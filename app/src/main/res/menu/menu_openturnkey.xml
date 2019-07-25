@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_openturnkey_scan_qrcode"
+        android:icon="@drawable/ic_scan_qrcode_white"
+        android:title="@string/scan_qr_code"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_openturnkey_sign_message"
+        android:title="@string/message_sign_validate" />
+    <item
+        android:id="@+id/menu_openturnkey_preauth_pin"
+        android:title="@string/pre_auth_by_pin" />
+    <item
+        android:id="@+id/menu_openturnkey_set_pin"
+        android:title="@string/set_pin_code" />
+    <item
+        android:id="@+id/menu_openturnkey_choose_key"
+        android:title="@string/set_key" />
+    <item
+        android:id="@+id/menu_openturnkey_get_key"
+        android:title="@string/get_key_information" />
+    <item
+        android:id="@+id/menu_openturnkey_set_note"
+        android:title="@string/write_memo" />
+    <item
+        android:id="@+id/menu_openturnkey_unlock"
+        android:title="@string/unlock" />
+</menu>

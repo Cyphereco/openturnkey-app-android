@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about">关于</string>
+    <string name="addresses" translatable="false">常用地址</string>
+    <string name="no_freq_addr">没有常用地址</string>
+    <string name="clear_history">清除记录</string>
+    <string name="fee_included">包含手续费</string>
+    <string name="get_key_information">获取密钥信息</string>
+    <string name="history" translatable="false">支付记录</string>
+    <string name="local_currency">当地货币</string>
+    <string name="no_payment_records">没有支付记录</string>
+    <string name="paste_clipboard">贴上复制内容</string>
+    <string name="pay" translatable="false">支付</string>
+    <string name="recipient_address">收款地址</string>
+    <string name="pre_auth_by_pin">使用PIN码授权</string>
+    <string name="read_nfc">读取NFC</string>
+    <string name="scan_qr_code">扫描QR码</string>
+    <string name="search">查找</string>
+    <string name="select_from_address_book">从常用地址选取</string>
+    <string name="set_key">选取密钥</string>
+    <string name="set_pin_code">设定PIN码</string>
+    <string name="message_sign_validate" translatable="false">信息签名/验证</string>
+    <string name="tap_openturnkey">靠近OpenTurnKey</string>
+    <string name="amount">金额</string>
+    <string name="sign_payment">签名支付</string>
+    <string name="transaction_fee">交易手续费</string>
+    <string name="unlock">解锁</string>
+    <string name="use_fix_addresss">使用固定收款地址</string>
+    <string name="high">高</string>
+    <string name="low">低</string>
+    <string name="mid">中</string>
+    <string name="ok">确定</string>
+    <string name="software_version">軟件版本</string>
+    <string name="cancel">取消</string>
+    <string name="clear_all_payment_history">清除所有支付记录？</string>
+    <string name="read_general_information">读取一般信息</string>
+    <string name="custom">自订</string>
+    <string name="disclose_key_information">获取密钥信息</string>
+    <string name="unlock_openturnkey">解锁OpenTurnKey</string>
+    <string name="suggested">推荐</string>
+    <string name="command_executed_successfuly">命令成功执行</string>
+    <string name="write_memo">写入备注</string>
+</resources>

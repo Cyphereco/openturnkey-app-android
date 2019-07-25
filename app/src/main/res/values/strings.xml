@@ -1,0 +1,60 @@
+<resources>
+    <string name="_app_name" translatable="false">OpenTurnKey</string>
+    <string name="history">History</string>
+    <string name="addresses">Addresses</string>
+    <string name="pay">Pay</string>
+    <string name="message_sign_validate">Message Sign/Validate</string>
+    <string name="_openturnkey" translatable="false">OpenTurnKey</string>
+    <string name="recipient_address">Recipient Address</string>
+    <string name="scan_qr_code">Scan QR Code</string>
+    <string name="read_nfc">Read NFC</string>
+    <string name="select_from_address_book">Select From Address Book</string>
+    <string name="paste_clipboard">Paste Clipboard</string>
+    <string name="low">Low</string>
+    <string name="mid">Mid</string>
+    <string name="high">High</string>
+    <string name="_currency_cny" translatable="false">CNY</string>
+    <string name="_currency_jpy" translatable="false">JPY</string>
+    <string name="_currency_twd" translatable="false">TWD</string>
+    <string name="_currency_usd" translatable="false">USD</string>
+    <string name="_currency_eur" translatable="false">EUR</string>
+    <string name="_currency_btc" translatable="false">BTC</string>
+    <string name="_numerical_zero" translatable="false">0.0</string>
+    <string name="_symbol_equal" translatable="false">=</string>
+    <string name="amount">Amount</string>
+    <string name="sign_payment">Sign Payment</string>
+    <string name="tap_openturnkey">Tap OpenTurnKey</string>
+    <string name="no_freq_addr">No Fequent Addresses</string>
+    <string name="no_payment_records">No Payment Records</string>
+    <string name="_by" translatable="false">BY</string>
+    <string name="_cyphereco" translatable="false">CYPHERECO</string>
+    <string name="local_currency">Local Currency</string>
+    <string name="transaction_fee">Transaction Fee</string>
+    <string name="fee_included">Fee Included</string>
+    <string name="clear_history">Clear History</string>
+    <string name="search">Search</string>
+    <string name="pre_auth_by_pin">Pre-Auth by PIN</string>
+    <string name="set_pin_code">Set PIN Code</string>
+    <string name="get_key_information">Get Key Information</string>
+    <string name="about">About</string>
+    <string name="use_fix_addresss">Use Fix Addresss</string>
+    <string name="set_key">Choose Key</string>
+    <string name="unlock">Unlock</string>
+    <string name="software_version">Software Version</string>
+    <string name="_version_number" translatable="false">1.0_beta</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="clear_all_payment_history">Clear all payment history?</string>
+    <string name="_left_bracket" translatable="false">(</string>
+    <string name="_right_bracket" translatable="false">)</string>
+    <string name="read_general_information">Read General Information</string>
+    <string name="disclose_key_information">Disclose Key Information</string>
+    <string name="unlock_openturnkey">Unlock OpenTurnKey</string>
+    <string name="custom">Custom</string>
+    <string name="_btc_per_byte" translatable="false">BTC/Byte</string>
+    <string name="_0_00001" translatable="false">0.00001</string>
+    <string name="command_executed_successfuly">Command Executed Successfuly!</string>
+    <string name="suggested">Suggested</string>
+    <string name="write_memo">Write Memo</string>
+
+</resources>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about">OpenTurnKeyについて</string>
+    <string name="clear_history">歴史削除</string>
+    <string name="fee_included">手数料込み</string>
+    <string name="history">支払歴史</string>
+    <string name="local_currency">現地通貨</string>
+    <string name="addresses">入金アドレス</string>
+    <string name="no_freq_addr">入金アドレスなし</string>
+    <string name="use_fix_addresss">固定入金アドレス使い</string>
+    <string name="unlock">ロック解除</string>
+    <string name="transaction_fee">手数料</string>
+    <string name="sign_payment">サイン支払い</string>
+    <string name="amount">金額</string>
+    <string name="message_sign_validate">メッセージサイン/チェック</string>
+    <string name="set_pin_code">PINコードセット</string>
+    <string name="set_key">鍵選んで</string>
+    <string name="select_from_address_book">アドレス選んで</string>
+    <string name="search">探し</string>
+    <string name="scan_qr_code">QR Code撮り</string>
+    <string name="read_nfc">NFC読んで</string>
+    <string name="pay">支払い</string>
+    <string name="paste_clipboard">ペスト</string>
+    <string name="no_payment_records">支払い記録なし</string>
+    <string name="recipient_address">入金アドレス</string>
+    <string name="get_key_information">鍵の詳細読んで</string>
+    <string name="pre_auth_by_pin">PINコード認証</string>
+    <string name="tap_openturnkey">OpenTurnKey近づく</string>
+    <string name="high">高</string>
+    <string name="low">低</string>
+    <string name="mid">中</string>
+    <string name="ok">はい</string>
+    <string name="software_version">ソフトウェアバージョン</string>
+    <string name="cancel">キャンセル</string>
+    <string name="clear_all_payment_history">すべての支払い履歴を削除しますか？</string>
+    <string name="read_general_information">一般情報を読む</string>
+    <string name="custom">カスタマイズ</string>
+    <string name="disclose_key_information">鍵の知り合い情報</string>
+    <string name="unlock_openturnkey">アンロックOpenTurnKey</string>
+    <string name="suggested">おすすめ</string>
+    <string name="command_executed_successfuly">コマンドが正常に実行された</string>
+    <string name="write_memo">メモ書き</string>
+</resources>

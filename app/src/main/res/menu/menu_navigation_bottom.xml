@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_menu_pay"
+        android:icon="@drawable/ic_payment_on_black_24dp"
+        android:title="@string/pay" />
+    <item
+        android:id="@+id/nav_menu_openturnkey"
+        android:icon="@mipmap/ic_cyphereco_logo_foreground"
+        android:title="@string/_openturnkey" />
+    <item
+        android:id="@+id/nav_menu_addresses"
+        android:icon="@drawable/ic_address_book_black_24dp"
+        android:title="@string/addresses" />
+    <item
+        android:id="@+id/nav_menu_history"
+        android:icon="@drawable/ic_history_black_24dp"
+        android:title="@string/history" />
+</menu>
