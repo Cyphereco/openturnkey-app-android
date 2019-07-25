@@ -22,7 +22,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SplashActivity"
+            android:name=".ui.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,7 +36,7 @@
 
                 <data
                     android:host="ext"
-                    android:pathPrefix="/com.otk.otkapp"
+                    android:pathPrefix="/com.cyphereco.openturnkey"
                     android:scheme="vnd.android.nfc" />
             </intent-filter>
             <intent-filter>
@@ -64,7 +64,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:screenOrientation="portrait"></activity>
 
         <meta-data

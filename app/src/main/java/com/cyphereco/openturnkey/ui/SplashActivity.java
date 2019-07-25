@@ -1,10 +1,12 @@
-package com.cyphereco.openturnkey;
+package com.cyphereco.openturnkey.ui;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
+
+import com.cyphereco.openturnkey.R;
 
 public class SplashActivity extends AppCompatActivity {
 

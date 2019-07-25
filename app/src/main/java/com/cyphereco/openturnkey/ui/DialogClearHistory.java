@@ -1,4 +1,4 @@
-package com.cyphereco.openturnkey;
+package com.cyphereco.openturnkey.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

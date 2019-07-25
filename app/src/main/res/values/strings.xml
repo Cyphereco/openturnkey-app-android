@@ -56,5 +56,6 @@
     <string name="command_executed_successfuly">Command Executed Successfuly!</string>
     <string name="suggested">Suggested</string>
     <string name="write_memo">Write Memo</string>
+    <string name="nfc_unavailable">NFC is not available</string>
 
 </resources>

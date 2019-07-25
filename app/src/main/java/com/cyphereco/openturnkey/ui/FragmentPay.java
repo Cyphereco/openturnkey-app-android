@@ -1,4 +1,4 @@
-package com.cyphereco.openturnkey;
+package com.cyphereco.openturnkey.ui;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;

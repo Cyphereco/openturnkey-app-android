@@ -1,4 +1,4 @@
-package com.cyphereco.openturnkey;
+package com.cyphereco.openturnkey.ui;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,11 +10,11 @@ import android.view.ViewGroup;
 
 import com.cyphereco.openturnkey.R;
 
-public class FragmentOtk extends Fragment {
+public class FragmentHistory extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_openturnkey, container, false);
+        return inflater.inflate(R.layout.fragment_history, container, false);
     }
 }

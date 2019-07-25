@@ -1,22 +1,37 @@
-package com.cyphereco.openturnkey;
+package com.cyphereco.openturnkey.ui;
 
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.nfc.NfcAdapter;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.cyphereco.openturnkey.R;
+import com.cyphereco.openturnkey.core.Otk;
+import com.cyphereco.openturnkey.ui.DialogAbout;
+import com.cyphereco.openturnkey.ui.DialogClearHistory;
+import com.cyphereco.openturnkey.ui.DialogLocalCurrency;
+import com.cyphereco.openturnkey.ui.DialogTransactionFee;
+import com.cyphereco.openturnkey.ui.FragmentAddrbook;
+import com.cyphereco.openturnkey.ui.FragmentHistory;
+import com.cyphereco.openturnkey.ui.FragmentOtk;
+import com.cyphereco.openturnkey.ui.FragmentPay;
 
 public class MainActivity extends AppCompatActivity
         implements DialogLocalCurrency.DialogLocalCurrecyListener,
         DialogTransactionFee.DialogTransactionFeeListener {
 
+    public static final String TAG = MainActivity.class.getSimpleName();
     private Menu toolbarMenu = null;
 
     private int localCurrency = R.id.radio_twd;
@@ -24,6 +39,8 @@ public class MainActivity extends AppCompatActivity
     private double customTransactionFee = 0.00001;
     private boolean includeFee = false;
     private boolean useFixAddr = false;
+    private NfcAdapter mNfcAdapter = null;
+    private Otk mOtk = null;
 
     /* declarations */
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
@@ -78,6 +95,53 @@ public class MainActivity extends AppCompatActivity
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
         bottomNav.setSelectedItemId(R.id.nav_menu_pay);
+
+        /* init NFC. */
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (mNfcAdapter == null) {
+            Toast.makeText(this, R.string.nfc_unavailable, Toast.LENGTH_LONG).show();
+            finish();
+        }
+
+        mOtk = Otk.getInstance();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String action = intent.getAction();
+
+        if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action) ||
+                NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            int ret = mOtk.processIntent(intent);
+            if (ret != Otk.OTK_RETURN_OK) {
+                Log.d(TAG, "process intent failed:" + ret);
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
+        IntentFilter ndefDetected = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
+        IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+        IntentFilter[] nfcIntentFilter = new IntentFilter[]{techDetected,tagDetected,ndefDetected};
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+
+        if (mNfcAdapter != null) {
+            mNfcAdapter.enableForegroundDispatch(this, pendingIntent, nfcIntentFilter, null);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mNfcAdapter!= null)
+            mNfcAdapter.disableForegroundDispatch(this);
     }
 
     @Override
