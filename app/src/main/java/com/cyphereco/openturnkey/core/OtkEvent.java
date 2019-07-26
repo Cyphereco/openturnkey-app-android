@@ -13,7 +13,7 @@ public class OtkEvent {
     /**
      * Constructor for general info event
      */
-    public OtkEvent(OtkData.GeneralInfo data) {
+    public OtkEvent(OtkData data) {
         mType = Type.GENERAL_INFORMATION;
         mData = data;
     }

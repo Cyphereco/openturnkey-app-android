@@ -1,6 +1,7 @@
 package com.cyphereco.openturnkey.core;
 
 import android.content.Intent;
+import android.graphics.Path;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
@@ -17,6 +18,7 @@ public class Otk {
     /** Return value. */
     public static final int OTK_RETURN_OK = 0;
     public static final int OTK_RETURN_ERROR = 1;
+    public static final int OTK_RETURN_ERROR_OP_IN_PROCESSING = 2;
 
     /** The place holder for the single object. */
     private static Otk mOtk = null;
@@ -24,6 +26,11 @@ public class Otk {
     /** Event listener. */
     OtkEventListener mEventListener = null;
     private Tag mCachedNfcTag = null;
+
+    /* Operation. */
+    Operation mOp = Operation.OTK_OP_GENERAL_INFO;
+    /* In processing. */
+    boolean isInProcessing = false;
 
     /**
      * Singleton retrieval of the OtkCoin.
@@ -65,6 +72,12 @@ public class Otk {
         return OTK_RETURN_ERROR;
     }
 
+    public enum Operation {
+        OTK_OP_GENERAL_INFO,
+        OTK_OP_PAY,
+
+    }
+
     /**
      * Event listener interface
      */
@@ -77,6 +90,21 @@ public class Otk {
      */
     public int setEventListener(OtkEventListener eventListener) {
         mEventListener = eventListener;
+        return OTK_RETURN_OK;
+    }
+
+    /**
+     * Set operation
+     */
+    public int setOperation(Otk.Operation op) {
+        if (mOp != Operation.OTK_OP_GENERAL_INFO && isInProcessing == true) {
+            /* Some operation is in processing, set another operation is not allowed.
+             * Should cancel current operation first.
+             */
+            return OTK_RETURN_ERROR_OP_IN_PROCESSING;
+        }
+        Log.d(TAG, "Set op to:" + op.name());
+        mOp = op;
         return OTK_RETURN_OK;
     }
 }
