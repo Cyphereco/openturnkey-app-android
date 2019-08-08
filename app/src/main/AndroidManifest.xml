@@ -65,7 +65,11 @@
         </activity>
         <activity
             android:name=".ui.MainActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.QRcodeScanActivity"
+            android:label="@string/title_activity_qrcode_scan" />
+
 
         <meta-data
             android:name="preloaded_fonts"

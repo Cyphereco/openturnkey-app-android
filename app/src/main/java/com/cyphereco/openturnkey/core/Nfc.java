@@ -2,6 +2,7 @@ package com.cyphereco.openturnkey.core;
 
 import android.nfc.FormatException;
 import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.util.Log;
@@ -14,12 +15,15 @@ import com.cyphereco.openturnkey.core.protocol.SessionData;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Random;
 
 public class Nfc {
     public static final String TAG = Nfc.class.getSimpleName();
 
     private static final int OTK_NFC_RECORD_MAX = 10;
     private static final String OTK_NFC_DATA_APP_PKG_URI = "com.cyphereco.openturnkey";
+    private static final String OTK_REQUEST_DATA_DELIM = "\n";
 
     static private String mCommandId = "";
     static private Command mIssuedCommand = Command.INVALID;
@@ -147,7 +151,7 @@ public class Nfc {
         // Parse address from session data
         SessionData sd = new SessionData(sessData);
 
-        return new OtkData(mintInfo, lockState, sd);
+        return new OtkData(mintInfo, lockState, pubKey, sd);
     }
 
     static private boolean verifySessionData(String publicKey, String message, String signature) {
@@ -163,6 +167,73 @@ public class Nfc {
     }
 
     static int writeCommand(Command cmd) {
+        return Otk.OTK_RETURN_OK;
+    }
+
+    static int writeCommand(Tag tag, Command cmd, String sessId, List<String> args) {
+        Log.d(TAG, "write Command:" + cmd.toString());
+        mIssuedCommand = Command.INVALID;
+        if (tag == null) {
+            Log.d(TAG, "NFC tag is null");
+            return Otk.OTK_RETURN_ERROR;
+        }
+        Ndef ndef = Ndef.get(tag);
+        int recordNum = 3;
+
+        if (args != null && args.size() > 0) {
+            Log.d(TAG, "args:" + args.toString());
+            recordNum += 1;
+        }
+
+        if (recordNum > OTK_NFC_RECORD_MAX) {
+            Log.d(TAG, "Too many record numbers " + recordNum);
+            return Otk.OTK_RETURN_ERROR;
+        }
+
+        NdefRecord record[] = new NdefRecord[recordNum];
+        Random r = new Random();
+        int rdn = r.nextInt();
+        if (rdn < 0) {
+            rdn = -rdn;
+        }
+        mCommandId = String.valueOf(rdn);
+        Log.d(TAG, "mCommandId:" + mCommandId);
+        if (ndef == null) {
+            return Otk.OTK_RETURN_ERROR;
+        }
+        try {
+            ndef.connect();
+            // 0:session id
+            record[0] = NdefRecord.createTextRecord("en", sessId);
+            // 1: command id
+            record[1] = NdefRecord.createTextRecord("en", String.valueOf(mCommandId));
+            // 2: command
+            record[2] = NdefRecord.createTextRecord("en", cmd.toString());
+
+            // 3: request data
+            String requestData = "";
+
+            if (args.size() > 0) {
+                // Separate by '\n'
+                for (int i = 0; i < args.size(); i++) {
+                    if (i == 0) {
+                        requestData += args.get(i);
+                    }
+                    else {
+                        requestData += OTK_REQUEST_DATA_DELIM + args.get(i);
+                    }
+                }
+                Log.d(TAG, "requestData:" + requestData);
+                record[3] = NdefRecord.createTextRecord("en", requestData);
+            }
+
+            ndef.writeNdefMessage(new NdefMessage(record));
+            mIssuedCommand = cmd;
+            ndef.close();
+        } catch (IOException | FormatException | IllegalStateException e) {
+            e.printStackTrace();
+            return Otk.OTK_RETURN_ERROR;
+        }
         return Otk.OTK_RETURN_OK;
     }
 }

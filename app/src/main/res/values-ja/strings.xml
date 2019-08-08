@@ -40,4 +40,22 @@
     <string name="suggested">おすすめ</string>
     <string name="command_executed_successfuly">コマンドが正常に実行された</string>
     <string name="write_memo">メモ書き</string>
+    <string name="processing">Processing</string>
+    <string name="btc_sent">BTC Sent</string>
+    <string name="get_recipient_address">Get Recipient Address</string>
+    <string name="nfc_unavailable">NFC is not available</string>
+    <string name="operation_cancelled">Operartion cancelled</string>
+    <string name="send_btc_failed">Send BTC Failed</string>
+    <string name="title_activity_qrcode_scan">Scan QR Code</string>
+    <string name="qr_code_scan_cancelled">QR code scan cancelled</string>
+    <string name="reason">Reason:</string>
+    <string name="recipient_is_empty">Recipient address is empty</string>
+    <string name="invalid_amount">Invalid amount</string>
+    <string name="invalid_recipient_amount">Invalid recipient address or amount</string>
+    <string name="hash">Hash:</string>
+    <string name="from">From:</string>
+    <string name="text_amount">Amount:</string>
+    <string name="text_fee">Fee:</string>
+    <string name="text_time">Time:</string>
+    <string name="to">To:</string>
 </resources>

@@ -9,12 +9,20 @@ import com.cyphereco.openturnkey.bitcoin.ECKey;
 import com.cyphereco.openturnkey.bitcoin.Utils;
 import com.cyphereco.openturnkey.bitcoin.VarInt;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 
 import org.bouncycastle.util.encoders.Base64;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class BtcUtils {
     public static final String TAG = BtcUtils.class.getSimpleName();
@@ -145,5 +153,103 @@ public class BtcUtils {
         }
     }
 
+    static public CurrencyExchangeRate getCurrencyExchangeRate() {
+        CurrencyExchangeRate ret = null;
+        HttpURLConnection httpConn = null;
 
+        // Read text input stream.
+        InputStreamReader isReader = null;
+
+        // Read text into buffer.
+        BufferedReader bufReader = null;
+
+        // Save server response text.
+        StringBuffer readTextBuf = new StringBuffer();
+
+        try {
+            // Create a URL object use page url.
+            URL url = new URL("https://blockchain.info/ticker");
+
+            // Open http connection to web server.
+            httpConn = (HttpURLConnection) url.openConnection();
+
+            // Set http request method to get.
+            httpConn.setRequestMethod("GET");
+
+            // Set connection timeout and read timeout value.
+            httpConn.setConnectTimeout(5000);
+            httpConn.setReadTimeout(5000);
+
+            // Get input stream from web url connection.
+            InputStream inputStream = httpConn.getInputStream();
+
+            // Create input stream reader based on url connection input stream.
+            isReader = new InputStreamReader(inputStream);
+
+            // Create buffered reader.
+            bufReader = new BufferedReader(isReader);
+
+            // Read line of text from server response.
+            String line = bufReader.readLine();
+
+            // Loop while return line is not null.
+            while (line != null) {
+                // Append the text to string buffer.
+                readTextBuf.append(line);
+
+                // Continue to read text line.
+                line = bufReader.readLine();
+            }
+
+            String in = readTextBuf.toString();
+            JSONObject reader = new JSONObject(in);
+            String twd = reader.getJSONObject("TWD").getString("last");
+            String usd = reader.getJSONObject("USD").getString("last");
+            String cny = reader.getJSONObject("CNY").getString("last");
+            String jpy = reader.getJSONObject("JPY").getString("last");
+            String eur = reader.getJSONObject("EUR").getString("last");
+
+            ret = new CurrencyExchangeRate(Double.parseDouble(twd), Double.parseDouble(usd), Double.parseDouble(jpy),
+                    Double.parseDouble(eur), Double.parseDouble(cny));
+
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (bufReader != null) {
+                    bufReader.close();
+                    bufReader = null;
+                }
+
+                if (isReader != null) {
+                    isReader.close();
+                    isReader = null;
+                }
+
+                if (httpConn != null) {
+                    httpConn.disconnect();
+                    httpConn = null;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return ret;
+    }
+
+    static public long BtcToSatoshi(double btc) {
+        return (long) (btc * 100000000);
+    }
+
+    static public double SatoshiToBtc(long satoshi) {
+
+        return ((double)satoshi / 100000000.0);
+    }
 }
