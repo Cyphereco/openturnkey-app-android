@@ -41,5 +41,8 @@ dependencies {
     implementation 'com.google.zxing:core:3.3.3'
     //compile (group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.54') {
     implementation 'org.bouncycastle:bcprov-jdk15on:1.54'
+    // https://mvnrepository.com/artifact/com.madgag.spongycastle/core
+    implementation 'com.madgag.spongycastle:core:1.54.0.0'
+
 
 }

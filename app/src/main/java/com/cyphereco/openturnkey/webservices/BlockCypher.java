@@ -1,7 +1,6 @@
 package com.cyphereco.openturnkey.webservices;
 
 
-import android.system.ErrnoException;
 import android.util.Log;
 
 import com.blockcypher.context.BlockCypherContext;
@@ -9,8 +8,6 @@ import com.blockcypher.exception.BlockCypherException;
 import com.blockcypher.model.address.Address;
 import com.blockcypher.model.transaction.Transaction;
 import com.blockcypher.model.transaction.intermediary.IntermediaryTransaction;
-import com.blockcypher.utils.gson.GsonFactory;
-import com.blockcypher.utils.sign.SignUtils;
 import com.cyphereco.openturnkey.core.Configurations;
 
 import org.spongycastle.asn1.DERInteger;
@@ -20,12 +17,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import jersey.repackaged.com.google.common.collect.Lists;
 
 public class BlockCypher extends BtcBase {
     public static final String TAG = BlockCypher.class.getSimpleName();
@@ -165,7 +159,6 @@ public class BlockCypher extends BtcBase {
         try {
             Transaction tx = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
 
-            Log.d(TAG,"Sent transaction: " + GsonFactory.getGsonPrettyPrint().toJson(tx));
             mCachedUnsignedTx = null;
             return tx;
         }
