@@ -19,7 +19,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.blockcypher.model.transaction.Transaction;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.OtkEvent;
@@ -213,7 +212,6 @@ public class MainActivity extends AppCompatActivity
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null) {
             Toast.makeText(this, R.string.nfc_unavailable, Toast.LENGTH_LONG).show();
-            finish();
         }
 
         mProgressDialogBuilder = new AlertDialog.Builder(MainActivity.this);
