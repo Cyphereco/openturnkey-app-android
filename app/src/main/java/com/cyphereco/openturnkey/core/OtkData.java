@@ -2,7 +2,7 @@ package com.cyphereco.openturnkey.core;
 
 import android.util.Log;
 
-import com.cyphereco.openturnkey.core.protocol.LockState;
+import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.core.protocol.SessionData;
 
 public class OtkData {
@@ -17,23 +17,25 @@ public class OtkData {
     private Type mType;
     String mAppUri;
     String mMintInfo;
-    LockState mLockState;
+
+    OtkState mOtkState;
     String mPublicKey;
     private SessionData mSessionData;
 
     public Type getType() {return mType;}
     public SessionData getSessionData() {return mSessionData;}
+    public OtkState getOtkState() { return mOtkState;}
 
     /**
      * Constructor
      * @param mintInfo
-     * @param lockState
+     * @param otkState
      * @param sd
      */
-    public OtkData(String mintInfo, LockState lockState, String pubKey, SessionData sd) {
-        Log.d(TAG, "mintInfo:" + mintInfo + " lockState:" + lockState.toString() + " SessionData:" + sd.toString());
+    public OtkData(String mintInfo, OtkState otkState, String pubKey, SessionData sd) {
+        Log.d(TAG, "mintInfo:" + mintInfo + "\notkState:" + otkState.toString() + "\nSessionData:" + sd.toString());
         mMintInfo = mintInfo;
-        mLockState = lockState;
+        mOtkState = otkState;
         mSessionData = sd;
         mPublicKey = pubKey;
         // Determine data type

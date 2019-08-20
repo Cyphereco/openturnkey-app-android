@@ -18,6 +18,7 @@ public class OtkEvent {
         CURRENCY_EXCHANGE_RATE_UPDATE,
         OPERATION_IN_PROCESSING,
         SIGN_FAILED,
+        OTK_UNAUTHORIZED,
     }
 
     public Type mType;

@@ -1,0 +1,151 @@
+package com.cyphereco.openturnkey.core.protocol;
+
+import android.util.Log;
+
+public class OtkState {
+    public static final String TAG = OtkState.class.getSimpleName();
+
+    public enum LockState {
+        INVALID("-1"),
+        UNLOCKED("00"),
+        LOCKED("01"),
+        AUTHORIZED("02");
+
+        private final String value;
+        private LockState(String s) {
+            value = s;
+        }
+        public String toString() {
+            return value;
+        }
+    }
+
+    public enum ExecutionState {
+        NFC_CMD_EXEC_NA("00"),
+        NFC_CMD_EXEC_SUCCESS("01"),        /* 1, Command executed successfully. */
+        NFC_CMD_EXEC_FAIL("02");           /* 2, Command executed failed. */
+        private final String value;
+        private ExecutionState(String s) {
+            value = s;
+        }
+        public String toString() {
+            return value;
+        }
+    }
+
+    public enum FailureReason {
+        NFC_REASON_INVALID("00"),  /*   0 / 0x00, Invalid,  For check purpose. */
+        NFC_REASON_TIMEOUT("C0"),  /* 192 / 0xC0, Enroll fingerpint on OTK. */
+        NFC_REASON_AUTH_FAILED("C1"),     /* 193 / 0xC1, Erase enrolled fingerprint and reset secure PIN to default, OTK (pre)authorization is required. */
+        NFC_REASON_CMD_INVALID("C2"),     /* 194 / 0xC2, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
+        NFC_REASON_PARAM_INVALID("C3"),   /* 195 / 0xC3, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
+        NFC_REASON_PARAM_MISSING("C4"),   /* 196 / 0xC4, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
+        NFC_REASON_LAST("FF");
+        private final String value;
+        private FailureReason(String s) {
+            value = s;
+        }
+        public String toString() {
+            return value;
+        }
+    }
+
+    public OtkState(String stateStr) {
+        // Lock state
+        String code = stateStr.substring(0, 2);
+        if (code.equalsIgnoreCase(LockState.UNLOCKED.toString())) {
+            mLockState = LockState.UNLOCKED;
+        }
+        else if (code.equalsIgnoreCase(LockState.LOCKED.toString())) {
+            mLockState = LockState.LOCKED;
+        }
+        else if (code.equalsIgnoreCase(LockState.AUTHORIZED.toString())) {
+            mLockState = LockState.AUTHORIZED;
+        }
+        else {
+            /* Should not be here. */
+            Log.d(TAG, "Lock state is invalid.");
+            mLockState = LockState.INVALID;
+        }
+
+        // Command exec state
+        code = stateStr.substring(2, 4);
+        if (code.equalsIgnoreCase(ExecutionState.NFC_CMD_EXEC_NA.toString())) {
+            mNfcCmdExecSate = ExecutionState.NFC_CMD_EXEC_NA;
+        }
+        else if (code.equalsIgnoreCase(ExecutionState.NFC_CMD_EXEC_SUCCESS.toString())) {
+            mNfcCmdExecSate = ExecutionState.NFC_CMD_EXEC_SUCCESS;
+        }
+        else if (code.equalsIgnoreCase(ExecutionState.NFC_CMD_EXEC_FAIL.toString())) {
+            mNfcCmdExecSate = ExecutionState.NFC_CMD_EXEC_FAIL;
+        }
+        else {
+            /* Should not be here. */
+            Log.d(TAG, "Exec state is invalid.");
+            mNfcCmdExecSate = ExecutionState.NFC_CMD_EXEC_NA;
+        }
+
+        // request command
+        code = String.format("%d", Integer.parseInt(stateStr.substring(4, 6),16));
+        if (code.equalsIgnoreCase(Command.LOCK.toString())) {
+            mCommand = Command.LOCK;
+        }
+        else if (code.equalsIgnoreCase(Command.UNLOCK.toString())) {
+            mCommand = Command.UNLOCK;
+        }
+        else if (code.equalsIgnoreCase(Command.SHOW_KEY.toString())) {
+            mCommand = Command.SHOW_KEY;
+        }
+        else if (code.equalsIgnoreCase(Command.SIGN.toString())) {
+            mCommand = Command.SIGN;
+        }
+        else if (code.equalsIgnoreCase(Command.SET_KEY.toString())) {
+            mCommand = Command.SET_KEY;
+        }
+        else if (code.equalsIgnoreCase(Command.SET_PIN.toString())) {
+            mCommand = Command.SET_PIN;
+        }
+        else if (code.equalsIgnoreCase(Command.SET_NOTE.toString())) {
+            mCommand = Command.SET_NOTE;
+        }
+        else if (code.equalsIgnoreCase(Command.CANCEL.toString())) {
+            mCommand = Command.CANCEL;
+        }
+        else {
+            /* Should not be here. */
+            mCommand = Command.INVALID;
+        }
+
+        // Failure reason
+        code = stateStr.substring(6, 8);
+        if (code.equalsIgnoreCase(FailureReason.NFC_REASON_AUTH_FAILED.toString())) {
+            mFailureReason = FailureReason.NFC_REASON_AUTH_FAILED;
+        }
+        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_CMD_INVALID.toString()))) {
+            mFailureReason = FailureReason.NFC_REASON_CMD_INVALID;
+        }
+        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_PARAM_INVALID.toString()))) {
+            mFailureReason = FailureReason.NFC_REASON_PARAM_INVALID;
+        }
+        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_PARAM_MISSING.toString()))) {
+            mFailureReason = FailureReason.NFC_REASON_PARAM_MISSING;
+        }
+        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_TIMEOUT.toString()))) {
+            mFailureReason = FailureReason.NFC_REASON_TIMEOUT;
+        }
+        else {
+            mFailureReason = FailureReason.NFC_REASON_INVALID;
+        }
+    }
+
+    private LockState mLockState;
+    private ExecutionState mNfcCmdExecSate;
+    private Command mCommand;
+    private FailureReason mFailureReason;
+
+    public LockState getLockState() {return mLockState;}
+    public String toString() {
+        String s = "\n\tLock state:" + mLockState.name() + "\n\tExec state:" + mNfcCmdExecSate.name() + "\n\tCommand:" + mCommand.name() + "\n\tFailure reason:" + mFailureReason.name();
+        return s;
+    }
+}

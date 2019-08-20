@@ -10,7 +10,7 @@ import android.util.Log;
 import com.cyphereco.openturnkey.bitcoin.ECException;
 import com.cyphereco.openturnkey.bitcoin.ECKey;
 import com.cyphereco.openturnkey.core.protocol.Command;
-import com.cyphereco.openturnkey.core.protocol.LockState;
+import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.core.protocol.SessionData;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 
@@ -134,24 +134,14 @@ public class Nfc {
 
         // Record 2 is lock state
         i = 2;
-        LockState lockState;
+
         message = new String(ndefMessage.getRecords()[i].getPayload()).substring(3);
-        if (message.equals(LockState.UNLOCKED.toString())) {
-            lockState = LockState.UNLOCKED;
-        }
-        else if (message.equals(LockState.LOCKED.toString())) {
-            lockState = LockState.LOCKED;
-        }
-        else {
-            /* Should not be here. */
-            Log.d(TAG, "Lock state is invalid.");
-            lockState = LockState.INVALID;
-        }
+        OtkState otkState = new OtkState(message);
 
         // Parse address from session data
         SessionData sd = new SessionData(sessData);
 
-        return new OtkData(mintInfo, lockState, pubKey, sd);
+        return new OtkData(mintInfo, otkState, pubKey, sd);
     }
 
     static private boolean verifySessionData(String publicKey, String message, String signature) {
@@ -170,7 +160,7 @@ public class Nfc {
         return Otk.OTK_RETURN_OK;
     }
 
-    static int writeCommand(Tag tag, Command cmd, String sessId, List<String> args) {
+    static int writeCommand(Tag tag, Command cmd, String sessId, String pin, List<String> args) {
         Log.d(TAG, "write Command:" + cmd.toString());
         mIssuedCommand = Command.INVALID;
         if (tag == null) {
@@ -182,6 +172,10 @@ public class Nfc {
 
         if (args != null && args.size() > 0) {
             Log.d(TAG, "args:" + args.toString());
+            recordNum += 1;
+        }
+
+        if (pin != null && pin.length() > 0) {
             recordNum += 1;
         }
 
@@ -203,14 +197,14 @@ public class Nfc {
         }
         try {
             ndef.connect();
-            // 0:session id
+            // 1:session id
             record[0] = NdefRecord.createTextRecord("en", sessId);
-            // 1: command id
+            // 2: command id
             record[1] = NdefRecord.createTextRecord("en", String.valueOf(mCommandId));
-            // 2: command
+            // 3: command
             record[2] = NdefRecord.createTextRecord("en", cmd.toString());
 
-            // 3: request data
+            // 4: request data
             String requestData = "";
 
             if (args.size() > 0) {
@@ -227,6 +221,11 @@ public class Nfc {
                 record[3] = NdefRecord.createTextRecord("en", requestData);
             }
 
+            // 5 Options
+            if (pin != null && pin.length() > 0) {
+                Log.d(TAG, "pin=" + pin);
+                record[4] = NdefRecord.createTextRecord("en", "pin=" + pin);
+            }
             ndef.writeNdefMessage(new NdefMessage(record));
             mIssuedCommand = cmd;
             ndef.close();

@@ -29,6 +29,7 @@ import com.cyphereco.openturnkey.utils.LocalCurrency;
 public class MainActivity extends AppCompatActivity
         implements DialogLocalCurrency.DialogLocalCurrecyListener,
         DialogTransactionFee.DialogTransactionFeeListener,
+        DialogAuthByPin.DialogAuthByPinListener,
         FragmentPay.FragmentPayListener,
         FragmentOtk.FragmentOtkListener {
 
@@ -286,6 +287,12 @@ public class MainActivity extends AppCompatActivity
                         ((FragmentPay) mSelectedFragment).updateRecipientAddress(event.getRecipientAddress());
                     }
                 }
+                else if (type == OtkEvent.Type.OTK_UNAUTHORIZED) {
+                    // Dismiss progress dialog
+                    mProgressDialog.dismiss();
+                    // Show pre-auth with pin dialog
+                    dialogAuthByPin();
+                }
                 else {
 
                 }
@@ -386,6 +393,17 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void authByPin(String pin) {
+        Log.d(TAG, "pin:" + pin);
+        mOtk.setPinForOperation(pin);
+    }
+
+    public void cancelAuthByPin() {
+        mOtk.cancelOperation();
+        mIsOperationOnGoing = false;
+        backToPreviousFragment();
+    }
+
     public void setTransactionFee(int transactionFee) {
         this.transactionFee = transactionFee;
         updatePayConfig(toolbarMenu);
@@ -405,6 +423,12 @@ public class MainActivity extends AppCompatActivity
         Bundle bundle = new Bundle();
         bundle.putInt("transactionFee", transactionFee);
         dialog.setArguments(bundle);
+        dialog.show(getSupportFragmentManager(), "dialog");
+    }
+
+    public void dialogAuthByPin() {
+        DialogAuthByPin dialog = new DialogAuthByPin();
+        dialog.setCancelable(false);
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
@@ -603,6 +627,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showProgressDialog(String title) {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            return;
+        }
         mProgressDialog = mProgressDialogBuilder.setTitle(title)
                 .setView(R.layout.dialog_progress_circle)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

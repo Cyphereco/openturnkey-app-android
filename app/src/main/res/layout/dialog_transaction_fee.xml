@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/high"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <RadioButton
             android:id="@+id/radio_mid"
@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/mid"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <RadioButton
             android:id="@+id/radio_low"
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/low"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <RadioButton
             android:id="@+id/radio_custom"
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/custom"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
     </RadioGroup>
 

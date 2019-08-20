@@ -149,5 +149,13 @@ public class SessionData {
     public List<String> getRequestSigList() {
         return sigList;
     }
+
+    public String toString() {
+        String s = "\n\tSession id:" + sessionId + "\n\tBTC addr:" + address;
+        if (requestId != null) {
+            s += "\n\tRequest id:" + requestId;
+        }
+        return s;
+    }
 }
 
