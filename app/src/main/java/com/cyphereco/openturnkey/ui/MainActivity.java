@@ -23,6 +23,7 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.Tx;
+import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 
@@ -263,7 +264,8 @@ public class MainActivity extends AppCompatActivity
                     dialogBtcSent(tx);
 
                 }
-                else if (type == OtkEvent.Type.SEND_BITCOIN_FAIL) {
+                else if ((type == OtkEvent.Type.SEND_BITCOIN_FAIL) ||
+                        (type == OtkEvent.Type.COMMAND_EXECUTION_FAILED)) {
                     // Hide progress
                     hideProgressDialog();
                     // Show error in doalog
@@ -289,7 +291,7 @@ public class MainActivity extends AppCompatActivity
                 }
                 else if (type == OtkEvent.Type.OTK_UNAUTHORIZED) {
                     // Dismiss progress dialog
-                    mProgressDialog.dismiss();
+                    hideProgressDialog();
                     // Show pre-auth with pin dialog
                     dialogAuthByPin();
                 }

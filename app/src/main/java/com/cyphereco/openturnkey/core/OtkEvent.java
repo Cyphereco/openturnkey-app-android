@@ -1,6 +1,7 @@
 package com.cyphereco.openturnkey.core;
 
 import com.blockcypher.model.transaction.Transaction;
+import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 
 import java.util.concurrent.TransferQueue;
@@ -19,6 +20,7 @@ public class OtkEvent {
         OPERATION_IN_PROCESSING,
         SIGN_FAILED,
         OTK_UNAUTHORIZED,
+        COMMAND_EXECUTION_FAILED,
     }
 
     public Type mType;

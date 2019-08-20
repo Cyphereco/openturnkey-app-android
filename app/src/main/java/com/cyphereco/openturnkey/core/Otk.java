@@ -275,6 +275,11 @@ public class Otk {
                 sendEvent(event);
                 completePayment(otkData.mPublicKey, otkData.getSessionData().getRequestSigList());
             }
+            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
+                OtkEvent event = new OtkEvent(OtkEvent.Type.COMMAND_EXECUTION_FAILED, otkData.getOtkState().getFailureReason().name());
+                sendEvent(event);
+                clearOp();
+            }
             return OTK_RETURN_OK;
         }
 

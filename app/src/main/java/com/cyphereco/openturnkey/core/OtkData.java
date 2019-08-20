@@ -13,6 +13,7 @@ public class OtkData {
         OTK_DATA_TYPE_GENERAL_INFO,
         OTK_DATA_TYPE_SIGNATURE,
         OTK_DATA_TYPE_KEY_INFO,
+        OTK_DATA_TYPE_COMMAND_EXEC_FAILURE,
     }
     private Type mType;
     String mAppUri;
@@ -44,6 +45,9 @@ public class OtkData {
         }
         else if (sd.getMasterExtKey() != null && sd.getMasterExtKey() != "") {
             mType = Type.OTK_DATA_TYPE_KEY_INFO;
+        }
+        else if (otkState.getFailureReason() != OtkState.FailureReason.NFC_REASON_INVALID) {
+            mType = Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE;
         }
         else {
             mType = Type.OTK_DATA_TYPE_GENERAL_INFO;
