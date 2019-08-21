@@ -23,7 +23,7 @@
     <string name="paste_clipboard">ペスト</string>
     <string name="no_payment_records">支払い記録なし</string>
     <string name="recipient_address">入金アドレス</string>
-    <string name="get_key_information">鍵の詳細読んで</string>
+    <string name="read_key_information">鍵の詳細読んで</string>
     <string name="pre_auth_by_pin">PINコード認証</string>
     <string name="tap_openturnkey">OpenTurnKey近づく</string>
     <string name="high">高</string>
@@ -58,4 +58,5 @@
     <string name="text_fee">Fee:</string>
     <string name="text_time">Time:</string>
     <string name="to">To:</string>
+    <string name="user_guide">ユーザーガイド</string>
 </resources>

@@ -21,6 +21,9 @@
             android:title="@string/use_fix_addresss" />
     </group>
     <item
+        android:id="@+id/menu_pay_user_guide"
+        android:title="@string/user_guide" />
+    <item
         android:id="@+id/menu_pay_about"
         android:title="@string/about" />
 </menu>

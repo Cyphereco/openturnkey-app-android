@@ -5,7 +5,7 @@
     <string name="no_freq_addr">没有常用地址</string>
     <string name="clear_history">清除记录</string>
     <string name="fee_included">包含手续费</string>
-    <string name="get_key_information">获取密钥信息</string>
+    <string name="read_key_information">读取密钥信息</string>
     <string name="history" translatable="false">支付记录</string>
     <string name="local_currency">当地货币</string>
     <string name="no_payment_records">没有支付记录</string>
@@ -58,4 +58,5 @@
     <string name="text_fee">Fee:</string>
     <string name="text_time">Time:</string>
     <string name="to">To:</string>
+    <string name="user_guide">使用指南</string>
 </resources>

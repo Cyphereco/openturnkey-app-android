@@ -17,7 +17,7 @@
     <string name="about">關於</string>
     <string name="clear_history">清除記錄</string>
     <string name="fee_included">包含手續費</string>
-    <string name="get_key_information">獲取密鑰資訊</string>
+    <string name="read_key_information">讀取密鑰資訊</string>
     <string name="local_currency">本地貨幣</string>
     <string name="pre_auth_by_pin">使用PIN碼授權</string>
     <string name="search">查詢</string>
@@ -58,4 +58,5 @@
     <string name="text_fee">Fee:</string>
     <string name="text_time">Time:</string>
     <string name="to">To:</string>
+    <string name="user_guide">使用指南</string>
 </resources>
