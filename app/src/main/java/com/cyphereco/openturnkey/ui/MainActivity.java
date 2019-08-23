@@ -381,6 +381,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.menu_pay_about:
                 dialogAbout();
                 return true;
+            case R.id.menu_addresses_add:
+                startActivity(new Intent(this, AddAddressActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
