@@ -163,6 +163,11 @@ public class MainActivity extends AppCompatActivity
                     Menu menu = toolbar.getMenu();
                     menu.clear();
 
+                    BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+                    if (bottomNav.getSelectedItemId() == menuItem.getItemId()) {
+                        return true;
+                    }
+
                     switch (menuItem.getItemId()) {
                         case R.id.nav_menu_history:
                             getSupportActionBar().setTitle(getString(R.string.history));
@@ -628,7 +633,10 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        // Do nothing
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        startActivity(intent);
     }
 
     private void showProgressDialog(String title) {

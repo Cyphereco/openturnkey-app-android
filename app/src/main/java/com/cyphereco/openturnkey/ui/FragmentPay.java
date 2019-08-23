@@ -294,7 +294,7 @@ public class FragmentPay extends Fragment {
 
     public void updateCurrencyExchangeRate(CurrencyExchangeRate rate) {
         mCurrencyExRate = rate;
-        updateCurrency();
+        // Don't update currency
     }
 
     public void updateLocalCurrency(LocalCurrency localCurrency) {
