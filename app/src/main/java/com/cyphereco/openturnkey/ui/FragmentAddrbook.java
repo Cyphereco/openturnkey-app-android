@@ -35,8 +35,8 @@ public class FragmentAddrbook extends Fragment {
         }
 
         List<DBAddrItem> addrData = mOtkDB.getAllAddressbook();
-        TextView noAddressView = (TextView) view.findViewById(R.id.text_no_history);
-        ListView addrListView = (ListView) view.findViewById(R.id.addrbookListView);
+        TextView noAddressView = (TextView) view.findViewById(R.id.text_no_address);
+        ListView addrListView = (ListView) view.findViewById(R.id.recyclerview_addresses);
 
         if (0 < addrData.size()) {
             noAddressView.setVisibility(View.INVISIBLE);
