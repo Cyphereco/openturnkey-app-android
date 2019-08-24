@@ -15,10 +15,6 @@ import android.widget.TextView;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Otk;
 
-import static com.cyphereco.openturnkey.core.Otk.Operation.OTK_OP_SIGN_PAYMENT;
-import static com.cyphereco.openturnkey.core.Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS;
-
-
 public class FragmentOtk extends Fragment {
 
     public static final String TAG = FragmentOtk.class.getSimpleName();
@@ -52,7 +48,8 @@ public class FragmentOtk extends Fragment {
         TextView tv;
         tv = view.findViewById(R.id.text_nfc_comm_type);
         Button btn = view.findViewById(R.id.button_otk_cancel);
-        if (mOp == OTK_OP_SIGN_PAYMENT) {
+        Log.d(TAG, "mOp:" + mOp.toString());
+        if (mOp == Otk.Operation.OTK_OP_SIGN_PAYMENT) {
             tv.setText(R.string.sign_payment);
             btn.setVisibility(View.VISIBLE);
             btn.setOnClickListener(new View.OnClickListener() {
@@ -61,11 +58,10 @@ public class FragmentOtk extends Fragment {
                     if (mListener != null) {
                         mListener.onCancelButtonClick();
                     }
-                    //getActivity().onBackPressed();
                 }
             });
         }
-        else if (mOp == OTK_OP_GET_RECIPIENT_ADDRESS) {
+        else if (mOp == Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS) {
             tv.setText(R.string.get_recipient_address);
             btn.setVisibility(View.VISIBLE);
             btn.setOnClickListener(new View.OnClickListener() {
@@ -74,12 +70,37 @@ public class FragmentOtk extends Fragment {
                     if (mListener != null) {
                         mListener.onCancelButtonClick();
                     }
-                    //getActivity().onBackPressed();
                 }
             });
         }
+        else if (mOp == Otk.Operation.OTK_OP_GET_KEY) {
+            tv.setText(R.string.disclose_key_information);
+            btn.setVisibility(View.INVISIBLE);
+        }
+        else if (mOp == Otk.Operation.OTK_OP_SET_PIN_CODE) {
+            tv.setText(R.string.set_pin_code);
+            btn.setVisibility(View.INVISIBLE);
+        }
+        else if (mOp == Otk.Operation.OTK_OP_WRITE_MEMO) {
+            tv.setText(R.string.set_note);
+            btn.setVisibility(View.INVISIBLE);
+        }
+        else if (mOp == Otk.Operation.OTK_OP_UNLOCK) {
+            tv.setText(R.string.unlock);
+            btn.setVisibility(View.INVISIBLE);
+        }
+        else if (mOp == Otk.Operation.OTK_OP_SIGN_MESSAGE) {
+            tv.setText(R.string.sign_message);
+            btn.setVisibility(View.INVISIBLE);
+        }
+        else if (mOp == Otk.Operation.OTK_OP_CHOOSE_KEY) {
+            tv.setText(R.string.choose_key);
+            btn.setVisibility(View.INVISIBLE);
+        }
         else {
             btn.setVisibility(View.INVISIBLE);
+            // Default is read general info
+            tv.setText(R.string.read_general_information);
         }
 
         return view;

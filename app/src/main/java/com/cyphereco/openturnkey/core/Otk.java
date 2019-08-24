@@ -44,9 +44,24 @@ public class Otk {
     private static final int OTK_MSG_CURRENCY_EX_RATE_UPDATE = 3;
 
     public enum Operation {
-        OTK_OP_NONE,
-        OTK_OP_SIGN_PAYMENT,
-        OTK_OP_GET_RECIPIENT_ADDRESS,
+        OTK_OP_NONE("None"),
+        OTK_OP_SIGN_PAYMENT("Sing Payment"),
+        OTK_OP_GET_RECIPIENT_ADDRESS("Get Recipient Address"),
+        OTK_OP_UNLOCK("Unlock"),
+        OTK_OP_WRITE_MEMO("Write Memo"),
+        OTK_OP_GET_KEY("Get Key"),
+        OTK_OP_SIGN_MESSAGE("Sign Message"),
+        OTK_OP_CHOOSE_KEY("Choose Key"),
+        OTK_OP_SET_PIN_CODE("Set Pin Code");
+
+        private final String value;
+        private Operation(String s) {
+            value = s;
+        }
+
+        public String toString(){
+            return value;
+        }
     }
 
     /** The place holder for the single object. */

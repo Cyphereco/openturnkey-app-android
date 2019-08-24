@@ -59,4 +59,10 @@
     <string name="text_time">Time:</string>
     <string name="to">To:</string>
     <string name="user_guide">使用指南</string>
+    <string name="terminate">Terminate</string>
+    <string name="confirm_terminate_op">Are you sure you want to terminate %s</string>
+    <string name="terminate_op">Terminate Operation</string>
+    <string name="set_note">Set Note</string>
+    <string name="choose_key">Choose Key</string>
+    <string name="sign_message">Sign Message</string>
 </resources>
