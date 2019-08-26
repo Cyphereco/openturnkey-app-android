@@ -16,9 +16,9 @@ public class Configurations {
     static Network mNetwork = Network.TESTNET;
     //static Network mNetwork = Network.MAINNET;
     // Tx fees level in satoshis/byte. Value TBD.
-    static long txFeesLow = 100;
-    static long txFeesMid = 250;
-    static long txFeesHigh = 500;
+    static public long txFeesLow = 100;
+    static public long txFeesMid = 250;
+    static public long txFeesHigh = 500;
 
     static public boolean isTestnet() {
         return (mNetwork == Network.TESTNET);

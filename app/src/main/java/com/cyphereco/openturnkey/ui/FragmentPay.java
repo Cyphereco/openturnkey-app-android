@@ -39,6 +39,20 @@ public class FragmentPay extends Fragment {
     private CurrencyExchangeRate mCurrencyExRate;
     private boolean mIsAmountConverting = false;
     private double mBtc = 0.0;
+    private static final String ARG_TO = "TO";
+    private static final String ARG_BTC = "BTC";
+    private static final String ARG_LC = "LC";
+
+
+    public static FragmentPay newInstance(String to, String btcAmount, String lcAmount) {
+        FragmentPay fragment = new FragmentPay();
+        Bundle args = new Bundle();
+        args.putString(ARG_TO, to);
+        args.putString(ARG_BTC, btcAmount);
+        args.putString(ARG_LC, lcAmount);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public void launchQRcodeScanActivity(View v) {
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
@@ -52,23 +66,8 @@ public class FragmentPay extends Fragment {
     }
 
     private void updateCurrencyName(View view) {
-
         TextView tv = view.findViewById(R.id.text_local_currency);
-        if (mLocalCurrency == LocalCurrency.LOCAL_CURRENCY_USD) {
-            tv.setText(R.string._currency_usd);
-        }
-        else if (mLocalCurrency == LocalCurrency.LOCAL_CURRENCY_TWD) {
-            tv.setText(R.string._currency_twd);
-        }
-        else if (mLocalCurrency == LocalCurrency.LOCAL_CURRENCY_CNY) {
-            tv.setText(R.string._currency_cny);
-        }
-        else if (mLocalCurrency == LocalCurrency.LOCAL_CURRENCY_EUR) {
-            tv.setText(R.string._currency_eur);
-        }
-        else if (mLocalCurrency == LocalCurrency.LOCAL_CURRENCY_JPY) {
-            tv.setText(R.string._currency_jpy);
-        }
+        tv.setText(mLocalCurrency.toString());
     }
 
     @Nullable
@@ -78,6 +77,8 @@ public class FragmentPay extends Fragment {
         // Set not focusable for recipient address so that the hint is shown correctly
         TextInputEditText inputReceipientAddress = view.findViewById(R.id.input_recipient_address);
         inputReceipientAddress.setFocusable(false);
+
+        mLocalCurrency = Preferences.getLocalCurrency(getActivity().getApplicationContext());
 
         updateCurrencyName(view);
         updateCurrency();
@@ -91,17 +92,27 @@ public class FragmentPay extends Fragment {
             }
         });
         iv = view.findViewById(R.id.icon_read_nfc);
+        final EditText etCc = view.findViewById(R.id.input_crypto_currency);
+        final EditText etLc = view.findViewById(R.id.input_local_currency);
+
+        if (getArguments() != null) {
+            etCc.setText(getArguments().getString(ARG_BTC));
+            etLc.setText(getArguments().getString(ARG_LC));
+            String to = getArguments().getString(ARG_TO);
+            if (to != null && to.length() > 0) {
+                updateRecipientAddress(to);
+            }
+        }
+
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mListener != null) {
-                    mListener.onGetRecipientAddressByReadNfcButtonClick();
+                    mListener.onGetRecipientAddressByReadNfcButtonClick(mRecipientAddress, etCc.getText().toString(), etLc.getText().toString());
                 }
             }
         });
 
-        final EditText etCc = view.findViewById(R.id.input_crypto_currency);
-        final EditText etLc = view.findViewById(R.id.input_local_currency);
         etCc.addTextChangedListener(new CurrencyTextWatcher(etCc) {
             @Override
             public void afterTextChanged(Editable editable) {
@@ -166,7 +177,7 @@ public class FragmentPay extends Fragment {
                     }
 
                     if (mListener != null) {
-                        mListener.onSignPaymentButtonClick(mRecipientAddress, mBtc);
+                        mListener.onSignPaymentButtonClick(mRecipientAddress, mBtc, etCc.getText().toString(), etLc.getText().toString());
                     }
                 }
                 catch (NullPointerException | NumberFormatException e) {
@@ -293,8 +304,14 @@ public class FragmentPay extends Fragment {
     }
 
     public void updateCurrencyExchangeRate(CurrencyExchangeRate rate) {
-        mCurrencyExRate = rate;
-        updateCurrency();
+        // Update currency only if there is no rate set before
+        if (mCurrencyExRate == null) {
+            mCurrencyExRate = rate;
+            updateCurrency();
+        }
+        else {
+            mCurrencyExRate = rate;
+        }
     }
 
     public void updateLocalCurrency(LocalCurrency localCurrency) {
@@ -307,7 +324,7 @@ public class FragmentPay extends Fragment {
     }
 
     public interface FragmentPayListener {
-        void onGetRecipientAddressByReadNfcButtonClick();
-        void onSignPaymentButtonClick(String to, double amount);
+        void onGetRecipientAddressByReadNfcButtonClick(String to, String  btc, String lc);
+        void onSignPaymentButtonClick(String to, double amount, String  btc, String lc);
     }
 }

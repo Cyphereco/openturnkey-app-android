@@ -6,16 +6,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.nfc.NfcAdapter;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +25,6 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.Tx;
-import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 
@@ -50,7 +51,6 @@ public class MainActivity extends AppCompatActivity
 
     private Menu toolbarMenu = null;
 
-    private int localCurrency = R.id.radio_twd;
     private int transactionFee = R.id.radio_low;
     private double customTransactionFee = 0.00001;
     private boolean includeFee = false;
@@ -59,10 +59,18 @@ public class MainActivity extends AppCompatActivity
     private Otk mOtk = null;
     private Fragment mSelectedFragment = null;
     private CurrencyExchangeRate mCurrencyExRate;
-    private boolean mIsOperationOnGoing = false;
     AlertDialog.Builder mProgressDialogBuilder = null;
     AlertDialog mProgressDialog = null;
+    AlertDialog.Builder mConfirmTerminateOpDialogBuilder = null;
+    AlertDialog mConfirmTerminateOpDialog = null;
+    private boolean mConfirmDialogResultValue;
 
+    private Otk.Operation mOp = Otk.Operation.OTK_OP_NONE;
+    private boolean mIsOpInProcessing = false;
+    // Cached pay fragment data
+    private String mAddress = "";
+    private String mBtcAmount = "";
+    private String mLcAmount = "";
 
     /**
      * Process activity result
@@ -153,12 +161,27 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-
+    
     /* declarations */
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                    BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+                    // mSelectedFragment null for the first show
+                    if (bottomNav.getSelectedItemId() == menuItem.getItemId() && mSelectedFragment != null) {
+                        return true;
+                    }
+
+                    if (mIsOpInProcessing == true) {
+                        // Cache selected item
+                        if (false == showConfirmDialogAndWaitResult(mOp, false)) {
+                            Log.d(TAG, "Confirmation cancelled!");
+                            return false;
+                        }
+                        Log.d(TAG, "Terminate Confirmed.");
+                    }
+
                     Toolbar toolbar = findViewById(R.id.toolbar);
                     Menu menu = toolbar.getMenu();
                     menu.clear();
@@ -168,31 +191,35 @@ public class MainActivity extends AppCompatActivity
                             getSupportActionBar().setTitle(getString(R.string.history));
                             getMenuInflater().inflate(R.menu.menu_history, menu);
                             mSelectedFragment = new FragmentHistory();
+                            clearCachedPayFragmentData();
                             break;
                         case R.id.nav_menu_addresses:
                             getSupportActionBar().setTitle(getString(R.string.addresses));
                             getMenuInflater().inflate(R.menu.menu_addresses, menu);
                             mSelectedFragment = new FragmentAddrbook();
+                            clearCachedPayFragmentData();
                             break;
                         case R.id.nav_menu_openturnkey:
                             getSupportActionBar().setTitle(getString(R.string._openturnkey));
                             getMenuInflater().inflate(R.menu.menu_openturnkey, menu);
-                            mSelectedFragment = new FragmentOtk();
+                            mSelectedFragment = FragmentOtk.newInstance(mOp);
+                            clearCachedPayFragmentData();
                             break;
                         default:
+                            // Pay fragment
                             getSupportActionBar().setTitle(getString(R.string.pay));
                             getMenuInflater().inflate(R.menu.menu_pay, menu);
                             updatePayConfig(menu);
-                            mSelectedFragment = new FragmentPay();
+                            // If we are in pay fragment already, just return true for set selected item.
+                            if (mSelectedFragment instanceof FragmentPay) {
+                                return true;
+                            }
+                            // Restore cached data
+                            mSelectedFragment = FragmentPay.newInstance(mAddress, mBtcAmount, mLcAmount);
                             ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
-                            ((FragmentPay) mSelectedFragment).updateRecipientAddress("mhifA1DwiMPHTjSJM8FFSL8ibrzWaBCkVT");
-
                             break;
                     }
-
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frame_main,
-                            mSelectedFragment).commit();
-
+                     getSupportFragmentManager().beginTransaction().replace(R.id.frame_main, mSelectedFragment).commit();
                     return true;
                 }
             };
@@ -217,6 +244,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         mProgressDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        mConfirmTerminateOpDialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
         mOtk = Otk.getInstance();
         mOtk.setEventListener(new Otk.OtkEventListener() {
@@ -256,8 +284,9 @@ public class MainActivity extends AppCompatActivity
                     // Make sure we are in FragmentOtk
                     if (mSelectedFragment instanceof FragmentOtk) {
                         // Go back to pay fragment
-                        mIsOperationOnGoing = false;
-                        backToPreviousFragment();
+                        mOp = Otk.Operation.OTK_OP_NONE;
+                        mIsOpInProcessing = false;
+                        backToPayFragment();
                     }
 
                     // Show tx
@@ -274,8 +303,9 @@ public class MainActivity extends AppCompatActivity
                     // Make sure we are in FragmentOtk
                     if (mSelectedFragment instanceof FragmentOtk) {
                         // Go back to pay fragment
-                        mIsOperationOnGoing = false;
-                        backToPreviousFragment();
+                        mOp = Otk.Operation.OTK_OP_NONE;
+                        mIsOpInProcessing = false;
+                        backToPayFragment();
 
                     }
                 }
@@ -283,8 +313,9 @@ public class MainActivity extends AppCompatActivity
                     // Make sure we are in FragmentOtk
                     if (mSelectedFragment instanceof FragmentOtk) {
                         // Go back to pay fragment
-                        mIsOperationOnGoing = false;
-                        backToPreviousFragment();
+                        mOp = Otk.Operation.OTK_OP_NONE;
+                        mIsOpInProcessing = false;
+                        backToPayFragment();
                         // Set recipient address
                         ((FragmentPay) mSelectedFragment).updateRecipientAddress(event.getRecipientAddress());
                     }
@@ -350,21 +381,54 @@ public class MainActivity extends AppCompatActivity
         return super.onCreateOptionsMenu(menu);
     }
 
+    private void setNfcCommTypeText(int item) {
+        TextView tv;
+        try {
+            switch (item) {
+                case R.id.menu_openturnkey_get_key:
+                    tv = findViewById(R.id.text_nfc_comm_type);
+                    tv.setText(R.string.disclose_key_information);
+                    // TODO
+                    return;
+                case R.id.menu_openturnkey_unlock:
+                    tv = findViewById(R.id.text_nfc_comm_type);
+                    tv.setText(R.string.unlock_openturnkey);
+                    return;
+                case R.id.menu_openturnkey_set_note:
+                    tv = findViewById(R.id.text_nfc_comm_type);
+                    tv.setText(R.string.set_note);
+                    return;
+                case R.id.menu_openturnkey_choose_key:
+                    tv = findViewById(R.id.text_nfc_comm_type);
+                    tv.setText(R.string.choose_key);
+                    return;
+                case R.id.menu_openturnkey_set_pin:
+                    tv = findViewById(R.id.text_nfc_comm_type);
+                    tv.setText(R.string.set_pin_code);
+                    return;
+                case R.id.menu_openturnkey_sign_message:
+                    tv = findViewById(R.id.text_nfc_comm_type);
+                    tv.setText(R.string.sign_message);
+                    return;
+            }
+        }
+        catch (NullPointerException e) {
+            // Do nothing
+        }
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         TextView tv;
 
+        if (mIsOpInProcessing) {
+            if (false == showConfirmDialogAndWaitResult(mOp, true)) {
+                return false;
+            }
+        }
+
         switch (item.getItemId()) {
             case R.id.menu_history_clear_history:
                 dialogClearHistory();
-                return true;
-            case R.id.menu_openturnkey_get_key:
-                tv = findViewById(R.id.text_nfc_comm_type);
-                tv.setText(R.string.disclose_key_information);
-                return true;
-            case R.id.menu_openturnkey_unlock:
-                tv = findViewById(R.id.text_nfc_comm_type);
-                tv.setText(R.string.unlock_openturnkey);
                 return true;
             case R.id.menu_pay_local_curreny:
                 dialogLocalCurrency();
@@ -384,17 +448,26 @@ public class MainActivity extends AppCompatActivity
             case R.id.menu_addresses_add:
                 startActivity(new Intent(this, AddAddressActivity.class));
                 return true;
+            case R.id.menu_openturnkey_get_key:
+            case R.id.menu_openturnkey_unlock:
+            case R.id.menu_openturnkey_set_note:
+            case R.id.menu_openturnkey_choose_key:
+            case R.id.menu_openturnkey_set_pin:
+            case R.id.menu_openturnkey_sign_message:
+                setNfcCommTypeText(item.getItemId());
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
     public void setLocalCurrency(int localCurrency) {
-        this.localCurrency = localCurrency;
         updatePayConfig(toolbarMenu);
+        LocalCurrency lc = currencyToLocalCurrency(localCurrency);
+        Preferences.setLocalCurrency(getApplicationContext(), lc);
         if (mSelectedFragment instanceof FragmentPay) {
             // Update local currency
-            ((FragmentPay) mSelectedFragment).updateLocalCurrency(currencyToLocalCurrency(localCurrency));
+            ((FragmentPay) mSelectedFragment).updateLocalCurrency(lc);
         }
     }
 
@@ -405,8 +478,9 @@ public class MainActivity extends AppCompatActivity
 
     public void cancelAuthByPin() {
         mOtk.cancelOperation();
-        mIsOperationOnGoing = false;
-        backToPreviousFragment();
+        mOp = Otk.Operation.OTK_OP_NONE;
+        mIsOpInProcessing = false;
+        backToPayFragment();
     }
 
     public void setTransactionFee(int transactionFee) {
@@ -417,8 +491,26 @@ public class MainActivity extends AppCompatActivity
     /* Local functions */
     public void dialogLocalCurrency() {
         DialogLocalCurrency dialog = new DialogLocalCurrency();
+        int localCurrencyId;
+
+        LocalCurrency lc = Preferences.getLocalCurrency(getApplicationContext());
+        if (lc == LocalCurrency.LOCAL_CURRENCY_CNY) {
+            localCurrencyId = R.id.radio_cny;
+        }
+        else if (lc == LocalCurrency.LOCAL_CURRENCY_EUR) {
+            localCurrencyId = R.id.radio_eur;
+        }
+        else if (lc == LocalCurrency.LOCAL_CURRENCY_JPY) {
+            localCurrencyId = R.id.radio_jpy;
+        }
+        else if (lc == LocalCurrency.LOCAL_CURRENCY_USD) {
+            localCurrencyId = R.id.radio_usd;
+        }
+        else {
+            localCurrencyId = R.id.radio_twd;
+        }
         Bundle bundle = new Bundle();
-        bundle.putInt("localCurrency", localCurrency);
+        bundle.putInt("localCurrency", localCurrencyId);
         dialog.setArguments(bundle);
         dialog.show(getSupportFragmentManager(), "dialog");
     }
@@ -475,22 +567,6 @@ public class MainActivity extends AppCompatActivity
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
-
-    public String currencyToString(int currency) {
-        switch (currency) {
-            case R.id.radio_cny:
-                return getString(R.string._currency_cny);
-            case R.id.radio_eur:
-                return getString(R.string._currency_eur);
-            case R.id.radio_jpy:
-                return getString(R.string._currency_jpy);
-            case R.id.radio_twd:
-                return getString(R.string._currency_twd);
-            default:
-                return getString(R.string._currency_usd);
-        }
-    }
-
     public LocalCurrency currencyToLocalCurrency(int currency) {
         switch (currency) {
             case R.id.radio_cny:
@@ -524,9 +600,10 @@ public class MainActivity extends AppCompatActivity
         MenuItem menuItem;
 
         menuItem = menu.findItem(R.id.menu_pay_local_curreny);
+        LocalCurrency lc = Preferences.getLocalCurrency(getApplicationContext());
         if (menuItem != null) {
             str = getString(R.string.local_currency) +
-                    " (" + currencyToString(localCurrency) + ")";
+                    " (" + lc.toString() + ")";
             menuItem.setTitle(str);
         }
 
@@ -548,57 +625,48 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void onSignPaymentButtonClick(String to, double amount) {
-        // Show FragmentOtk
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        Menu menu = toolbar.getMenu();
-        // Dont show menu
-        menu.clear();
-        getSupportActionBar().setTitle(getString(R.string._openturnkey));
-        mSelectedFragment = FragmentOtk.newInstance(Otk.Operation.OTK_OP_SIGN_PAYMENT);
+    private void cacheAddressAndAmount() {
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.frame_main,
-                mSelectedFragment).addToBackStack(null).commit();
+    }
 
+    public void onSignPaymentButtonClick(String to, double amount, String btcAmount, String lcAmount) {
+        mOp = Otk.Operation.OTK_OP_SIGN_PAYMENT;
         // TODO convert txFee log, mid high
         mOtk.setOperation(Otk.Operation.OTK_OP_SIGN_PAYMENT, to, amount, includeFee, 0);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-        bottomNav.setVisibility(View.INVISIBLE);
+        bottomNav.setSelectedItemId(R.id.nav_menu_openturnkey);
 
-        mIsOperationOnGoing = true;
+        mIsOpInProcessing = true;
+
+        // Cache recipient address and amount
+        mAddress = to;
+        mBtcAmount = btcAmount;
+        mLcAmount = lcAmount;
     }
 
-    public void onGetRecipientAddressByReadNfcButtonClick() {
-        // Show FragmentOtk
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        Menu menu = toolbar.getMenu();
-        // Dont show menu
-        menu.clear();
-        getSupportActionBar().setTitle(getString(R.string._openturnkey));
-        mSelectedFragment = FragmentOtk.newInstance(Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS);
-
-        getSupportFragmentManager().beginTransaction().replace(R.id.frame_main,
-                mSelectedFragment).addToBackStack(null).commit();
-
+    public void onGetRecipientAddressByReadNfcButtonClick(String address, String btcAmount, String lcAmount) {
+        // Cache op
+        mOp = Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS;
         mOtk.setOperation(Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-        bottomNav.setVisibility(View.INVISIBLE);
-        mIsOperationOnGoing = true;
+        bottomNav.setSelectedItemId(R.id.nav_menu_openturnkey);
 
+        mIsOpInProcessing = true;
+
+        // Cache recipient address and amount
+        mAddress = address;
+        mBtcAmount = btcAmount;
+        mLcAmount = lcAmount;
     }
 
-    public void backToPreviousFragment() {
+    public void backToPayFragment() {
+//        super.onBackPressed();
+//        getActiveFragment();
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-        bottomNav.setVisibility(View.VISIBLE);
-        // Add menu back
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        Menu menu = toolbar.getMenu();
-        getMenuInflater().inflate(R.menu.menu_pay, menu);
-        updatePayConfig(menu);
-        super.onBackPressed();
-        getActiveFragment();
+
+        bottomNav.setSelectedItemId(R.id.nav_menu_pay);
         // Update rate in case it's not updated
         if (mSelectedFragment instanceof FragmentPay) {
             ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
@@ -608,8 +676,9 @@ public class MainActivity extends AppCompatActivity
     public void onCancelButtonClick() {
         Toast.makeText(this, getString(R.string.operation_cancelled), Toast.LENGTH_LONG).show();
         mOtk.cancelOperation();
-        mIsOperationOnGoing = false;
-        backToPreviousFragment();
+        mOp = Otk.Operation.OTK_OP_NONE;
+        mIsOpInProcessing = false;
+        backToPayFragment();
     }
 
     private void getActiveFragment() {
@@ -628,7 +697,10 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        // Do nothing
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        startActivity(intent);
     }
 
     private void showProgressDialog(String title) {
@@ -652,6 +724,66 @@ public class MainActivity extends AppCompatActivity
         if (mProgressDialog != null) {
             mProgressDialog.dismiss();
         }
+    }
+
+    boolean showConfirmDialogAndWaitResult(Otk.Operation op, final boolean isOtkOptionsSet) {
+        final Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message mesg) {
+                Log.d(TAG, "msg:" + mesg.toString());
+                throw new RuntimeException();
+            }
+        };
+
+        if (mConfirmTerminateOpDialog != null && mConfirmTerminateOpDialog.isShowing()) {
+            Log.d(TAG, "Confirm dialog is shown, should be some error!");
+        }
+
+        mConfirmTerminateOpDialog = mConfirmTerminateOpDialogBuilder.setTitle(R.string.terminate_op)
+                .setMessage(String.format(getString(R.string.confirm_terminate_op), op.toString()))
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Log.d(TAG, "onCancel()");
+                        mConfirmDialogResultValue = false;
+                        handler.sendMessage(handler.obtainMessage());
+                        hideConfirmTerminateOpDialog();
+                    }})
+                .setPositiveButton(R.string.terminate, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Log.d(TAG, "onTerminate()");
+                        hideConfirmTerminateOpDialog();
+                        mConfirmDialogResultValue = true;
+                        // Terminate current op
+                        mOtk.cancelOperation();
+                        mIsOpInProcessing = false;
+                        clearCachedPayFragmentData();
+                        if (isOtkOptionsSet) {
+                            ((FragmentOtk) mSelectedFragment).hideCancelButton();
+                        }
+                        mOp = Otk.Operation.OTK_OP_NONE;
+                        handler.sendMessage(handler.obtainMessage());
+                    }})
+                .setCancelable(true)
+                .show();
+        try {
+            Looper.loop();
+        }
+        catch (RuntimeException e) {}
+        return mConfirmDialogResultValue;
+    }
+
+    private void hideConfirmTerminateOpDialog() {
+        if (mConfirmTerminateOpDialog != null) {
+            mConfirmTerminateOpDialog.dismiss();
+        }
+    }
+
+    private void clearCachedPayFragmentData() {
+        mAddress = "";
+        mBtcAmount = "";
+        mLcAmount = "";
     }
 }
 
