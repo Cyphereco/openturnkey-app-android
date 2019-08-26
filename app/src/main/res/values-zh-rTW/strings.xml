@@ -65,4 +65,6 @@
     <string name="set_note">Set Note</string>
     <string name="choose_key">Choose Key</string>
     <string name="sign_message">Sign Message</string>
+    <string name="add">新增</string>
+    <string name="authenticity_check">信賴性檢查</string>
 </resources>

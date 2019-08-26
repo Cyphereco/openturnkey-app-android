@@ -46,10 +46,10 @@ dependencies {
     implementation 'com.poovam:pin-edittext-field:1.2.0'
     implementation 'log4j:log4j:1.2.16'
     implementation 'com.google.code.gson:gson:2.2.4'
-    compile ('org.glassfish.jersey.core:jersey-client:2.9') {
+    api ('org.glassfish.jersey.core:jersey-client:2.9') {
         exclude group: 'javax.inject', module: 'javax.inject'
     }
-    compile group: 'javax.xml.stream', name: 'stax-api', version: '1.0'
+    api group: 'javax.xml.stream', name: 'stax-api', version: '1.0'
     implementation 'javax.websocket:javax.websocket-api:1.0'
 
     implementation 'com.android.support:recyclerview-v7:28.0.0'

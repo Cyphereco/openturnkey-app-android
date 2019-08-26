@@ -3,6 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/menu_openturnkey_authenticity_check"
+        android:title="@string/authenticity_check" />
+    <item
         android:id="@+id/menu_openturnkey_set_pin"
         android:title="@string/set_pin_code" />
     <item

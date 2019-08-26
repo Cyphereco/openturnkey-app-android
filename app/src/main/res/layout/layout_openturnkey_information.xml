@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/lock_state"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:contentDescription="@string/lock_state"
+        app:layout_constraintBottom_toBottomOf="@+id/power_state"
+        app:layout_constraintEnd_toStartOf="@+id/power_state"
+        app:layout_constraintTop_toTopOf="@+id/power_state"
+        app:srcCompat="@drawable/ic_lock_open_black_24dp" />
+
+    <ImageView
+        android:id="@+id/power_state"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:contentDescription="@string/battery_state"
+        android:rotation="270"
+        app:layout_constraintBottom_toBottomOf="@+id/power_state_value"
+        app:layout_constraintEnd_toStartOf="@+id/power_state_value"
+        app:layout_constraintTop_toTopOf="@+id/power_state_value"
+        app:srcCompat="@drawable/ic_battery_80_black_24dp" />
+
+    <TextView
+        android:id="@+id/power_state_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="80%"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/key_mint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Key Mint: Cyphereco OU "
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/mint_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mint Date: 2019/06/09"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/key_mint"
+        app:layout_constraintTop_toBottomOf="@+id/key_mint" />
+
+    <TextView
+        android:id="@+id/version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Version: 1.2 / 1.1.6"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/mint_date"
+        app:layout_constraintTop_toBottomOf="@+id/mint_date" />
+
+    <TextView
+        android:id="@+id/serial_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Serial No.: b7022ddc25"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/version"
+        app:layout_constraintTop_toBottomOf="@+id/version" />
+
+    <TextView
+        android:id="@+id/note"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/note"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/serial_number"
+        app:layout_constraintTop_toBottomOf="@+id/serial_number" />
+
+    <EditText
+        android:id="@+id/user_note_context"
+        android:layout_width="330dp"
+        android:layout_height="61dp"
+        android:layout_marginEnd="16dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/note"
+        app:layout_constraintTop_toBottomOf="@+id/serial_number" tools:targetApi="o"/>
+
+    <TextView
+        android:id="@+id/btc_address_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/btc_address"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_note_context" />
+
+    <ImageView
+        android:id="@+id/btc_address_qrcode"
+        android:layout_width="192dp"
+        android:layout_height="192dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="@string/btc_qr_code"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btc_address_title"
+        app:srcCompat="@drawable/ic_scan_qrcode_foreground" />
+
+    <TextView
+        android:id="@+id/btc_address_context"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="1LG9fDp3do4X2tEf4k7V4uCYhNUmSq6vL8"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btc_address_qrcode" />
+</android.support.constraint.ConstraintLayout>
