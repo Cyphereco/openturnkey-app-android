@@ -31,6 +31,13 @@ public class FragmentOtk extends Fragment {
         return fragment;
     }
 
+    public void hideCancelButton() {
+        Button btn = getView().findViewById(R.id.button_otk_cancel);
+        if (btn != null) {
+            btn.setVisibility(View.INVISIBLE);
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
