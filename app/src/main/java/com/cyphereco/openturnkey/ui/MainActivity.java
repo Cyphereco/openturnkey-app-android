@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity
     private Otk.Operation mOp = Otk.Operation.OTK_OP_NONE;
     private boolean mIsOpInProcessing = false;
     // Cached pay fragment data
-    private String mAddress = "";
+    private String mRecipientAddress = "";
     private String mBtcAmount = "";
     private String mLcAmount = "";
 
@@ -210,12 +210,8 @@ public class MainActivity extends AppCompatActivity
                             getSupportActionBar().setTitle(getString(R.string.pay));
                             getMenuInflater().inflate(R.menu.menu_pay, menu);
                             updatePayConfig(menu);
-                            // If we are in pay fragment already, just return true for set selected item.
-                            if (mSelectedFragment instanceof FragmentPay) {
-                                return true;
-                            }
                             // Restore cached data
-                            mSelectedFragment = FragmentPay.newInstance(mAddress, mBtcAmount, mLcAmount);
+                            mSelectedFragment = FragmentPay.newInstance(mRecipientAddress, mBtcAmount, mLcAmount);
                             ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
                             break;
                     }
@@ -315,9 +311,10 @@ public class MainActivity extends AppCompatActivity
                         // Go back to pay fragment
                         mOp = Otk.Operation.OTK_OP_NONE;
                         mIsOpInProcessing = false;
+                        mRecipientAddress = event.getRecipientAddress();
                         backToPayFragment();
                         // Set recipient address
-                        ((FragmentPay) mSelectedFragment).updateRecipientAddress(event.getRecipientAddress());
+//                        ((FragmentPay) mSelectedFragment).updateRecipientAddress(event.getRecipientAddress());
                     }
                 }
                 else if (type == OtkEvent.Type.OTK_UNAUTHORIZED) {
@@ -640,7 +637,7 @@ public class MainActivity extends AppCompatActivity
         mIsOpInProcessing = true;
 
         // Cache recipient address and amount
-        mAddress = to;
+        mRecipientAddress = to;
         mBtcAmount = btcAmount;
         mLcAmount = lcAmount;
     }
@@ -656,14 +653,12 @@ public class MainActivity extends AppCompatActivity
         mIsOpInProcessing = true;
 
         // Cache recipient address and amount
-        mAddress = address;
+        mRecipientAddress = address;
         mBtcAmount = btcAmount;
         mLcAmount = lcAmount;
     }
 
     public void backToPayFragment() {
-//        super.onBackPressed();
-//        getActiveFragment();
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
 
         bottomNav.setSelectedItemId(R.id.nav_menu_pay);
@@ -781,7 +776,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void clearCachedPayFragmentData() {
-        mAddress = "";
+        mRecipientAddress = "";
         mBtcAmount = "";
         mLcAmount = "";
     }

@@ -97,10 +97,16 @@ public class FragmentPay extends Fragment {
 
         if (getArguments() != null) {
             etCc.setText(getArguments().getString(ARG_BTC));
+            try {
+                mBtc = Double.parseDouble(etCc.getText().toString());
+            }
+            catch (NumberFormatException e) {
+                etCc.setText("");
+            }
             etLc.setText(getArguments().getString(ARG_LC));
             String to = getArguments().getString(ARG_TO);
             if (to != null && to.length() > 0) {
-                updateRecipientAddress(to);
+                updateRecipientAddress(view, to);
             }
         }
 
@@ -229,8 +235,11 @@ public class FragmentPay extends Fragment {
     }
 
     public void updateRecipientAddress(String recipientAddress) {
+        updateRecipientAddress(getView(), recipientAddress);
+    }
+
+    public void updateRecipientAddress(View view, String recipientAddress) {
         mRecipientAddress = recipientAddress;
-        View view = getView();
         if (view == null) {
             return;
         }
