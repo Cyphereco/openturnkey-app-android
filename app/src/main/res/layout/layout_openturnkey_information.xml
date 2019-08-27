@@ -38,16 +38,74 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <EditText
+        android:id="@+id/text_balance_btc"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="@string/_numerical_zero"
+        android:inputType="numberDecimal"
+        android:textAlignment="viewEnd"
+        app:layout_constraintEnd_toStartOf="@+id/input_local_currency"
+        app:layout_constraintStart_toStartOf="@+id/textView14"
+        app:layout_constraintTop_toBottomOf="@+id/textView14" tools:targetApi="o"/>
+
+    <TextView
+        android:id="@+id/label_btc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/_currency_btc"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="@+id/text_balance_btc"
+        app:layout_constraintTop_toBottomOf="@+id/text_balance_btc" />
+
+    <TextView
+        android:id="@+id/label_equal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/_symbol_equal"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/text_balance_btc"
+        app:layout_constraintStart_toEndOf="@+id/text_balance_btc"
+        app:layout_constraintTop_toTopOf="@+id/text_balance_btc" />
+
+    <EditText
+        android:id="@+id/text_balance_fiat"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="@string/_numerical_zero"
+        android:inputType="numberDecimal"
+        android:textAlignment="viewEnd"
+        app:layout_constraintBottom_toBottomOf="@+id/text_balance_btc"
+        app:layout_constraintStart_toEndOf="@+id/label_equal"
+        app:layout_constraintTop_toTopOf="@+id/text_balance_btc" tools:targetApi="o"/>
+
+    <TextView
+        android:id="@+id/label_fiat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/_currency_twd"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="@+id/text_balance_fiat"
+        app:layout_constraintTop_toBottomOf="@+id/text_balance_fiat" />
+
     <TextView
         android:id="@+id/key_mint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="2dp"
         android:text="Key Mint: Cyphereco OU "
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/mint_date"
+        app:layout_constraintStart_toStartOf="@+id/mint_date" />
 
     <TextView
         android:id="@+id/mint_date"
@@ -55,8 +113,8 @@
         android:layout_height="wrap_content"
         android:text="Mint Date: 2019/06/09"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintStart_toStartOf="@+id/key_mint"
-        app:layout_constraintTop_toBottomOf="@+id/key_mint" />
+        app:layout_constraintBottom_toTopOf="@+id/version"
+        app:layout_constraintStart_toStartOf="@+id/version" />
 
     <TextView
         android:id="@+id/version"
@@ -64,8 +122,8 @@
         android:layout_height="wrap_content"
         android:text="Version: 1.2 / 1.1.6"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintStart_toStartOf="@+id/mint_date"
-        app:layout_constraintTop_toBottomOf="@+id/mint_date" />
+        app:layout_constraintBottom_toTopOf="@+id/serial_number"
+        app:layout_constraintStart_toStartOf="@+id/serial_number" />
 
     <TextView
         android:id="@+id/serial_number"
@@ -73,8 +131,8 @@
         android:layout_height="wrap_content"
         android:text="Serial No.: b7022ddc25"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintStart_toStartOf="@+id/version"
-        app:layout_constraintTop_toBottomOf="@+id/version" />
+        app:layout_constraintBottom_toTopOf="@+id/note"
+        app:layout_constraintStart_toStartOf="@+id/note" />
 
     <TextView
         android:id="@+id/note"
@@ -82,33 +140,34 @@
         android:layout_height="wrap_content"
         android:text="@string/note"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintStart_toStartOf="@+id/serial_number"
-        app:layout_constraintTop_toBottomOf="@+id/serial_number" />
+        app:layout_constraintEnd_toStartOf="@+id/user_note_context"
+        app:layout_constraintTop_toTopOf="@+id/user_note_context" />
 
     <EditText
         android:id="@+id/user_note_context"
         android:layout_width="330dp"
         android:layout_height="61dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
         android:autofillHints=""
         android:ems="10"
         android:gravity="start|top"
         android:inputType="textMultiLine"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/note"
-        app:layout_constraintTop_toBottomOf="@+id/serial_number" tools:targetApi="o"/>
+        tools:targetApi="o" />
 
     <TextView
         android:id="@+id/btc_address_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:text="@string/btc_address"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_note_context" />
+        app:layout_constraintTop_toBottomOf="@+id/label_btc" />
 
     <ImageView
         android:id="@+id/btc_address_qrcode"
@@ -126,10 +185,33 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:text="1LG9fDp3do4X2tEf4k7V4uCYhNUmSq6vL8"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btc_address_qrcode" />
+
+    <TextView
+        android:id="@+id/textView14"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:text="Account Balance:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lock_state" />
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/btc_address_context"
+        app:layout_constraintStart_toEndOf="@+id/btc_address_context"
+        app:layout_constraintTop_toTopOf="@+id/btc_address_context"
+        app:srcCompat="@drawable/ic_content_copy_black_24dp" />
+
 </android.support.constraint.ConstraintLayout>
