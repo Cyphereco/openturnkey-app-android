@@ -91,5 +91,7 @@
     <string name="btc_qr_code">BTC QR Code</string>
     <string name="lock_state">Lock State</string>
     <string name="battery_state">Battery State</string>
+    <string name="mint_inforamtion">Mint Inforamtion</string>
+    <string name="account_balance">Account Balance:</string>
 
 </resources>

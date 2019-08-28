@@ -50,8 +50,8 @@
         android:inputType="numberDecimal"
         android:textAlignment="viewEnd"
         app:layout_constraintEnd_toStartOf="@+id/input_local_currency"
-        app:layout_constraintStart_toStartOf="@+id/textView14"
-        app:layout_constraintTop_toBottomOf="@+id/textView14" tools:targetApi="o"/>
+        app:layout_constraintStart_toStartOf="@+id/label_account_balance"
+        app:layout_constraintTop_toBottomOf="@+id/label_account_balance" tools:targetApi="o" />
 
     <TextView
         android:id="@+id/label_btc"
@@ -86,7 +86,7 @@
         android:textAlignment="viewEnd"
         app:layout_constraintBottom_toBottomOf="@+id/text_balance_btc"
         app:layout_constraintStart_toEndOf="@+id/label_equal"
-        app:layout_constraintTop_toTopOf="@+id/text_balance_btc" tools:targetApi="o"/>
+        app:layout_constraintTop_toTopOf="@+id/text_balance_btc" tools:targetApi="o" />
 
     <TextView
         android:id="@+id/label_fiat"
@@ -96,43 +96,6 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="@+id/text_balance_fiat"
         app:layout_constraintTop_toBottomOf="@+id/text_balance_fiat" />
-
-    <TextView
-        android:id="@+id/key_mint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="2dp"
-        android:text="Key Mint: Cyphereco OU "
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toTopOf="@+id/mint_date"
-        app:layout_constraintStart_toStartOf="@+id/mint_date" />
-
-    <TextView
-        android:id="@+id/mint_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mint Date: 2019/06/09"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toTopOf="@+id/version"
-        app:layout_constraintStart_toStartOf="@+id/version" />
-
-    <TextView
-        android:id="@+id/version"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Version: 1.2 / 1.1.6"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toTopOf="@+id/serial_number"
-        app:layout_constraintStart_toStartOf="@+id/serial_number" />
-
-    <TextView
-        android:id="@+id/serial_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Serial No.: b7022ddc25"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toTopOf="@+id/note"
-        app:layout_constraintStart_toStartOf="@+id/note" />
 
     <TextView
         android:id="@+id/note"
@@ -145,10 +108,10 @@
 
     <EditText
         android:id="@+id/user_note_context"
-        android:layout_width="330dp"
+        android:layout_width="300dp"
         android:layout_height="61dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="48dp"
+        android:layout_marginBottom="16dp"
         android:autofillHints=""
         android:ems="10"
         android:gravity="start|top"
@@ -161,23 +124,25 @@
         android:id="@+id/btc_address_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/btc_address"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toTopOf="@+id/btc_address_qrcode"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/label_btc" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/btc_address_qrcode"
         android:layout_width="192dp"
         android:layout_height="192dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:contentDescription="@string/btc_qr_code"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btc_address_title"
+        app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_scan_qrcode_foreground" />
 
     <TextView
@@ -194,24 +159,36 @@
         app:layout_constraintTop_toBottomOf="@+id/btc_address_qrcode" />
 
     <TextView
-        android:id="@+id/textView14"
+        android:id="@+id/label_account_balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
-        android:text="Account Balance:"
+        android:text="@string/account_balance"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lock_state" />
 
     <ImageView
-        android:id="@+id/imageView3"
+        android:id="@+id/icon_copy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:contentDescription="@android:string/copyUrl"
         app:layout_constraintBottom_toBottomOf="@+id/btc_address_context"
         app:layout_constraintStart_toEndOf="@+id/btc_address_context"
         app:layout_constraintTop_toTopOf="@+id/btc_address_context"
         app:srcCompat="@drawable/ic_content_copy_black_24dp" />
+
+    <ImageView
+        android:id="@+id/icon_mint_information"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="@string/mint_inforamtion"
+        app:layout_constraintBottom_toBottomOf="@+id/user_note_context"
+        app:layout_constraintStart_toEndOf="@+id/user_note_context"
+        app:layout_constraintTop_toTopOf="@+id/user_note_context"
+        app:srcCompat="@drawable/ic_info_outline_black_24dp" />
 
 </android.support.constraint.ConstraintLayout>
