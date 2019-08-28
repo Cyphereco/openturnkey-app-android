@@ -13,7 +13,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -178,7 +177,7 @@ public class FragmentPay extends Fragment {
                     }
                     // Check amount
                     if (mBtc <= 0) {
-                        Snackbar.make(view, getString(R.string.invalid_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                        Snackbar.make(view, getString(R.string.incorrect_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                         return;
                     }
 
@@ -188,7 +187,7 @@ public class FragmentPay extends Fragment {
                 }
                 catch (NullPointerException | NumberFormatException e) {
                     e.printStackTrace();
-                    Snackbar.make(view, getString(R.string.invalid_recipient_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    Snackbar.make(view, getString(R.string.incorrect_recipient_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                     return;
                 }
 

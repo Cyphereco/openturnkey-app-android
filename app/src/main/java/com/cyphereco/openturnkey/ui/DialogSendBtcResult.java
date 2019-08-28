@@ -10,14 +10,13 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.utils.BtcUtils;
 
 public class DialogSendBtcResult extends AppCompatDialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        int resultStringId = R.string.btc_sent;
+        int resultStringId = R.string.transaction_sent;
         String reason = "";
         String from;
         String to;
@@ -34,7 +33,7 @@ public class DialogSendBtcResult extends AppCompatDialogFragment {
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view;
-        if (resultStringId == R.string.btc_sent) {
+        if (resultStringId == R.string.transaction_sent) {
             hash = getArguments().getString("hash");
             from = getArguments().getString("from");
             to = getArguments().getString("to");

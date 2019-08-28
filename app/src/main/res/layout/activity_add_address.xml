@@ -21,7 +21,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:popupTheme="@style/Base.ThemeOverlay.AppCompat.Light" />
+            app:popupTheme="@style/Base.ThemeOverlay.AppCompat.Light"
+            app:title="@string/add_address" />
 
     </android.support.design.widget.AppBarLayout>
 

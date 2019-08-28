@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Process activity result
+     *
      * @param requestCode
      * @param resultCode
      * @param intent
@@ -87,57 +88,52 @@ public class MainActivity extends AppCompatActivity
                 if (contents.contains(BEGIN_BITCOIN_SIGNED_MESSAGE)) {
                     // TODO
                     // updateFormattedSignedMessage(contents);
-                }
-                else {
+                } else {
                     String addr = "";
                     String amount = "0.0";
                     boolean notBTC = false;
 
                     if (contents.contains(":")) {
                         // contents might be a uri
-                        String uriArray[] = contents.split(":");
+                        String[] uriArray = contents.split(":");
 
                         if (uriArray.length > 1) {
                             if (uriArray[0].contentEquals("bitcoin")) {
                                 contents = uriArray[1];
                                 addr = contents;
-                            }
-                            else {
+                            } else {
                                 notBTC = true;
                                 Toast.makeText(this, "Sorry! " + uriArray[0] +
-                                        " is not supported at this moment.",Toast.LENGTH_LONG).show();
+                                        " is not supported at this moment.", Toast.LENGTH_LONG).show();
                                 contents = "";
                             }
-                        }
-                        else {
+                        } else {
                             // incorrect uri format
                         }
                     }
 
                     if (!notBTC && contents.contains("?")) {
                         // contents might contains query tag
-                        String queryArray[] = contents.split("\\?");
+                        String[] queryArray = contents.split("\\?");
 
                         if (queryArray.length > 1) {
                             addr = queryArray[0];
 
-                            String queryTagArray[] = queryArray[1].split("&");
+                            String[] queryTagArray = queryArray[1].split("&");
 
                             for (String s : queryTagArray) {
                                 if (s.toLowerCase().contains(AMOUNT_EQUAL_TO)) {
-                                    String amountArray[] = s.split("=");
+                                    String[] amountArray = s.split("=");
                                     if (amountArray.length > 1) {
-                                        Toast.makeText(this, "Amount: " + amountArray[1],Toast.LENGTH_LONG).show();
+                                        Toast.makeText(this, "Amount: " + amountArray[1], Toast.LENGTH_LONG).show();
                                         amount = amountArray[1];
                                     }
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             // incorrect uri
                         }
-                    }
-                    else {
+                    } else {
                         addr = contents;
                     }
 
@@ -157,11 +153,11 @@ public class MainActivity extends AppCompatActivity
                 }
             } else if (resultCode == RESULT_CANCELED) {
                 //Handle cancel
-                Toast.makeText(this, getString(R.string.qr_code_scan_cancelled),Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.qr_code_scan_cancelled), Toast.LENGTH_LONG).show();
             }
         }
     }
-    
+
     /* declarations */
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -215,7 +211,7 @@ public class MainActivity extends AppCompatActivity
                             ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
                             break;
                     }
-                     getSupportFragmentManager().beginTransaction().replace(R.id.frame_main, mSelectedFragment).commit();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frame_main, mSelectedFragment).commit();
                     return true;
                 }
             };
@@ -256,18 +252,14 @@ public class MainActivity extends AppCompatActivity
                         // Update rate
                         ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(event.mCurrencyExRate);
                     }
-                }
-                else if (type == OtkEvent.Type.APPROACH_OTK) {
+                } else if (type == OtkEvent.Type.APPROACH_OTK) {
                     // TODO
-                }
-                else if (type == OtkEvent.Type.OPERATION_IN_PROCESSING) {
+                } else if (type == OtkEvent.Type.OPERATION_IN_PROCESSING) {
                     // Show progress spin circle
                     showProgressDialog(getString(R.string.processing));
-                }
-                else if (type == OtkEvent.Type.GENERAL_INFORMATION) {
+                } else if (type == OtkEvent.Type.GENERAL_INFORMATION) {
                     // TODO
-                }
-                else if (type == OtkEvent.Type.SEND_BITCOIN_SUCCESS) {
+                } else if (type == OtkEvent.Type.SEND_BITCOIN_SUCCESS) {
                     hideProgressDialog();
                     Tx tx = event.getTx();
                     Log.d(TAG, "From:" + tx.getFrom());
@@ -288,8 +280,7 @@ public class MainActivity extends AppCompatActivity
                     // Show tx
                     dialogBtcSent(tx);
 
-                }
-                else if ((type == OtkEvent.Type.SEND_BITCOIN_FAIL) ||
+                } else if ((type == OtkEvent.Type.SEND_BITCOIN_FAIL) ||
                         (type == OtkEvent.Type.COMMAND_EXECUTION_FAILED)) {
                     // Hide progress
                     hideProgressDialog();
@@ -304,8 +295,7 @@ public class MainActivity extends AppCompatActivity
                         backToPayFragment();
 
                     }
-                }
-                else if (type == OtkEvent.Type.RECIPIENT_ADDRESS) {
+                } else if (type == OtkEvent.Type.RECIPIENT_ADDRESS) {
                     // Make sure we are in FragmentOtk
                     if (mSelectedFragment instanceof FragmentOtk) {
                         // Go back to pay fragment
@@ -316,14 +306,12 @@ public class MainActivity extends AppCompatActivity
                         // Set recipient address
 //                        ((FragmentPay) mSelectedFragment).updateRecipientAddress(event.getRecipientAddress());
                     }
-                }
-                else if (type == OtkEvent.Type.OTK_UNAUTHORIZED) {
+                } else if (type == OtkEvent.Type.OTK_UNAUTHORIZED) {
                     // Dismiss progress dialog
                     hideProgressDialog();
                     // Show pre-auth with pin dialog
                     dialogAuthByPin();
-                }
-                else {
+                } else {
 
                 }
             }
@@ -352,7 +340,7 @@ public class MainActivity extends AppCompatActivity
         IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         IntentFilter ndefDetected = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
         IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
-        IntentFilter[] nfcIntentFilter = new IntentFilter[]{techDetected,tagDetected,ndefDetected};
+        IntentFilter[] nfcIntentFilter = new IntentFilter[]{techDetected, tagDetected, ndefDetected};
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
@@ -365,7 +353,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        if(mNfcAdapter!= null)
+        if (mNfcAdapter != null)
             mNfcAdapter.disableForegroundDispatch(this);
     }
 
@@ -384,20 +372,20 @@ public class MainActivity extends AppCompatActivity
             switch (item) {
                 case R.id.menu_openturnkey_get_key:
                     tv = findViewById(R.id.text_nfc_comm_type);
-                    tv.setText(R.string.disclose_key_information);
+                    tv.setText(R.string.read_key_information);
                     // TODO
                     return;
                 case R.id.menu_openturnkey_unlock:
                     tv = findViewById(R.id.text_nfc_comm_type);
-                    tv.setText(R.string.unlock_openturnkey);
+                    tv.setText(R.string.unlock);
                     return;
                 case R.id.menu_openturnkey_set_note:
                     tv = findViewById(R.id.text_nfc_comm_type);
-                    tv.setText(R.string.set_note);
+                    tv.setText(R.string.write_memo);
                     return;
                 case R.id.menu_openturnkey_choose_key:
                     tv = findViewById(R.id.text_nfc_comm_type);
-                    tv.setText(R.string.choose_key);
+                    tv.setText(R.string.set_key);
                     return;
                 case R.id.menu_openturnkey_set_pin:
                     tv = findViewById(R.id.text_nfc_comm_type);
@@ -408,11 +396,11 @@ public class MainActivity extends AppCompatActivity
                     tv.setText(R.string.sign_message);
                     return;
             }
-        }
-        catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             // Do nothing
         }
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         TextView tv;
@@ -444,6 +432,9 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.menu_addresses_add:
                 startActivity(new Intent(this, AddAddressActivity.class));
+                return true;
+            case R.id.menu_openturnkey_read_openturnkey:
+                startActivity(new Intent(this, OpenturnkeyInfoActivity.class));
                 return true;
             case R.id.menu_openturnkey_get_key:
             case R.id.menu_openturnkey_unlock:
@@ -493,17 +484,13 @@ public class MainActivity extends AppCompatActivity
         LocalCurrency lc = Preferences.getLocalCurrency(getApplicationContext());
         if (lc == LocalCurrency.LOCAL_CURRENCY_CNY) {
             localCurrencyId = R.id.radio_cny;
-        }
-        else if (lc == LocalCurrency.LOCAL_CURRENCY_EUR) {
+        } else if (lc == LocalCurrency.LOCAL_CURRENCY_EUR) {
             localCurrencyId = R.id.radio_eur;
-        }
-        else if (lc == LocalCurrency.LOCAL_CURRENCY_JPY) {
+        } else if (lc == LocalCurrency.LOCAL_CURRENCY_JPY) {
             localCurrencyId = R.id.radio_jpy;
-        }
-        else if (lc == LocalCurrency.LOCAL_CURRENCY_USD) {
+        } else if (lc == LocalCurrency.LOCAL_CURRENCY_USD) {
             localCurrencyId = R.id.radio_usd;
-        }
-        else {
+        } else {
             localCurrencyId = R.id.radio_twd;
         }
         Bundle bundle = new Bundle();
@@ -545,7 +532,7 @@ public class MainActivity extends AppCompatActivity
         DialogSendBtcResult dialog = new DialogSendBtcResult();
         Bundle bundle = new Bundle();
         // result string id
-        bundle.putInt("sendBtcResult", R.string.btc_sent);
+        bundle.putInt("sendBtcResult", R.string.transaction_sent);
         bundle.putString("from", tx.getFrom());
         bundle.putString("to", tx.getTo());
         bundle.putString("hash", tx.getHash());
@@ -684,8 +671,7 @@ public class MainActivity extends AppCompatActivity
                     mSelectedFragment = fragment;
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             // Do nothing
         }
     }
@@ -710,7 +696,8 @@ public class MainActivity extends AppCompatActivity
                         Log.d(TAG, "onCancel()");
                         onCancelButtonClick();
                         hideProgressDialog();
-                    }})
+                    }
+                })
                 .setCancelable(true)
                 .show();
     }
@@ -743,7 +730,8 @@ public class MainActivity extends AppCompatActivity
                         mConfirmDialogResultValue = false;
                         handler.sendMessage(handler.obtainMessage());
                         hideConfirmTerminateOpDialog();
-                    }})
+                    }
+                })
                 .setPositiveButton(R.string.terminate, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -759,13 +747,14 @@ public class MainActivity extends AppCompatActivity
                         }
                         mOp = Otk.Operation.OTK_OP_NONE;
                         handler.sendMessage(handler.obtainMessage());
-                    }})
+                    }
+                })
                 .setCancelable(true)
                 .show();
         try {
             Looper.loop();
+        } catch (RuntimeException e) {
         }
-        catch (RuntimeException e) {}
         return mConfirmDialogResultValue;
     }
 

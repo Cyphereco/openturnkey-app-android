@@ -48,8 +48,6 @@
     <string name="_left_bracket" translatable="false">(</string>
     <string name="_right_bracket" translatable="false">)</string>
     <string name="read_general_information">Read General Information</string>
-    <string name="disclose_key_information">Disclose Key Information</string>
-    <string name="unlock_openturnkey">Unlock OpenTurnKey</string>
     <string name="custom">Custom</string>
     <string name="_btc_per_byte" translatable="false">BTC/Byte</string>
     <string name="_0_00001" translatable="false">0.00001</string>
@@ -65,12 +63,12 @@
     <string name="get_recipient_address">Get Recipient Address</string>
     <string name="operation_cancelled">Operartion cancelled</string>
     <string name="send_btc_failed">Send BTC Failed</string>
-    <string name="btc_sent">BTC Sent</string>
+    <string name="transaction_sent">Transaction Sent</string>
     <string name="reason">Reason:</string>
     <string name="processing">Processing</string>
     <string name="recipient_is_empty">Recipient address is empty</string>
-    <string name="invalid_amount">Invalid amount</string>
-    <string name="invalid_recipient_amount">Invalid recipient address or amount</string>
+    <string name="incorrect_amount">Incorrect amount</string>
+    <string name="incorrect_recipient_amount">Incorrect recipient address or amount</string>
     <string name="from">From:</string>
     <string name="to">To:</string>
     <string name="hash">Hash:</string>
@@ -82,8 +80,6 @@
     <string name="terminate">Terminate</string>
     <string name="confirm_terminate_op">Are you sure you want to terminate %s?</string>
     <string name="terminate_op">Terminate Operation</string>
-    <string name="set_note">Set Note</string>
-    <string name="choose_key">Choose Key</string>
     <string name="sign_message">Sign Message</string>
     <string name="authenticity_check">Authenticity Check</string>
     <string name="btc_address">BTC Address</string>
@@ -93,5 +89,8 @@
     <string name="battery_state">Battery State</string>
     <string name="mint_inforamtion">Mint Inforamtion</string>
     <string name="account_balance">Account Balance:</string>
+    <string name="read_openturnkey">Read OpenTurnKey</string>
+    <string name="add_address">Add Address</string>
+    <string name="openturnkey_information">OpenTurnKey Information</string>
 
 </resources>

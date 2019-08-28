@@ -11,6 +11,15 @@
     <uses-feature
         android:name="android.hardware.nfc"
         android:required="true" />
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="true" />
+
+    <uses-permission android:name="android.hardware.camera" />
+    <uses-permission android:name="android.hardware.camera.autofocus" />
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"
@@ -20,6 +29,7 @@
         android:roundIcon="@mipmap/ic_cyphereco_color_logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ui.OpenturnkeyInfoActivity"></activity>
         <activity
             android:name=".ui.SplashActivity"
             android:screenOrientation="portrait">
@@ -68,7 +78,6 @@
         <activity
             android:name=".ui.QRcodeScanActivity"
             android:label="@string/title_activity_qrcode_scan" />
-
         <activity
             android:name=".ui.AddAddressActivity"
             android:label="Add Address"
@@ -78,16 +87,5 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
     </application>
-    <uses-feature
-        android:name="android.hardware.nfc"
-        android:required="true" />
-    <uses-permission android:name="android.hardware.camera" />
-    <uses-permission android:name="android.hardware.camera.autofocus" />
-
-    <uses-permission android:name="android.permission.NFC" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <uses-permission android:name="android.permission.CAMERA" />
 
 </manifest>

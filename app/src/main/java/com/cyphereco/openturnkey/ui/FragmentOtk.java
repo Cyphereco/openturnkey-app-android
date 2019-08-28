@@ -81,7 +81,7 @@ public class FragmentOtk extends Fragment {
             });
         }
         else if (mOp == Otk.Operation.OTK_OP_GET_KEY) {
-            tv.setText(R.string.disclose_key_information);
+            tv.setText(R.string.read_key_information);
             btn.setVisibility(View.INVISIBLE);
         }
         else if (mOp == Otk.Operation.OTK_OP_SET_PIN_CODE) {
@@ -89,7 +89,7 @@ public class FragmentOtk extends Fragment {
             btn.setVisibility(View.INVISIBLE);
         }
         else if (mOp == Otk.Operation.OTK_OP_WRITE_MEMO) {
-            tv.setText(R.string.set_note);
+            tv.setText(R.string.write_memo);
             btn.setVisibility(View.INVISIBLE);
         }
         else if (mOp == Otk.Operation.OTK_OP_UNLOCK) {
@@ -101,7 +101,7 @@ public class FragmentOtk extends Fragment {
             btn.setVisibility(View.INVISIBLE);
         }
         else if (mOp == Otk.Operation.OTK_OP_CHOOSE_KEY) {
-            tv.setText(R.string.choose_key);
+            tv.setText(R.string.set_key);
             btn.setVisibility(View.INVISIBLE);
         }
         else {
