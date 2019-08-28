@@ -252,4 +252,42 @@ public class BtcUtils {
 
         return ((double)satoshi / 100000000.0);
     }
+
+    static public double localCurrencyToBtc(CurrencyExchangeRate rate, LocalCurrency lc, double amount) {
+        if (rate == null) {
+            return 0;
+        }
+        switch (lc) {
+            case LOCAL_CURRENCY_TWD:
+                return Double.valueOf(amount / rate.getTWD());
+            case LOCAL_CURRENCY_USD:
+                return Double.valueOf(amount / rate.getUSD());
+            case LOCAL_CURRENCY_CNY:
+                return Double.valueOf(amount / rate.getCNY());
+            case LOCAL_CURRENCY_EUR:
+                return Double.valueOf(amount / rate.getEUR());
+            case LOCAL_CURRENCY_JPY:
+                return Double.valueOf(amount / rate.getJPY());
+        }
+        return 0;
+    }
+
+    static public double btcToLocalCurrency(CurrencyExchangeRate rate, LocalCurrency lc, double amount) {
+        if (rate == null) {
+            return 0;
+        }
+        switch (lc) {
+            case LOCAL_CURRENCY_TWD:
+                return Double.valueOf(rate.getTWD() * amount);
+            case LOCAL_CURRENCY_USD:
+                return Double.valueOf(rate.getUSD() * amount);
+            case LOCAL_CURRENCY_CNY:
+                return Double.valueOf(rate.getCNY() * amount);
+            case LOCAL_CURRENCY_EUR:
+                return Double.valueOf(rate.getEUR() * amount);
+            case LOCAL_CURRENCY_JPY:
+                return Double.valueOf(rate.getJPY() * amount);
+        }
+        return 0;
+    }
 }

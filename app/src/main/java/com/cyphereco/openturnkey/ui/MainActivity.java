@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity
     public static final String KEY_PRE_AUTH_PIN_CODE = "KEY_PRE_AUTH_PIN_CODE";
     public static final String KEY_SET_PIN_CODE = "KEY_SET_PIN_CODE";
     public static final String KEY_SET_KEY = "KEY_SET_KEY";
+    public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
 
     private static final String BEGIN_BITCOIN_SIGNED_MESSAGE = "-----BEGIN BITCOIN SIGNED MESSAGE-----";
     private static final String AMOUNT_EQUAL_TO = "amount=";
@@ -198,7 +199,11 @@ public class MainActivity extends AppCompatActivity
                         case R.id.nav_menu_openturnkey:
                             getSupportActionBar().setTitle(getString(R.string._openturnkey));
                             getMenuInflater().inflate(R.menu.menu_openturnkey, menu);
+                            if (mOp == Otk.Operation.OTK_OP_NONE) {
+                                mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                            }
                             mSelectedFragment = FragmentOtk.newInstance(mOp);
+                            mOtk.setOperation(mOp);
                             clearCachedPayFragmentData();
                             break;
                         default:
@@ -247,10 +252,10 @@ public class MainActivity extends AppCompatActivity
                 // TODO: process event
                 if (type == OtkEvent.Type.CURRENCY_EXCHANGE_RATE_UPDATE) {
                     // Cache rate
-                    mCurrencyExRate = event.mCurrencyExRate;
+                    mCurrencyExRate = event.getCurrencyExRate();
                     if (mSelectedFragment instanceof FragmentPay) {
                         // Update rate
-                        ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(event.mCurrencyExRate);
+                        ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
                     }
                 } else if (type == OtkEvent.Type.APPROACH_OTK) {
                     // TODO
@@ -258,7 +263,10 @@ public class MainActivity extends AppCompatActivity
                     // Show progress spin circle
                     showProgressDialog(getString(R.string.processing));
                 } else if (type == OtkEvent.Type.GENERAL_INFORMATION) {
-                    // TODO
+                    Intent intent = new Intent(getApplicationContext() , OpenturnkeyInfoActivity.class);
+                    intent.putExtra(KEY_OTK_DATA, event.getData());
+                    startActivity(intent);
+                    mOtk.getBalance(event.getData().getSessionData().getAddress());
                 } else if (type == OtkEvent.Type.SEND_BITCOIN_SUCCESS) {
                     hideProgressDialog();
                     Tx tx = event.getTx();
@@ -303,8 +311,6 @@ public class MainActivity extends AppCompatActivity
                         mIsOpInProcessing = false;
                         mRecipientAddress = event.getRecipientAddress();
                         backToPayFragment();
-                        // Set recipient address
-//                        ((FragmentPay) mSelectedFragment).updateRecipientAddress(event.getRecipientAddress());
                     }
                 } else if (type == OtkEvent.Type.OTK_UNAUTHORIZED) {
                     // Dismiss progress dialog
@@ -312,7 +318,6 @@ public class MainActivity extends AppCompatActivity
                     // Show pre-auth with pin dialog
                     dialogAuthByPin();
                 } else {
-
                 }
             }
         });
@@ -368,31 +373,31 @@ public class MainActivity extends AppCompatActivity
 
     private void setNfcCommTypeText(int item) {
         TextView tv;
+        tv = findViewById(R.id.text_nfc_comm_type);
         try {
             switch (item) {
+                case R.id.menu_openturnkey_read_openturnkey:
+                    tv.setText(R.string.read_general_information);
+                    return;
+                case R.id.menu_openturnkey_authenticity_check:
+                    tv.setText(R.string.authenticity_check);
+                    return;
                 case R.id.menu_openturnkey_get_key:
-                    tv = findViewById(R.id.text_nfc_comm_type);
                     tv.setText(R.string.read_key_information);
-                    // TODO
                     return;
                 case R.id.menu_openturnkey_unlock:
-                    tv = findViewById(R.id.text_nfc_comm_type);
                     tv.setText(R.string.unlock);
                     return;
                 case R.id.menu_openturnkey_set_note:
-                    tv = findViewById(R.id.text_nfc_comm_type);
                     tv.setText(R.string.write_memo);
                     return;
                 case R.id.menu_openturnkey_choose_key:
-                    tv = findViewById(R.id.text_nfc_comm_type);
                     tv.setText(R.string.set_key);
                     return;
                 case R.id.menu_openturnkey_set_pin:
-                    tv = findViewById(R.id.text_nfc_comm_type);
                     tv.setText(R.string.set_pin_code);
                     return;
                 case R.id.menu_openturnkey_sign_message:
-                    tv = findViewById(R.id.text_nfc_comm_type);
                     tv.setText(R.string.sign_message);
                     return;
             }
@@ -434,8 +439,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(new Intent(this, AddAddressActivity.class));
                 return true;
             case R.id.menu_openturnkey_read_openturnkey:
-                startActivity(new Intent(this, OpenturnkeyInfoActivity.class));
-                return true;
+            case R.id.menu_openturnkey_authenticity_check:
             case R.id.menu_openturnkey_get_key:
             case R.id.menu_openturnkey_unlock:
             case R.id.menu_openturnkey_set_note:

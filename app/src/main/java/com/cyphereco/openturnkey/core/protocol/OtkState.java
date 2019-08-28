@@ -2,7 +2,9 @@ package com.cyphereco.openturnkey.core.protocol;
 
 import android.util.Log;
 
-public class OtkState {
+import java.io.Serializable;
+
+public class OtkState implements Serializable {
     public static final String TAG = OtkState.class.getSimpleName();
 
     public enum LockState {

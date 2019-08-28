@@ -2,10 +2,17 @@ package com.cyphereco.openturnkey.core;
 
 import android.util.Log;
 
+import com.cyphereco.openturnkey.core.protocol.MintInfo;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.core.protocol.SessionData;
 
-public class OtkData {
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+
+public class OtkData implements Serializable {
     private static final String TAG = OtkData.class.getSimpleName();
 
     /* Data type. */
@@ -17,7 +24,7 @@ public class OtkData {
     }
     private Type mType;
     String mAppUri;
-    String mMintInfo;
+    MintInfo mMintInfo;
 
     OtkState mOtkState;
     String mPublicKey;
@@ -26,6 +33,8 @@ public class OtkData {
     public Type getType() {return mType;}
     public SessionData getSessionData() {return mSessionData;}
     public OtkState getOtkState() { return mOtkState;}
+    public String getPublicKey() { return mPublicKey;}
+    public MintInfo getMintInfo() { return mMintInfo;}
 
     /**
      * Constructor
@@ -35,7 +44,7 @@ public class OtkData {
      */
     public OtkData(String mintInfo, OtkState otkState, String pubKey, SessionData sd) {
         Log.d(TAG, "mintInfo:" + mintInfo + "\notkState:" + otkState.toString() + "\nSessionData:" + sd.toString());
-        mMintInfo = mintInfo;
+        mMintInfo = new MintInfo(mintInfo);
         mOtkState = otkState;
         mSessionData = sd;
         mPublicKey = pubKey;

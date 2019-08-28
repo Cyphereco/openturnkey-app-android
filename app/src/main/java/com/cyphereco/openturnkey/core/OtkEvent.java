@@ -4,6 +4,7 @@ import com.blockcypher.model.transaction.Transaction;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 
+import java.math.BigDecimal;
 import java.util.concurrent.TransferQueue;
 
 public class OtkEvent {
@@ -21,13 +22,15 @@ public class OtkEvent {
         SIGN_FAILED,
         OTK_UNAUTHORIZED,
         COMMAND_EXECUTION_FAILED,
+        BALANCE_UPDATE,
     }
 
-    public Type mType;
-    public OtkData mData;
-    public String mDesc;
-    public CurrencyExchangeRate mCurrencyExRate = null;
+    private Type mType;
+    private OtkData mData;
+    private String mDesc;
+    private CurrencyExchangeRate mCurrencyExRate = null;
     private Tx mTx;
+    private BigDecimal mBalance;
 
     /**
      * Constructor for general info event
@@ -40,6 +43,12 @@ public class OtkEvent {
     public OtkEvent(Type eventType, String desc) {
         mType = eventType;
         mDesc = desc;
+    }
+
+    public OtkEvent(Type eventType, BigDecimal b, CurrencyExchangeRate rate) {
+        mType = eventType;
+        mBalance = b;
+        mCurrencyExRate = rate;
     }
 
     public OtkEvent(Tx tx) {
@@ -61,5 +70,8 @@ public class OtkEvent {
     public String getRecipientAddress() { return mDesc;}
     public String getFailureReason() { return mDesc;}
     public Tx getTx() { return mTx;}
+    public OtkData getData() {return mData;}
+    public CurrencyExchangeRate getCurrencyExRate() {return mCurrencyExRate;}
+    public BigDecimal getBalance() {return mBalance;}
 
 }

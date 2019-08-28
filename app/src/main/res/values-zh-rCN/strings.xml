@@ -73,4 +73,6 @@
     <string name="account_balance">账户余额</string>
     <string name="read_openturnkey">读取OpenTurnKey</string>
     <string name="openturnkey_information">OpenTurnKey信息</string>
+    <string name="fetching">Fetching...</string>
+    <string name="address_copied_to_clipboard">Address copied to clipboard</string>
 </resources>

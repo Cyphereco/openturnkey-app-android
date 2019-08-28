@@ -45,6 +45,7 @@ public class Otk {
 
     public enum Operation {
         OTK_OP_NONE("None"),
+        OTK_OP_READ_GENERAL_INFO("Read General Info"),
         OTK_OP_SIGN_PAYMENT("Sing Payment"),
         OTK_OP_GET_RECIPIENT_ADDRESS("Get Recipient Address"),
         OTK_OP_UNLOCK("Unlock"),
@@ -69,6 +70,7 @@ public class Otk {
 
     /** Event listener. */
     static OtkEventListener mEventListener = null;
+    static BalanceUpdateListener mBalanceUpdateListener = null;
 
     /* Operation. */
     static Operation mOp = Operation.OTK_OP_NONE;
@@ -161,13 +163,15 @@ public class Otk {
             TimerTask task = new TimerTask() {
                 public void run () {
                     CurrencyExchangeRate cer = BtcUtils.getCurrencyExchangeRate();
-                    // Send message
-                    Message msg = new Message();
-                    msg.what = OTK_MSG_CURRENCY_EX_RATE_UPDATE;
-                    msg.obj = cer;
-                    mHandler.sendMessage(msg);
-
-
+                    if (cer != null) {
+                        // Send message
+                        Message msg = new Message();
+                        msg.what = OTK_MSG_CURRENCY_EX_RATE_UPDATE;
+                        msg.obj = cer;
+                        mHandler.sendMessage(msg);
+                        // Cache it
+                        mCurrencyExRate = cer;
+                    }
                 }
             };
             mTimer.schedule(task,100,1000 * 60);
@@ -211,7 +215,10 @@ public class Otk {
      */
     public int processIntent(Intent intent) {
         Log.d(TAG, "process intent");
-
+        if (mOp == Operation.OTK_OP_NONE) {
+            Log.d(TAG, "No op is set!");
+            return OTK_RETURN_ERROR_INVALID_OP;
+        }
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
         if (tag != null) {
             if (mCommandToWrite != Command.INVALID) {
@@ -245,6 +252,12 @@ public class Otk {
      * @return
      */
     static private int sendEvent(OtkEvent event) {
+        if (event.getType() == OtkEvent.Type.BALANCE_UPDATE) {
+            if (mBalanceUpdateListener != null) {
+                mBalanceUpdateListener.onOtkEvent(event);
+                return OTK_RETURN_OK;
+            }
+        }
         if (mEventListener == null) {
             return OTK_RETURN_ERROR;
         }
@@ -259,7 +272,7 @@ public class Otk {
         if (otkData == null) {
             return OTK_RETURN_ERROR;
         }
-        if (mOp == Operation.OTK_OP_NONE) {
+        if (mOp == Operation.OTK_OP_READ_GENERAL_INFO) {
             OtkEvent event = new OtkEvent(OtkEvent.Type.GENERAL_INFORMATION, otkData);
             sendEvent(event);
             clearOp();
@@ -331,6 +344,13 @@ public class Otk {
     }
 
     /**
+     * Event listener interface
+     */
+    public interface BalanceUpdateListener {
+        void onOtkEvent(OtkEvent event);
+    }
+
+    /**
      * Event listener.
      */
     public int setEventListener(OtkEventListener eventListener) {
@@ -338,6 +358,10 @@ public class Otk {
         return OTK_RETURN_OK;
     }
 
+    public int setBalanceListener(BalanceUpdateListener eventListener) {
+        mBalanceUpdateListener = eventListener;
+        return OTK_RETURN_OK;
+    }
     /**
      * Set operation
      */
@@ -467,5 +491,20 @@ public class Otk {
         };
         t.start();
         return OTK_RETURN_OK;
+    }
+
+    public void getBalance(final String address) {
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                synchronized (this) {
+                    BigDecimal b = BlockCypher.getInstance().getBalance(address);
+                    OtkEvent event = new OtkEvent(OtkEvent.Type.BALANCE_UPDATE, b, mCurrencyExRate);
+                    sendEvent(event);
+                }
+            }
+        };
+
+        t.start();
     }
 }

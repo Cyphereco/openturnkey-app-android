@@ -2,10 +2,11 @@ package com.cyphereco.openturnkey.core.protocol;
 
 import android.util.Log;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SessionData {
+public class SessionData implements Serializable {
     private static final String TAG = SessionData.class.getSimpleName();
 
     private static final String CRLF = "\r\n";

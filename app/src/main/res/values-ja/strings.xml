@@ -73,4 +73,6 @@
     <string name="account_balance">勘定残高</string>
     <string name="read_openturnkey">OpenTurnKey読んで</string>
     <string name="openturnkey_information">OpenTurnKey情報</string>
+    <string name="fetching">Fetching...</string>
+    <string name="address_copied_to_clipboard">Address copied to clipboard</string>
 </resources>
