@@ -29,6 +29,7 @@
         android:roundIcon="@mipmap/ic_cyphereco_color_logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ui.EditContactActivity"></activity>
         <activity android:name=".ui.OpenturnkeyInfoActivity"></activity>
         <activity
             android:name=".ui.SplashActivity"
@@ -79,8 +80,8 @@
             android:name=".ui.QRcodeScanActivity"
             android:label="@string/title_activity_qrcode_scan" />
         <activity
-            android:name=".ui.AddAddressActivity"
-            android:label="Add Address"
+            android:name=".ui.AddContactActivity"
+            android:label="Add Contact"
             android:parentActivityName=".ui.MainActivity" />
 
         <meta-data

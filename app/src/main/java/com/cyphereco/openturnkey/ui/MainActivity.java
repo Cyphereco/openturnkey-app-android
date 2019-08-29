@@ -33,7 +33,8 @@ public class MainActivity extends AppCompatActivity
         DialogTransactionFee.DialogTransactionFeeListener,
         DialogAuthByPin.DialogAuthByPinListener,
         FragmentPay.FragmentPayListener,
-        FragmentOtk.FragmentOtkListener {
+        FragmentOtk.FragmentOtkListener,
+        FragmentAddrbook.FragmentAddrbookListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
@@ -436,7 +437,7 @@ public class MainActivity extends AppCompatActivity
                 dialogAbout();
                 return true;
             case R.id.menu_addresses_add:
-                startActivity(new Intent(this, AddAddressActivity.class));
+                startActivity(new Intent(this, AddContactActivity.class));
                 return true;
             case R.id.menu_openturnkey_read_openturnkey:
             case R.id.menu_openturnkey_authenticity_check:
@@ -772,6 +773,12 @@ public class MainActivity extends AppCompatActivity
         mRecipientAddress = "";
         mBtcAmount = "";
         mLcAmount = "";
+    }
+
+    @Override
+    public void onAddressbookPayingButtonClick(String address) {
+        mRecipientAddress = address;
+        backToPayFragment();
     }
 }
 

@@ -35,6 +35,7 @@ public class OpenturnkeyDB {
     private static final String TRANS_RAW_DATA_COL = "rawData";
 
     // Columns of address book
+    private static final String ADDRBOOK_KEY_ID_COL = "_id";
     private static final String ADDRBOOK_ADDR_COL = "address";
     private static final String ADDRBOOK_USR_NAME_COL = "userName";
 
@@ -198,9 +199,9 @@ public class OpenturnkeyDB {
         return otkDB.update(ADDR_BOOK_TABLE_NAME, cv, where, null) > 0;
     }
 
-    public boolean deleteAddressbookByAddr(String addr) {
-        String where = ADDRBOOK_ADDR_COL + "=" + addr;
-        return otkDB.delete(ADDR_BOOK_TABLE_NAME, where , null) > 0;
+    public boolean deleteAddressbookByAddr(String address) {
+        return otkDB.delete(ADDR_BOOK_TABLE_NAME,
+                ADDRBOOK_ADDR_COL + "=?" , new String[]{address}) > 0;
     }
 
     public List<DBAddrItem> getAllAddressbook() {
