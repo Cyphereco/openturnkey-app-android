@@ -377,7 +377,7 @@ public class MainActivity extends AppCompatActivity
         tv = findViewById(R.id.text_nfc_comm_type);
         try {
             switch (item) {
-                case R.id.menu_openturnkey_read_openturnkey:
+                case R.id.menu_openturnkey_read_generalinformation:
                     tv.setText(R.string.read_general_information);
                     return;
                 case R.id.menu_openturnkey_authenticity_check:
@@ -439,7 +439,7 @@ public class MainActivity extends AppCompatActivity
             case R.id.menu_addresses_add:
                 startActivity(new Intent(this, AddContactActivity.class));
                 return true;
-            case R.id.menu_openturnkey_read_openturnkey:
+            case R.id.menu_openturnkey_read_generalinformation:
             case R.id.menu_openturnkey_authenticity_check:
             case R.id.menu_openturnkey_get_key:
             case R.id.menu_openturnkey_unlock:

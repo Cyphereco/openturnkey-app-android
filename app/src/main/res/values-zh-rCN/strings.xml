@@ -71,7 +71,6 @@
     <string name="btc_qr_code">BTC二维码</string>
     <string name="add_address">新增地址</string>
     <string name="account_balance">账户余额</string>
-    <string name="read_openturnkey">读取OpenTurnKey</string>
     <string name="openturnkey_information">OpenTurnKey信息</string>
     <string name="fetching">数据更新中...</string>
     <string name="address_copied">地址已复制</string>
