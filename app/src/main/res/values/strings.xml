@@ -89,10 +89,10 @@
     <string name="battery_state">Battery State</string>
     <string name="mint_inforamtion">Mint Inforamtion</string>
     <string name="account_balance">Account Balance:</string>
-    <string name="read_openturnkey">Read OpenTurnKey</string>
     <string name="add_address">Add Address</string>
     <string name="openturnkey_information">OpenTurnKey Information</string>
     <string name="fetching">Fetching...</string>
-    <string name="address_copied_to_clipboard">Address copied to clipboard</string>
+    <string name="address_copied">Address copied</string>
+    <string name="please_wait">Please wait a moment...</string>
 
 </resources>

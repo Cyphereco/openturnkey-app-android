@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_openturnkey_read_openturnkey"
-        android:title="@string/read_openturnkey" />
+        android:id="@+id/menu_openturnkey_read_generalinformation"
+        android:title="@string/read_general_information" />
     <item
         android:id="@+id/menu_openturnkey_authenticity_check"
         android:title="@string/authenticity_check" />

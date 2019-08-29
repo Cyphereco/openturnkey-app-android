@@ -17,7 +17,7 @@
     <string name="set_key">鍵選んで</string>
     <string name="select_from_address_book">アドレス選んで</string>
     <string name="search">探し</string>
-    <string name="scan_qr_code">QR Code撮り</string>
+    <string name="scan_qr_code">QRコード撮り</string>
     <string name="read_nfc">NFC読んで</string>
     <string name="pay">支払い</string>
     <string name="paste_clipboard">ペスト</string>
@@ -45,12 +45,12 @@
     <string name="operation_cancelled">操作がキャンセルされました</string>
     <string name="send_btc_failed">BTCの発送に失敗しました</string>
     <string name="title_activity_qrcode_scan">QRコードをスキャン</string>
-    <string name="qr_code_scan_cancelled">QR code scan cancelled</string>
+    <string name="qr_code_scan_cancelled">QRコード撮りキャンセル</string>
     <string name="reason">理由:</string>
     <string name="recipient_is_empty">入金アドレスが空です</string>
     <string name="incorrect_amount">金額間違い</string>
     <string name="incorrect_recipient_amount">金額や入金アドレス間違い</string>
-    <string name="hash">Hash:</string>
+    <string name="hash">ハッシュ:</string>
     <string name="from">From:</string>
     <string name="text_amount">金額:</string>
     <string name="text_fee">手数料:</string>
@@ -71,8 +71,8 @@
     <string name="btc_qr_code">BTC QRコード</string>
     <string name="add_address">アドレスを追加</string>
     <string name="account_balance">勘定残高</string>
-    <string name="read_openturnkey">OpenTurnKey読んで</string>
     <string name="openturnkey_information">OpenTurnKey情報</string>
-    <string name="fetching">Fetching...</string>
-    <string name="address_copied_to_clipboard">Address copied to clipboard</string>
+    <string name="fetching">データ更新中...</string>
+    <string name="address_copied">アドレスコピーしました</string>
+    <string name="please_wait">お少々待ちください</string>
 </resources>
