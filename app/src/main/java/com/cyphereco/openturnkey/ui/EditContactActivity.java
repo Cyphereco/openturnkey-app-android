@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBAddrItem;
@@ -20,7 +21,7 @@ import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import java.util.List;
 
 public class EditContactActivity extends AppCompatActivity {
-    private final static String TAG = AddContactActivity.class.getSimpleName();
+    private final static String TAG = EditContactActivity.class.getSimpleName();
     private final static int ZXING_CAMERA_PERMISSION = 1;
     private static final String BEGIN_BITCOIN_SIGNED_MESSAGE = "-----BEGIN BITCOIN SIGNED MESSAGE-----";
     private static final String AMOUNT_EQUAL_TO = "amount=";
@@ -45,7 +46,7 @@ public class EditContactActivity extends AppCompatActivity {
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                finishActivity();
             }
         });
 
@@ -80,14 +81,83 @@ public class EditContactActivity extends AppCompatActivity {
         mContactAddress = intent.getStringExtra("CONTACT_ADDRESS");
         mInputContactName.setText(mContactName);
         mInputContactAddress.setText(mContactAddress);
+    }
 
-        List<DBAddrItem> addrDataset = mOtkDB.getAllAddressbook();
-        for (int i = 0; i < addrDataset.size(); i++) {
-            DBAddrItem item = addrDataset.get(i);
-            Log.d(TAG, "name: " + item.getName() + ", address: " + item.getAddress());
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        Log.d(TAG, "onActivityResult:" + requestCode + " resultCode:" + resultCode);
+        if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
+            if (resultCode == RESULT_OK) {
+                // Handle successful scan
+                String contents = intent.getStringExtra(KEY_QR_CODE);
+                if (contents.contains(BEGIN_BITCOIN_SIGNED_MESSAGE)) {
+                    // TODO
+                    // updateFormattedSignedMessage(contents);
+                }
+                else {
+                    String addr = "";
+                    String amount = "0.0";
+                    boolean notBTC = false;
+
+                    if (contents.contains(":")) {
+                        // contents might be a uri
+                        String uriArray[] = contents.split(":");
+
+                        if (uriArray.length > 1) {
+                            if (uriArray[0].contentEquals("bitcoin")) {
+                                contents = uriArray[1];
+                                addr = contents;
+                            }
+                            else {
+                                notBTC = true;
+                                Toast.makeText(this, "Sorry! " + uriArray[0] +
+                                        " is not supported at this moment.",Toast.LENGTH_LONG).show();
+                                contents = "";
+                            }
+                        }
+                        else {
+                            // incorrect uri format
+                        }
+                    }
+
+                    if (!notBTC && contents.contains("?")) {
+                        // contents might contains query tag
+                        String queryArray[] = contents.split("\\?");
+
+                        if (queryArray.length > 1) {
+                            addr = queryArray[0];
+
+                            String queryTagArray[] = queryArray[1].split("&");
+
+                            for (String s : queryTagArray) {
+                                if (s.toLowerCase().contains(AMOUNT_EQUAL_TO)) {
+                                    String amountArray[] = s.split("=");
+                                    if (amountArray.length > 1) {
+                                        Toast.makeText(this, "Amount: " + amountArray[1],Toast.LENGTH_LONG).show();
+                                        amount = amountArray[1];
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            // incorrect uri
+                        }
+                    }
+                    else {
+                        addr = contents;
+                    }
+
+                    if (addr.length() > 0) {
+                        TextInputEditText inputAddress = findViewById(
+                                R.id.input_edit_contact_address);
+                        inputAddress.setText(addr);
+                    }
+                }
+            } else if (resultCode == RESULT_CANCELED) {
+                // Handle cancel
+                Toast.makeText(this, getString(R.string.qr_code_scan_cancelled),
+                        Toast.LENGTH_LONG).show();
+            }
         }
-
-
     }
 
     private void saveContact() {
@@ -106,15 +176,21 @@ public class EditContactActivity extends AppCompatActivity {
                 mOtkDB.updateAddressbook(newItem);
             }
         }
-        finish();
+        finishActivity();
     }
 
     private void deleteContact() {
         mOtkDB.deleteAddressbookByAddr(mContactAddress);
+        finishActivity();
+    }
+
+    private void finishActivity() {
+        Intent intent = new Intent();
+        setResult(RESULT_OK, intent);
         finish();
     }
 
-    public void launchQRcodeScanActivity(View v) {
+    private void launchQRcodeScanActivity(View v) {
         Log.d(TAG, "launchQRcodeScanActivity");
         if (ContextCompat.checkSelfPermission(EditContactActivity.this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {

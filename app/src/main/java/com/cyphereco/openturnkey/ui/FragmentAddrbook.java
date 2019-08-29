@@ -46,11 +46,11 @@ public class FragmentAddrbook extends Fragment {
                 Log.d(TAG, "onEditingContact the position is: " + position);
 
                 DBAddrItem item = mAdapter.getAddressItemByPosition(position);
-                Intent intent = new Intent(getActivity(), EditContactActivity.class);
+                Intent intent = new Intent(getContext(), EditContactActivity.class);
 
                 intent.putExtra("CONTACT_NAME", item.getName());
                 intent.putExtra("CONTACT_ADDRESS", item.getAddress());
-                startActivity(intent);
+                getActivity().startActivityForResult(intent, MainActivity.REQUEST_CODE_CONTACT_EDIT);
             }
         });
     }
@@ -109,6 +109,12 @@ public class FragmentAddrbook extends Fragment {
         super.onDetach();
         Log.d(TAG, "onDetach");
         mListener = null;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult");
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public interface FragmentAddrbookListener {

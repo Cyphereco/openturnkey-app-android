@@ -39,7 +39,7 @@ public class AddContactActivity extends AppCompatActivity {
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                finishActivity();
             }
         });
 
@@ -137,6 +137,7 @@ public class AddContactActivity extends AppCompatActivity {
             }
         }
     }
+
     private void saveContact() {
         TextInputEditText inputName = findViewById(R.id.input_contact_name);
         String name = Objects.requireNonNull(inputName.getText()).toString();
@@ -148,10 +149,16 @@ public class AddContactActivity extends AppCompatActivity {
             mOtkDB.addAddress(new DBAddrItem(address, name));
         }
 
+        finishActivity();
+    }
+
+    private void finishActivity() {
+        Intent intent = new Intent();
+        setResult(RESULT_OK, intent);
         finish();
     }
 
-    public void launchQRcodeScanActivity(View v) {
+    private void launchQRcodeScanActivity(View v) {
         Log.d(TAG, "launchQRcodeScanActivity");
         if (ContextCompat.checkSelfPermission(AddContactActivity.this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {

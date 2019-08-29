@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_CODE_PRE_AUTH = 1;
     public static final int REQUEST_CODE_SET_PIN = 2;
     public static final int REQUEST_CODE_SET_KEY = 3;
+    public static final int REQUEST_CODE_CONTACT_EDIT = 4;
+    public static final int REQUEST_CODE_CONTACT_ADD = 5;
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
     public static final String KEY_PRE_AUTH_PIN_CODE = "KEY_PRE_AUTH_PIN_CODE";
     public static final String KEY_SET_PIN_CODE = "KEY_SET_PIN_CODE";
@@ -156,6 +158,14 @@ public class MainActivity extends AppCompatActivity
             } else if (resultCode == RESULT_CANCELED) {
                 //Handle cancel
                 Toast.makeText(this, getString(R.string.qr_code_scan_cancelled), Toast.LENGTH_LONG).show();
+            }
+        }
+        else if ((requestCode == REQUEST_CODE_CONTACT_EDIT) ||
+                (requestCode == REQUEST_CODE_CONTACT_ADD)) {
+            if (resultCode == RESULT_OK) {
+                mSelectedFragment = new FragmentAddrbook();
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.frame_main, mSelectedFragment).commitAllowingStateLoss();
             }
         }
     }
@@ -437,7 +447,8 @@ public class MainActivity extends AppCompatActivity
                 dialogAbout();
                 return true;
             case R.id.menu_addresses_add:
-                startActivity(new Intent(this, AddContactActivity.class));
+                startActivityForResult(new Intent(this, AddContactActivity.class),
+                        MainActivity.REQUEST_CODE_CONTACT_ADD);
                 return true;
             case R.id.menu_openturnkey_read_openturnkey:
             case R.id.menu_openturnkey_authenticity_check:
