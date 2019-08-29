@@ -40,7 +40,7 @@
     <string name="write_memo">寫入備注</string>
     <string name="processing">處理中</string>
     <string name="operation_cancelled">操作取消</string>
-    <string name="qr_code_scan_cancelled">QR code scan cancelled</string>
+    <string name="qr_code_scan_cancelled">取消二維碼掃描</string>
     <string name="reason">原因:</string>
     <string name="transaction_sent">交易已發送</string>
     <string name="get_recipient_address">獲取收款地址</string>
@@ -50,7 +50,7 @@
     <string name="recipient_is_empty">收款地址為空</string>
     <string name="incorrect_amount">金額錯誤</string>
     <string name="incorrect_recipient_amount">金額或地址錯誤</string>
-    <string name="hash">Hash:</string>
+    <string name="hash">雜凑值:</string>
     <string name="from">From:</string>
     <string name="text_amount">金额:</string>
     <string name="text_fee">手續費:</string>
@@ -73,6 +73,7 @@
     <string name="account_balance">賬戶餘額</string>
     <string name="read_openturnkey">讀取OpenTurnKey</string>
     <string name="openturnkey_information">OpenTurnKey資訊</string>
-    <string name="fetching">Fetching...</string>
-    <string name="address_copied_to_clipboard">Address copied to clipboard</string>
+    <string name="fetching">資料更新中...</string>
+    <string name="address_copied">地址已複製</string>
+    <string name="please_wait">請稍候...</string>
 </resources>
