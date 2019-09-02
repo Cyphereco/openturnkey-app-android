@@ -90,7 +90,7 @@
         android:inputType="numberDecimal"
         android:textAlignment="viewEnd"
         app:layout_constraintEnd_toStartOf="@+id/input_local_currency"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" tools:targetApi="o" />
 
     <EditText
         android:id="@+id/input_local_currency"
@@ -103,7 +103,7 @@
         android:inputType="numberDecimal"
         android:textAlignment="viewEnd"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/input_crypto_currency" />
+        app:layout_constraintTop_toTopOf="@+id/input_crypto_currency" tools:targetApi="o" />
 
     <TextView
         android:id="@+id/text_cyrpto_currency"
@@ -148,6 +148,15 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintBottom_toTopOf="@+id/input_crypto_currency"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <CheckBox
+        android:id="@+id/checkBox_use_all_funds"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/use_all_funds"
+        app:layout_constraintEnd_toEndOf="@+id/text_local_currency"
+        app:layout_constraintTop_toBottomOf="@+id/text_local_currency" />
 
     <Button
         android:id="@+id/button_sign_payment"

@@ -585,13 +585,13 @@ public class MainActivity extends AppCompatActivity
     public String transactionFeeToString(int transactionFee) {
         switch (transactionFee) {
             case R.id.radio_custom:
-                return getString(R.string.custom);
+                return getString(R.string.customized_fees);
             case R.id.radio_high:
-                return getString(R.string.high);
+                return getString(R.string.high_fees);
             case R.id.radio_mid:
-                return getString(R.string.mid);
+                return getString(R.string.mid_fees);
             default:
-                return getString(R.string.low);
+                return getString(R.string.low_fees);
         }
     }
 

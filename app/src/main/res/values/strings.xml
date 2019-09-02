@@ -10,9 +10,9 @@
     <string name="read_nfc">Read NFC</string>
     <string name="select_from_address_book">Select From Address Book</string>
     <string name="paste_clipboard">Paste Clipboard</string>
-    <string name="low">Low</string>
-    <string name="mid">Mid</string>
-    <string name="high">High</string>
+    <string name="low_fees">Low (60+ minutes)</string>
+    <string name="mid_fees">Mid (30-60 minutes)</string>
+    <string name="high_fees">High (10-20 minutes)</string>
     <string name="_currency_cny" translatable="false">CNY</string>
     <string name="_currency_jpy" translatable="false">JPY</string>
     <string name="_currency_twd" translatable="false">TWD</string>
@@ -48,8 +48,7 @@
     <string name="_left_bracket" translatable="false">(</string>
     <string name="_right_bracket" translatable="false">)</string>
     <string name="read_general_information">Read General Information</string>
-    <string name="custom">Custom</string>
-    <string name="_btc_per_byte" translatable="false">BTC/Byte</string>
+    <string name="customized_fees">Customized Fees</string>
     <string name="_0_00001" translatable="false">0.00001</string>
     <string name="command_executed_successfuly">Command Executed Successfuly!</string>
     <string name="suggested">Suggested</string>
@@ -94,5 +93,6 @@
     <string name="fetching">Fetching...</string>
     <string name="address_copied">Address copied</string>
     <string name="please_wait">Please wait a moment...</string>
+    <string name="use_all_funds">Use All Funds</string>
 
 </resources>
