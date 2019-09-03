@@ -63,7 +63,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
                 TextView tv = findViewById(R.id.text_balance_btc);
                 OtkEvent event = (OtkEvent) msg.obj;
                 BigDecimal b = event.getBalance();
-                double btc = BtcUtils.SatoshiToBtc(b.longValue());
+                double btc = BtcUtils.satoshiToBtc(b.longValue());
                 if (b != null) {
                     tv.setText(String.format("%.8f", btc));
                     tv = findViewById(R.id.text_balance_fiat);
@@ -132,6 +132,10 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
             @Override
             public void onOtkEvent(OtkEvent event) {
                 if (event.getType() == OtkEvent.Type.BALANCE_UPDATE) {
+                    if (!event.getAddress().equals(address)) {
+                        Log.d(TAG, "Address doesn't match." + event.getAddress() + " " + address);
+                        return;
+                    }
                     Message msg = new Message();
                     msg.obj = event;
                     handler.sendMessage(msg);

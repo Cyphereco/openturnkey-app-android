@@ -7,7 +7,6 @@ import android.nfc.Tag;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.util.Log;
 
 import com.blockcypher.exception.BlockCypherException;
@@ -89,6 +88,7 @@ public class Otk {
     static boolean mFeeIncluded;
     static long mTxFees;
     static List<String> mArgs = new ArrayList<String>();
+    static List<String> mSignatures = new ArrayList<String>();
     static CurrencyExchangeRate mCurrencyExRate;
     static Tag mTag;
     static boolean mIsAuthorized;
@@ -121,6 +121,8 @@ public class Otk {
                             // Cache to sign list
                             List<String> toSignList = (List<String>) msg.obj;
                             mArgs.clear();
+                            // Also clear cached signature
+                            mSignatures.clear();
                             mArgs.addAll(toSignList);
                             // Check if it's authorized
                             if (mIsAuthorized == false) {
@@ -131,8 +133,10 @@ public class Otk {
                                 mCommandToWrite = Command.SIGN;
                             }
                             else {
+                                // Clear cached pin
+                                mPin = "";
                                 // Authorized. Write command
-                                writeSignCommand("");
+                                writeSignCommand(mPin);
                             }
                             break;
                         case OTK_MSG_SEND_BITCOIN_FAILED:
@@ -148,7 +152,8 @@ public class Otk {
                         case OTK_MSG_BITCOIN_SENT:
                             Transaction trans = (Transaction)msg.obj;
                             // TODO get raw hex of transaction
-                            Tx tx = new Tx(trans.getHash(), mFrom, mTo, mAmount, BtcUtils.SatoshiToBtc(trans.getFees().longValue()), trans.getReceived(), "");
+                            long amount = trans.getTotal().longValue();
+                            Tx tx = new Tx(trans.getHash(), mFrom, mTo, BtcUtils.satoshiToBtc(amount), BtcUtils.satoshiToBtc(trans.getFees().longValue()), trans.getReceived(), "");
                             event = new OtkEvent(tx);
                             sendEvent(event);
                             clearOp();
@@ -182,9 +187,16 @@ public class Otk {
     static void writeSignCommand(String pin) {
         Log.d(TAG, "writeSignCommand:" + pin);
         OtkEvent event;
-        if (OTK_RETURN_OK == Nfc.writeCommand(mTag, Command.SIGN, mSessionId, pin, mArgs)) {
+        // Try to wirte maximum size we can
+        List<String> args = new ArrayList<String>();
+        int hashSize = Math.min(mArgs.size(), Configurations.maxSignaturesPerCommand);
+        boolean isMore = false;
+        if (hashSize < mArgs.size()) {
+            isMore = true;
+        }
+        args = mArgs.subList(0, hashSize);
+        if (OTK_RETURN_OK == Nfc.writeCommand(mTag, Command.SIGN, mSessionId, pin, args, isMore)) {
             // Command written, read signature(s).
-            //SystemClock.sleep(1000);
             OtkData otkData = Nfc.read(mTag);
             if (otkData == null) {
                 // OTK is not connected
@@ -198,8 +210,7 @@ public class Otk {
                     event = new OtkEvent(OtkEvent.Type.SIGN_FAILED);
                     sendEvent(event);
                 }
-                // Got signature(s), complete tx
-                completePayment(otkData.mPublicKey, otkData.getSessionData().getRequestSigList());
+                processSignature(otkData);
             }
         }
         else {
@@ -265,6 +276,35 @@ public class Otk {
         return OTK_RETURN_OK;
     }
 
+    static private void processSignature(OtkData otkData) {
+        String pubKey = otkData.getPublicKey();
+        List<String> sigs = otkData.getSessionData().getRequestSigList();
+        if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
+            mIsAuthorized = false;
+        }
+        else {
+            // OTK is authorized. Get address, session id and generate transaction
+            mIsAuthorized = true;
+            mPin = "";
+        }
+        // Check if there are more hash to sign
+        int sigSize = sigs.size();
+        // Add signatures to cache.
+        for (int i = 0; i < sigSize; i++) {
+            mArgs.remove(0);
+            mSignatures.add(sigs.get(i));
+        }
+        if (mArgs.size() > 0) {
+            Log.d(TAG, "We have more hash to sign. " + mArgs.size());
+            // write remain hashs
+            writeSignCommand(mPin);
+        }
+        else {
+            // Got all signature(s), complete tx
+            completePayment(pubKey, mSignatures);
+        }
+    }
+
     /**
      * Method to process read Otk data base on current state.
      */
@@ -298,10 +338,10 @@ public class Otk {
 
             }
             else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_SIGNATURE) {
-                // Got signature(s), complete tx
+                // Got signature(s), process them
                 OtkEvent event = new OtkEvent(OtkEvent.Type.OPERATION_IN_PROCESSING);
                 sendEvent(event);
-                completePayment(otkData.mPublicKey, otkData.getSessionData().getRequestSigList());
+                processSignature(otkData);
             }
             else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
                 OtkEvent event = new OtkEvent(OtkEvent.Type.COMMAND_EXECUTION_FAILED, otkData.getOtkState().getFailureReason().name());
@@ -440,7 +480,7 @@ public class Otk {
             public void run() {
                 synchronized (this) {
                     try {
-                        long amountInSatoshi = BtcUtils.BtcToSatoshi(mAmount);
+                        long amountInSatoshi = BtcUtils.btcToSatoshi(mAmount);
                         List<String> toSignList = BlockCypher.getInstance().sendBitcoin(from, to, amountInSatoshi, false, txFees);
                         Message msg = new Message();
                         msg.what = OTK_MSG_GOT_UNSIGNED_TX;
@@ -470,6 +510,7 @@ public class Otk {
     }
 
     static private int completePayment(final String publicKey, final List<String> sigResult) {
+        Log.d(TAG, "completePayment");
         Thread t = new Thread() {
             @Override
             public void run() {
@@ -499,7 +540,7 @@ public class Otk {
             public void run() {
                 synchronized (this) {
                     BigDecimal b = BlockCypher.getInstance().getBalance(address);
-                    OtkEvent event = new OtkEvent(OtkEvent.Type.BALANCE_UPDATE, b, mCurrencyExRate);
+                    OtkEvent event = new OtkEvent(OtkEvent.Type.BALANCE_UPDATE, address, b, mCurrencyExRate);
                     sendEvent(event);
                 }
             }

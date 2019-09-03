@@ -244,11 +244,15 @@ public class BtcUtils {
         return ret;
     }
 
-    static public long BtcToSatoshi(double btc) {
+    static public long btcToSatoshi(double btc) {
+        if (btc == -1) {
+            // For use all funds
+            return -1;
+        }
         return (long) (btc * 100000000);
     }
 
-    static public double SatoshiToBtc(long satoshi) {
+    static public double satoshiToBtc(long satoshi) {
 
         return ((double)satoshi / 100000000.0);
     }

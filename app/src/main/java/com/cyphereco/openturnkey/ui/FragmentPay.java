@@ -13,10 +13,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -41,14 +44,17 @@ public class FragmentPay extends Fragment {
     private static final String ARG_TO = "TO";
     private static final String ARG_BTC = "BTC";
     private static final String ARG_LC = "LC";
+    private static final String ARG_USE_ALL_FUNDS = "USE_ALL_FUNDS";
 
 
-    public static FragmentPay newInstance(String to, String btcAmount, String lcAmount) {
+    public static FragmentPay newInstance(String to, String btcAmount, String lcAmount, boolean isUseAllFundsChecked) {
         FragmentPay fragment = new FragmentPay();
         Bundle args = new Bundle();
         args.putString(ARG_TO, to);
         args.putString(ARG_BTC, btcAmount);
         args.putString(ARG_LC, lcAmount);
+        args.putBoolean(ARG_USE_ALL_FUNDS, isUseAllFundsChecked);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -107,13 +113,18 @@ public class FragmentPay extends Fragment {
             if (to != null && to.length() > 0) {
                 updateRecipientAddress(view, to);
             }
+            CheckBox cb = view.findViewById(R.id.checkBox_use_all_funds);
+            boolean b = getArguments().getBoolean(ARG_USE_ALL_FUNDS);
+            Log.d(TAG, "Checked:" + b);
+            cb.setChecked(b);
         }
 
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mListener != null) {
-                    mListener.onGetRecipientAddressByReadNfcButtonClick(mRecipientAddress, etCc.getText().toString(), etLc.getText().toString());
+                    CheckBox cb = getView().findViewById(R.id.checkBox_use_all_funds);
+                    mListener.onGetRecipientAddressByReadNfcButtonClick(mRecipientAddress, etCc.getText().toString(), etLc.getText().toString(), cb.isChecked());
                 }
             }
         });
@@ -175,14 +186,22 @@ public class FragmentPay extends Fragment {
                         Snackbar.make(view, getString(R.string.recipient_is_empty), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                         return;
                     }
-                    // Check amount
-                    if (mBtc <= 0) {
-                        Snackbar.make(view, getString(R.string.incorrect_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                        return;
+                    CheckBox cb = v.findViewById(R.id.checkBox_use_all_funds);
+                    if (cb.isChecked()) {
+                        if (mListener != null) {
+                            mListener.onSignPaymentButtonClick(mRecipientAddress, -1, etCc.getText().toString(), etLc.getText().toString(), cb.isChecked());
+                        }
                     }
+                    else {
+                        // Check amount
+                        if (mBtc <= 0) {
+                            Snackbar.make(view, getString(R.string.incorrect_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                            return;
+                        }
 
-                    if (mListener != null) {
-                        mListener.onSignPaymentButtonClick(mRecipientAddress, mBtc, etCc.getText().toString(), etLc.getText().toString());
+                        if (mListener != null) {
+                            mListener.onSignPaymentButtonClick(mRecipientAddress, mBtc, etCc.getText().toString(), etLc.getText().toString(), cb.isChecked());
+                        }
                     }
                 }
                 catch (NullPointerException | NumberFormatException e) {
@@ -191,6 +210,21 @@ public class FragmentPay extends Fragment {
                     return;
                 }
 
+            }
+        });
+
+        CheckBox cb = view.findViewById(R.id.checkBox_use_all_funds);
+        cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
+                if (isChecked) {
+                    etCc.setEnabled(false);
+                    etLc.setEnabled(false);
+                }
+                else {
+                    etCc.setEnabled(true);
+                    etLc.setEnabled(true);
+                }
             }
         });
 
@@ -332,7 +366,7 @@ public class FragmentPay extends Fragment {
     }
 
     public interface FragmentPayListener {
-        void onGetRecipientAddressByReadNfcButtonClick(String to, String  btc, String lc);
-        void onSignPaymentButtonClick(String to, double amount, String  btc, String lc);
+        void onGetRecipientAddressByReadNfcButtonClick(String to, String  btc, String lc, boolean isAllFundChecked);
+        void onSignPaymentButtonClick(String to, double amount, String  btc, String lc, boolean isAllFundChecked);
     }
 }

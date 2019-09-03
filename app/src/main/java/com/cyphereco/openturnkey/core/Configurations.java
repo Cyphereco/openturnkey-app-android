@@ -20,6 +20,9 @@ public class Configurations {
     static public long txFeesMid = 250;
     static public long txFeesHigh = 500;
 
+    // This value should be define according to OTK's definition
+    static public int maxSignaturesPerCommand = 10;
+
     static public boolean isTestnet() {
         return (mNetwork == Network.TESTNET);
     }

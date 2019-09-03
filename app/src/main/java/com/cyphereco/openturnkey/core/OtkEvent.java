@@ -45,9 +45,10 @@ public class OtkEvent {
         mDesc = desc;
     }
 
-    public OtkEvent(Type eventType, BigDecimal b, CurrencyExchangeRate rate) {
+    public OtkEvent(Type eventType, String address, BigDecimal b, CurrencyExchangeRate rate) {
         mType = eventType;
         mBalance = b;
+        mDesc = address;
         mCurrencyExRate = rate;
     }
 
@@ -68,6 +69,7 @@ public class OtkEvent {
         return mType;
     }
     public String getRecipientAddress() { return mDesc;}
+    public String getAddress() { return mDesc;}
     public String getFailureReason() { return mDesc;}
     public Tx getTx() { return mTx;}
     public OtkData getData() {return mData;}

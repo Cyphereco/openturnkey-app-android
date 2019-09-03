@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity
     private String mRecipientAddress = "";
     private String mBtcAmount = "";
     private String mLcAmount = "";
+    private boolean mIsUseAllFundsChecked = false;
 
     /**
      * Process activity result
@@ -223,7 +224,7 @@ public class MainActivity extends AppCompatActivity
                             getMenuInflater().inflate(R.menu.menu_pay, menu);
                             updatePayConfig(menu);
                             // Restore cached data
-                            mSelectedFragment = FragmentPay.newInstance(mRecipientAddress, mBtcAmount, mLcAmount);
+                            mSelectedFragment = FragmentPay.newInstance(mRecipientAddress, mBtcAmount, mLcAmount, mIsUseAllFundsChecked);
                             ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
                             break;
                     }
@@ -629,7 +630,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void onSignPaymentButtonClick(String to, double amount, String btcAmount, String lcAmount) {
+    public void onSignPaymentButtonClick(String to, double amount, String btcAmount, String lcAmount, boolean isAllFundsChecked) {
         mOp = Otk.Operation.OTK_OP_SIGN_PAYMENT;
         // TODO convert txFee log, mid high
         mOtk.setOperation(Otk.Operation.OTK_OP_SIGN_PAYMENT, to, amount, includeFee, 0);
@@ -643,9 +644,10 @@ public class MainActivity extends AppCompatActivity
         mRecipientAddress = to;
         mBtcAmount = btcAmount;
         mLcAmount = lcAmount;
+        mIsUseAllFundsChecked = isAllFundsChecked;
     }
 
-    public void onGetRecipientAddressByReadNfcButtonClick(String address, String btcAmount, String lcAmount) {
+    public void onGetRecipientAddressByReadNfcButtonClick(String address, String btcAmount, String lcAmount, boolean isAllFundsChecked) {
         // Cache op
         mOp = Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS;
         mOtk.setOperation(Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS);
@@ -659,6 +661,7 @@ public class MainActivity extends AppCompatActivity
         mRecipientAddress = address;
         mBtcAmount = btcAmount;
         mLcAmount = lcAmount;
+        mIsUseAllFundsChecked = isAllFundsChecked;
     }
 
     public void backToPayFragment() {

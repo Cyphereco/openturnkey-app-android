@@ -160,7 +160,7 @@ public class Nfc {
         return Otk.OTK_RETURN_OK;
     }
 
-    static int writeCommand(Tag tag, Command cmd, String sessId, String pin, List<String> args) {
+    static int writeCommand(Tag tag, Command cmd, String sessId, String pin, List<String> args, boolean isMore) {
         Log.d(TAG, "write Command:" + cmd.toString());
         mIssuedCommand = Command.INVALID;
         if (tag == null) {
@@ -222,10 +222,24 @@ public class Nfc {
             }
 
             // 5 Options
+            String options = "";
+            // more
+            if (isMore) {
+                Log.d(TAG, "more data to write");
+                options += "more=1" + OTK_REQUEST_DATA_DELIM;
+
+            }
+            // pin
             if (pin != null && pin.length() > 0) {
                 Log.d(TAG, "pin=" + pin);
-                record[4] = NdefRecord.createTextRecord("en", "pin=" + pin);
+                options += "pin=" + pin + OTK_REQUEST_DATA_DELIM;
             }
+            if (options.length() > 0) {
+                // remove last delimiter
+                options.substring(0, options.length() - 1);
+                record[4] = NdefRecord.createTextRecord("en", options);
+            }
+
             ndef.writeNdefMessage(new NdefMessage(record));
             mIssuedCommand = cmd;
             ndef.close();
