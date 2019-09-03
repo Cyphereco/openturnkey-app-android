@@ -6,15 +6,21 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.RadioGroup;
 
 import com.cyphereco.openturnkey.R;
+import com.cyphereco.openturnkey.utils.BtcUtils;
+
+import java.text.DecimalFormat;
 
 public class DialogTransactionFee extends AppCompatDialogFragment {
     private int selectedFee;
     RadioGroup rgTransactionFee = null;
+    EditText et = null;
     public DialogTransactionFeeListener listener;
 
     @Override
@@ -29,16 +35,35 @@ public class DialogTransactionFee extends AppCompatDialogFragment {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        View v = getView();
+                        int selected = rgTransactionFee.getCheckedRadioButtonId();
+                        try {
+                            double txFee = Double.valueOf(et.getText().toString());
+                            listener.setCustomizedTxFee(txFee);
+                        }
+                        catch (Exception e) {
+                            // Should not be here
+                            e.printStackTrace();
+                        }
                         listener.setTransactionFee(rgTransactionFee.getCheckedRadioButtonId());
+
                     }
                 });
 
         rgTransactionFee = view.findViewById(R.id.rg_transaction_fee);
+        et = view.findViewById(R.id.transaction_fee);
 
         if (getArguments() != null) {
             selectedFee = getArguments().getInt("transactionFee");
             rgTransactionFee.check(selectedFee);
+            double fee = BtcUtils.satoshiToBtc(getArguments().getLong("customizedFee"));
+            if (fee > 0) {
+                EditText et = view.findViewById(R.id.transaction_fee);
+                DecimalFormat format = new DecimalFormat("0.########");
+                et.setText(format.format(fee));
+            }
         }
+
 
         return builder.create();
     }
@@ -57,5 +82,6 @@ public class DialogTransactionFee extends AppCompatDialogFragment {
 
     public interface DialogTransactionFeeListener {
         void setTransactionFee(int transactionFee);
+        void setCustomizedTxFee(double txFee);
     }
 }

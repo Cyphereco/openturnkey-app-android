@@ -1,5 +1,6 @@
 package com.cyphereco.openturnkey.utils;
 
+import android.content.Context;
 import android.util.Log;
 
 //import com.google.bitcoin.core.utils.Utils;
@@ -8,6 +9,8 @@ import com.cyphereco.openturnkey.bitcoin.ECException;
 import com.cyphereco.openturnkey.bitcoin.ECKey;
 import com.cyphereco.openturnkey.bitcoin.Utils;
 import com.cyphereco.openturnkey.bitcoin.VarInt;
+import com.cyphereco.openturnkey.core.Configurations;
+import com.cyphereco.openturnkey.ui.Preferences;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -153,6 +156,93 @@ public class BtcUtils {
         }
     }
 
+    static public TxFee getTxFee() {
+        TxFee txFee = null;
+        HttpURLConnection httpConn = null;
+
+        // Read text input stream.
+        InputStreamReader isReader = null;
+
+        // Read text into buffer.
+        BufferedReader bufReader = null;
+
+        // Save server response text.
+        StringBuffer readTextBuf = new StringBuffer();
+
+        try {
+            // Create a URL object use page url.
+            URL url = new URL("https://bitcoinfees.earn.com/api/v1/fees/recommended");
+
+            // Open http connection to web server.
+            httpConn = (HttpURLConnection) url.openConnection();
+
+            // Set http request method to get.
+            httpConn.setRequestMethod("GET");
+
+            // Set connection timeout and read timeout value.
+            httpConn.setConnectTimeout(5000);
+            httpConn.setReadTimeout(5000);
+
+            // Get input stream from web url connection.
+            InputStream inputStream = httpConn.getInputStream();
+
+            // Create input stream reader based on url connection input stream.
+            isReader = new InputStreamReader(inputStream);
+
+            // Create buffered reader.
+            bufReader = new BufferedReader(isReader);
+
+            // Read line of text from server response.
+            String line = bufReader.readLine();
+
+            // Loop while return line is not null.
+            while (line != null) {
+                // Append the text to string buffer.
+                readTextBuf.append(line);
+
+                // Continue to read text line.
+                line = bufReader.readLine();
+            }
+
+            String in = readTextBuf.toString();
+            JSONObject reader = new JSONObject(in);
+            String low = reader.getString("hourFee");
+            String mid = reader.getString("halfHourFee");
+            String high = reader.getString("fastestFee");
+
+            txFee = new TxFee(Integer.parseInt(low), Integer.parseInt(mid), Integer.parseInt(high));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (bufReader != null) {
+                    bufReader.close();
+                    bufReader = null;
+                }
+
+                if (isReader != null) {
+                    isReader.close();
+                    isReader = null;
+                }
+
+                if (httpConn != null) {
+                    httpConn.disconnect();
+                    httpConn = null;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return txFee;
+
+    }
+
     static public CurrencyExchangeRate getCurrencyExchangeRate() {
         CurrencyExchangeRate ret = null;
         HttpURLConnection httpConn = null;
@@ -293,5 +383,27 @@ public class BtcUtils {
                 return Double.valueOf(rate.getJPY() * amount);
         }
         return 0;
+    }
+
+    static public long getTxFeeInSatoshi(Context ctx) {
+        Configurations.TxFeeType type = Preferences.getTxFeeType(ctx);
+        TxFee txFee = Preferences.getTxFee(ctx);
+        long txFees = 0;
+        if (type == Configurations.TxFeeType.HIGH) {
+            // Now we estimate tx size is about 200 bytes
+            txFees = txFee.getHigh() * 200;
+        }
+        else if (type == Configurations.TxFeeType.MID) {
+            // Now we estimate tx size is about 200 bytes
+            txFees = txFee.getMid() * 200;
+        }
+        else if (type == Configurations.TxFeeType.LOW) {
+            // Now we estimate tx size is about 200 bytes
+            txFees = txFee.getLow() * 200;
+        }
+        else {
+            txFees = Preferences.getCustomizedTxFee(ctx);
+        }
+        return txFees;
     }
 }

@@ -15,6 +15,7 @@ import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
+import com.cyphereco.openturnkey.utils.TxFee;
 import com.cyphereco.openturnkey.webservices.BlockCypher;
 
 import java.math.BigDecimal;
@@ -41,6 +42,7 @@ public class Otk {
     private static final int OTK_MSG_BITCOIN_SENT = 1;
     private static final int OTK_MSG_SEND_BITCOIN_FAILED = 2;
     private static final int OTK_MSG_CURRENCY_EX_RATE_UPDATE = 3;
+    private static final int OTK_MSG_TX_FEE_UPDATE = 4;
 
     public enum Operation {
         OTK_OP_NONE("None"),
@@ -94,7 +96,8 @@ public class Otk {
     static boolean mIsAuthorized;
     static String mPin;
     // Periodic Timer
-    static Timer mTimer = new Timer();
+    static Timer mTimerRate = new Timer();
+    static Timer mTimerTxFee = new Timer();
 
     /**
      * Singleton retrieval of the OtkCoin.
@@ -149,6 +152,10 @@ public class Otk {
                             event = new OtkEvent(OtkEvent.Type.CURRENCY_EXCHANGE_RATE_UPDATE, mCurrencyExRate);
                             sendEvent(event);
                             break;
+                        case OTK_MSG_TX_FEE_UPDATE:
+                            event = new OtkEvent(OtkEvent.Type.TX_FEE_UPDATE, (TxFee) msg.obj);
+                            sendEvent(event);
+                            break;
                         case OTK_MSG_BITCOIN_SENT:
                             Transaction trans = (Transaction)msg.obj;
                             // TODO get raw hex of transaction
@@ -179,7 +186,21 @@ public class Otk {
                     }
                 }
             };
-            mTimer.schedule(task,100,1000 * 60);
+            mTimerRate.schedule(task,100,1000 * 60);
+            // Timer task which calling get current exchange api.
+            TimerTask updateTxFeeTask = new TimerTask() {
+                public void run () {
+                    TxFee txFee = BtcUtils.getTxFee();
+                    if (txFee != null) {
+                        // Send message
+                        Message msg = new Message();
+                        msg.what = OTK_MSG_TX_FEE_UPDATE;
+                        msg.obj = txFee;
+                        mHandler.sendMessage(msg);
+                    }
+                }
+            };
+            mTimerTxFee.schedule(updateTxFeeTask,100,1000 * 60 * 60);
         }
         return mOtk;
     }

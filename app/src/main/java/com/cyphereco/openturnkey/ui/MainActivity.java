@@ -22,9 +22,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
+import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.Tx;
+import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 
@@ -55,7 +57,6 @@ public class MainActivity extends AppCompatActivity
 
     private Menu toolbarMenu = null;
 
-    private int transactionFee = R.id.radio_low;
     private double customTransactionFee = 0.00001;
     private boolean includeFee = false;
     private boolean useFixAddr = false;
@@ -269,6 +270,9 @@ public class MainActivity extends AppCompatActivity
                         // Update rate
                         ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
                     }
+                } else if (type == OtkEvent.Type.TX_FEE_UPDATE) {
+                    // Store to preference
+                    Preferences.setTxFee(getApplicationContext(), event.getTxFee());
                 } else if (type == OtkEvent.Type.APPROACH_OTK) {
                     // TODO
                 } else if (type == OtkEvent.Type.OPERATION_IN_PROCESSING) {
@@ -488,8 +492,29 @@ public class MainActivity extends AppCompatActivity
         backToPayFragment();
     }
 
+    Configurations.TxFeeType toTxFee(int transactionFee) {
+        switch (transactionFee) {
+            case R.id.radio_custom:
+                return Configurations.TxFeeType.CUSTOMIZED;
+            case R.id.radio_high:
+                return Configurations.TxFeeType.HIGH;
+            case R.id.radio_mid:
+                return Configurations.TxFeeType.MID;
+            default:
+                return Configurations.TxFeeType.LOW;
+        }
+    }
+
     public void setTransactionFee(int transactionFee) {
-        this.transactionFee = transactionFee;
+        // Store to preference
+        Preferences.setTxFeeType(getApplicationContext(), toTxFee(transactionFee));
+        updatePayConfig(toolbarMenu);
+    }
+
+    public void setCustomizedTxFee(double txFee) {
+        // Store to preference
+        Log.d(TAG, "Customized fee:" + txFee);
+        Preferences.setCustomizedTxFee(getApplicationContext(), BtcUtils.btcToSatoshi(txFee));
         updatePayConfig(toolbarMenu);
     }
 
@@ -518,8 +543,25 @@ public class MainActivity extends AppCompatActivity
 
     public void dialogTransactionFee() {
         DialogTransactionFee dialog = new DialogTransactionFee();
+
+        Configurations.TxFeeType txFeeType = Preferences.getTxFeeType(getApplicationContext());
+        int transactionFeeId;
+        if (txFeeType == Configurations.TxFeeType.CUSTOMIZED) {
+            transactionFeeId = R.id.radio_custom;
+        }
+        else if (txFeeType == Configurations.TxFeeType.HIGH) {
+            transactionFeeId = R.id.radio_high;
+        }
+        else if (txFeeType == Configurations.TxFeeType.MID) {
+            transactionFeeId = R.id.radio_mid;
+        }
+        else {
+            transactionFeeId = R.id.radio_low;
+        }
+
         Bundle bundle = new Bundle();
-        bundle.putInt("transactionFee", transactionFee);
+        bundle.putInt("transactionFee", transactionFeeId);
+        bundle.putLong("customizedFee", Preferences.getCustomizedTxFee(getApplicationContext()));
         dialog.setArguments(bundle);
         dialog.show(getSupportFragmentManager(), "dialog");
     }
@@ -583,17 +625,17 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public String transactionFeeToString(int transactionFee) {
-        switch (transactionFee) {
-            case R.id.radio_custom:
-                return getString(R.string.customized_fees);
-            case R.id.radio_high:
-                return getString(R.string.high_fees);
-            case R.id.radio_mid:
-                return getString(R.string.mid_fees);
-            default:
-                return getString(R.string.low_fees);
+    public String transactionFeeToString(Configurations.TxFeeType txFeeType) {
+        if (txFeeType == Configurations.TxFeeType.CUSTOMIZED) {
+            return getString(R.string.customized_fees);
         }
+        if (txFeeType == Configurations.TxFeeType.HIGH) {
+            return getString(R.string.high_fees);
+        }
+        if (txFeeType == Configurations.TxFeeType.MID) {
+            return getString(R.string.mid_fees);
+        }
+        return getString(R.string.low_fees);
     }
 
     public void updatePayConfig(Menu menu) {
@@ -609,9 +651,10 @@ public class MainActivity extends AppCompatActivity
         }
 
         menuItem = menu.findItem(R.id.menu_pay_transaction_fee);
+        Configurations.TxFeeType txFeeType = Preferences.getTxFeeType(getApplicationContext());
         if (menuItem != null) {
             str = getString(R.string.transaction_fee) +
-                    " (" + transactionFeeToString(transactionFee) + ")";
+                    " (" + transactionFeeToString(txFeeType) + ")";
             menuItem.setTitle(str);
         }
 
@@ -632,8 +675,9 @@ public class MainActivity extends AppCompatActivity
 
     public void onSignPaymentButtonClick(String to, double amount, String btcAmount, String lcAmount, boolean isAllFundsChecked) {
         mOp = Otk.Operation.OTK_OP_SIGN_PAYMENT;
-        // TODO convert txFee log, mid high
-        mOtk.setOperation(Otk.Operation.OTK_OP_SIGN_PAYMENT, to, amount, includeFee, 0);
+        long txFees = BtcUtils.getTxFeeInSatoshi(getApplicationContext());
+
+        mOtk.setOperation(Otk.Operation.OTK_OP_SIGN_PAYMENT, to, amount, includeFee, txFees);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setSelectedItemId(R.id.nav_menu_openturnkey);
@@ -680,19 +724,6 @@ public class MainActivity extends AppCompatActivity
         mOp = Otk.Operation.OTK_OP_NONE;
         mIsOpInProcessing = false;
         backToPayFragment();
-    }
-
-    private void getActiveFragment() {
-        // Get active fragment
-        try {
-            for (Fragment fragment : getSupportFragmentManager().getFragments()) {
-                if (fragment != null && fragment.isVisible()) {
-                    mSelectedFragment = fragment;
-                }
-            }
-        } catch (Exception e) {
-            // Do nothing
-        }
     }
 
     @Override

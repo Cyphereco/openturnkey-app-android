@@ -3,6 +3,7 @@ package com.cyphereco.openturnkey.core;
 import com.blockcypher.model.transaction.Transaction;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
+import com.cyphereco.openturnkey.utils.TxFee;
 
 import java.math.BigDecimal;
 import java.util.concurrent.TransferQueue;
@@ -18,6 +19,7 @@ public class OtkEvent {
         SEND_BITCOIN_FAIL,
         APPROACH_OTK,
         CURRENCY_EXCHANGE_RATE_UPDATE,
+        TX_FEE_UPDATE,
         OPERATION_IN_PROCESSING,
         SIGN_FAILED,
         OTK_UNAUTHORIZED,
@@ -31,6 +33,7 @@ public class OtkEvent {
     private CurrencyExchangeRate mCurrencyExRate = null;
     private Tx mTx;
     private BigDecimal mBalance;
+    private TxFee mTxFee;
 
     /**
      * Constructor for general info event
@@ -65,6 +68,11 @@ public class OtkEvent {
         mCurrencyExRate = currencyExRate;
     }
 
+    public OtkEvent(Type eventType, TxFee txFee) {
+        mType = eventType;
+        mTxFee = txFee;
+    }
+
     public Type getType() {
         return mType;
     }
@@ -75,5 +83,6 @@ public class OtkEvent {
     public OtkData getData() {return mData;}
     public CurrencyExchangeRate getCurrencyExRate() {return mCurrencyExRate;}
     public BigDecimal getBalance() {return mBalance;}
+    public TxFee getTxFee() { return mTxFee;}
 
 }

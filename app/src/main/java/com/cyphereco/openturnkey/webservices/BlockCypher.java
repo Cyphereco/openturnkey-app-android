@@ -9,6 +9,7 @@ import com.blockcypher.model.address.Address;
 import com.blockcypher.model.transaction.Transaction;
 import com.blockcypher.model.transaction.intermediary.IntermediaryTransaction;
 import com.cyphereco.openturnkey.core.Configurations;
+import com.cyphereco.openturnkey.core.Otk;
 
 import org.spongycastle.asn1.DERInteger;
 import org.spongycastle.asn1.DERSequenceGenerator;
@@ -77,15 +78,13 @@ public class BlockCypher extends BtcBase {
     public List<String> sendBitcoin(String from, String to, long amount, boolean feeIncluded, long txFees) throws BlockCypherException {
         try {
             IntermediaryTransaction unsignedTx = mBcCtx.getTransactionService().newTransaction(
-                    new ArrayList<String>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount);
+                    new ArrayList<String>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, txFees);
             if ((unsignedTx == null) || unsignedTx.getTosign().size() == 0) {
                 Log.d(TAG, "unsignedTx is null or toSign is empty");
                 return null;
             }
             // Cache unsignedTx
             Log.d(TAG, "unsignedTx:" + unsignedTx.toString());
-            // XXX Set tx fee doesn't work over Blockcypher. To support it, need to construct tx by ourselves.
-            Transaction tx = unsignedTx.getTx();
             mCachedUnsignedTx = unsignedTx;
             ArrayList al = new ArrayList<String>();
             return unsignedTx.getTosign();
