@@ -77,6 +77,7 @@ public class BlockCypher extends BtcBase {
      */
     public List<String> sendBitcoin(String from, String to, long amount, boolean feeIncluded, long txFees) throws BlockCypherException {
         try {
+            Log.d(TAG, "Fee:" + txFees);
             IntermediaryTransaction unsignedTx = mBcCtx.getTransactionService().newTransaction(
                     new ArrayList<String>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, txFees);
             if ((unsignedTx == null) || unsignedTx.getTosign().size() == 0) {

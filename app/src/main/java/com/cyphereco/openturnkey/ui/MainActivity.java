@@ -275,6 +275,7 @@ public class MainActivity extends AppCompatActivity
                     Preferences.setTxFee(getApplicationContext(), event.getTxFee());
                 } else if (type == OtkEvent.Type.APPROACH_OTK) {
                     // TODO
+                    hideProgressDialog();
                 } else if (type == OtkEvent.Type.OPERATION_IN_PROCESSING) {
                     // Show progress spin circle
                     showProgressDialog(getString(R.string.processing));
@@ -669,10 +670,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void cacheAddressAndAmount() {
-
-    }
-
     public void onSignPaymentButtonClick(String to, double amount, String btcAmount, String lcAmount, boolean isAllFundsChecked) {
         mOp = Otk.Operation.OTK_OP_SIGN_PAYMENT;
         long txFees = BtcUtils.getTxFeeInSatoshi(getApplicationContext());
@@ -818,6 +815,7 @@ public class MainActivity extends AppCompatActivity
         mRecipientAddress = "";
         mBtcAmount = "";
         mLcAmount = "";
+        mIsUseAllFundsChecked = false;
     }
 
     @Override

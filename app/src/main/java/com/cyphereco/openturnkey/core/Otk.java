@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.blockcypher.exception.BlockCypherException;
 import com.blockcypher.model.transaction.Transaction;
+import com.blockcypher.model.transaction.output.Output;
 import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.BtcUtils;
@@ -132,8 +133,8 @@ public class Otk {
                                 // Send unauthorized event.
                                 event = new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED);
                                 sendEvent(event);
-                                // Cache command
-                                mCommandToWrite = Command.SIGN;
+                                // clear cached command so that it won't write command without pin
+                                mCommandToWrite = Command.INVALID;
                             }
                             else {
                                 // Clear cached pin
@@ -159,8 +160,20 @@ public class Otk {
                         case OTK_MSG_BITCOIN_SENT:
                             Transaction trans = (Transaction)msg.obj;
                             // TODO get raw hex of transaction
-                            long amount = trans.getTotal().longValue();
-                            Tx tx = new Tx(trans.getHash(), mFrom, mTo, BtcUtils.satoshiToBtc(amount), BtcUtils.satoshiToBtc(trans.getFees().longValue()), trans.getReceived(), "");
+                            double amount = 0.0;
+                            // Find amount from outputs
+                            for (int i = 0; i < trans.getOutputs().size(); i++) {
+                                Output o = trans.getOutputs().get(i);
+                                if (o.getAddresses().get(0).equals(mTo)) {
+                                    amount = BtcUtils.satoshiToBtc(o.getValue().longValue());
+                                    break;
+                                }
+                            }
+                            // In case not found.
+                            if (amount == 0.0) {
+                                amount = mAmount;
+                            }
+                            Tx tx = new Tx(trans.getHash(), mFrom, mTo, amount, BtcUtils.satoshiToBtc(trans.getFees().longValue()), trans.getReceived(), "");
                             event = new OtkEvent(tx);
                             sendEvent(event);
                             clearOp();
@@ -341,8 +354,13 @@ public class Otk {
         }
 
         if (mOp == Operation.OTK_OP_SIGN_PAYMENT) {
-            isInProcessing = true;
+
             if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
+                if (isInProcessing == true) {
+                    Log.d(TAG, "It's already in processing.");
+                    return OTK_RETURN_OK;
+                }
+                isInProcessing = true;
                 // Check if OTK is authorized
                 if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
                     mIsAuthorized = false;
@@ -469,12 +487,14 @@ public class Otk {
      * @return
      */
     public int cancelOperation() {
+        Log.d(TAG, "cancelOperation");
         clearOp();
         return OTK_RETURN_OK;
     }
 
     private int writeCommand(String pin) {
         if (mCommandToWrite == Command.INVALID) {
+            Log.d(TAG, "Command is INVALID");
             clearOp();
             return OTK_RETURN_ERROR;
         }
@@ -491,6 +511,10 @@ public class Otk {
             return OTK_RETURN_ERROR_NO_OP_PROCESSING;
         }
 
+        // Set command
+        if (mOp == Operation.OTK_OP_SIGN_PAYMENT) {
+            mCommandToWrite = Command.SIGN;
+        }
         writeCommand(pin);
         return OTK_RETURN_OK;
     }
