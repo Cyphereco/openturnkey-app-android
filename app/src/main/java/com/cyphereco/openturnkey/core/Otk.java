@@ -258,12 +258,9 @@ public class Otk {
     /**
      * Method to process all NFC intents
      */
-    public int processIntent(Intent intent) {
+    public int processIntent(Intent intent, OtkEventListener listener) {
         Log.d(TAG, "process intent");
-        if (mOp == Operation.OTK_OP_NONE) {
-            Log.d(TAG, "No op is set!");
-            return OTK_RETURN_ERROR_INVALID_OP;
-        }
+
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
         if (tag != null) {
             if (mCommandToWrite != Command.INVALID) {
@@ -273,7 +270,7 @@ public class Otk {
             }
             OtkData data = Nfc.read(tag);
             mTag = tag;
-            return processOtkData(data);
+            return processOtkData(data, listener);
         }
 
         // tag is null, Try NdefMessage in intent
@@ -285,7 +282,7 @@ public class Otk {
                 msgs[i] = (NdefMessage) rawMsgs[i];
             }
             OtkData data = Nfc.read(msgs);
-            return processOtkData(data);
+            return processOtkData(data, listener);
         }
 
         return OTK_RETURN_ERROR;
@@ -342,12 +339,16 @@ public class Otk {
     /**
      * Method to process read Otk data base on current state.
      */
-    private int processOtkData(OtkData otkData) {
+    private int processOtkData(OtkData otkData, OtkEventListener listener) {
         if (otkData == null) {
             return OTK_RETURN_ERROR;
         }
-        if (mOp == Operation.OTK_OP_READ_GENERAL_INFO) {
+        if (mOp == Operation.OTK_OP_READ_GENERAL_INFO || mOp == Operation.OTK_OP_NONE) {
             OtkEvent event = new OtkEvent(OtkEvent.Type.GENERAL_INFORMATION, otkData);
+            if (listener != null) {
+                listener.onOtkEvent(event);
+                return OTK_RETURN_OK;
+            }
             sendEvent(event);
             clearOp();
             return OTK_RETURN_OK;

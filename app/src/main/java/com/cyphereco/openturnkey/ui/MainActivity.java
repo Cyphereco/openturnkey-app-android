@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity
     private boolean includeFee = false;
     private boolean useFixAddr = false;
     private NfcAdapter mNfcAdapter = null;
-    private Otk mOtk = null;
+    static private Otk mOtk = null;
     private Fragment mSelectedFragment = null;
     private CurrencyExchangeRate mCurrencyExRate;
     AlertDialog.Builder mProgressDialogBuilder = null;
@@ -235,6 +235,10 @@ public class MainActivity extends AppCompatActivity
             };
 
     /* class functions */
+    static public boolean isRunning() {
+        return (mOtk != null);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -283,7 +287,6 @@ public class MainActivity extends AppCompatActivity
                     Intent intent = new Intent(getApplicationContext() , OpenturnkeyInfoActivity.class);
                     intent.putExtra(KEY_OTK_DATA, event.getData());
                     startActivity(intent);
-                    mOtk.getBalance(event.getData().getSessionData().getAddress());
                 } else if (type == OtkEvent.Type.SEND_BITCOIN_SUCCESS) {
                     hideProgressDialog();
                     Tx tx = event.getTx();
@@ -348,7 +351,7 @@ public class MainActivity extends AppCompatActivity
 
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action) ||
                 NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
-            int ret = mOtk.processIntent(intent);
+            int ret = mOtk.processIntent(intent, null);
             if (ret != Otk.OTK_RETURN_OK) {
                 Log.d(TAG, "process intent failed:" + ret);
             }

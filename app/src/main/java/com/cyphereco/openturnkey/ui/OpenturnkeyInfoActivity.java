@@ -1,11 +1,14 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.nfc.NfcAdapter;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -32,6 +35,13 @@ import java.math.BigDecimal;
 
 public class OpenturnkeyInfoActivity extends AppCompatActivity {
     public static final String TAG = OpenturnkeyInfoActivity.class.getSimpleName();
+    private NfcAdapter mNfcAdapter = null;
+    static private Otk mOtk = null;
+    static Handler handler = null;
+
+    static public boolean isActive() {
+        return (mOtk != null);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +61,16 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
             return;
         }
 
+        /* init NFC. */
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        mOtk = Otk.getInstance();
+
         final LocalCurrency lc = Preferences.getLocalCurrency(getApplicationContext());
         TextView tv = findViewById(R.id.label_fiat);
 
         tv.setText(lc.toString());
 
-        final Handler handler = new Handler() {
+        handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 Log.d(TAG, "handle message:" + msg.what);
@@ -75,10 +89,17 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
                     tv = findViewById(R.id.text_balance_fiat);
                     tv.setText(R.string._numerical_zero);
                 }
-
-
             }
         };
+
+        updateInfo(otkData);
+    }
+
+    private void updateInfo(final OtkData otkData) {
+        final LocalCurrency lc = Preferences.getLocalCurrency(getApplicationContext());
+        TextView tv = findViewById(R.id.label_fiat);
+
+        tv.setText(lc.toString());
         // Check balance
         tv = findViewById(R.id.btc_address_context);
         final String address = otkData.getSessionData().getAddress();
@@ -127,8 +148,8 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
         tv.setText(R.string.fetching);
         tv = findViewById(R.id.text_balance_fiat);
         tv.setText(R.string.fetching);
-        Otk otk = Otk.getInstance();
-        otk.setBalanceListener(new Otk.BalanceUpdateListener() {
+
+        mOtk.setBalanceListener(new Otk.BalanceUpdateListener() {
             @Override
             public void onOtkEvent(OtkEvent event) {
                 if (event.getType() == OtkEvent.Type.BALANCE_UPDATE) {
@@ -142,7 +163,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
                 }
             }
         });
-        otk.getBalance(address);
+        mOtk.getBalance(address);
 
         // i button
         ImageView i = findViewById(R.id.icon_mint_information);
@@ -158,27 +179,61 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
                         .show();
             }
         });
+    }
 
-        // i button
-        ImageView copy = findViewById(R.id.icon_copy);
-        copy.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("address", address);
-                clipboard.setPrimaryClip(clip);
-                Toast.makeText(getApplicationContext(), R.string.address_copied, Toast.LENGTH_SHORT).show();
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String action = intent.getAction();
+
+        if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action) ||
+                NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            int ret = mOtk.processIntent(intent, new Otk.OtkEventListener() {
+                @Override
+                public void onOtkEvent(OtkEvent event) {
+                    Log.d(TAG, "onOtkEvent");
+                    if (event.getType() != OtkEvent.Type.GENERAL_INFORMATION) {
+                        return;
+                    }
+                    // Update info
+                    updateInfo(event.getData());
+                }
+            });
+            if (ret != Otk.OTK_RETURN_OK) {
+                Log.d(TAG, "process intent failed:" + ret);
             }
-        });
+        }
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
+        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
+        IntentFilter ndefDetected = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
+        IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+        IntentFilter[] nfcIntentFilter = new IntentFilter[]{techDetected, tagDetected, ndefDetected};
 
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+
+        if (mNfcAdapter != null) {
+            mNfcAdapter.enableForegroundDispatch(this, pendingIntent, nfcIntentFilter, null);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mNfcAdapter != null)
+            mNfcAdapter.disableForegroundDispatch(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Otk.getInstance().setBalanceListener(null);
+        mOtk.setBalanceListener(null);
+        mOtk = null;
     }
 
     @Override
