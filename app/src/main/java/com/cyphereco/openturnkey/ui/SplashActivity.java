@@ -1,21 +1,25 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.cyphereco.openturnkey.R;
 
 public class SplashActivity extends AppCompatActivity {
-
+    public static final String TAG = SplashActivity.class.getSimpleName();
     private static int SPLASH_TIMEOUT = 3000;
     static int i = 0;
+    private boolean isStarted = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.d(TAG, "onCreate");
         if (MainActivity.isRunning()) {
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(intent);
@@ -32,11 +36,26 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(final Intent intent) {
         super.onNewIntent(intent);
+        Log.d(TAG, "onNewIntent():" + intent.getAction());
+        if (isStarted == false) {
+            // Wait  few seconds and call onNewIntent again.
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    onNewIntent(intent);
+                }
+            }, 1000);
+            return;
+        }
+
+        // No need to process MAIN action
         if (intent.getAction().equals("android.intent.action.MAIN")) {
             return;
         }
+        // Should be NFC related intents
         if (OpenturnkeyInfoActivity.isActive()) {
             intent.setClass(SplashActivity.this, OpenturnkeyInfoActivity.class);
             startActivity(intent);
@@ -45,7 +64,6 @@ public class SplashActivity extends AppCompatActivity {
             intent.setClass(SplashActivity.this, MainActivity.class);
             startActivity(intent);
         }
-
     }
 
     @Override
@@ -56,6 +74,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume");
         if (MainActivity.isRunning()) {
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(intent);
@@ -73,6 +92,7 @@ public class SplashActivity extends AppCompatActivity {
 
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(intent);
+            isStarted = true;
         }
     }
 }

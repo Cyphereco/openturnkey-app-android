@@ -22,7 +22,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".ui.EditContactActivity"></activity>
         <activity android:name=".ui.OpenturnkeyInfoActivity"
-            android:launchMode="singleInstance" />
+            android:launchMode="singleTop" />
         <activity
             android:name=".ui.SplashActivity"
             android:launchMode="singleInstance"
@@ -69,7 +69,7 @@
         </activity>
         <activity
             android:name=".ui.MainActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTop"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity

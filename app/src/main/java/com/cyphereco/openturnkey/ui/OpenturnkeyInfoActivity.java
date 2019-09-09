@@ -46,6 +46,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_openturnkey_info);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -179,6 +180,18 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
                         .show();
             }
         });
+
+        // copy button
+        ImageView copy = findViewById(R.id.icon_copy);
+        copy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("address", address);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(getApplicationContext(), R.string.address_copied, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -188,6 +201,10 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
 
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action) ||
                 NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            if (mOtk == null) {
+                Log.d(TAG, "mOtk is null");
+                return;
+            }
             int ret = mOtk.processIntent(intent, new Otk.OtkEventListener() {
                 @Override
                 public void onOtkEvent(OtkEvent event) {
@@ -232,6 +249,11 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy");
+        if (mOtk == null) {
+            Log.d(TAG, "mOtk is null");
+            return;
+        }
         mOtk.setBalanceListener(null);
         mOtk = null;
     }

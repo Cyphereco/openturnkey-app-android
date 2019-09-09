@@ -1,6 +1,7 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.Manifest;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -70,6 +71,18 @@ public class FragmentPay extends Fragment {
         }
     }
 
+    public void pasteAddressFromClipboard(View v) {
+        ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard.hasPrimaryClip()) {
+            android.content.ClipDescription description = clipboard.getPrimaryClipDescription();
+            android.content.ClipData data = clipboard.getPrimaryClip();
+            if (data != null && description != null) {
+                String address = String.valueOf(data.getItemAt(0).coerceToText(getContext()));
+                updateRecipientAddress(address);
+            }
+        }
+    }
+
     private void updateCurrencyName(View view) {
         TextView tv = view.findViewById(R.id.text_local_currency);
         tv.setText(mLocalCurrency.toString());
@@ -96,6 +109,15 @@ public class FragmentPay extends Fragment {
                 launchQRcodeScanActivity(view);
             }
         });
+
+        iv = view.findViewById(R.id.icon_paste_clipboard);
+        iv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pasteAddressFromClipboard(view);
+            }
+        });
+
         iv = view.findViewById(R.id.icon_read_nfc);
         final EditText etCc = view.findViewById(R.id.input_crypto_currency);
         final EditText etLc = view.findViewById(R.id.input_local_currency);
