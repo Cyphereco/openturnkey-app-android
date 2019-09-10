@@ -22,7 +22,7 @@ public class MintInfo implements Serializable {
     private static final String MINT_INFO_FW_VERSION = "F/W Version: ";
     private static final String MINT_INFO_SERIAL_NO = "Serial No.: ";
     private static final String MINT_INFO_BATTERY_LEVEL = "Battery Level: ";
-    private static final String MINT_INFO_NOTE = "Note:";
+    private static final String MINT_INFO_NOTE = "Note: \r\n";
 
     String mKeyMint;
     String mMintDate;
@@ -89,8 +89,7 @@ public class MintInfo implements Serializable {
         lableStart = info.indexOf(MINT_INFO_NOTE);
         if (lableStart != -1) {
             int dataStart = lableStart + MINT_INFO_NOTE.length();
-            int crlf = info.indexOf(CRLF, dataStart);
-            mNote = info.substring(dataStart, crlf);
+            mNote = info.substring(dataStart);
         }
     }
 
