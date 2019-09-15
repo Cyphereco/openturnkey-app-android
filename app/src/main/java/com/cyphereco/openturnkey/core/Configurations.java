@@ -1,10 +1,5 @@
 package com.cyphereco.openturnkey.core;
 
-import com.cyphereco.openturnkey.bitcoin.NetParams;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-
 public class Configurations {
 
     public enum Network {
@@ -29,6 +24,8 @@ public class Configurations {
     static public long txFeeLow = 2;
     static public long txFeeMid = 14;
     static public long txFeeHigh = 16;
+    static public boolean writeLogToFile = true;
+
     static public boolean isTestnet() {
         return (mNetwork == Network.TESTNET);
     }

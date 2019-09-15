@@ -4,10 +4,9 @@ public class DBTransItem implements java.io.Serializable {
     private long id;
     private long datetime;
     private String payeeAddr;
-    private int cryptoCurrency;
-    private int cryptoCurrencyAmount;
-    private int localCurrency;
-    private int localCurrencyAmount;
+    private String payerAddr;
+    private double amount;
+    private double fee;
     private int status;
     private String comment;
     private String rawData;
@@ -15,26 +14,23 @@ public class DBTransItem implements java.io.Serializable {
     public DBTransItem() {
         this.id = 0;
         this.datetime = 0;
+        this.payerAddr = "";
         this.payeeAddr = "";
-        this.cryptoCurrency = 0;
-        this.cryptoCurrencyAmount = 0;
-        this.localCurrency = 0;
-        this.localCurrencyAmount = 0;
+        this.amount = 0.0;
+        this.fee = 0.0;
         this.status = 0;
         this.comment = "";
         this.rawData = "";
     }
 
-    public DBTransItem(long id, long datetime, String payeeAddr, int cryptoCurrency,
-                       int cryptoCurrencyAmount, int localCurrency, int localCurrencyAmount,
-                       int status, String comment, String rawData) {
+    public DBTransItem(long id, long datetime, String payerAddr, String payeeAddr,
+                       double cryptoCurrencyAmount, double fee, int status, String comment, String rawData) {
         this.id = id;
         this.datetime = datetime;
+        this.payerAddr = payerAddr;
         this.payeeAddr = payeeAddr;
-        this.cryptoCurrency = cryptoCurrency;
-        this.cryptoCurrencyAmount = cryptoCurrencyAmount;
-        this.localCurrency = localCurrency;
-        this.localCurrencyAmount = localCurrencyAmount;
+        this.amount = cryptoCurrencyAmount;
+        this.fee = fee;
         this.status = status;
         this.comment = comment;
         this.rawData = rawData;
@@ -64,36 +60,28 @@ public class DBTransItem implements java.io.Serializable {
         this.payeeAddr = payeeAddr;
     }
 
-    public int getCryptoCurrency() {
-        return cryptoCurrency;
+    public String getPayerAddr() {
+        return payerAddr;
     }
 
-    public void setCryptoCurrency(int cryptoCurrency) {
-        this.cryptoCurrency = cryptoCurrency;
+    public void setPayerAddr(String payerAddr) {
+        this.payerAddr = payerAddr;
     }
 
-    public int getCryptoCurrencyAmount() {
-        return cryptoCurrencyAmount;
+    public double getAmount() {
+        return this.amount;
     }
 
-    public void setCryptoCurrencyAmount(int cryptoCurrencyAmount) {
-        this.cryptoCurrencyAmount = cryptoCurrencyAmount;
+    public double getFee() {
+        return this.fee;
     }
 
-    public int getLocalCurrency() {
-        return localCurrency;
+    public void setAmount(double cryptoCurrencyAmount) {
+        this.amount = cryptoCurrencyAmount;
     }
 
-    public void setLocalCurrency(int localCurrency) {
-        this.localCurrency = localCurrency;
-    }
-
-    public int getLocalCurrencyAmount() {
-        return localCurrencyAmount;
-    }
-
-    public void setLocalCurrencyAmount(int localCurrencyAmount) {
-        this.localCurrencyAmount = localCurrencyAmount;
+    public void setFee(double fee) {
+        this.fee = fee;
     }
 
     public int getStatus() {

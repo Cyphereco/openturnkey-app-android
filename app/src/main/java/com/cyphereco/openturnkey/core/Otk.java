@@ -7,17 +7,23 @@ import android.nfc.Tag;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.blockcypher.exception.BlockCypherException;
 import com.blockcypher.model.transaction.Transaction;
+import com.blockcypher.model.transaction.intermediary.IntermediaryTransaction;
 import com.blockcypher.model.transaction.output.Output;
+import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
+import com.cyphereco.openturnkey.db.DBTransItem;
+import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.TxFee;
 import com.cyphereco.openturnkey.webservices.BlockCypher;
+
+import org.slf4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,6 +36,7 @@ import java.util.TimerTask;
  */
 public class Otk {
     public static final String TAG = Otk.class.getSimpleName();
+    static Logger logger = Log4jHelper.getLogger(TAG);
 
     /** Return value. */
     public static final int OTK_RETURN_OK = 0;
@@ -44,6 +51,7 @@ public class Otk {
     private static final int OTK_MSG_SEND_BITCOIN_FAILED = 2;
     private static final int OTK_MSG_CURRENCY_EX_RATE_UPDATE = 3;
     private static final int OTK_MSG_TX_FEE_UPDATE = 4;
+    private static final int OTK_MSG_COMPLETE_PAYMENT_FAILED = 5;
 
     public enum Operation {
         OTK_OP_NONE("None"),
@@ -106,45 +114,48 @@ public class Otk {
      * @return The singleton.
      */
     public static synchronized Otk getInstance() {
-        Log.d(TAG, "getInstance()");
+        logger.info("getInstance()");
 
         if (null == mOtk) {
             mOtk = new Otk();
             mHandler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
-                    Log.d(TAG, "handle message:" + msg.what);
+                    logger.info("handle message:" + msg.what);
                     OtkEvent event;
+                    Tx tx;
                     switch (msg.what) {
                         case OTK_MSG_GOT_UNSIGNED_TX:
                             if (mOp != Operation.OTK_OP_SIGN_PAYMENT) {
+                                logger.warn("Got unsigned tx but operation is cancelled.");
                                 /* Op cancelled, ignore it */
                                 break;
                             }
 
                             // Cache to sign list
-                            List<String> toSignList = (List<String>) msg.obj;
+                            UnsignedTx unsigendTx = (UnsignedTx)msg.obj;
+                            List<String> toSignList = unsigendTx.getToSign();
                             mArgs.clear();
                             // Also clear cached signature
                             mSignatures.clear();
                             mArgs.addAll(toSignList);
-                            // Check if it's authorized
-                            if (mIsAuthorized == false) {
-                                // Send unauthorized event.
-                                event = new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED);
-                                sendEvent(event);
-                                // clear cached command so that it won't write command without pin
-                                mCommandToWrite = Command.INVALID;
-                            }
-                            else {
-                                // Clear cached pin
-                                mPin = "";
-                                // Authorized. Write command
-                                writeSignCommand(mPin);
-                            }
+
+                            // Send unsigned tx event
+                            sendEvent(new OtkEvent(unsigendTx));
                             break;
                         case OTK_MSG_SEND_BITCOIN_FAILED:
                             event = new OtkEvent(OtkEvent.Type.SEND_BITCOIN_FAIL, (String)msg.obj);
+                            sendEvent(event);
+                            clearOp();
+                            break;
+                        case OTK_MSG_COMPLETE_PAYMENT_FAILED:
+                            tx = (Tx)msg.obj;
+                            if (tx == null) {
+                                event = new OtkEvent(OtkEvent.Type.COMPLETE_PAYMENT_FAIL, "Unknown Reason");
+                            }
+                            else {
+                                event = new OtkEvent(OtkEvent.Type.COMPLETE_PAYMENT_FAIL, tx);
+                            }
                             sendEvent(event);
                             clearOp();
                             break;
@@ -158,26 +169,10 @@ public class Otk {
                             sendEvent(event);
                             break;
                         case OTK_MSG_BITCOIN_SENT:
-                            Transaction trans = (Transaction)msg.obj;
-                            // TODO get raw hex of transaction
-                            double amount = 0.0;
-                            // Find amount from outputs
-                            for (int i = 0; i < trans.getOutputs().size(); i++) {
-                                Output o = trans.getOutputs().get(i);
-                                if (o.getAddresses().get(0).equals(mTo)) {
-                                    amount = BtcUtils.satoshiToBtc(o.getValue().longValue());
-                                    break;
-                                }
-                            }
-                            // In case not found.
-                            if (amount == 0.0) {
-                                amount = mAmount;
-                            }
-                            Tx tx = new Tx(trans.getHash(), mFrom, mTo, amount, BtcUtils.satoshiToBtc(trans.getFees().longValue()), trans.getReceived(), "");
-                            event = new OtkEvent(tx);
+                            tx = (Tx)msg.obj;
+                            event = new OtkEvent(OtkEvent.Type.SEND_BITCOIN_SUCCESS, tx);
                             sendEvent(event);
                             clearOp();
-                            // TODO: add transaction to database.
                             break;
                         default:
                     }
@@ -219,7 +214,7 @@ public class Otk {
     }
 
     static void writeSignCommand(String pin) {
-        Log.d(TAG, "writeSignCommand:" + pin);
+        logger.info("writeSignCommand:" + pin);
         OtkEvent event;
         // Try to wirte maximum size we can
         List<String> args = new ArrayList<String>();
@@ -240,7 +235,7 @@ public class Otk {
             }
             else {
                 if (otkData.getType() != OtkData.Type.OTK_DATA_TYPE_SIGNATURE) {
-                    Log.d(TAG, "Expect signature but got " + otkData.getType().toString());
+                    logger.info("Expect signature but got " + otkData.getType().toString());
                     event = new OtkEvent(OtkEvent.Type.SIGN_FAILED);
                     sendEvent(event);
                 }
@@ -259,7 +254,7 @@ public class Otk {
      * Method to process all NFC intents
      */
     public int processIntent(Intent intent, OtkEventListener listener) {
-        Log.d(TAG, "process intent");
+        logger.info("process intent");
 
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
         if (tag != null) {
@@ -326,7 +321,7 @@ public class Otk {
             mSignatures.add(sigs.get(i));
         }
         if (mArgs.size() > 0) {
-            Log.d(TAG, "We have more hash to sign. " + mArgs.size());
+            logger.info("We have more hash to sign. " + mArgs.size());
             // write remain hashs
             writeSignCommand(mPin);
         }
@@ -355,10 +350,14 @@ public class Otk {
         }
 
         if (mOp == Operation.OTK_OP_SIGN_PAYMENT) {
-
             if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
                 if (isInProcessing == true) {
-                    Log.d(TAG, "It's already in processing.");
+                    logger.error("It's already in processing.");
+                    if (!mSessionId.equals(otkData.getSessionData().getSessionId())) {
+                        // OTK must be restarted, consider failed.
+                        sendEvent(new OtkEvent(OtkEvent.Type.SEND_BITCOIN_FAIL));
+                        return OTK_RETURN_ERROR;
+                    }
                     return OTK_RETURN_OK;
                 }
                 isInProcessing = true;
@@ -372,7 +371,7 @@ public class Otk {
                 }
                 mFrom = otkData.getSessionData().getAddress();
                 mSessionId = otkData.getSessionData().getSessionId();
-                sendBitcoin(mFrom, mTo, mAmount, mTxFees);
+                sendBitcoin(mFrom, mTo, mAmount, mTxFees, mFeeIncluded);
                 OtkEvent event = new OtkEvent(OtkEvent.Type.OPERATION_IN_PROCESSING);
                 sendEvent(event);
 
@@ -401,8 +400,8 @@ public class Otk {
         return OTK_RETURN_OK;
     }
 
-    static private int clearOp() {
-        Log.d(TAG, "clearOp");
+     static private int clearOp() {
+        logger.info("clearOp");
         mOp = Operation.OTK_OP_NONE;
         // Clear cached data
         mTo = "";
@@ -452,7 +451,7 @@ public class Otk {
              */
             return OTK_RETURN_ERROR_OP_IN_PROCESSING;
         }
-        Log.d(TAG, "Set op to:" + op.name());
+        logger.info("Set op to:" + op.name());
         mOp = op;
         return OTK_RETURN_OK;
     }
@@ -472,7 +471,7 @@ public class Otk {
             return OTK_RETURN_ERROR_INVALID_OP;
         }
 
-        Log.d(TAG, "Set op to:" + op.name());
+        logger.info("Set op to:{} to:{} amount:{} fee:{} feeIncluded:{}", op.name(), to, amount, txFees, feeIncluded);
         mOp = op;
         // Cache data
         mTo = to;
@@ -488,14 +487,14 @@ public class Otk {
      * @return
      */
     public int cancelOperation() {
-        Log.d(TAG, "cancelOperation");
+        logger.info("cancelOperation");
         clearOp();
         return OTK_RETURN_OK;
     }
 
     private int writeCommand(String pin) {
         if (mCommandToWrite == Command.INVALID) {
-            Log.d(TAG, "Command is INVALID");
+            logger.info("Command is INVALID");
             clearOp();
             return OTK_RETURN_ERROR;
         }
@@ -520,17 +519,17 @@ public class Otk {
         return OTK_RETURN_OK;
     }
 
-    private void sendBitcoin(final String from, final String to, final double amount, final long txFees) {
+    private void sendBitcoin(final String from, final String to, final double amount, final long txFees, final boolean feeIncluded) {
         Thread t = new Thread() {
             @Override
             public void run() {
                 synchronized (this) {
                     try {
                         long amountInSatoshi = BtcUtils.btcToSatoshi(mAmount);
-                        List<String> toSignList = BlockCypher.getInstance().sendBitcoin(from, to, amountInSatoshi, false, txFees);
+                        UnsignedTx unsigendTx = BlockCypher.getInstance().sendBitcoin(from, to, amountInSatoshi, txFees, feeIncluded);
                         Message msg = new Message();
                         msg.what = OTK_MSG_GOT_UNSIGNED_TX;
-                        msg.obj = toSignList;
+                        msg.obj = unsigendTx;
                         mHandler.sendMessage(msg);
                     }
                     catch (BlockCypherException e) {
@@ -556,21 +555,40 @@ public class Otk {
     }
 
     static private int completePayment(final String publicKey, final List<String> sigResult) {
-        Log.d(TAG, "completePayment");
+        logger.info("completePayment");
         Thread t = new Thread() {
             @Override
             public void run() {
                 synchronized (this) {
-                    Transaction tx = BlockCypher.getInstance().completeSendBitcoin(publicKey, sigResult);
-                    if (tx != null) {
+                    try {
+                        Transaction trans = BlockCypher.getInstance().completeSendBitcoin(publicKey, sigResult);
+                        if (trans != null) {
+                            // Success
+                            Tx tx = new Tx(mFrom, mTo, trans, Tx.Status.STATUS_SUCCESS);
+                            Message msg = new Message();
+                            msg.what = OTK_MSG_BITCOIN_SENT;
+                            msg.obj = tx;
+                            mHandler.sendMessage(msg);
+                        }
+                        else {
+                            // failed
+                            Message msg = new Message();
+                            msg.what = OTK_MSG_COMPLETE_PAYMENT_FAILED;
+                            msg.obj = null;
+                            mHandler.sendMessage(msg);
+                        }
+                    }
+                    catch (BlockCypherException e) {
+                        Tx tx = new Tx(mFrom, mTo, e.getBlockCypherError().getTx(), Tx.Status.STATUS_UNKNOWN_FAILURE);
                         Message msg = new Message();
-                        msg.what = OTK_MSG_BITCOIN_SENT;
-                        msg.arg1 = tx.getFees().intValue();
+                        msg.what = OTK_MSG_COMPLETE_PAYMENT_FAILED;
                         msg.obj = tx;
                         mHandler.sendMessage(msg);
-                    } else {
+                    }
+                    catch (Exception e) {
                         Message msg = new Message();
-                        msg.what = OTK_MSG_SEND_BITCOIN_FAILED;
+                        msg.what = OTK_MSG_COMPLETE_PAYMENT_FAILED;
+                        msg.obj = null;
                         mHandler.sendMessage(msg);
                     }
                 }
@@ -593,5 +611,28 @@ public class Otk {
         };
 
         t.start();
+    }
+
+    public void confirmPayment() {
+        logger.info("confirm payment");
+        // Make sure op
+        if (mOp != Operation.OTK_OP_SIGN_PAYMENT) {
+            logger.warn("Confirm payment but operation is cancelled.");
+            /* Op cancelled, ignore it */
+            return;
+        }
+        // Check if it's authorized
+        if (mIsAuthorized == false) {
+            // Send unauthorized event.
+            sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
+            // clear cached command so that it won't write command without pin
+            mCommandToWrite = Command.INVALID;
+        }
+        else {
+            // Clear cached pin
+            mPin = "";
+            // Authorized. Write command
+            writeSignCommand(mPin);
+        }
     }
 }

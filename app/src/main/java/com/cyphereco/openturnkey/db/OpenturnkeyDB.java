@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +26,10 @@ public class OpenturnkeyDB {
     // Columns of transaction table
     private static final String TRANS_KEY_ID_COL = "_id";
     private static final String TRANS_DATETIME_COL = "datetime";
+    private static final String TRANS_PAYER_ADDR_COL = "payerAddr";
     private static final String TRANS_PAYEE_ADDR_COL = "payeeAddr";
-    private static final String TRANS_CRYPTO_CURRENCY_COL = "cryptoCurrency";
-    private static final String TRANS_CRYPTO_CURRENCY_AMOUNT_COL = "cryptoCurrencyAmount";
-    private static final String TRANS_LOCAL_CURRENCY_COL = "localCurrency";
-    private static final String TRANS_LOCAL_CURRENCY_AMOUNT_COL = "localCurrencyAmount";
+    private static final String TRANS_AMOUNT_COL = "amount";
+    private static final String TRANS_FEE_COL = "fee";
     private static final String TRANS_STATUS_COL = "status";
     private static final String TRANS_COMMENTS_COL = "comments";
     private static final String TRANS_RAW_DATA_COL = "rawData";
@@ -45,11 +45,10 @@ public class OpenturnkeyDB {
     public static final String CREATE_TRANS_TABLE_SQL = "CREATE TABLE " + TRANS_TABLE_NAME + " (" +
             TRANS_KEY_ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             TRANS_DATETIME_COL + " DateTime NOT NULL, " +
+            TRANS_PAYER_ADDR_COL + " VARCHAR(64) NOT NULL, " +
             TRANS_PAYEE_ADDR_COL + " VARCHAR(64) NOT NULL, " +
-            TRANS_CRYPTO_CURRENCY_COL + " INTEGER, " +
-            TRANS_CRYPTO_CURRENCY_AMOUNT_COL + " INTEGER, " +
-            TRANS_LOCAL_CURRENCY_COL + " INTEGER, " +
-            TRANS_LOCAL_CURRENCY_AMOUNT_COL + " INTEGER, " +
+            TRANS_AMOUNT_COL + " DOUBLE, " +
+            TRANS_FEE_COL + " DOUBLE, " +
             TRANS_STATUS_COL + " INTEGER, " +
             TRANS_COMMENTS_COL + " TEXT, " +
             TRANS_RAW_DATA_COL + " TEXT " +
@@ -72,14 +71,13 @@ public class OpenturnkeyDB {
 
         item.setId(cursor.getLong(0));
         item.setDatetime(cursor.getLong(1));
-        item.setPayeeAddr(cursor.getString(2));
-        item.setCryptoCurrency(cursor.getInt(3));
-        item.setCryptoCurrencyAmount(cursor.getInt(4));
-        item.setLocalCurrency(cursor.getInt(5));
-        item.setLocalCurrencyAmount(cursor.getInt(6));
-        item.setStatus(cursor.getInt(7));
-        item.setComment(cursor.getString(8));
-        item.setRawData(cursor.getString(9));
+        item.setPayerAddr(cursor.getString(2));
+        item.setPayeeAddr(cursor.getString(3));
+        item.setAmount(cursor.getDouble(4));
+        item.setFee(cursor.getDouble(5));
+        item.setStatus(cursor.getInt(6));
+        item.setComment(cursor.getString(7));
+        item.setRawData(cursor.getString(8));
 
         return item;
     }
@@ -95,6 +93,7 @@ public class OpenturnkeyDB {
 
     public OpenturnkeyDB(Context context) {
         otkDB = DBHelper.getDatabase(context);
+
     }
 
     public void close() {
@@ -116,11 +115,10 @@ public class OpenturnkeyDB {
         ContentValues cv = new ContentValues();
 
         cv.put(TRANS_DATETIME_COL, item.getDatetime());
+        cv.put(TRANS_PAYER_ADDR_COL, item.getPayerAddr());
         cv.put(TRANS_PAYEE_ADDR_COL, item.getPayeeAddr());
-        cv.put(TRANS_CRYPTO_CURRENCY_COL, item.getCryptoCurrency());
-        cv.put(TRANS_CRYPTO_CURRENCY_AMOUNT_COL, item.getCryptoCurrencyAmount());
-        cv.put(TRANS_LOCAL_CURRENCY_COL, item.getLocalCurrency());
-        cv.put(TRANS_LOCAL_CURRENCY_AMOUNT_COL, item.getLocalCurrencyAmount());
+        cv.put(TRANS_AMOUNT_COL, item.getAmount());
+        cv.put(TRANS_FEE_COL, item.getFee());
         cv.put(TRANS_STATUS_COL, item.getStatus());
         cv.put(TRANS_COMMENTS_COL, item.getComment());
         cv.put(TRANS_RAW_DATA_COL, item.getRawData());
@@ -135,11 +133,10 @@ public class OpenturnkeyDB {
         ContentValues cv = new ContentValues();
 
         cv.put(TRANS_DATETIME_COL, item.getDatetime());
+        cv.put(TRANS_PAYER_ADDR_COL, item.getPayeeAddr());
         cv.put(TRANS_PAYEE_ADDR_COL, item.getPayeeAddr());
-        cv.put(TRANS_CRYPTO_CURRENCY_COL, item.getCryptoCurrency());
-        cv.put(TRANS_CRYPTO_CURRENCY_AMOUNT_COL, item.getCryptoCurrencyAmount());
-        cv.put(TRANS_LOCAL_CURRENCY_COL, item.getLocalCurrency());
-        cv.put(TRANS_LOCAL_CURRENCY_AMOUNT_COL, item.getLocalCurrencyAmount());
+        cv.put(TRANS_AMOUNT_COL, item.getAmount());
+        cv.put(TRANS_FEE_COL, item.getFee());
         cv.put(TRANS_STATUS_COL, item.getStatus());
         cv.put(TRANS_COMMENTS_COL, item.getComment());
         cv.put(TRANS_RAW_DATA_COL, item.getRawData());

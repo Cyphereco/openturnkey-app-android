@@ -8,9 +8,15 @@ import com.blockcypher.exception.BlockCypherException;
 import com.blockcypher.model.address.Address;
 import com.blockcypher.model.transaction.Transaction;
 import com.blockcypher.model.transaction.intermediary.IntermediaryTransaction;
+import com.blockcypher.model.transaction.output.Output;
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.Otk;
+import com.cyphereco.openturnkey.core.Tx;
+import com.cyphereco.openturnkey.core.UnsignedTx;
+import com.cyphereco.openturnkey.utils.BtcUtils;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
 
+import org.slf4j.Logger;
 import org.spongycastle.asn1.DERInteger;
 import org.spongycastle.asn1.DERSequenceGenerator;
 
@@ -24,6 +30,8 @@ import java.util.List;
 
 public class BlockCypher extends BtcBase {
     public static final String TAG = BlockCypher.class.getSimpleName();
+    static Logger logger = Log4jHelper.getLogger(TAG);
+
     private static BlockCypher mBc = null;
     BlockCypherContext mBcCtx;
     IntermediaryTransaction mCachedUnsignedTx = null;
@@ -45,7 +53,7 @@ public class BlockCypher extends BtcBase {
      * @return The singleton.
      */
     public static synchronized BlockCypher getInstance() {
-        Log.d(TAG, "getInstance()");
+        logger.info("getInstance()");
         if (null == mBc) {
             mBc = new BlockCypher();
         }
@@ -53,14 +61,14 @@ public class BlockCypher extends BtcBase {
     }
 
     public BigDecimal getBalance(String address) {
-        Log.d(TAG, "getBalance");
+        logger.info("getBalance");
         try {
             Address a = mBcCtx.getAddressService().getAddress(address);
-            Log.d(TAG, "address:" + address + " balance:" + a.getBalance() + " final:" + a.getFinalBalance());
+            logger.info("address:" + address + " balance:" + a.getBalance() + " final:" + a.getFinalBalance());
             BigDecimal d = a.getFinalBalance();
             return d;
         } catch (Exception e) {
-            Log.d(TAG, "e:" + e.toString());
+            logger.error("e:" + e.toString());
         }
         return BigDecimal.ZERO;
     }
@@ -75,27 +83,48 @@ public class BlockCypher extends BtcBase {
      * @return List of unsigned tx
      * @throws BlockCypherException
      */
-    public List<String> sendBitcoin(String from, String to, long amount, boolean feeIncluded, long txFees) throws BlockCypherException {
+    public UnsignedTx sendBitcoin(String from, String to, long amount, long txFees, boolean feeIncluded) throws BlockCypherException {
+        logger.info("sendBitcoin() from:{} to:{} amount:{} fee:{} feeIncluded:{}", from, to, amount, txFees, feeIncluded);
         try {
-            Log.d(TAG, "Fee:" + txFees);
+            if (feeIncluded) {
+                amount -= txFees;
+                logger.info("Fee included. Amount:{}, fee:{}", amount, txFees);
+            }
             IntermediaryTransaction unsignedTx = mBcCtx.getTransactionService().newTransaction(
                     new ArrayList<String>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, txFees);
             if ((unsignedTx == null) || unsignedTx.getTosign().size() == 0) {
-                Log.d(TAG, "unsignedTx is null or toSign is empty");
+                logger.info("unsignedTx is null or toSign is empty");
                 return null;
             }
             // Cache unsignedTx
-            Log.d(TAG, "unsignedTx:" + unsignedTx.toString());
+            logger.info("unsignedTx:" + unsignedTx.toString());
             mCachedUnsignedTx = unsignedTx;
-            ArrayList al = new ArrayList<String>();
-            return unsignedTx.getTosign();
+            double a = 0.0;
+            Transaction trans = unsignedTx.getTx();
+            // Find amount from outputs
+            for (int i = 0; i < trans.getOutputs().size(); i++) {
+                Output o = trans.getOutputs().get(i);
+                if (o.getAddresses().get(0).equals(to)) {
+                    a = BtcUtils.satoshiToBtc(o.getValue().longValue());
+                    break;
+                }
+            }
+            if (a == 0.0) {
+                logger.error("Amount is zero");
+                // Should not be here
+                a = amount;
+            }
+            UnsignedTx utx = new UnsignedTx(from, to, a, txFees, unsignedTx.getTosign());
+            return utx;
+//            ArrayList al = new ArrayList<String>();
+//            return unsignedTx.getTosign();
         }
         catch (BlockCypherException e) {
-            Log.d(TAG, "e:" + e.toString());
+            logger.error("e:" + e.toString());
             throw e;
         }
         catch (Exception e) {
-            Log.d(TAG, "e:" + e.toString());
+            logger.error("e:" + e.toString());
             throw e;
         }
     }
@@ -130,19 +159,19 @@ public class BlockCypher extends BtcBase {
             res = bos.toByteArray();
             return res;
         } catch (IOException e) {
-            Log.d(TAG, "Exception while toDER()" + e.toString());
+            logger.info("Exception while toDER()" + e.toString());
         }
         return null;
     }
 
-    public Transaction completeSendBitcoin(String publicKey, List<String> sigList) {
+    public Transaction completeSendBitcoin(String publicKey, List<String> sigList) throws BlockCypherException, Exception {
         if (mCachedUnsignedTx == null) {
-            Log.d(TAG, "mCachedUnsignedTx is null");
+            logger.info("mCachedUnsignedTx is null");
             return null;
         }
 
         if (mCachedUnsignedTx.getTosign().size() != sigList.size()) {
-            Log.d(TAG, "toSign number:" + mCachedUnsignedTx.getTosign().size() + " sig number:" + sigList.size());
+            logger.info("toSign number:" + mCachedUnsignedTx.getTosign().size() + " sig number:" + sigList.size());
             mCachedUnsignedTx = null;
             return null;
         }
@@ -157,19 +186,19 @@ public class BlockCypher extends BtcBase {
         }
 
         try {
-            Transaction tx = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
-
+            Transaction trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
             mCachedUnsignedTx = null;
-            return tx;
+            return trans;
         }
         catch (BlockCypherException e) {
-            Log.d(TAG, "e:" + e.toString());
+            logger.info("e:" + e.toString());
             mCachedUnsignedTx = null;
-            return null;
+            throw e;
         }
         catch (Exception e) {
-            Log.d(TAG, "e:" + e.toString());
-            return null;
+            logger.info("e:" + e.toString());
+            mCachedUnsignedTx = null;
+            throw e;
         }
     }
 }

@@ -13,6 +13,9 @@ import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.core.protocol.SessionData;
 import com.cyphereco.openturnkey.utils.BtcUtils;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
+
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,7 +23,8 @@ import java.util.Random;
 
 public class Nfc {
     public static final String TAG = Nfc.class.getSimpleName();
-
+    private static Logger logger = Log4jHelper.getLogger(TAG);
+    
     private static final int OTK_NFC_RECORD_MAX = 10;
     private static final String OTK_NFC_DATA_APP_PKG_URI = "com.cyphereco.openturnkey";
     private static final String OTK_REQUEST_DATA_DELIM = "\n";
@@ -34,7 +38,7 @@ public class Nfc {
      * @return
      */
     static OtkData read(Tag tag) {
-        Log.d(TAG, "read tag");
+        logger.info("read tag");
         OtkData ret = null;
         if (tag == null) {
             return null;
@@ -60,7 +64,7 @@ public class Nfc {
      * @return
      */
     static OtkData read(NdefMessage[] ndefMessages) {
-        Log.d(TAG, "read NdefMessage[] length:" + ndefMessages.length);
+        logger.info("read NdefMessage[] length:" + ndefMessages.length);
         // Get first item for now
         NdefMessage ndefMessage = ndefMessages[0];
         return read(ndefMessage);
@@ -72,7 +76,7 @@ public class Nfc {
      * @return
      */
     static OtkData read(NdefMessage ndefMessage) {
-        Log.d(TAG, "read NdefMessage");
+        logger.info("read NdefMessage");
 
         OtkData ret = null;
         Command issuedCommand = mIssuedCommand;
@@ -80,25 +84,25 @@ public class Nfc {
 
         int recordLen = ndefMessage.getRecords().length;
         if (recordLen <= 0 || recordLen > OTK_NFC_RECORD_MAX) {
-            Log.d(TAG, "Invalid record length:" + recordLen);
+            logger.error("Invalid record length:" + recordLen);
             return ret;
         }
         for (int i = 0; i < recordLen; i++) {
-            Log.d(TAG, "record[" + i + "]:" + new String(ndefMessage.getRecords()[i].getPayload()));
+            logger.info("record[" + i + "]:" + new String(ndefMessage.getRecords()[i].getPayload()));
         }
 
         if (recordLen != 6) {
-            Log.d(TAG, "record number is invalid:" + recordLen);
+            logger.info("record number is invalid:" + recordLen);
             return ret;
         }
 
         // First record indicate what's the records for
         int i = 0;
         String message = new String(ndefMessage.getRecords()[i].getPayload());
-        Log.d(TAG, "read NFC record[" + i + "]:" + message);
+        logger.info("read NFC record[" + i + "]:" + message);
 
         if (!message.equals(OTK_NFC_DATA_APP_PKG_URI)) {
-            Log.d(TAG, "Invalid NFC record. First one is not Appliction Packet URI.");
+            logger.error("Invalid NFC record. First one is not Appliction Packet URI.");
             return ret;
         }
 
@@ -124,7 +128,7 @@ public class Nfc {
         i = 5;
         message = new String(ndefMessage.getRecords()[i].getPayload()).substring(3);
         if (false == verifySessionData(pubKey, sessData, message)) {
-            Log.d(TAG, "Session data verify failed.");
+            logger.error("Session data verify failed.");
             return ret;
         }
 
@@ -151,7 +155,7 @@ public class Nfc {
             return ecKey.verifySignature(message.getBytes(), signature);
         }
         catch (ECException e){
-            Log.d(TAG, "ECException:" + e.toString());
+            logger.error("ECException:" + e.toString());
             return false;
         }
     }
@@ -161,17 +165,17 @@ public class Nfc {
     }
 
     static int writeCommand(Tag tag, Command cmd, String sessId, String pin, List<String> args, boolean isMore) {
-        Log.d(TAG, "write Command:" + cmd.toString());
+        logger.info("write Command:" + cmd.toString());
         mIssuedCommand = Command.INVALID;
         if (tag == null) {
-            Log.d(TAG, "NFC tag is null");
+            logger.error("NFC tag is null");
             return Otk.OTK_RETURN_ERROR;
         }
         Ndef ndef = Ndef.get(tag);
         int recordNum = 3;
 
         if (args != null && args.size() > 0) {
-            Log.d(TAG, "args:" + args.toString());
+            logger.info("args:" + args.toString());
             recordNum += 1;
         }
 
@@ -180,7 +184,7 @@ public class Nfc {
         }
 
         if (recordNum > OTK_NFC_RECORD_MAX) {
-            Log.d(TAG, "Too many record numbers " + recordNum);
+            logger.error("Too many record numbers " + recordNum);
             return Otk.OTK_RETURN_ERROR;
         }
 
@@ -191,7 +195,7 @@ public class Nfc {
             rdn = -rdn;
         }
         mCommandId = String.valueOf(rdn);
-        Log.d(TAG, "mCommandId:" + mCommandId);
+        logger.info("mCommandId:" + mCommandId);
         if (ndef == null) {
             return Otk.OTK_RETURN_ERROR;
         }
@@ -217,7 +221,7 @@ public class Nfc {
                         requestData += OTK_REQUEST_DATA_DELIM + args.get(i);
                     }
                 }
-                Log.d(TAG, "requestData:" + requestData);
+                logger.info("requestData:" + requestData);
                 record[3] = NdefRecord.createTextRecord("en", requestData);
             }
 
@@ -225,13 +229,13 @@ public class Nfc {
             String options = "";
             // more
             if (isMore) {
-                Log.d(TAG, "more data to write");
+                logger.info("more data to write");
                 options += "more=1" + OTK_REQUEST_DATA_DELIM;
 
             }
             // pin
             if (pin != null && pin.length() > 0) {
-                Log.d(TAG, "pin=" + pin);
+                logger.info("pin=" + pin);
                 options += "pin=" + pin + OTK_REQUEST_DATA_DELIM;
             }
             if (options.length() > 0) {
@@ -244,7 +248,7 @@ public class Nfc {
             mIssuedCommand = cmd;
             ndef.close();
         } catch (IOException | FormatException | IllegalStateException e) {
-            e.printStackTrace();
+            logger.error("Write command exception:" + e);
             return Otk.OTK_RETURN_ERROR;
         }
         return Otk.OTK_RETURN_OK;

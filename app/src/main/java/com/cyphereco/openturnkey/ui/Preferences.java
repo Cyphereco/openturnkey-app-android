@@ -65,7 +65,8 @@ public class Preferences {
         else if (s.equals(Configurations.TxFeeType.CUSTOMIZED.name())) {
             return Configurations.TxFeeType.CUSTOMIZED;
         }
-        return Configurations.TxFeeType.CUSTOMIZED;
+        // Default
+        return Configurations.TxFeeType.LOW;
     }
 
     static public void setTxFee(Context ctx, TxFee txFee) {
@@ -92,6 +93,6 @@ public class Preferences {
 
     static public long getCustomizedTxFee(Context ctx) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        return prefs.getLong(CUSTOMIZED_TX_FEE, 0);
+        return prefs.getLong(CUSTOMIZED_TX_FEE, 1000);
     }
 }

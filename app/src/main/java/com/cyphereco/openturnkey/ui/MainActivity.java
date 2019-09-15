@@ -26,9 +26,15 @@ import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.Tx;
+import com.cyphereco.openturnkey.core.UnsignedTx;
+import com.cyphereco.openturnkey.db.DBTransItem;
+import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
+
+import org.slf4j.Logger;
 
 public class MainActivity extends AppCompatActivity
         implements DialogLocalCurrency.DialogLocalCurrecyListener,
@@ -39,6 +45,7 @@ public class MainActivity extends AppCompatActivity
         FragmentAddrbook.FragmentAddrbookListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
+    Logger logger = Log4jHelper.getLogger(TAG);
 
     public static final int REQUEST_CODE_QR_CODE = 0;
     public static final int REQUEST_CODE_PRE_AUTH = 1;
@@ -66,9 +73,14 @@ public class MainActivity extends AppCompatActivity
     private CurrencyExchangeRate mCurrencyExRate;
     AlertDialog.Builder mProgressDialogBuilder = null;
     AlertDialog mProgressDialog = null;
+    AlertDialog mOtkRemovedDialog = null;
+    AlertDialog.Builder mOtkRemovedDialogBuilder = null;
     AlertDialog.Builder mConfirmTerminateOpDialogBuilder = null;
+    AlertDialog.Builder mConfirmPaymentDialogBuilder = null;
     AlertDialog mConfirmTerminateOpDialog = null;
+    AlertDialog mConfirmPaymentDialog = null;
     private boolean mConfirmDialogResultValue;
+    private boolean mConfirmPaymentDialogResultValue;
 
     private Otk.Operation mOp = Otk.Operation.OTK_OP_NONE;
     private boolean mIsOpInProcessing = false;
@@ -86,7 +98,7 @@ public class MainActivity extends AppCompatActivity
      * @param intent
      */
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        Log.d(TAG, "onActivityResult:" + requestCode + " resultCode:" + resultCode);
+        logger.info("onActivityResult:" + requestCode + " resultCode:" + resultCode);
         if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
             if (resultCode == RESULT_OK) {
                 // Handle successful scan
@@ -186,10 +198,10 @@ public class MainActivity extends AppCompatActivity
                     if (mIsOpInProcessing == true) {
                         // Cache selected item
                         if (false == showConfirmDialogAndWaitResult(mOp, false)) {
-                            Log.d(TAG, "Confirmation cancelled!");
+                            logger.info("Confirmation cancelled!");
                             return false;
                         }
-                        Log.d(TAG, "Terminate Confirmed.");
+                        logger.info("Terminate Confirmed.");
                     }
 
                     Toolbar toolbar = findViewById(R.id.toolbar);
@@ -236,14 +248,13 @@ public class MainActivity extends AppCompatActivity
 
     /* class functions */
     static public boolean isRunning() {
-        Log.d(TAG, "isRunning:" + (mOtk != null));
         return (mOtk != null);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate");
+        logger.info("onCreate");
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -260,14 +271,16 @@ public class MainActivity extends AppCompatActivity
         }
 
         mProgressDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        mOtkRemovedDialogBuilder = new AlertDialog.Builder(MainActivity.this);
         mConfirmTerminateOpDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        mConfirmPaymentDialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
         mOtk = Otk.getInstance();
         mOtk.setEventListener(new Otk.OtkEventListener() {
             @Override
             public void onOtkEvent(OtkEvent event) {
                 OtkEvent.Type type = event.getType();
-                Log.d(TAG, "onOtkEvent:" + type.toString());
+                logger.info("onOtkEvent:" + type.toString());
                 // TODO: process event
                 if (type == OtkEvent.Type.CURRENCY_EXCHANGE_RATE_UPDATE) {
                     // Cache rate
@@ -280,9 +293,17 @@ public class MainActivity extends AppCompatActivity
                     // Store to preference
                     Preferences.setTxFee(getApplicationContext(), event.getTxFee());
                 } else if (type == OtkEvent.Type.APPROACH_OTK) {
-                    // TODO
                     hideProgressDialog();
+                    // Show dialog to indicate user not to remove OTK
+                    showOtkRemovedDialog();
                 } else if (type == OtkEvent.Type.OPERATION_IN_PROCESSING) {
+                    // Stop cancel timer
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        // Update rate
+                        ((FragmentOtk) mSelectedFragment).stopCancelTimer();
+                    }
+                    // Hide otk removed dialog
+                    hideOtkRemovedDialog();
                     // Show progress spin circle
                     showProgressDialog(getString(R.string.processing));
                 } else if (type == OtkEvent.Type.GENERAL_INFORMATION) {
@@ -292,23 +313,18 @@ public class MainActivity extends AppCompatActivity
                 } else if (type == OtkEvent.Type.SEND_BITCOIN_SUCCESS) {
                     hideProgressDialog();
                     Tx tx = event.getTx();
-                    Log.d(TAG, "From:" + tx.getFrom());
-                    Log.d(TAG, "To:" + tx.getTo());
-                    Log.d(TAG, "Hash:" + tx.getHash());
-                    Log.d(TAG, "Fee:" + tx.getFee());
-                    Log.d(TAG, "Amount:" + tx.getAmount());
-                    Log.d(TAG, "Time:" + tx.getTime());
-
+                    // Add transaction to database.
+                    addTxToDb(tx);
                     // Make sure we are in FragmentOtk
                     if (mSelectedFragment instanceof FragmentOtk) {
                         // Go back to pay fragment
                         mOp = Otk.Operation.OTK_OP_NONE;
                         mIsOpInProcessing = false;
-                        backToPayFragment();
+                        // TODO: Go to history page and show the tx
+                        goToHistoryFragment();
+                        // Show tx
+                        dialogBtcSent(tx);
                     }
-
-                    // Show tx
-                    dialogBtcSent(tx);
 
                 } else if ((type == OtkEvent.Type.SEND_BITCOIN_FAIL) ||
                         (type == OtkEvent.Type.COMMAND_EXECUTION_FAILED)) {
@@ -317,14 +333,30 @@ public class MainActivity extends AppCompatActivity
                     // Show error in doalog
                     dialogSentBtcFailed(event.getFailureReason());
 
+                    mOp = Otk.Operation.OTK_OP_NONE;
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
                     // Make sure we are in FragmentOtk
                     if (mSelectedFragment instanceof FragmentOtk) {
                         // Go back to pay fragment
-                        mOp = Otk.Operation.OTK_OP_NONE;
-                        mIsOpInProcessing = false;
                         backToPayFragment();
-
                     }
+                } else if (type == OtkEvent.Type.COMPLETE_PAYMENT_FAIL) {
+                    // Hide progress
+                    hideProgressDialog();
+                    mOp = Otk.Operation.OTK_OP_NONE;
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    // Make sure we are in FragmentOtk
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        // Add tx to db
+                        addTxToDb(event.getTx());
+                        // TODO: Go to history page and show the tx
+                        goToHistoryFragment();
+                        // Show error in doalog
+                        dialogSentBtcFailed(event.getFailureReason());
+                    }
+
                 } else if (type == OtkEvent.Type.RECIPIENT_ADDRESS) {
                     // Make sure we are in FragmentOtk
                     if (mSelectedFragment instanceof FragmentOtk) {
@@ -339,6 +371,21 @@ public class MainActivity extends AppCompatActivity
                     hideProgressDialog();
                     // Show pre-auth with pin dialog
                     dialogAuthByPin();
+                } else if (type == OtkEvent.Type.UNSIGNED_TX){
+                    if (mOp != Otk.Operation.OTK_OP_SIGN_PAYMENT) {
+                        logger.error("Got unsigned tx but sign payment is already terminated");
+                    }
+                    else {
+                        // Show dialog for user to confirm the payment
+                        UnsignedTx utx = event.getUnsignedTx();
+                        if (true == showConfirmPaymentDialog(utx)) {
+                            // Confirm payment
+                            mOtk.confirmPayment();
+                        } else {
+                            // Cancel payment
+                            onCancelButtonClick();
+                        }
+                    }
                 } else {
                 }
             }
@@ -349,14 +396,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        Log.d(TAG, "onNewIntent");
+        logger.info("onNewIntent");
         String action = intent.getAction();
 
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action) ||
                 NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
             int ret = mOtk.processIntent(intent, null);
             if (ret != Otk.OTK_RETURN_OK) {
-                Log.d(TAG, "process intent failed:" + ret);
+                logger.info("process intent failed:" + ret);
             }
         }
     }
@@ -364,7 +411,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume");
+        logger.info("onResume");
         IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         IntentFilter ndefDetected = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
         IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
@@ -488,7 +535,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void authByPin(String pin) {
-        Log.d(TAG, "pin:" + pin);
+        logger.info("pin:" + pin);
         mOtk.setPinForOperation(pin);
     }
 
@@ -520,7 +567,7 @@ public class MainActivity extends AppCompatActivity
 
     public void setCustomizedTxFee(double txFee) {
         // Store to preference
-        Log.d(TAG, "Customized fee:" + txFee);
+        logger.info("Customized fee:" + txFee);
         Preferences.setCustomizedTxFee(getApplicationContext(), BtcUtils.btcToSatoshi(txFee));
         updatePayConfig(toolbarMenu);
     }
@@ -697,7 +744,6 @@ public class MainActivity extends AppCompatActivity
     public void onGetRecipientAddressByReadNfcButtonClick(String address, String btcAmount, String lcAmount, boolean isAllFundsChecked) {
         // Cache op
         mOp = Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS;
-        mOtk.setOperation(Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setSelectedItemId(R.id.nav_menu_openturnkey);
@@ -721,12 +767,29 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void goToHistoryFragment() {
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+
+        bottomNav.setSelectedItemId(R.id.nav_menu_history);
+    }
+
     public void onCancelButtonClick() {
         Toast.makeText(this, getString(R.string.operation_cancelled), Toast.LENGTH_LONG).show();
+        hideConfirmPaymentDialog();
+        hideProgressDialog();
+        hideConfirmTerminateOpDialog();
+        hideOtkRemovedDialog();
         mOtk.cancelOperation();
         mOp = Otk.Operation.OTK_OP_NONE;
         mIsOpInProcessing = false;
         backToPayFragment();
+    }
+
+    public void onCancelTimeout() {
+        Toast.makeText(this, getString(R.string.operation_timeout), Toast.LENGTH_LONG).show();
+        mOtk.cancelOperation();
+        mOp = Otk.Operation.OTK_OP_NONE;
+        mIsOpInProcessing = false;
     }
 
     @Override
@@ -746,9 +809,8 @@ public class MainActivity extends AppCompatActivity
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.d(TAG, "onCancel()");
+                        logger.info("onCancel()");
                         onCancelButtonClick();
-                        hideProgressDialog();
                     }
                 })
                 .setCancelable(true)
@@ -761,17 +823,34 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void showOtkRemovedDialog() {
+        if (mOtkRemovedDialog != null && mOtkRemovedDialog.isShowing()) {
+            return;
+        }
+        mOtkRemovedDialog = mOtkRemovedDialogBuilder.setTitle(getString(R.string.in_operation))
+                .setMessage(R.string.do_not_remove_otk)
+                .setPositiveButton(R.string.ok, null)
+                .setCancelable(true)
+                .show();
+    }
+
+    private void hideOtkRemovedDialog() {
+        if (mOtkRemovedDialog != null) {
+            mOtkRemovedDialog.dismiss();
+        }
+    }
+
     boolean showConfirmDialogAndWaitResult(Otk.Operation op, final boolean isOtkOptionsSet) {
         final Handler handler = new Handler() {
             @Override
             public void handleMessage(Message mesg) {
-                Log.d(TAG, "msg:" + mesg.toString());
+                logger.info("msg:" + mesg.toString());
                 throw new RuntimeException();
             }
         };
 
         if (mConfirmTerminateOpDialog != null && mConfirmTerminateOpDialog.isShowing()) {
-            Log.d(TAG, "Confirm dialog is shown, should be some error!");
+            logger.info("Confirm dialog is shown, should be some error!");
         }
 
         mConfirmTerminateOpDialog = mConfirmTerminateOpDialogBuilder.setTitle(R.string.terminate_op)
@@ -779,7 +858,7 @@ public class MainActivity extends AppCompatActivity
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.d(TAG, "onCancel()");
+                        logger.info("onCancel()");
                         mConfirmDialogResultValue = false;
                         handler.sendMessage(handler.obtainMessage());
                         hideConfirmTerminateOpDialog();
@@ -788,7 +867,7 @@ public class MainActivity extends AppCompatActivity
                 .setPositiveButton(R.string.terminate, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.d(TAG, "onTerminate()");
+                        logger.info("onTerminate()");
                         hideConfirmTerminateOpDialog();
                         mConfirmDialogResultValue = true;
                         // Terminate current op
@@ -798,6 +877,7 @@ public class MainActivity extends AppCompatActivity
                         if (isOtkOptionsSet) {
                             ((FragmentOtk) mSelectedFragment).hideCancelButton();
                         }
+                        ((FragmentOtk) mSelectedFragment).stopCancelTimer();
                         mOp = Otk.Operation.OTK_OP_NONE;
                         handler.sendMessage(handler.obtainMessage());
                     }
@@ -817,6 +897,65 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    boolean showConfirmPaymentDialog(UnsignedTx utx) {
+        final Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message mesg) {
+                logger.info("msg:" + mesg.toString());
+                throw new RuntimeException();
+            }
+        };
+
+        if (mConfirmPaymentDialog != null && mConfirmPaymentDialog.isShowing()) {
+            logger.error("Confirm dialog is shown, should be some error!");
+        }
+
+        // From:
+        // To:
+        // Amount:
+        // Fee:
+        // Estimated time to be confirmed:
+
+        String msg = getString(R.string.from) + utx.getFrom() + "\n" +
+                getString(R.string.to) + utx.getTo() + "\n" +
+                getString(R.string.text_amount) + String.format("%.8f", utx.getAmount()) + "\n" +
+                getString(R.string.text_fee_in_satoshi) +  utx.getFee() + "\n" +
+                getString(R.string.text_estimated_time) + BtcUtils.getEstimatedTime(getApplicationContext(), BtcUtils.btcToSatoshi(utx.getFee()));
+        mConfirmPaymentDialog = mConfirmPaymentDialogBuilder.setTitle(R.string.confirm_payment)
+                .setMessage(msg)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        logger.info("onCancel()");
+                        mConfirmPaymentDialogResultValue = false;
+                        handler.sendMessage(handler.obtainMessage());
+                        onCancelButtonClick();
+                    }
+                })
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        logger.info("onOk()");
+                        hideConfirmPaymentDialog();
+                        mConfirmPaymentDialogResultValue = true;
+                        handler.sendMessage(handler.obtainMessage());
+                    }
+                })
+                .setCancelable(true)
+                .show();
+        try {
+            Looper.loop();
+        } catch (RuntimeException e) {
+        }
+        return mConfirmPaymentDialogResultValue;
+    }
+
+    private void hideConfirmPaymentDialog() {
+        if (mConfirmPaymentDialog != null) {
+            mConfirmPaymentDialog.dismiss();
+        }
+    }
+
     private void clearCachedPayFragmentData() {
         mRecipientAddress = "";
         mBtcAmount = "";
@@ -828,6 +967,20 @@ public class MainActivity extends AppCompatActivity
     public void onAddressbookPayingButtonClick(String address) {
         mRecipientAddress = address;
         backToPayFragment();
+    }
+
+    private void addTxToDb(Tx tx) {
+        if (tx == null) {
+            logger.error("addTxToDb(): tx is null");
+            return;
+        }
+        logger.debug("addTxToDb() tx:\n{}", tx.toString());
+        // Add transaction to database.
+        DBTransItem dbTrans = new DBTransItem(0, BtcUtils.convertDateTimeStringToLong(tx.getTime()), tx.getFrom(), tx.getTo(), tx.getAmount(), tx.getFee(),
+                tx.getStatus().toInt(), tx.getDesc(), tx.getRaw());
+        OpenturnkeyDB otkDB = new OpenturnkeyDB(getApplicationContext());
+        otkDB.addTransaction(dbTrans);
+        logger.debug("DB tx count:{}", otkDB.getTransactionCount());
     }
 }
 

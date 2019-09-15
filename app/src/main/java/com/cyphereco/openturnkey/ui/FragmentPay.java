@@ -28,9 +28,13 @@ import android.widget.TextView;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
+
+import org.slf4j.Logger;
 
 public class FragmentPay extends Fragment {
     public static final String TAG = FragmentPay.class.getSimpleName();
+    Logger logger = Log4jHelper.getLogger(TAG);
 
     private static final int ZXING_CAMERA_PERMISSION = 1;
 
@@ -137,7 +141,7 @@ public class FragmentPay extends Fragment {
             }
             CheckBox cb = view.findViewById(R.id.checkBox_use_all_funds);
             boolean b = getArguments().getBoolean(ARG_USE_ALL_FUNDS);
-            Log.d(TAG, "Checked:" + b);
+            logger.info("Checked:" + b);
             cb.setChecked(b);
         }
 

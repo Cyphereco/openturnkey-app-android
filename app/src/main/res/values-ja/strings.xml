@@ -75,4 +75,11 @@
     <string name="fetching">データ更新中...</string>
     <string name="address_copied">アドレスコピーしました</string>
     <string name="please_wait">お少々待ちください</string>
+    <string name="operation_timeout">Operation Timeout</string>
+    <string name="do_not_remove_otk">Do not remove OTK during operation</string>
+    <string name="confirm_payment">Please Confirm Payment</string>
+    <string name="text_estimated_time">"Estimated Time(min): "</string>
+    <string name="text_fee_in_satoshi">Fees(in satoshi):</string>
+    <string name="unknown_reason">Unknown Reason</string>
+    <string name="in_operation">In Operation</string>
 </resources>

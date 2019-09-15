@@ -1,6 +1,16 @@
 package com.cyphereco.openturnkey.core;
 
+import com.blockcypher.model.transaction.Transaction;
+import com.blockcypher.model.transaction.output.Output;
+import com.cyphereco.openturnkey.utils.BtcUtils;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
+
+import org.slf4j.Logger;
+
 public class Tx {
+    public static final String TAG = Tx.class.getSimpleName();
+    Logger logger = Log4jHelper.getLogger(TAG);
+
     private String mFrom;
     private String mTo;
     private String mTime;
@@ -8,8 +18,49 @@ public class Tx {
     private double mFee;
     private String mRaw;
     private String mHash;
+    private Status mStatus;
+    private String mDesc;
 
-    public Tx(String hash, String from, String to, double amount, double fee, String time, String raw) {
+    public enum Status {
+        STATUS_SUCCESS(0),
+        STATUS_NETWORK_FAILURE(1),
+        STATUS_UNKNOWN_FAILURE(2),
+        STATUS_SIGNATURE_MISMATCH(3);
+
+        private final int value;
+        private Status(int s) {
+            value = s;
+        }
+        public int toInt(){
+            return value;
+        }
+    }
+
+    public Tx(String from, String to, Transaction trans, Status status) {
+        this(from, to, trans, status, "");
+    }
+
+    public Tx(String from, String to, Transaction trans, Status status, String errorDesc) {
+        mFrom = from;
+        mTo = to;
+        double amount = 0.0;
+        // Find amount from outputs
+        for (int i = 0; i < trans.getOutputs().size(); i++) {
+            Output o = trans.getOutputs().get(i);
+            if (o.getAddresses().get(0).equals(mTo)) {
+                amount = BtcUtils.satoshiToBtc(o.getValue().longValue());
+                break;
+            }
+        }
+        mHash = trans.getHash();
+        mAmount = amount;
+        mFee = BtcUtils.satoshiToBtc(trans.getFees().longValue());
+        mTime = trans.getReceived();
+        mStatus = status;
+        mDesc = errorDesc;
+    }
+
+    public Tx(String hash, String from, String to, double amount, double fee, String time, String raw, Status status, String errorDesc) {
         mHash = hash;
         mFrom = from;
         mTo = to;
@@ -17,6 +68,8 @@ public class Tx {
         mFee = fee;
         mTime = time;
         mRaw = raw;
+        mStatus = status;
+        mDesc = errorDesc;
     }
 
     public String getFrom() { return mFrom;}
@@ -26,4 +79,18 @@ public class Tx {
     public double getFee() { return mFee;}
     public String getTime() { return mTime;}
     public String getRaw() { return mRaw;}
+    public String getDesc() { return mDesc;}
+    public Status getStatus() { return mStatus;}
+    public void setFrom(String from) {mFrom = from;}
+    public void setTo(String to) {mTo = to;}
+    public String toString() {
+        return "From:" + mFrom +
+                "\nTo:" + mTo +
+                "\nHash:" + mHash +
+                "\nAmount:" + mAmount +
+                "\nFee:" + mFee +
+                "\nTime:" + mTime +
+                "\nStatus:" + mStatus +
+                "\nError desc:" + mDesc;
+    }
 }

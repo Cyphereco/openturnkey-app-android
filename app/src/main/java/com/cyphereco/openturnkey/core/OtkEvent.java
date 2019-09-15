@@ -1,12 +1,9 @@
 package com.cyphereco.openturnkey.core;
 
-import com.blockcypher.model.transaction.Transaction;
-import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 import com.cyphereco.openturnkey.utils.TxFee;
 
 import java.math.BigDecimal;
-import java.util.concurrent.TransferQueue;
 
 public class OtkEvent {
 
@@ -17,6 +14,7 @@ public class OtkEvent {
         RECIPIENT_ADDRESS,
         SEND_BITCOIN_SUCCESS,
         SEND_BITCOIN_FAIL,
+        COMPLETE_PAYMENT_FAIL,
         APPROACH_OTK,
         CURRENCY_EXCHANGE_RATE_UPDATE,
         TX_FEE_UPDATE,
@@ -25,6 +23,7 @@ public class OtkEvent {
         OTK_UNAUTHORIZED,
         COMMAND_EXECUTION_FAILED,
         BALANCE_UPDATE,
+        UNSIGNED_TX,
     }
 
     private Type mType;
@@ -32,6 +31,7 @@ public class OtkEvent {
     private String mDesc;
     private CurrencyExchangeRate mCurrencyExRate = null;
     private Tx mTx;
+    private UnsignedTx mUnsignedTx;
     private BigDecimal mBalance;
     private TxFee mTxFee;
 
@@ -55,9 +55,14 @@ public class OtkEvent {
         mCurrencyExRate = rate;
     }
 
-    public OtkEvent(Tx tx) {
-        mType = Type.SEND_BITCOIN_SUCCESS;
+    public OtkEvent(Type eventType, Tx tx) {
+        mType = eventType;
         mTx = tx;
+    }
+
+    public OtkEvent(UnsignedTx tx) {
+        mType = Type.UNSIGNED_TX;
+        mUnsignedTx = tx;
     }
 
     public OtkEvent(Type eventType) {
@@ -80,6 +85,7 @@ public class OtkEvent {
     public String getAddress() { return mDesc;}
     public String getFailureReason() { return mDesc;}
     public Tx getTx() { return mTx;}
+    public UnsignedTx getUnsignedTx() { return mUnsignedTx;}
     public OtkData getData() {return mData;}
     public CurrencyExchangeRate getCurrencyExRate() {return mCurrencyExRate;}
     public BigDecimal getBalance() {return mBalance;}

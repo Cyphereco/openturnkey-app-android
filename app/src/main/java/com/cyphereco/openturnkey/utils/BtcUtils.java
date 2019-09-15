@@ -21,14 +21,22 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 
 public class BtcUtils {
     public static final String TAG = BtcUtils.class.getSimpleName();
+    static Logger logger = Log4jHelper.getLogger(TAG);
+
 
     /** Signed message header */
     private static final String BITCOIN_SIGNED_MESSAGE_HEADER = "Bitcoin Signed Message:\n";
@@ -405,5 +413,41 @@ public class BtcUtils {
             txFees = Preferences.getCustomizedTxFee(ctx);
         }
         return txFees;
+    }
+
+    static public long getEstimatedTime(Context ctx, long fee) {
+        TxFee txFee = Preferences.getTxFee(ctx);
+        if (fee > txFee.getHigh() * 200) {
+            // Faster than 1 block
+            return 10;
+        }
+        if (fee > txFee.getMid() * 200) {
+            // Faster than half hour
+            return 30;
+        }
+        if (fee > txFee.getLow() * 200) {
+            // Faster than 1 hour
+            return 60;
+        }
+        return (fee / (txFee.getLow() * 200) * 60);
+    }
+
+    static public long convertDateTimeStringToLong(String dateTime) {
+        try {
+            //2019-09-15T16:49:49.584902078Z
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'");
+            Date d = format.parse(dateTime);
+            return d.getTime();
+        } catch (ParseException e ) {
+            logger.error("Failed to parse {}. Exception:{}" + e);
+            return 0;
+        }
+    }
+
+    static public String convertDateTimeStringFromLong(long time) {
+        Date date = new Date(time);
+        //2019-09-15T16:49:49.584902078Z
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'");
+        return format.format(date);
     }
 }

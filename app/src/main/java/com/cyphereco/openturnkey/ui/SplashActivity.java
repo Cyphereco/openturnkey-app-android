@@ -1,7 +1,10 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,36 +12,79 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.cyphereco.openturnkey.R;
+import com.cyphereco.openturnkey.core.Configurations;
+import com.cyphereco.openturnkey.db.OpenturnkeyDB;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
+
+import org.slf4j.Logger;
+
 
 public class SplashActivity extends AppCompatActivity {
     public static final String TAG = SplashActivity.class.getSimpleName();
+    Logger logger;
+
     private static int SPLASH_TIMEOUT = 3000;
     static int i = 0;
     private boolean isStarted = false;
+    private static final int REQUEST_CODE = 0x11;
+
+    String[] permissions = {"android.permission.WRITE_EXTERNAL_STORAGE"};
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_CODE) {
+            logger = Log4jHelper.getLogger(TAG);
+
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                logger.info("Permission granted");
+            }
+            else {
+                logger.info("Permission is not granted");
+            }
+
+            // Test code To be removed
+            OpenturnkeyDB mOtkDB = new OpenturnkeyDB(getApplicationContext());
+            logger.debug("trans:" + mOtkDB.getAllTransaction());
+
+            if (MainActivity.isRunning()) {
+                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                startActivity(intent);
+                return;
+            }
+            SplashLauncher splashLauncher = new SplashLauncher();
+            splashLauncher.start();
+        }
+    }
+
+   @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate");
-        if (MainActivity.isRunning()) {
-            Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-            startActivity(intent);
-            return;
-        }
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_splash);
 
-        SplashLauncher splashLauncher = new SplashLauncher();
-        splashLauncher.start();
+        if (Configurations.writeLogToFile) {
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE); // without sdk version check
 
+        }
+        else {
+            logger = Log4jHelper.getLogger(TAG);
+            if (MainActivity.isRunning()) {
+                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                startActivity(intent);
+                return;
+            }
+            SplashLauncher splashLauncher = new SplashLauncher();
+            splashLauncher.start();
+        }
     }
 
     @Override
     protected void onNewIntent(final Intent intent) {
         super.onNewIntent(intent);
-        Log.d(TAG, "onNewIntent():" + intent.getAction());
         if (isStarted == false) {
             // Wait  few seconds and call onNewIntent again.
             final Handler handler = new Handler();
@@ -74,7 +120,6 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume");
         if (MainActivity.isRunning()) {
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(intent);
@@ -84,15 +129,17 @@ public class SplashActivity extends AppCompatActivity {
     private class SplashLauncher extends Thread {
         @Override
         public void run() {
+            logger.info("Start MainActivity in {} seconds", SPLASH_TIMEOUT / 1000);
+
             try {
                 sleep(SPLASH_TIMEOUT);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Exception:", e);
             }
-
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(intent);
             isStarted = true;
+            logger.info("MainActivity is starting...");
         }
     }
 }
