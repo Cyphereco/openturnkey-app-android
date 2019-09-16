@@ -101,5 +101,7 @@
     <string name="text_fee_in_satoshi">Fees(in satoshi):</string>
     <string name="unknown_reason">Unknown Reason</string>
     <string name="in_operation">In Operation</string>
+    <string name="seg_wit_address_is_not_supported">SigWit Address is not supported at the moment</string>
+    <string name="invalid_address">Invalid Address</string>
 
 </resources>

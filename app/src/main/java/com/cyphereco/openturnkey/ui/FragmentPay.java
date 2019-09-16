@@ -26,6 +26,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
+import com.cyphereco.openturnkey.core.Configurations;
+import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
@@ -207,9 +209,17 @@ public class FragmentPay extends Fragment {
                 // Check if recipient address is valid.
                 View v = getView();
                 try {
-                    // TODO check if address is valid
+                    // Check if address is valid
                     if (mRecipientAddress == null || mRecipientAddress.length() == 0) {
                         Snackbar.make(view, getString(R.string.recipient_is_empty), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                        return;
+                    }
+                    if (true == BtcUtils.isSegWitAddress(!Configurations.isTestnet(), mRecipientAddress)) {
+                        Snackbar.make(view, getString(R.string.seg_wit_address_is_not_supported), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                        return;
+                    }
+                    if (false == BtcUtils.validateAddress(!Configurations.isTestnet(), mRecipientAddress)) {
+                        Snackbar.make(view, getString(R.string.invalid_address), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                         return;
                     }
                     CheckBox cb = v.findViewById(R.id.checkBox_use_all_funds);

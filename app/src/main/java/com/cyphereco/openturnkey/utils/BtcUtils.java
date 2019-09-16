@@ -43,6 +43,18 @@ public class BtcUtils {
 
     private BtcUtils() {}
 
+    private static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
+    private static  final int[] INDEXES = new int[128];
+    static {
+
+        for (int i = 0; i < INDEXES.length; i++) {
+            INDEXES[i] = -1;
+        }
+        for (int i = 0; i < ALPHABET.length; i++) {
+            INDEXES[ALPHABET[i]] = i;
+        }
+    }
+
     public static byte[] generateMessageToSign(String message) {
         byte[] contents;
         try (ByteArrayOutputStream outStream = new ByteArrayOutputStream(message.length()*2)) {
@@ -449,5 +461,68 @@ public class BtcUtils {
         //2019-09-15T16:49:49.584902078Z
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'");
         return format.format(date);
+    }
+
+    static public boolean isSegWitAddress(boolean isMainNet, String address) {
+        try {
+            if (isMainNet) {
+                if (address.substring(0, 3).equals("bc1")) {
+                    return true;
+                }
+            }
+            else {
+                // testnet
+                if (address.substring(0, 3).equals("tb1")) {
+                    return true;
+                }
+            }
+        }
+        catch (Exception e) {
+            logger.error("isSegWitAddress() ex:" + e);
+        }
+        return false;
+    }
+
+    static public boolean validateAddress(boolean isMainNet, String address) {
+        logger.debug("mainnet:{} address:", isMainNet, address);
+        // check prefix
+        try {
+            char[] addr = address.toCharArray();
+            if (isMainNet) {
+                if (addr[0] != '1' && addr[0] != '3') {
+                    logger.error("Invalid prefix:{}", addr[0]);
+                    return false;
+                }
+            }
+            else {
+                // Testnet
+                if (addr[0] != 'm' && addr[0] != 'n' && addr[0] != '2') {
+                    logger.error("Invalid prefix:{}", addr[0]);
+                    return false;
+                }
+            }
+            // Check length
+            if (addr.length < 26 || addr.length > 35) {
+                logger.error("Invalid length:{}", addr.length);
+                return false;
+            }
+            // Check is all are valid character
+            for (int i = 1; i < addr.length - 1; i++) {
+                int digit58 = -1;
+                char c = addr[i];
+                if (c >= 0 && c < 128) {
+                    digit58 = INDEXES[c];
+                }
+                if (digit58 < 0) {
+                    logger.error("Invalid address:{} at {}", address, i);
+                    return false;
+                }
+            }
+            return true;
+        }
+        catch (Exception e) {
+            logger.error("validateAddress() ex:" + e);
+        }
+        return false;
     }
 }
