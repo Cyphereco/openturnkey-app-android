@@ -151,6 +151,17 @@ public class OpenturnkeyDB {
         return otkDB.delete(TRANS_TABLE_NAME, where , null) > 0;
     }
 
+    public DBTransItem getTransactionItemById(long id) {
+        Cursor cursor = otkDB.query(TRANS_TABLE_NAME, null,
+                TRANS_KEY_ID_COL + "=?", new String[] {String.valueOf(id)},
+                null, null, null, null);
+        if (1 == cursor.getCount()) {
+            cursor.moveToNext();
+            return generateTransItemByQueryResult(cursor);
+        }
+        return null;
+    }
+
     public List<DBTransItem> getAllTransaction() {
         List<DBTransItem> result = new ArrayList<>();
         Cursor cursor = otkDB.query(TRANS_TABLE_NAME, null,null,null,
