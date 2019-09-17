@@ -23,8 +23,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -37,6 +35,8 @@ public class BtcUtils {
     public static final String TAG = BtcUtils.class.getSimpleName();
     static Logger logger = Log4jHelper.getLogger(TAG);
 
+    static final BigInteger HALF_CURVE_ORDER = new BigInteger("7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0", 16);
+    static final BigInteger CURVE_ORDER = new BigInteger("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16);
 
     /** Signed message header */
     private static final String BITCOIN_SIGNED_MESSAGE_HEADER = "Bitcoin Signed Message:\n";
@@ -524,5 +524,12 @@ public class BtcUtils {
             logger.error("validateAddress() ex:" + e);
         }
         return false;
+    }
+
+    static public BigInteger lowSValue(BigInteger s) {
+        if (s.compareTo(HALF_CURVE_ORDER) <= 0) {
+            return s;
+        }
+        return CURVE_ORDER.subtract(s);
     }
 }

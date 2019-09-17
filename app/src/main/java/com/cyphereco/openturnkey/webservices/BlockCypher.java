@@ -10,8 +10,6 @@ import com.blockcypher.model.transaction.Transaction;
 import com.blockcypher.model.transaction.intermediary.IntermediaryTransaction;
 import com.blockcypher.model.transaction.output.Output;
 import com.cyphereco.openturnkey.core.Configurations;
-import com.cyphereco.openturnkey.core.Otk;
-import com.cyphereco.openturnkey.core.Tx;
 import com.cyphereco.openturnkey.core.UnsignedTx;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
@@ -181,6 +179,8 @@ public class BlockCypher extends BtcBase {
             mCachedUnsignedTx.addPubKeys(publicKey);
             BigInteger r = new BigInteger(sig.substring(0, 64),16);
             BigInteger s = new BigInteger(sig.substring(64, 128),16);
+            // To ensure low S values for BIP 62
+            s = BtcUtils.lowSValue(s);
             String signedString = bytesToHexString(toDER(r, s));
             mCachedUnsignedTx.addSignature(signedString);
         }
