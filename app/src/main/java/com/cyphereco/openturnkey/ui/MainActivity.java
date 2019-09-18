@@ -354,7 +354,7 @@ public class MainActivity extends AppCompatActivity
                         // TODO: Go to history page and show the tx
                         goToHistoryFragment();
                         // Show error in doalog
-                        dialogSentBtcFailed(event.getFailureReason());
+                        dialogSentBtcFailed(event.getTx().getDesc());
                     }
 
                 } else if (type == OtkEvent.Type.RECIPIENT_ADDRESS) {

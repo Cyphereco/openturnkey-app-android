@@ -579,7 +579,9 @@ public class Otk {
                         }
                     }
                     catch (BlockCypherException e) {
-                        Tx tx = new Tx(mFrom, mTo, e.getBlockCypherError().getTx(), Tx.Status.STATUS_UNKNOWN_FAILURE);
+                        // parse error
+                        String reason = BlockCypher.parseError(e.getBlockCypherError().getErrors().get(0).toString());
+                        Tx tx = new Tx(mFrom, mTo, e.getBlockCypherError().getTx(), Tx.Status.STATUS_UNKNOWN_FAILURE, reason);
                         Message msg = new Message();
                         msg.what = OTK_MSG_COMPLETE_PAYMENT_FAILED;
                         msg.obj = tx;

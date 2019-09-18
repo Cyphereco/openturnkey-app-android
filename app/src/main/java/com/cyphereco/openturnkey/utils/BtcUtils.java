@@ -530,6 +530,7 @@ public class BtcUtils {
         if (s.compareTo(HALF_CURVE_ORDER) <= 0) {
             return s;
         }
+        logger.info("s > half curve order");
         return CURVE_ORDER.subtract(s);
     }
 }
