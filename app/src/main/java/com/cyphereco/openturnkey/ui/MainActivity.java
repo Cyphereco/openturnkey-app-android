@@ -490,6 +490,14 @@ public class MainActivity extends AppCompatActivity
             case R.id.menu_history_clear_history:
                 dialogClearHistory();
                 return true;
+            case R.id.menu_history_success_tx:
+                startActivityForResult(new Intent(this, ActivityExampleSuccessTx.class),
+                        MainActivity.REQUEST_CODE_CONTACT_ADD);
+                return true;
+            case R.id.menu_history_fail_tx:
+                startActivityForResult(new Intent(this, ActivityExampleFailTx.class),
+                        MainActivity.REQUEST_CODE_CONTACT_ADD);
+                return true;
             case R.id.menu_pay_local_curreny:
                 dialogLocalCurrency();
                 return true;
@@ -507,6 +515,10 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.menu_addresses_add:
                 startActivityForResult(new Intent(this, AddContactActivity.class),
+                        MainActivity.REQUEST_CODE_CONTACT_ADD);
+                return true;
+            case R.id.menu_tmp_add_example:
+                startActivityForResult(new Intent(this, ActivityExampleAddrEditor.class),
                         MainActivity.REQUEST_CODE_CONTACT_ADD);
                 return true;
             case R.id.menu_openturnkey_read_generalinformation:

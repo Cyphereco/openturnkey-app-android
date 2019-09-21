@@ -141,8 +141,8 @@
 
     <EditText
         android:id="@+id/user_note_context"
-        android:layout_width="250dp"
-        android:layout_height="60dp"
+        android:layout_width="220dp"
+        android:layout_height="80dp"
         android:layout_marginBottom="8dp"
         android:autofillHints=""
         android:ems="10"
@@ -169,8 +169,10 @@
 
     <TextView
         android:id="@+id/btc_address_context"
-        android:layout_width="300dp"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLength="34"
         android:text="1LG9fDp3do4X2tEf4k7V4uCYhNUmSq6vL8"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
@@ -195,7 +197,6 @@
         android:layout_height="32dp"
         android:layout_marginStart="8dp"
         android:contentDescription="@string/mint_inforamtion"
-        app:layout_constraintBottom_toBottomOf="@+id/user_note_context"
         app:layout_constraintStart_toEndOf="@+id/user_note_context"
         app:layout_constraintTop_toTopOf="@+id/user_note_context"
         app:srcCompat="@drawable/ic_info_outline_black_24dp" />

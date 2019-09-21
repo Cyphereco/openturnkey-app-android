@@ -103,5 +103,7 @@
     <string name="in_operation">In Operation</string>
     <string name="seg_wit_address_is_not_supported">SigWit Address is not supported at the moment</string>
     <string name="invalid_address">Invalid Address</string>
+    <string name="alias">Alias</string>
+    <string name="save">Save</string>
 
 </resources>

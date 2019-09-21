@@ -2,6 +2,7 @@ package com.cyphereco.openturnkey.ui;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
@@ -34,6 +35,7 @@ public class AddContactActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_contact);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         ImageButton cancelBtn = findViewById(R.id.cancel_btn_add_new_contact);
         cancelBtn.setOnClickListener(new View.OnClickListener() {

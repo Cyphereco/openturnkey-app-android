@@ -187,6 +187,7 @@ public class BlockCypher extends BtcBase {
 
         try {
             Transaction trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
+            logger.info("TX Sent: " + trans.toString());
             mCachedUnsignedTx = null;
             return trans;
         }

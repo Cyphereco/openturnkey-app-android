@@ -14,10 +14,11 @@
         android:layout_marginEnd="8dp"
         android:clickable="true"
         android:contentDescription="@string/scan_qr_code"
+        android:focusable="true"
+        android:padding="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
-        app:srcCompat="@drawable/ic_scan_qrcode_foreground"
-        android:focusable="true" />
+        app:srcCompat="@drawable/ic_action_scan_qr_code" />
 
     <ImageView
         android:id="@+id/icon_read_nfc"
@@ -27,10 +28,11 @@
         android:layout_marginEnd="8dp"
         android:clickable="true"
         android:contentDescription="@string/read_nfc"
+        android:focusable="true"
+        android:paddingTop="4dp"
         app:layout_constraintEnd_toStartOf="@+id/icon_scan_qrcode"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
-        app:srcCompat="@drawable/ic_read_nfc_foreground"
-        android:focusable="true" />
+        app:srcCompat="@drawable/ic_read_nfc_foreground" />
 
     <ImageView
         android:id="@+id/icon_select_from_addresses"
@@ -53,11 +55,12 @@
         android:layout_marginEnd="8dp"
         android:clickable="true"
         android:contentDescription="@string/paste_clipboard"
+        android:focusable="true"
+        android:paddingTop="4dp"
         android:tint="@color/colorPrimary"
         app:layout_constraintEnd_toStartOf="@+id/icon_select_from_addresses"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
-        app:srcCompat="@drawable/ic_content_paste_black_24dp"
-        android:focusable="true" />
+        app:srcCompat="@drawable/ic_content_paste_black_24dp" />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/textInputLayout"
