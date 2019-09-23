@@ -64,7 +64,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
 
         /* init NFC. */
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        mOtk = Otk.getInstance();
+        mOtk = Otk.getInstance(getApplicationContext());
 
         final LocalCurrency lc = Preferences.getLocalCurrency(getApplicationContext());
         TextView tv = findViewById(R.id.label_fiat);

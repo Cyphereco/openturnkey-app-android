@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity
         mConfirmTerminateOpDialogBuilder = new AlertDialog.Builder(MainActivity.this);
         mConfirmPaymentDialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
-        mOtk = Otk.getInstance();
+        mOtk = Otk.getInstance(getApplicationContext());
         mOtk.setEventListener(new Otk.OtkEventListener() {
             @Override
             public void onOtkEvent(OtkEvent event) {

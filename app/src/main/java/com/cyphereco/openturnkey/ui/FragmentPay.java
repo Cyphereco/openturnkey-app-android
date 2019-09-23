@@ -214,11 +214,11 @@ public class FragmentPay extends Fragment {
                         Snackbar.make(view, getString(R.string.recipient_is_empty), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                         return;
                     }
-                    if (true == BtcUtils.isSegWitAddress(!Configurations.isTestnet(), mRecipientAddress)) {
+                    if (true == BtcUtils.isSegWitAddress(!Preferences.isTestnet(getContext()), mRecipientAddress)) {
                         Snackbar.make(view, getString(R.string.seg_wit_address_is_not_supported), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                         return;
                     }
-                    if (false == BtcUtils.validateAddress(!Configurations.isTestnet(), mRecipientAddress)) {
+                    if (false == BtcUtils.validateAddress(!Preferences.isTestnet(getContext()), mRecipientAddress)) {
                         Snackbar.make(view, getString(R.string.invalid_address), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                         return;
                     }

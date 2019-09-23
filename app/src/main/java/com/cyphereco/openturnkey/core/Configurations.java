@@ -15,7 +15,7 @@ public class Configurations {
     }
 
     // Set this for main net or test net
-    static Network mNetwork = Network.TESTNET;
+    static public Network network = Network.TESTNET;
     //static Network mNetwork = Network.MAINNET;
 
     // This value should be define according to OTK's definition
@@ -26,7 +26,10 @@ public class Configurations {
     static public long txFeeHigh = 16;
     static public boolean writeLogToFile = true;
 
-    static public boolean isTestnet() {
-        return (mNetwork == Network.TESTNET);
+//    static public boolean isTestnet() {
+//        return (network == Network.TESTNET);
+//    }
+    static public void setNetwork(Network nw) {
+        network = nw;
     }
 }

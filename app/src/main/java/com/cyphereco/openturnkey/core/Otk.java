@@ -1,5 +1,6 @@
 package com.cyphereco.openturnkey.core;
 
+import android.content.Context;
 import android.content.Intent;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
@@ -108,13 +109,18 @@ public class Otk {
     static Timer mTimerRate = new Timer();
     static Timer mTimerTxFee = new Timer();
 
+    // Application  context
+    static Context mCtx;
+
     /**
      * Singleton retrieval of the OtkCoin.
      *
      * @return The singleton.
      */
-    public static synchronized Otk getInstance() {
+    public static synchronized Otk getInstance(Context ctx) {
         logger.info("getInstance()");
+
+        mCtx = ctx;
 
         if (null == mOtk) {
             mOtk = new Otk();
@@ -526,7 +532,7 @@ public class Otk {
                 synchronized (this) {
                     try {
                         long amountInSatoshi = BtcUtils.btcToSatoshi(mAmount);
-                        UnsignedTx unsigendTx = BlockCypher.getInstance().sendBitcoin(from, to, amountInSatoshi, txFees, feeIncluded);
+                        UnsignedTx unsigendTx = BlockCypher.getInstance(mCtx).sendBitcoin(from, to, amountInSatoshi, txFees, feeIncluded);
                         Message msg = new Message();
                         msg.what = OTK_MSG_GOT_UNSIGNED_TX;
                         msg.obj = unsigendTx;
@@ -561,7 +567,7 @@ public class Otk {
             public void run() {
                 synchronized (this) {
                     try {
-                        Transaction trans = BlockCypher.getInstance().completeSendBitcoin(publicKey, sigResult);
+                        Transaction trans = BlockCypher.getInstance(mCtx).completeSendBitcoin(publicKey, sigResult);
                         if (trans != null) {
                             // Success
                             Tx tx = new Tx(mFrom, mTo, trans, Tx.Status.STATUS_SUCCESS);
@@ -605,7 +611,7 @@ public class Otk {
             @Override
             public void run() {
                 synchronized (this) {
-                    BigDecimal b = BlockCypher.getInstance().getBalance(address);
+                    BigDecimal b = BlockCypher.getInstance(mCtx).getBalance(address);
                     OtkEvent event = new OtkEvent(OtkEvent.Type.BALANCE_UPDATE, address, b, mCurrencyExRate);
                     sendEvent(event);
                 }

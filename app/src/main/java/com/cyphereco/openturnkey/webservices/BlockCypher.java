@@ -1,6 +1,7 @@
 package com.cyphereco.openturnkey.webservices;
 
 
+import android.content.Context;
 import android.util.Log;
 
 import com.blockcypher.context.BlockCypherContext;
@@ -11,6 +12,7 @@ import com.blockcypher.model.transaction.intermediary.IntermediaryTransaction;
 import com.blockcypher.model.transaction.output.Output;
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.UnsignedTx;
+import com.cyphereco.openturnkey.ui.Preferences;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
@@ -31,17 +33,18 @@ public class BlockCypher extends BtcBase {
     static Logger logger = Log4jHelper.getLogger(TAG);
 
     private static BlockCypher mBc = null;
-    BlockCypherContext mBcCtx;
+    private static BlockCypherContext mBcCtx;
     IntermediaryTransaction mCachedUnsignedTx = null;
 
-    private BlockCypher() {
+    private BlockCypher(Context ctx) {
         String network;
-        if (Configurations.isTestnet()) {
+        if (Preferences.isTestnet(ctx)) {
             network = "test3";
         }
         else {
             network = "main";
         }
+        logger.info("BlockCypher:{}", network);
         mBcCtx = new BlockCypherContext("v1", "btc", network, "7744d177ce1e4ef48c7431fcb55531b9");
     }
 
@@ -50,12 +53,18 @@ public class BlockCypher extends BtcBase {
      *
      * @return The singleton.
      */
-    public static synchronized BlockCypher getInstance() {
-        logger.info("getInstance()");
+    public static synchronized BlockCypher getInstance(Context ctx) {
         if (null == mBc) {
-            mBc = new BlockCypher();
+            mBc = new BlockCypher(ctx);
         }
         return mBc;
+    }
+
+    public static BlockCypher reInit(Context ctx) {
+        logger.info("reInit");
+        mBcCtx = null;
+        mBc = null;
+        return getInstance(ctx);
     }
 
     public BigDecimal getBalance(String address) {

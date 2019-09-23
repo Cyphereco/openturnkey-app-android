@@ -16,6 +16,7 @@ public class Preferences {
     private static final String TX_FEE_MID = "TX_FEE_MID";
     private static final String TX_FEE_HIGH = "TX_FEE_HIGH";
     private static final String CUSTOMIZED_TX_FEE = "CUSTOMIZED_TX_FEE";
+    private static final String NETWORK = "NETWORK";
 
 
     static public LocalCurrency getLocalCurrency(Context ctx) {
@@ -67,6 +68,25 @@ public class Preferences {
         }
         // Default
         return Configurations.TxFeeType.LOW;
+    }
+    static public void setNetwork(Context ctx, Configurations.Network network) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        prefs.edit().putString(NETWORK, network.name()).commit();
+        // Update configuration
+        Configurations.setNetwork(network);
+    }
+
+    static public Configurations.Network getNetwork(Context ctx) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        String s = prefs.getString(NETWORK, Configurations.network.name());
+        if (s.equals(Configurations.Network.MAINNET.name())) {
+            return Configurations.Network.MAINNET;
+        }
+        return Configurations.Network.TESTNET;
+    }
+
+    static public boolean isTestnet(Context ctx) {
+        return (getNetwork(ctx) == Configurations.Network.TESTNET);
     }
 
     static public void setTxFee(Context ctx, TxFee txFee) {
