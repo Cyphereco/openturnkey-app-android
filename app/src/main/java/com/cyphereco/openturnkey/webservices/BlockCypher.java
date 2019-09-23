@@ -34,9 +34,10 @@ public class BlockCypher extends BtcBase {
 
     private static BlockCypher mBc = null;
     private static BlockCypherContext mBcCtx;
+    private final Context mCtx;
     IntermediaryTransaction mCachedUnsignedTx = null;
 
-    private BlockCypher(Context ctx) {
+    private void newBlockCypherContext(Context ctx) {
         String network;
         if (Preferences.isTestnet(ctx)) {
             network = "test3";
@@ -44,8 +45,13 @@ public class BlockCypher extends BtcBase {
         else {
             network = "main";
         }
-        logger.info("BlockCypher:{}", network);
+        logger.info("newBlockCypherContext:{}", network);
         mBcCtx = new BlockCypherContext("v1", "btc", network, "7744d177ce1e4ef48c7431fcb55531b9");
+    }
+
+    private BlockCypher(Context ctx) {
+        mCtx = ctx;
+        newBlockCypherContext(ctx);
     }
 
     /**
@@ -60,11 +66,16 @@ public class BlockCypher extends BtcBase {
         return mBc;
     }
 
-    public static BlockCypher reInit(Context ctx) {
+    public void reInit() {
         logger.info("reInit");
-        mBcCtx = null;
-        mBc = null;
-        return getInstance(ctx);
+        if (mBc == null) {
+            logger.error("Should not be here!!!");
+            getInstance(mCtx);
+            return;
+        }
+        // only renew BlockCypherContext
+        newBlockCypherContext(mCtx);
+        return;
     }
 
     public BigDecimal getBalance(String address) {

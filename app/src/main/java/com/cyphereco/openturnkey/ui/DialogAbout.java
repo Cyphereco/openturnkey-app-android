@@ -63,12 +63,12 @@ public class DialogAbout extends AppCompatDialogFragment {
                     // toggle mode
                     if (Preferences.isTestnet(getContext())) {
                         Preferences.setNetwork(getContext(), Configurations.Network.MAINNET);
-                        BlockCypher.getInstance(getContext()).reInit(getContext());
+                        BlockCypher.getInstance(getContext()).reInit();
                         setVersion(v);
                     }
                     else {
                         Preferences.setNetwork(getContext(), Configurations.Network.TESTNET);
-                        BlockCypher.getInstance(getContext()).reInit(getContext());
+                        BlockCypher.getInstance(getContext()).reInit();
                         setVersion(v);
                     }
                     clickCount = 0;

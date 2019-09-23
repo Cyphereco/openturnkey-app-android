@@ -3,7 +3,6 @@ package com.cyphereco.openturnkey.utils;
 import android.content.Context;
 import android.util.Log;
 
-//import com.google.bitcoin.core.utils.Utils;
 import com.cyphereco.openturnkey.bitcoin.ECDSASignature;
 import com.cyphereco.openturnkey.bitcoin.ECException;
 import com.cyphereco.openturnkey.bitcoin.ECKey;
