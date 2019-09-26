@@ -1,7 +1,10 @@
 package com.cyphereco.openturnkey.ui;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,17 +15,24 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBAddrItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
+import com.cyphereco.openturnkey.utils.QRCodeUtils;
+import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
 
 import java.util.List;
 
 
 public class FragmentAddrbook extends Fragment {
     private final static String TAG = AddrbookViewAdapter.class.getSimpleName();
+
+    private TextView mTVNoAddressMessage;
+    private RecyclerView mRVAddressList;
+
     private OpenturnkeyDB mOtkDB = null;
     private AddrbookViewAdapter mAdapter;
     private FragmentAddrbookListener mListener;
@@ -33,26 +43,109 @@ public class FragmentAddrbook extends Fragment {
         }
         mAdapter.setAdapterListener(new AddrbookViewAdapter.AdapterListener() {
             @Override
-            public void onPaying(int position) {
-                Log.d(TAG, "On Paying the position is: " + position);
-
-                DBAddrItem item = mAdapter.getAddressItemByPosition(position);
-
-                mListener.onAddressbookPayingButtonClick(item.getAddress());
+            public void onDeleteAddress(int position) {
+                Log.d(TAG, "onDelete the position is: " + position);
+                processDeleteAddress(position);
             }
 
             @Override
-            public void onEditingContact(int position) {
-                Log.d(TAG, "onEditingContact the position is: " + position);
+            public void onEditAddress(int position) {
+                Log.d(TAG, "onEditAddress the position is: " + position);
+                processEditAddress(position);
+            }
 
+            @Override
+            public void onShowQRCode(int position) {
+                Log.d(TAG, "onShowQRCode the position is: " + position);
+                processShowQRCode(position);
+            }
+
+            @Override
+            public void onPay(int position) {
+                Log.d(TAG, "onPay the position is: " + position);
                 DBAddrItem item = mAdapter.getAddressItemByPosition(position);
-                Intent intent = new Intent(getContext(), EditContactActivity.class);
-
-                intent.putExtra("CONTACT_NAME", item.getName());
-                intent.putExtra("CONTACT_ADDRESS", item.getAddress());
-                getActivity().startActivityForResult(intent, MainActivity.REQUEST_CODE_CONTACT_EDIT);
+                mListener.onAddressbookPayingButtonClick(item.getAddress());
             }
         });
+    }
+
+    private void processDeleteAddress(int position) {
+        final DBAddrItem item = mAdapter.getAddressItemByPosition(position);
+        new AlertDialog.Builder(getActivity())
+                .setMessage(R.string.delete_address_dialog_message)
+                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mOtkDB.deleteAddressbookByAddr(item.getAddress());
+                        updateAddressDataset();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
+    }
+
+    private void processEditAddress(int position) {
+        DBAddrItem item = mAdapter.getAddressItemByPosition(position);
+        Intent intent = new Intent(getContext(), ActivityAddressEditor.class);
+
+        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_TYPE,
+                ActivityAddressEditor.EDITOR_TYPE_EDIT);
+        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ALIAS, item.getName());
+        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ADDR, item.getAddress());
+        if (null != getActivity()) {
+            getActivity().startActivityForResult(intent,
+                    MainActivity.REQUEST_CODE_ADDRESS_EDIT);
+        }
+    }
+
+    private void processShowQRCode(int position) {
+        final DBAddrItem item = mAdapter.getAddressItemByPosition(position);
+        final View v = View.inflate(getContext(), R.layout.dialog_address_item_qrcode, null);
+        TextView tvAlias = v.findViewById(R.id.textView_addrbook_item_dialog_alias);
+        TextView tvAddress = v.findViewById(R.id.textView_addrbook_item_dialog_address);
+        ImageView ivQRCode = v.findViewById(R.id.imageView_addrbook_item_address_qrcode);
+
+        tvAlias.setText(item.getName());
+        tvAddress.setText(item.getAddress());
+        BitcoinPaymentURI uri = new BitcoinPaymentURI.Builder().address(item.getAddress()).build();
+        if (uri != null) {
+            Bitmap bitmap = QRCodeUtils.encodeAsBitmap(uri.getURI(),
+                    ivQRCode.getDrawable().getIntrinsicWidth(),
+                    ivQRCode.getDrawable().getIntrinsicHeight());
+            ivQRCode.setImageBitmap(bitmap);
+        }
+
+        new AlertDialog.Builder(getActivity())
+                .setTitle("QRCode")
+                .setView(v)
+                .setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
+    }
+
+    private void updateAddressDataset() {
+        List<DBAddrItem> addrDataset = mOtkDB.getAllAddressbook();
+
+        if (0 < addrDataset.size()) {
+            mTVNoAddressMessage.setVisibility(View.INVISIBLE);
+            if (null != mRVAddressList) {
+                mRVAddressList.setVisibility(View.VISIBLE);
+                mAdapter.setData(addrDataset);
+            }
+        }
+        else {
+            mTVNoAddressMessage.setVisibility(View.VISIBLE);
+            if (null != mRVAddressList) {
+                mRVAddressList.setVisibility(View.INVISIBLE);
+            }
+        }
     }
 
     @Nullable
@@ -62,33 +155,23 @@ public class FragmentAddrbook extends Fragment {
         Log.d(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.fragment_addrbook, container, false);
 
+        mTVNoAddressMessage = view.findViewById(R.id.text_no_address);
+        mRVAddressList = view.findViewById(R.id.recyclerView_address);
+
         if (null == mOtkDB) {
             mOtkDB = new OpenturnkeyDB(getContext());
         }
 
-        List<DBAddrItem> addrDataset = mOtkDB.getAllAddressbook();
-        TextView noAddressView = view.findViewById(R.id.text_no_address);
-        RecyclerView addrRecyclerView = view.findViewById(R.id.recyclerView_address);
+        mAdapter = new AddrbookViewAdapter(getContext());
+        this.setAdapterListener();
 
-        if (0 < addrDataset.size()) {
-            noAddressView.setVisibility(View.INVISIBLE);
-            if (null != addrRecyclerView) {
-                addrRecyclerView.setVisibility(View.VISIBLE);
-                mAdapter = new AddrbookViewAdapter(addrDataset, inflater);
-                this.setAdapterListener();
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mRVAddressList.setLayoutManager(layoutManager);
+        mRVAddressList.setAdapter(mAdapter);
 
-                final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-                layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-                addrRecyclerView.setLayoutManager(layoutManager);
-                addrRecyclerView.setAdapter(mAdapter);
-            }
-        }
-        else {
-            noAddressView.setVisibility(View.VISIBLE);
-            if (null != addrRecyclerView) {
-                addrRecyclerView.setVisibility(View.INVISIBLE);
-            }
-        }
+        updateAddressDataset();
+
         return view;
     }
 

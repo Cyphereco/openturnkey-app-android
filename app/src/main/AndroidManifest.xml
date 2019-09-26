@@ -21,11 +21,9 @@
         android:roundIcon="@mipmap/ic_cyphereco_color_logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.ActivityExampleAddrEditor"></activity>
         <activity android:name=".ui.ActivityExampleFailTx"></activity>
         <activity android:name=".ui.ActivityExampleSuccessTx"></activity>
         <activity android:name=".ui.TransDetailActivity" />
-        <activity android:name=".ui.EditContactActivity" />
         <activity
             android:name=".ui.OpenturnkeyInfoActivity"
             android:configChanges="orientation"
@@ -84,7 +82,7 @@
             android:name=".ui.QRcodeScanActivity"
             android:label="@string/title_activity_qrcode_scan" />
         <activity
-            android:name=".ui.AddContactActivity"
+            android:name=".ui.ActivityAddressEditor"
             android:label="Add Contact"
             android:parentActivityName=".ui.MainActivity" />
 

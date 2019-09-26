@@ -14,7 +14,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
@@ -51,8 +50,7 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_CODE_PRE_AUTH = 1;
     public static final int REQUEST_CODE_SET_PIN = 2;
     public static final int REQUEST_CODE_SET_KEY = 3;
-    public static final int REQUEST_CODE_CONTACT_EDIT = 4;
-    public static final int REQUEST_CODE_CONTACT_ADD = 5;
+    public static final int REQUEST_CODE_ADDRESS_EDIT = 4;
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
     public static final String KEY_PRE_AUTH_PIN_CODE = "KEY_PRE_AUTH_PIN_CODE";
     public static final String KEY_SET_PIN_CODE = "KEY_SET_PIN_CODE";
@@ -174,8 +172,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, getString(R.string.qr_code_scan_cancelled), Toast.LENGTH_LONG).show();
             }
         }
-        else if ((requestCode == REQUEST_CODE_CONTACT_EDIT) ||
-                (requestCode == REQUEST_CODE_CONTACT_ADD)) {
+        else if (requestCode == REQUEST_CODE_ADDRESS_EDIT) {
             if (resultCode == RESULT_OK) {
                 mSelectedFragment = new FragmentAddrbook();
                 getSupportFragmentManager().beginTransaction()
@@ -492,11 +489,11 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.menu_history_success_tx:
                 startActivityForResult(new Intent(this, ActivityExampleSuccessTx.class),
-                        MainActivity.REQUEST_CODE_CONTACT_ADD);
+                        MainActivity.REQUEST_CODE_ADDRESS_EDIT);
                 return true;
             case R.id.menu_history_fail_tx:
                 startActivityForResult(new Intent(this, ActivityExampleFailTx.class),
-                        MainActivity.REQUEST_CODE_CONTACT_ADD);
+                        MainActivity.REQUEST_CODE_ADDRESS_EDIT);
                 return true;
             case R.id.menu_pay_local_curreny:
                 dialogLocalCurrency();
@@ -514,12 +511,10 @@ public class MainActivity extends AppCompatActivity
                 dialogAbout();
                 return true;
             case R.id.menu_addresses_add:
-                startActivityForResult(new Intent(this, AddContactActivity.class),
-                        MainActivity.REQUEST_CODE_CONTACT_ADD);
-                return true;
-            case R.id.menu_tmp_add_example:
-                startActivityForResult(new Intent(this, ActivityExampleAddrEditor.class),
-                        MainActivity.REQUEST_CODE_CONTACT_ADD);
+                Intent intent = new Intent(this, ActivityAddressEditor.class);
+                intent.putExtra(ActivityAddressEditor.KEY_EDITOR_TYPE,
+                        ActivityAddressEditor.EDITOR_TYPE_ADD);
+                startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
                 return true;
             case R.id.menu_openturnkey_read_generalinformation:
             case R.id.menu_openturnkey_authenticity_check:

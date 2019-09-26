@@ -105,5 +105,8 @@
     <string name="invalid_address">Invalid Address</string>
     <string name="alias">Alias</string>
     <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="delete_address_dialog_message">Are you sure you want to delete this address?</string>
 
 </resources>

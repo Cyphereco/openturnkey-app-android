@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +16,11 @@ public class OpenturnkeyDB {
     /**
      * This is transaction log table name of database
      */
-    public static final String TRANS_TABLE_NAME = "transactionLog";
+    static final String TRANS_TABLE_NAME = "transactionLog";
     /**
      * This is address book table name of database
      */
-    public static final String ADDR_BOOK_TABLE_NAME = "addrBook";
+    static final String ADDR_BOOK_TABLE_NAME = "addrBook";
 
     // Columns of transaction table
     private static final String TRANS_KEY_ID_COL = "_id";
@@ -35,14 +34,13 @@ public class OpenturnkeyDB {
     private static final String TRANS_RAW_DATA_COL = "rawData";
 
     // Columns of address book
-    private static final String ADDRBOOK_KEY_ID_COL = "_id";
     private static final String ADDRBOOK_ADDR_COL = "address";
     private static final String ADDRBOOK_USR_NAME_COL = "userName";
 
     /**
      * SQL command of creating transaction table
      */
-    public static final String CREATE_TRANS_TABLE_SQL = "CREATE TABLE " + TRANS_TABLE_NAME + " (" +
+    static final String CREATE_TRANS_TABLE_SQL = "CREATE TABLE " + TRANS_TABLE_NAME + " (" +
             TRANS_KEY_ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             TRANS_DATETIME_COL + " DateTime NOT NULL, " +
             TRANS_PAYER_ADDR_COL + " VARCHAR(64) NOT NULL, " +
@@ -57,14 +55,14 @@ public class OpenturnkeyDB {
     /**
      * SQL command of creating address book table
      */
-    public static final String CREATE_ADDRBOOK_TABLE_SQL = "CREATE TABLE " +
+    static final String CREATE_ADDRBOOK_TABLE_SQL = "CREATE TABLE " +
             ADDR_BOOK_TABLE_NAME + " (" +
             ADDRBOOK_ADDR_COL + " VARCHAR(64) PRIMARY KEY NOT NULL, " +
             ADDRBOOK_USR_NAME_COL + " VARCHAR(128) NOT NULL " +
             ");";
 
     // Database object
-    private SQLiteDatabase otkDB = null;
+    private SQLiteDatabase otkDB;
 
     private DBTransItem generateTransItemByQueryResult(Cursor cursor) {
         DBTransItem item = new DBTransItem();
@@ -103,10 +101,13 @@ public class OpenturnkeyDB {
     public int getTransactionCount() {
         int ret = 0;
 
-        Cursor cursor = otkDB.rawQuery(
-                "SELECT COUNT(*) FROM " + TRANS_TABLE_NAME,null);
-        if (cursor.moveToNext()) {
-            ret = cursor.getInt(0);
+        try (Cursor cursor = otkDB.rawQuery(
+                "SELECT COUNT(*) FROM " + TRANS_TABLE_NAME,null)) {
+            if (cursor.moveToNext()) {
+                ret = cursor.getInt(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return ret;
     }
@@ -152,35 +153,44 @@ public class OpenturnkeyDB {
     }
 
     public DBTransItem getTransactionItemById(long id) {
-        Cursor cursor = otkDB.query(TRANS_TABLE_NAME, null,
-                TRANS_KEY_ID_COL + "=?", new String[] {String.valueOf(id)},
-                null, null, null, null);
-        if (1 == cursor.getCount()) {
-            cursor.moveToNext();
-            return generateTransItemByQueryResult(cursor);
+        DBTransItem item = null;
+        try (Cursor cursor = otkDB.query(TRANS_TABLE_NAME, null,
+                TRANS_KEY_ID_COL + "=?", new String[]{String.valueOf(id)},
+                null, null, null, null)) {
+            if (1 == cursor.getCount()) {
+                cursor.moveToNext();
+                item = generateTransItemByQueryResult(cursor);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return null;
+        return item;
     }
 
     public List<DBTransItem> getAllTransaction() {
         List<DBTransItem> result = new ArrayList<>();
-        Cursor cursor = otkDB.query(TRANS_TABLE_NAME, null,null,null,
-                null,null,null,null);
-        while (cursor.moveToNext()) {
-            result.add(generateTransItemByQueryResult(cursor));
-        }
 
-        cursor.close();
+        try (Cursor cursor = otkDB.query(TRANS_TABLE_NAME, null, null,
+                null, null, null, null, null)) {
+            while (cursor.moveToNext()) {
+                result.add(generateTransItemByQueryResult(cursor));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return result;
     }
 
     public int getAddrbookCount() {
         int ret = 0;
 
-        Cursor cursor = otkDB.rawQuery(
-                "SELECT COUNT(*) FROM " + ADDR_BOOK_TABLE_NAME,null);
-        if (cursor.moveToNext()) {
-            ret = cursor.getInt(0);
+        try (Cursor cursor = otkDB.rawQuery(
+                "SELECT COUNT(*) FROM " + ADDR_BOOK_TABLE_NAME, null)) {
+            if (cursor.moveToNext()) {
+                ret = cursor.getInt(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return ret;
     }
@@ -201,10 +211,8 @@ public class OpenturnkeyDB {
         ContentValues cv = new ContentValues();
 
         cv.put(ADDRBOOK_USR_NAME_COL, item.getName());
-
-        String where = ADDRBOOK_ADDR_COL + "=" + item.getAddress();
-
-        return otkDB.update(ADDR_BOOK_TABLE_NAME, cv, where, null) > 0;
+        return otkDB.update(ADDR_BOOK_TABLE_NAME, cv,
+                ADDRBOOK_ADDR_COL + "=?",new String[] { item.getAddress() }) > 0;
     }
 
     public boolean deleteAddressbookByAddr(String address) {
@@ -214,13 +222,29 @@ public class OpenturnkeyDB {
 
     public List<DBAddrItem> getAllAddressbook() {
         List<DBAddrItem> result = new ArrayList<>();
-        Cursor cursor = otkDB.query(ADDR_BOOK_TABLE_NAME, null,null,null,
-                null,null,null,null);
+        Cursor cursor = otkDB.query(ADDR_BOOK_TABLE_NAME, null,null,
+                null, null,null,null,null);
         while (cursor.moveToNext()) {
             result.add(generateAddrbookItemByQueryResult(cursor));
         }
 
         cursor.close();
         return result;
+    }
+
+    public DBAddrItem getAddressItemByAddr(String address) {
+        DBAddrItem item = null;
+
+        try (Cursor cursor = otkDB.query(ADDR_BOOK_TABLE_NAME, null,
+                ADDRBOOK_ADDR_COL + "=?", new String[]{address},
+                null, null, null, null)) {
+            if (1 == cursor.getCount()) {
+                cursor.moveToNext();
+                item = generateAddrbookItemByQueryResult(cursor);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return item;
     }
 }

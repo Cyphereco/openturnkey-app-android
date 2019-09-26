@@ -10,12 +10,7 @@
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/menu_addresses_add"
-        android:icon="@drawable/ic_add_white_24dp"
+        android:icon="@android:drawable/ic_menu_add"
         android:title="@string/add"
         app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/menu_tmp_add_example"
-        android:icon="@android:drawable/ic_menu_add"
-        app:showAsAction="ifRoom"
-        android:title="" />
 </menu>
