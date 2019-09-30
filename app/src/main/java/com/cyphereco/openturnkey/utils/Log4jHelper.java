@@ -1,23 +1,23 @@
 package com.cyphereco.openturnkey.utils;
 
-import android.os.Environment;
-
 import com.cyphereco.openturnkey.core.Configurations;
 
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.android.LogcatAppender;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
 
 public class Log4jHelper {
 
     static {
+        // For BlockCypher API logger
+        org.apache.log4j.BasicConfigurator.configure();
+        final org.apache.log4j.Logger l = org.apache.log4j.Logger.getRootLogger();
+        l.setLevel(Level.DEBUG);
+
         if (!Configurations.writeLogToFile) {
             // Overwrite settings from logback.xml
             configureLogbackDirectly();

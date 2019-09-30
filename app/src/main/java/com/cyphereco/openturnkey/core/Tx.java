@@ -52,6 +52,7 @@ public class Tx {
                 break;
             }
         }
+        mRaw = trans.getHex();
         mHash = trans.getHash();
         mAmount = amount;
         mFee = BtcUtils.satoshiToBtc(trans.getFees().longValue());
@@ -84,7 +85,8 @@ public class Tx {
     public void setFrom(String from) {mFrom = from;}
     public void setTo(String to) {mTo = to;}
     public String toString() {
-        return "From:" + mFrom +
+        return "Raw:" + mRaw +
+                "\nFrom:" + mFrom +
                 "\nTo:" + mTo +
                 "\nHash:" + mHash +
                 "\nAmount:" + mAmount +

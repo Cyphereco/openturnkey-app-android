@@ -207,9 +207,11 @@ public class BlockCypher extends BtcBase {
 
         try {
             Transaction trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
-            logger.info("TX Sent: " + trans.toString());
+            // Get tx for raw
+            Transaction t = mBcCtx.getTransactionService().getTransaction(trans.getHash());
+            logger.info("TX Sent: " + t.toString());
             mCachedUnsignedTx = null;
-            return trans;
+            return t;
         }
         catch (BlockCypherException e) {
             logger.info("e:" + e.toString());
