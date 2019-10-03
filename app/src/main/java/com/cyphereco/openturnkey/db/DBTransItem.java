@@ -1,19 +1,25 @@
 package com.cyphereco.openturnkey.db;
 
 public class DBTransItem implements java.io.Serializable {
+    public static final String AMOUNT_UNIT_STRING_DEFAULT = "BTC";
+
     private long id;
     private long datetime;
     private String payeeAddr;
     private String payerAddr;
     private double amount;
+    private String amountUnitString;
     private double fee;
+    private String feeUnitString;
     private int status;
+    private String hash;
     private String comment;
     private String rawData;
 
     public DBTransItem() {
         this.id = 0;
         this.datetime = 0;
+        this.hash = "";
         this.payerAddr = "";
         this.payeeAddr = "";
         this.amount = 0.0;
@@ -23,10 +29,12 @@ public class DBTransItem implements java.io.Serializable {
         this.rawData = "";
     }
 
-    public DBTransItem(long id, long datetime, String payerAddr, String payeeAddr,
-                       double cryptoCurrencyAmount, double fee, int status, String comment, String rawData) {
+    public DBTransItem(long id, long datetime, String hash, String payerAddr, String payeeAddr,
+                       double cryptoCurrencyAmount, double fee, int status,
+                       String comment, String rawData) {
         this.id = id;
         this.datetime = datetime;
+        this.hash = hash;
         this.payerAddr = payerAddr;
         this.payeeAddr = payeeAddr;
         this.amount = cryptoCurrencyAmount;
@@ -50,6 +58,14 @@ public class DBTransItem implements java.io.Serializable {
 
     public void setDatetime(long datetime) {
         this.datetime = datetime;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 
     public String getPayeeAddr() {
@@ -106,5 +122,30 @@ public class DBTransItem implements java.io.Serializable {
 
     public void setRawData(String rawData) {
         this.rawData = rawData;
+    }
+
+    public void setAmountUnitString(String unitString) {
+        if ((null ==unitString) || ("" == unitString)) {
+            unitString = AMOUNT_UNIT_STRING_DEFAULT;
+        }
+        this.amountUnitString = unitString;
+    }
+
+    public String getAmountUnitString() {
+        if ((null == this.amountUnitString) || ("" == this.amountUnitString)) {
+            return AMOUNT_UNIT_STRING_DEFAULT;
+        }
+        return this.amountUnitString;
+    }
+
+    public void setFeeUnitString(String unitString) {
+        if ((null ==unitString) || ("" == unitString)) {
+            unitString = AMOUNT_UNIT_STRING_DEFAULT;
+        }
+        this.feeUnitString = unitString;
+    }
+
+    public String getFeeUnitString() {
+        return this.feeUnitString;
     }
 }

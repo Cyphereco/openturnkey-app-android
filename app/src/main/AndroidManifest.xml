@@ -21,9 +21,7 @@
         android:roundIcon="@mipmap/ic_cyphereco_color_logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.ActivityExampleFailTx"></activity>
-        <activity android:name=".ui.ActivityExampleSuccessTx"></activity>
-        <activity android:name=".ui.TransDetailActivity" />
+        <activity android:name=".ui.ActivityTransactionInfo" />
         <activity
             android:name=".ui.OpenturnkeyInfoActivity"
             android:configChanges="orientation"

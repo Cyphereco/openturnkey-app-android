@@ -18,32 +18,53 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 public class FragmentHistory extends Fragment {
     private final static String TAG = FragmentHistory.class.getSimpleName();
 
+    private TextView mTVNoHistoryMessage;
+    private RecyclerView mRVHistory;
+
     private OpenturnkeyDB mOtkDB = null;
-    private HistoryViewAdapter mViewAdapter;
+    private HistoryViewAdapter mItemViewAdapter;
 
     private void setAdapterListener() {
-        if (null == mViewAdapter) {
+        if (null == mItemViewAdapter) {
             return;
         }
-        mViewAdapter.setAdapterListener(new HistoryViewAdapter.AdapterListener() {
+        mItemViewAdapter.setAdapterListener(new HistoryViewAdapter.AdapterListener() {
             @Override
             public void onClickTransItem(int position) {
                 /* Show transaction detail in another activity */
-                DBTransItem item = mViewAdapter.getTransItemByPosition(position);
+                DBTransItem item = mItemViewAdapter.getTransItemByPosition(position);
 
-                Intent intent = new Intent(getContext(), TransDetailActivity.class);
-                intent.putExtra("TRANS_ID", item.getId());
-                getActivity().startActivity(intent);
+                if (null != item) {
+                    Intent intent = new Intent(getContext(), ActivityTransactionInfo.class);
+                    intent.putExtra(ActivityTransactionInfo.KEY_CURRENT_TRANS_ID, item.getId());
+                    startActivityForResult(intent, MainActivity.REQUEST_CODE_TRANSACTION_INFO);
+                }
+                else {
+                    Log.e(TAG, "Cannot find transaction item. Position: " + position);
+                }
             }
         });
+    }
+
+    private void updateTransactionDataset() {
+        List<DBTransItem> dataset = mOtkDB.getAllTransaction();
+        if (0 < dataset.size()) {
+            Log.d(TAG, "updateTransactionDataset > 0");
+            mTVNoHistoryMessage.setVisibility(View.INVISIBLE);
+            mRVHistory.setVisibility(View.VISIBLE);
+
+            mItemViewAdapter.setData(dataset);
+        }
+        else {
+            Log.d(TAG, "updateTransactionDataset == 0");
+            mTVNoHistoryMessage.setVisibility(View.VISIBLE);
+            mRVHistory.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Nullable
@@ -58,30 +79,16 @@ public class FragmentHistory extends Fragment {
             mOtkDB = new OpenturnkeyDB(getContext());
         }
 
-        List<DBTransItem> historyDataset = mOtkDB.getAllTransaction();
-        TextView tvNoHistory = view.findViewById(R.id.text_no_history);
-        RecyclerView rvHistory = view.findViewById(R.id.recyclerView_history);
-        Log.d(TAG, "size of dataset: " + historyDataset.size());
+        mTVNoHistoryMessage = view.findViewById(R.id.text_no_history);
+        mRVHistory = view.findViewById(R.id.recyclerView_history);
 
-        if (0 < historyDataset.size()) {
-            tvNoHistory.setVisibility(View.INVISIBLE);
-            if (null != rvHistory) {
-                rvHistory.setVisibility(View.VISIBLE);
-                mViewAdapter = new HistoryViewAdapter(historyDataset, inflater);
-                this.setAdapterListener();
+        mItemViewAdapter = new HistoryViewAdapter(getContext());
+        this.setAdapterListener();
 
-                final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-                layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-                rvHistory.setLayoutManager(layoutManager);
-                rvHistory.setAdapter(mViewAdapter);
-            }
-        }
-        else {
-            tvNoHistory.setVisibility(View.VISIBLE);
-            if (null != rvHistory) {
-                rvHistory.setVisibility(View.INVISIBLE);
-            }
-        }
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mRVHistory.setLayoutManager(layoutManager);
+        mRVHistory.setAdapter(mItemViewAdapter);
 
         return view;
     }
@@ -98,4 +105,10 @@ public class FragmentHistory extends Fragment {
         Log.d(TAG, "onDetach");
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume");
+        updateTransactionDataset();
+    }
 }

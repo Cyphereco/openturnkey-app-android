@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity
         implements DialogLocalCurrency.DialogLocalCurrecyListener,
         DialogTransactionFee.DialogTransactionFeeListener,
         DialogAuthByPin.DialogAuthByPinListener,
+        DialogClearHistory.DialogClearHistoryListener,
         FragmentPay.FragmentPayListener,
         FragmentOtk.FragmentOtkListener,
         FragmentAddrbook.FragmentAddrbookListener {
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_CODE_SET_PIN = 2;
     public static final int REQUEST_CODE_SET_KEY = 3;
     public static final int REQUEST_CODE_ADDRESS_EDIT = 4;
+    public static final int REQUEST_CODE_TRANSACTION_INFO = 5;
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
     public static final String KEY_PRE_AUTH_PIN_CODE = "KEY_PRE_AUTH_PIN_CODE";
     public static final String KEY_SET_PIN_CODE = "KEY_SET_PIN_CODE";
@@ -175,6 +177,13 @@ public class MainActivity extends AppCompatActivity
         else if (requestCode == REQUEST_CODE_ADDRESS_EDIT) {
             if (resultCode == RESULT_OK) {
                 mSelectedFragment = new FragmentAddrbook();
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.frame_main, mSelectedFragment).commitAllowingStateLoss();
+            }
+        }
+        else if (requestCode == REQUEST_CODE_TRANSACTION_INFO) {
+            if (resultCode == RESULT_OK) {
+                mSelectedFragment = new FragmentHistory();
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.frame_main, mSelectedFragment).commitAllowingStateLoss();
             }
@@ -486,14 +495,6 @@ public class MainActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.menu_history_clear_history:
                 dialogClearHistory();
-                return true;
-            case R.id.menu_history_success_tx:
-                startActivityForResult(new Intent(this, ActivityExampleSuccessTx.class),
-                        MainActivity.REQUEST_CODE_ADDRESS_EDIT);
-                return true;
-            case R.id.menu_history_fail_tx:
-                startActivityForResult(new Intent(this, ActivityExampleFailTx.class),
-                        MainActivity.REQUEST_CODE_ADDRESS_EDIT);
                 return true;
             case R.id.menu_pay_local_curreny:
                 dialogLocalCurrency();
@@ -983,11 +984,21 @@ public class MainActivity extends AppCompatActivity
         }
         logger.debug("addTxToDb() tx:\n{}", tx.toString());
         // Add transaction to database.
-        DBTransItem dbTrans = new DBTransItem(0, BtcUtils.convertDateTimeStringToLong(tx.getTime()), tx.getFrom(), tx.getTo(), tx.getAmount(), tx.getFee(),
+        DBTransItem dbTrans = new DBTransItem(0,
+                BtcUtils.convertDateTimeStringToLong(tx.getTime()),
+                tx.getHash(), tx.getFrom(), tx.getTo(), tx.getAmount(), tx.getFee(),
                 tx.getStatus().toInt(), tx.getDesc(), tx.getRaw());
         OpenturnkeyDB otkDB = new OpenturnkeyDB(getApplicationContext());
         otkDB.addTransaction(dbTrans);
         logger.debug("DB tx count:{}", otkDB.getTransactionCount());
+    }
+
+    @Override
+    public void onClearHistorySuccess() {
+        // Reload history fragment
+        mSelectedFragment = new FragmentHistory();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frame_main, mSelectedFragment).commitAllowingStateLoss();
     }
 }
 

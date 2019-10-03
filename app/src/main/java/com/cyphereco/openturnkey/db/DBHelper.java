@@ -4,16 +4,15 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper {
-    private static final String TAG = DBHelper.class.getSimpleName();
+//    private static final String TAG = DBHelper.class.getSimpleName();
     private static final int DB_VERSION = 2;
     private static final String DB_NAME = "OpenTurnKeyTest.db";
 
     private static SQLiteDatabase database = null;
 
-    public DBHelper(Context context, String name, CursorFactory factory, int version) {
+    private DBHelper(Context context, String name, CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 
@@ -34,7 +33,7 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public static SQLiteDatabase getDatabase(Context context) {
+    static SQLiteDatabase getDatabase(Context context) {
         if (database == null || !database.isOpen()) {
             database = new DBHelper(context, DB_NAME,
             null, DB_VERSION).getWritableDatabase();

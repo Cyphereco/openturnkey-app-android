@@ -76,8 +76,10 @@ public class FragmentAddrbook extends Fragment {
                 .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mOtkDB.deleteAddressbookByAddr(item.getAddress());
-                        updateAddressDataset();
+                        if (OpenturnkeyDB.ReturnValue.SUCCESS ==
+                                mOtkDB.deleteAddressbookByAddr(item.getAddress())) {
+                            updateAddressDataset();
+                        }
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

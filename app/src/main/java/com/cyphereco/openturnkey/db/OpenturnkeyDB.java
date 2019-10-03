@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.List;
  *
  */
 public class OpenturnkeyDB {
+    private static final String TAG = OpenturnkeyDB.class.getSimpleName();
+
     /**
      * This is transaction log table name of database
      */
@@ -25,10 +28,13 @@ public class OpenturnkeyDB {
     // Columns of transaction table
     private static final String TRANS_KEY_ID_COL = "_id";
     private static final String TRANS_DATETIME_COL = "datetime";
+    private static final String TRANS_HASH_COL = "hash";
     private static final String TRANS_PAYER_ADDR_COL = "payerAddr";
     private static final String TRANS_PAYEE_ADDR_COL = "payeeAddr";
     private static final String TRANS_AMOUNT_COL = "amount";
+    private static final String TRANS_AMOUNT_UNIT_STR_COL = "amountTypeStr";
     private static final String TRANS_FEE_COL = "fee";
+    private static final String TRANS_FEE_UNIT_STR_COL = "feeTypeStr";
     private static final String TRANS_STATUS_COL = "status";
     private static final String TRANS_COMMENTS_COL = "comments";
     private static final String TRANS_RAW_DATA_COL = "rawData";
@@ -43,10 +49,13 @@ public class OpenturnkeyDB {
     static final String CREATE_TRANS_TABLE_SQL = "CREATE TABLE " + TRANS_TABLE_NAME + " (" +
             TRANS_KEY_ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             TRANS_DATETIME_COL + " DateTime NOT NULL, " +
+            TRANS_HASH_COL + " VARCHAR(128), " +
             TRANS_PAYER_ADDR_COL + " VARCHAR(64) NOT NULL, " +
             TRANS_PAYEE_ADDR_COL + " VARCHAR(64) NOT NULL, " +
             TRANS_AMOUNT_COL + " DOUBLE, " +
+            TRANS_AMOUNT_UNIT_STR_COL + " VARCHAR(32), " +
             TRANS_FEE_COL + " DOUBLE, " +
+            TRANS_FEE_UNIT_STR_COL + " VARCHAR(32), " +
             TRANS_STATUS_COL + " INTEGER, " +
             TRANS_COMMENTS_COL + " TEXT, " +
             TRANS_RAW_DATA_COL + " TEXT " +
@@ -69,13 +78,16 @@ public class OpenturnkeyDB {
 
         item.setId(cursor.getLong(0));
         item.setDatetime(cursor.getLong(1));
-        item.setPayerAddr(cursor.getString(2));
-        item.setPayeeAddr(cursor.getString(3));
-        item.setAmount(cursor.getDouble(4));
-        item.setFee(cursor.getDouble(5));
-        item.setStatus(cursor.getInt(6));
-        item.setComment(cursor.getString(7));
-        item.setRawData(cursor.getString(8));
+        item.setHash(cursor.getString(2));
+        item.setPayerAddr(cursor.getString(3));
+        item.setPayeeAddr(cursor.getString(4));
+        item.setAmount(cursor.getDouble(5));
+        item.setAmountUnitString(cursor.getString(6));
+        item.setFee(cursor.getDouble(7));
+        item.setFeeUnitString(cursor.getString(8));
+        item.setStatus(cursor.getInt(9));
+        item.setComment(cursor.getString(10));
+        item.setRawData(cursor.getString(11));
 
         return item;
     }
@@ -89,13 +101,14 @@ public class OpenturnkeyDB {
         return item;
     }
 
+    public class ReturnValue {
+        static final int FAIL = 0;
+        public static final int SUCCESS = 1;
+    }
+
     public OpenturnkeyDB(Context context) {
         otkDB = DBHelper.getDatabase(context);
 
-    }
-
-    public void close() {
-        otkDB.close();
     }
 
     public int getTransactionCount() {
@@ -116,10 +129,13 @@ public class OpenturnkeyDB {
         ContentValues cv = new ContentValues();
 
         cv.put(TRANS_DATETIME_COL, item.getDatetime());
+        cv.put(TRANS_HASH_COL, item.getHash());
         cv.put(TRANS_PAYER_ADDR_COL, item.getPayerAddr());
         cv.put(TRANS_PAYEE_ADDR_COL, item.getPayeeAddr());
         cv.put(TRANS_AMOUNT_COL, item.getAmount());
+        cv.put(TRANS_AMOUNT_UNIT_STR_COL, item.getAmountUnitString());
         cv.put(TRANS_FEE_COL, item.getFee());
+        cv.put(TRANS_FEE_UNIT_STR_COL, item.getFeeUnitString());
         cv.put(TRANS_STATUS_COL, item.getStatus());
         cv.put(TRANS_COMMENTS_COL, item.getComment());
         cv.put(TRANS_RAW_DATA_COL, item.getRawData());
@@ -130,7 +146,7 @@ public class OpenturnkeyDB {
         return item;
     }
 
-    public boolean updateTransaction(DBTransItem item) {
+    public int updateTransaction(DBTransItem item) {
         ContentValues cv = new ContentValues();
 
         cv.put(TRANS_DATETIME_COL, item.getDatetime());
@@ -144,12 +160,19 @@ public class OpenturnkeyDB {
 
         String where = TRANS_KEY_ID_COL + "=" + item.getId();
 
-        return otkDB.update(TRANS_TABLE_NAME, cv, where, null) > 0;
+        if (otkDB.update(TRANS_TABLE_NAME, cv, where, null) > 0) {
+            return ReturnValue.SUCCESS;
+        }
+        return ReturnValue.FAIL;
     }
 
-    public boolean deleteTransactionById(long id) {
+    public int deleteTransactionById(long id) {
         String where = TRANS_KEY_ID_COL + "=" + id;
-        return otkDB.delete(TRANS_TABLE_NAME, where , null) > 0;
+
+        if (otkDB.delete(TRANS_TABLE_NAME, where , null) > 0) {
+            return ReturnValue.SUCCESS;
+        }
+        return ReturnValue.FAIL;
     }
 
     public DBTransItem getTransactionItemById(long id) {
@@ -179,6 +202,19 @@ public class OpenturnkeyDB {
             e.printStackTrace();
         }
         return result;
+    }
+
+    public int clearTransactionTable() {
+        int ret = ReturnValue.SUCCESS;
+
+        try {
+            otkDB.execSQL("DROP TABLE IF EXISTS " + TRANS_TABLE_NAME);
+            otkDB.execSQL(CREATE_TRANS_TABLE_SQL);
+        } catch (Exception e) {
+            Log.e(TAG, "clearTransactionTable FAILd. e: " + e);
+            ret = ReturnValue.FAIL;
+        }
+        return ret;
     }
 
     public int getAddrbookCount() {
@@ -215,9 +251,12 @@ public class OpenturnkeyDB {
                 ADDRBOOK_ADDR_COL + "=?",new String[] { item.getAddress() }) > 0;
     }
 
-    public boolean deleteAddressbookByAddr(String address) {
-        return otkDB.delete(ADDR_BOOK_TABLE_NAME,
-                ADDRBOOK_ADDR_COL + "=?" , new String[]{address}) > 0;
+    public int deleteAddressbookByAddr(String address) {
+        if (0 < otkDB.delete(ADDR_BOOK_TABLE_NAME, ADDRBOOK_ADDR_COL + "=?" ,
+                new String[]{address})) {
+            return ReturnValue.SUCCESS;
+        }
+        return ReturnValue.FAIL;
     }
 
     public List<DBAddrItem> getAllAddressbook() {

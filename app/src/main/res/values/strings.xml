@@ -108,5 +108,8 @@
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="delete_address_dialog_message">Are you sure you want to delete this address?</string>
+    <string name="success">SUCCESS</string>
+    <string name="fail">FAIL</string>
+    <string name="copy">Copy</string>
 
 </resources>

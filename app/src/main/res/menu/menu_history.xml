@@ -5,10 +5,4 @@
     <item
         android:id="@+id/menu_history_clear_history"
         android:title="@string/clear_history" />
-    <item
-        android:id="@+id/menu_history_success_tx"
-        android:title="Success Transaction" />
-    <item
-        android:id="@+id/menu_history_fail_tx"
-        android:title="Fail Transaction" />
 </menu>

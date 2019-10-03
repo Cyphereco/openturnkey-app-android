@@ -87,4 +87,7 @@
     <string name="delete">刪除</string>
     <string name="edit">編輯</string>
     <string name="delete_address_dialog_message">確定刪除此地址?</string>
+    <string name="success">成功</string>
+    <string name="fail">失敗</string>
+    <string name="copy">複製</string>
 </resources>
