@@ -24,7 +24,7 @@
     <string name="no_payment_records">支払い記録なし</string>
     <string name="recipient_address">入金アドレス</string>
     <string name="read_key_information">鍵の詳細読んで</string>
-    <string name="pre_auth_by_pin">PINコード認証</string>
+    <string name="auth_with_pin">PINコード認証</string>
     <string name="tap_openturnkey">OpenTurnKey近づく</string>
     <string name="high_fees">高 (10-20分)</string>
     <string name="low_fees">低 (60分以上)</string>

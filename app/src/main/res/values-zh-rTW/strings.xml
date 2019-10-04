@@ -19,7 +19,7 @@
     <string name="fee_included">包含手續費</string>
     <string name="read_key_information">讀取密鑰資訊</string>
     <string name="local_currency">本地貨幣</string>
-    <string name="pre_auth_by_pin">使用PIN碼授權</string>
+    <string name="auth_with_pin">使用PIN碼授權</string>
     <string name="search">查詢</string>
     <string name="set_pin_code">設定PIN碼</string>
     <string name="transaction_fee">交易手續費</string>

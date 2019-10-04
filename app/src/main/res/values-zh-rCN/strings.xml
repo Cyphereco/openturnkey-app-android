@@ -12,7 +12,7 @@
     <string name="paste_clipboard">贴上复制内容</string>
     <string name="pay" translatable="false">支付</string>
     <string name="recipient_address">收款地址</string>
-    <string name="pre_auth_by_pin">使用PIN码授权</string>
+    <string name="auth_with_pin">使用PIN码授权</string>
     <string name="read_nfc">读取NFC</string>
     <string name="scan_qr_code">扫描QR码</string>
     <string name="search">查找</string>

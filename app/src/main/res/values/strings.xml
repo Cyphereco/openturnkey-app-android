@@ -33,7 +33,7 @@
     <string name="fee_included">Fee Included</string>
     <string name="clear_history">Clear History</string>
     <string name="search">Search</string>
-    <string name="pre_auth_by_pin">Pre-Auth by PIN</string>
+    <string name="auth_with_pin">Authorization with PIN Code</string>
     <string name="set_pin_code">Set PIN Code</string>
     <string name="read_key_information">Read Key Information</string>
     <string name="about">About</string>

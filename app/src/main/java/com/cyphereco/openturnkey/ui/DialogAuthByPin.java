@@ -28,7 +28,7 @@ public class DialogAuthByPin extends AppCompatDialogFragment {
         View view = inflater.inflate(R.layout.dialog_auth_with_pin, null);
 
         builder.setView(view)
-                .setTitle(R.string.pre_auth_by_pin)
+                .setTitle(R.string.auth_with_pin)
                 .setCancelable(false)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
