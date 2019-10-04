@@ -33,14 +33,14 @@ public class DialogClearHistory extends AppCompatDialogFragment {
                         // Clear payment history
                         OpenturnkeyDB otkDB = new OpenturnkeyDB(getContext());
                         if (OpenturnkeyDB.ReturnValue.SUCCESS == otkDB.clearTransactionTable()) {
-                            Toast.makeText(getContext(), "Success to clear history",
+                            Toast.makeText(getContext(), getString(R.string.all_history_cleared),
                                     Toast.LENGTH_LONG).show();
                             if (null != mListener) {
                                 mListener.onClearHistorySuccess();
                             }
                         }
                         else {
-                            Toast.makeText(getContext(), "Fail to clear history",
+                            Toast.makeText(getContext(), getString(R.string.failed_to_clear_history),
                                     Toast.LENGTH_LONG).show();
                         }
                     }

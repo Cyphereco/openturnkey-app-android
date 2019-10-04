@@ -23,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/_currency_cny"
+            android:text="@string/currency_cny"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <RadioButton
@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/_currency_eur"
+            android:text="@string/currency_eur"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <RadioButton
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/_currency_jpy"
+            android:text="@string/currency_jpy"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <RadioButton
@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/_currency_twd"
+            android:text="@string/currency_twd"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <RadioButton
@@ -56,7 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:checked="true"
-            android:text="@string/_currency_usd"
+            android:text="@string/currency_usd"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
     </RadioGroup>
 </android.support.constraint.ConstraintLayout>

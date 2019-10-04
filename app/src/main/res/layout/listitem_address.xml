@@ -27,22 +27,11 @@
         app:layout_constraintTop_toBottomOf="@+id/textView_addrbook_item_alias" />
 
     <ImageView
-        android:id="@+id/imageView_addrbook_item_edit"
-        android:contentDescription="@string/edit"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView_addrbook_item_pay"
-        app:layout_constraintEnd_toStartOf="@+id/imageView_addrbook_item_qrcode"
-        app:layout_constraintTop_toTopOf="@+id/imageView_addrbook_item_pay"
-        app:srcCompat="@drawable/ic_pencil_black_24dp" />
-
-    <ImageView
         android:id="@+id/imageView_addrbook_item_delete"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="10dp"
         android:contentDescription="@string/delete"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/imageView_addrbook_item_pay"
         app:layout_constraintEnd_toStartOf="@+id/imageView_addrbook_item_edit"
         app:layout_constraintTop_toTopOf="@+id/imageView_addrbook_item_pay"
@@ -50,27 +39,44 @@
         app:srcCompat="@drawable/ic_delete_black_24dp" />
 
     <ImageView
+        android:id="@+id/imageView_addrbook_item_edit"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="@string/edit"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView_addrbook_item_pay"
+        app:layout_constraintEnd_toStartOf="@+id/imageView_addrbook_item_qrcode"
+        app:layout_constraintTop_toTopOf="@+id/imageView_addrbook_item_pay"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/ic_pencil_black_24dp" />
+
+    <ImageView
+        android:id="@+id/imageView_addrbook_item_qrcode"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="@string/btc_qr_code"
+        android:paddingStart="4dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="2dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView_addrbook_item_pay"
+        app:layout_constraintEnd_toStartOf="@+id/imageView_addrbook_item_pay"
+        app:layout_constraintTop_toTopOf="@+id/imageView_addrbook_item_pay"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/ic_action_qr_code" />
+
+    <ImageView
         android:id="@+id/imageView_addrbook_item_pay"
-        android:contentDescription="@string/pay"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="12dp"
         android:layout_marginBottom="8dp"
+        android:contentDescription="@string/pay"
         app:layout_constraintBottom_toBottomOf="@+id/textView_addrbook_item_address"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/textView_addrbook_item_alias"
         app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/ic_send_black_24dp" />
 
-    <ImageView
-        android:id="@+id/imageView_addrbook_item_qrcode"
-        android:contentDescription="@string/btc_qr_code"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView_addrbook_item_pay"
-        app:layout_constraintEnd_toStartOf="@+id/imageView_addrbook_item_pay"
-        app:layout_constraintTop_toTopOf="@+id/imageView_addrbook_item_pay"
-        app:srcCompat="@drawable/ic_action_qr_code" />
 </android.support.constraint.ConstraintLayout>

@@ -27,7 +27,7 @@ public class FragmentOtk extends Fragment {
     public static final String TAG = FragmentOtk.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
     // Cancel timeout for pay
-    private final int AUTO_DISMISS_MILLIS = 10 * 1000;
+    private final int AUTO_DISMISS_MILLIS = 30 * 1000;
 
     private FragmentOtkListener mListener;
     private static final String ARG_OPERATION = "operation";

@@ -2,7 +2,5 @@
 <resources>
     <array name="preloaded_fonts" translatable="false">
         <item>@font/anton</item>
-        <item>@font/nosifer</item>
-        <item>@font/wallpoet</item>
     </array>
 </resources>

@@ -22,6 +22,7 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBAddrItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
+import com.google.zxing.qrcode.encoder.QRCode;
 import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
 
 import java.util.List;
@@ -122,7 +123,7 @@ public class FragmentAddrbook extends Fragment {
         }
 
         new AlertDialog.Builder(getActivity())
-                .setTitle("QRCode")
+                .setTitle(getString(R.string.btc_qr_code))
                 .setView(v)
                 .setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override

@@ -82,7 +82,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         }
 
         if (null == item) {
-            Toast.makeText(this, "Cannot find the transaction",
+            Toast.makeText(this, getString(R.string.transaction_not_found),
                     Toast.LENGTH_LONG).show();
             finishActivity();
         }
@@ -183,7 +183,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
 
         if (OpenturnkeyDB.ReturnValue.SUCCESS !=
                 mOtkDB.deleteTransactionById(oriItem.getId())) {
-            Toast.makeText(getApplicationContext(), "Delete item fail",
+            Toast.makeText(getApplicationContext(), getString(R.string.failed_to_delete),
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -262,7 +262,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         final DBTransItem item = mTransactionDataSet.get(mCurrentPosition);
 
         new AlertDialog.Builder(this)
-                .setTitle("Raw Data")
+                .setTitle(getString(R.string.raw_data))
                 .setMessage(item.getRawData())
                 .setNeutralButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {

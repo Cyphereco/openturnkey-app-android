@@ -58,7 +58,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="@string/account_balance"
+        android:text="@string/subject_account_balance"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
@@ -70,7 +70,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:autofillHints=""
-        android:editable="false"
         android:ems="10"
         android:focusable="false"
         android:hint="@string/_numerical_zero"
@@ -108,7 +107,6 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:autofillHints=""
-        android:editable="false"
         android:ems="10"
         android:focusable="false"
         android:hint="@string/_numerical_zero"
@@ -124,7 +122,7 @@
         android:id="@+id/label_fiat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/_currency_twd"
+        android:text="@string/currency_twd"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="@+id/text_balance_fiat"
         app:layout_constraintTop_toBottomOf="@+id/text_balance_fiat" />
@@ -134,7 +132,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:text="@string/note"
+        android:text="@string/subject_note"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toStartOf="@+id/user_note_context"
         app:layout_constraintTop_toTopOf="@+id/user_note_context" />

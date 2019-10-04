@@ -13,11 +13,11 @@
     <string name="low_fees">Low (60+ minutes)</string>
     <string name="mid_fees">Mid (30-60 minutes)</string>
     <string name="high_fees">High (10-20 minutes)</string>
-    <string name="_currency_cny" translatable="false">CNY</string>
-    <string name="_currency_jpy" translatable="false">JPY</string>
-    <string name="_currency_twd" translatable="false">TWD</string>
-    <string name="_currency_usd" translatable="false">USD</string>
-    <string name="_currency_eur" translatable="false">EUR</string>
+    <string name="currency_cny">CNY (Chinese Yen)</string>
+    <string name="currency_jpy">JPY (Japanese Yen)</string>
+    <string name="currency_twd">TWD (Taiwan Dollar)</string>
+    <string name="currency_usd">USD (US Dollar)</string>
+    <string name="currency_eur">EUR (Euro)</string>
     <string name="_currency_btc" translatable="false">BTC</string>
     <string name="_numerical_zero" translatable="false">0.0</string>
     <string name="_symbol_equal" translatable="false">=</string>
@@ -63,17 +63,15 @@
     <string name="operation_cancelled">Operartion cancelled</string>
     <string name="send_btc_failed">Send BTC Failed</string>
     <string name="transaction_sent">Transaction Sent</string>
-    <string name="reason">Reason:</string>
+    <string name="subject_reason">Reason:</string>
     <string name="processing">Processing</string>
     <string name="recipient_is_empty">Recipient address is empty</string>
     <string name="incorrect_amount">Incorrect amount</string>
     <string name="incorrect_recipient_amount">Incorrect recipient address or amount</string>
-    <string name="from">From:</string>
-    <string name="to">To:</string>
-    <string name="hash">Hash:</string>
-    <string name="text_amount">Amount:</string>
-    <string name="text_fee">Fee:</string>
-    <string name="text_time">Time:</string>
+    <string name="subject_sender">Sender:</string>
+    <string name="subject_recipient">Recipient:</string>
+    <string name="subject_amount">Amount:</string>
+    <string name="subject_time">Time:</string>
     <string name="user_guide">User Guide</string>
     <string name="add">Add</string>
     <string name="terminate">Terminate</string>
@@ -82,12 +80,12 @@
     <string name="sign_message">Sign Message</string>
     <string name="authenticity_check">Authenticity Check</string>
     <string name="btc_address">BTC Address</string>
-    <string name="note">Note:</string>
+    <string name="subject_note">Note:</string>
     <string name="btc_qr_code">BTC QR Code</string>
     <string name="lock_state">Lock State</string>
     <string name="battery_state">Battery State</string>
     <string name="mint_inforamtion">Mint Inforamtion</string>
-    <string name="account_balance">Account Balance:</string>
+    <string name="subject_account_balance">Account Balance:</string>
     <string name="add_address">Add Address</string>
     <string name="openturnkey_information">OpenTurnKey Information</string>
     <string name="fetching">Fetching...</string>
@@ -95,21 +93,42 @@
     <string name="please_wait">Please wait a moment...</string>
     <string name="use_all_funds">Use All Funds</string>
     <string name="operation_timeout">Operation Timeout</string>
-    <string name="do_not_remove_otk">Do not remove OTK during operation</string>
-    <string name="confirm_payment">Please Confirm Payment</string>
-    <string name="text_estimated_time">"Estimated Time(min): "</string>
-    <string name="text_fee_in_satoshi">Fees(in satoshi):</string>
+    <string name="do_not_remove_otk">Do not remove OpenTurnKey</string>
+    <string name="confirm_payment">Confirm Payment</string>
+    <string name="subject_text_estimated_time">"Est. Time to Complete(MIN): "</string>
+    <string name="subject_fees_in_satoshi">Fees(SAT):</string>
     <string name="unknown_reason">Unknown Reason</string>
-    <string name="in_operation">In Operation</string>
+    <string name="in_operation">Processing</string>
     <string name="seg_wit_address_is_not_supported">SigWit Address is not supported at the moment</string>
     <string name="invalid_address">Invalid Address</string>
     <string name="alias">Alias</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
-    <string name="delete_address_dialog_message">Are you sure you want to delete this address?</string>
+    <string name="delete_address_dialog_message">Delete this address?</string>
     <string name="success">SUCCESS</string>
     <string name="fail">FAIL</string>
     <string name="copy">Copy</string>
+    <string name="subject_date_time">Date/Time:</string>
+    <string name="subject_result">Result:</string>
+    <string name="export_raw_data">Export Raw Data</string>
+    <string name="subject_transaction_id">Transaction ID:</string>
+    <string name="view_online">View Online</string>
+    <string name="resend_payment">resend payment</string>
+    <string name="delete_transaction_record">delete transaction record</string>
+    <string name="transaction_execution_status">transaction execution status</string>
+    <string name="failure_reason">failure reason</string>
+    <string name="previous_transaction_record">previous transaction record</string>
+    <string name="next_transaction_record">next transaction record</string>
+    <string name="subject_fees">Fees:</string>
+    <string name="priority_time_needed">Priority (Time Needed)</string>
+    <string name="edit_address">Edit Address</string>
+    <string name="transaction_info">Transaction Information</string>
+    <string name="raw_data">Raw Data</string>
+    <string name="all_history_cleared">All history cleared</string>
+    <string name="failed_to_clear_history">Failed to clear history</string>
+    <string name="not_supported">not supported</string>
+    <string name="transaction_not_found">Transaction not found</string>
+    <string name="failed_to_delete">Failed to delete</string>
 
 </resources>

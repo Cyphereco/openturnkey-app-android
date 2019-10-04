@@ -281,8 +281,8 @@ public class ActivityAddressEditor extends AppCompatActivity {
                             }
                             else {
                                 notBTC = true;
-                                Toast.makeText(this, "Sorry! " + uriArray[0] +
-                                        " is not supported at this moment.",
+                                Toast.makeText(this, uriArray[0] +
+                                        getString(R.string.not_supported),
                                         Toast.LENGTH_LONG).show();
                                 contents = "";
                             }
@@ -307,7 +307,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
                                     String[] amountArray = s.split("=");
                                     if (amountArray.length > 1) {
                                         Toast.makeText(this,
-                                                "Amount: " + amountArray[1],
+                                                getString(R.string.subject_amount)+ amountArray[1],
                                                 Toast.LENGTH_LONG).show();
                                     }
                                 }

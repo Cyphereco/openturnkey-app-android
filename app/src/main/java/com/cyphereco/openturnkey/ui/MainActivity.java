@@ -121,8 +121,8 @@ public class MainActivity extends AppCompatActivity
                                 addr = contents;
                             } else {
                                 notBTC = true;
-                                Toast.makeText(this, "Sorry! " + uriArray[0] +
-                                        " is not supported at this moment.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(this, uriArray[0] +
+                                        getString(R.string.not_supported), Toast.LENGTH_LONG).show();
                                 contents = "";
                             }
                         } else {
@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity
                                 if (s.toLowerCase().contains(AMOUNT_EQUAL_TO)) {
                                     String[] amountArray = s.split("=");
                                     if (amountArray.length > 1) {
-                                        Toast.makeText(this, "Amount: " + amountArray[1], Toast.LENGTH_LONG).show();
+                                        Toast.makeText(this, getString(R.string.subject_amount) + amountArray[1], Toast.LENGTH_LONG).show();
                                         amount = amountArray[1];
                                     }
                                 }
@@ -924,11 +924,11 @@ public class MainActivity extends AppCompatActivity
         // Fee:
         // Estimated time to be confirmed:
 
-        String msg = getString(R.string.from) + utx.getFrom() + "\n" +
-                getString(R.string.to) + utx.getTo() + "\n" +
-                getString(R.string.text_amount) + String.format("%.8f", utx.getAmount()) + "\n" +
-                getString(R.string.text_fee_in_satoshi) +  utx.getFee() + "\n" +
-                getString(R.string.text_estimated_time) + BtcUtils.getEstimatedTime(getApplicationContext(), BtcUtils.btcToSatoshi(utx.getFee()));
+        String msg = getString(R.string.subject_sender) + utx.getFrom() + "\n" +
+                getString(R.string.subject_recipient) + utx.getTo() + "\n" +
+                getString(R.string.subject_amount) + String.format("%.8f", utx.getAmount()) + "\n" +
+                getString(R.string.subject_fees_in_satoshi) +  utx.getFee() + "\n" +
+                getString(R.string.subject_text_estimated_time) + BtcUtils.getEstimatedTime(getApplicationContext(), BtcUtils.btcToSatoshi(utx.getFee()));
         mConfirmPaymentDialog = mConfirmPaymentDialogBuilder.setTitle(R.string.confirm_payment)
                 .setMessage(msg)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
