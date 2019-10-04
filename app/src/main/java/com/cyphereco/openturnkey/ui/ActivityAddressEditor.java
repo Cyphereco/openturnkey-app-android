@@ -10,6 +10,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -22,6 +23,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -32,6 +34,7 @@ import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.db.DBAddrItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.AddressUtils;
+import com.cyphereco.openturnkey.utils.BtcUtils;
 
 import java.util.Objects;
 
@@ -93,6 +96,11 @@ public class ActivityAddressEditor extends AppCompatActivity {
         if (EDITOR_TYPE_EDIT == intent.getIntExtra(KEY_EDITOR_TYPE, 0)) {
             mInputAlias.setText(intent.getStringExtra(KEY_EDITOR_CONTACT_ALIAS));
             mInputAddress.setText(intent.getStringExtra(KEY_EDITOR_CONTACT_ADDR));
+        }
+
+        if ((null != mInputAddress.getText()) &&
+                (!mInputAddress.getText().toString().isEmpty())) {
+            mSaveBtn.setEnabled(true);
         }
 
         setUIListener();
@@ -196,7 +204,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
         mSaveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveContact();
+                saveContact(v);
             }
         });
 
@@ -341,9 +349,29 @@ public class ActivityAddressEditor extends AppCompatActivity {
         }
     }
 
-    private void saveContact() {
+    private void saveContact(View v) {
         String alias = Objects.requireNonNull(mInputAlias.getText()).toString();
         String address = Objects.requireNonNull(mInputAddress.getText()).toString();
+
+        try {
+            // Check if address is valid
+            if (address == null || address.length() == 0) {
+                Snackbar.make(v, getString(R.string.recipient_is_empty), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                return;
+            }
+            if (true == BtcUtils.isSegWitAddress(!Preferences.isTestnet(getApplicationContext()), address)) {
+                Snackbar.make(v, getString(R.string.seg_wit_address_is_not_supported), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                return;
+            }
+            if (false == BtcUtils.validateAddress(!Preferences.isTestnet(getApplicationContext()), address)) {
+                Snackbar.make(v, getString(R.string.invalid_address), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                return;
+            }
+        }
+        catch (NullPointerException | NumberFormatException e) {
+            e.printStackTrace();
+            return;
+        }
 
         if (alias.isEmpty()) {
             alias = AddressUtils.getShortAddress(address);
