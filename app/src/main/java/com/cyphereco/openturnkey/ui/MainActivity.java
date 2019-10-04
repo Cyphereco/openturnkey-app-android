@@ -533,13 +533,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void setLocalCurrency(int localCurrency) {
-        updatePayConfig(toolbarMenu);
         LocalCurrency lc = currencyToLocalCurrency(localCurrency);
         Preferences.setLocalCurrency(getApplicationContext(), lc);
         if (mSelectedFragment instanceof FragmentPay) {
             // Update local currency
             ((FragmentPay) mSelectedFragment).updateLocalCurrency(lc);
         }
+        // Update currency in option menu
+        updatePayConfig(toolbarMenu);
     }
 
     public void authByPin(String pin) {
