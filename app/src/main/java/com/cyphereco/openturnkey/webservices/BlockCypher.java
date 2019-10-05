@@ -108,8 +108,16 @@ public class BlockCypher extends BtcBase {
                 amount -= txFees;
                 logger.info("Fee included. Amount:{}, fee:{}", amount, txFees);
             }
-            IntermediaryTransaction unsignedTx = mBcCtx.getTransactionService().newTransaction(
-                    new ArrayList<String>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, txFees);
+            IntermediaryTransaction unsignedTx;
+            if (txFees == 0) {
+                // set "prefrence":"zero"
+                unsignedTx = mBcCtx.getTransactionService().newTransaction(
+                        new ArrayList<String>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, "zero");
+            }
+            else {
+                unsignedTx = mBcCtx.getTransactionService().newTransaction(
+                        new ArrayList<String>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, txFees);
+            }
             if ((unsignedTx == null) || unsignedTx.getTosign().size() == 0) {
                 logger.info("unsignedTx is null or toSign is empty");
                 return null;

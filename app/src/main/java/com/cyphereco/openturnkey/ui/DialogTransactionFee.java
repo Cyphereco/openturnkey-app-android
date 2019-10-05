@@ -57,7 +57,7 @@ public class DialogTransactionFee extends AppCompatDialogFragment {
             selectedFee = getArguments().getInt("transactionFee");
             rgTransactionFee.check(selectedFee);
             double fee = BtcUtils.satoshiToBtc(getArguments().getLong("customizedFee"));
-            if (fee > 0) {
+            if (fee >= 0) {
                 EditText et = view.findViewById(R.id.transaction_fee);
                 DecimalFormat format = new DecimalFormat("0.########");
                 et.setText(format.format(fee));
