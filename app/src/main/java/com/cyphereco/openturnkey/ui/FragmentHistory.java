@@ -18,6 +18,9 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class FragmentHistory extends Fragment {
@@ -42,8 +45,10 @@ public class FragmentHistory extends Fragment {
                 if (null != item) {
                     Intent intent = new Intent(getContext(), ActivityTransactionInfo.class);
                     intent.putExtra(ActivityTransactionInfo.KEY_CURRENT_TRANS_ID, item.getId());
-                    getActivity().startActivityForResult(intent,
-                            MainActivity.REQUEST_CODE_TRANSACTION_INFO);
+                    if (getActivity() != null) {
+                        getActivity().startActivityForResult(intent,
+                                MainActivity.REQUEST_CODE_TRANSACTION_INFO);
+                    }
                 }
                 else {
                     Log.e(TAG, "Cannot find transaction item. Position: " + position);
@@ -54,15 +59,29 @@ public class FragmentHistory extends Fragment {
 
     private void updateTransactionDataset() {
         List<DBTransItem> dataset = mOtkDB.getAllTransaction();
+
+        Collections.sort(dataset, new Comparator<DBTransItem>() {
+            @Override
+            public int compare(DBTransItem o1, DBTransItem o2) {
+                Date dt1 = new Date(o1.getDatetime());
+                Date dt2 = new Date(o2.getDatetime());
+                if (dt1.before(dt2)) {
+                    return 1;
+                }
+                else if (dt1.equals(dt2)) {
+                    return 0;
+                }
+                return -1;
+            }
+        });
+
         if (0 < dataset.size()) {
-            Log.d(TAG, "updateTransactionDataset > 0");
             mTVNoHistoryMessage.setVisibility(View.INVISIBLE);
             mRVHistory.setVisibility(View.VISIBLE);
 
             mItemViewAdapter.setData(dataset);
         }
         else {
-            Log.d(TAG, "updateTransactionDataset == 0");
             mTVNoHistoryMessage.setVisibility(View.VISIBLE);
             mRVHistory.setVisibility(View.INVISIBLE);
         }
