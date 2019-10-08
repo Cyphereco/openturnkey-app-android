@@ -115,7 +115,7 @@
     <string name="subject_transaction_id">Transaction ID:</string>
     <string name="view_online">View Online</string>
     <string name="resend_payment">resend payment</string>
-    <string name="delete_transaction_record">delete transaction record</string>
+    <string name="delete_transaction_record">Delete transaction record</string>
     <string name="transaction_execution_status">transaction execution status</string>
     <string name="failure_reason">failure reason</string>
     <string name="previous_transaction_record">previous transaction record</string>
@@ -130,5 +130,6 @@
     <string name="not_supported">not supported</string>
     <string name="transaction_not_found">Transaction not found</string>
     <string name="failed_to_delete">Failed to delete</string>
+    <string name="delete_this_transaction_record">Delete this transaction record?</string>
 
 </resources>

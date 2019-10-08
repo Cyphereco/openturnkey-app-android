@@ -88,7 +88,7 @@
     <string name="copy">コピー</string>
     <string name="alias">別称</string>
     <string name="delete">消す</string>
-    <string name="delete_address_dialog_message">このアドレスを削除？</string>
+    <string name="delete_address_dialog_message">このアドレスを削除?</string>
     <string name="edit">編集する</string>
     <string name="use_all_funds">すべての資金を出す</string>
     <string name="save">セーブ</string>
@@ -117,4 +117,5 @@
     <string name="not_supported">サポートされていません</string>
     <string name="transaction_not_found">找不到交易记录</string>
     <string name="failed_to_delete">削除できませんでした</string>
+    <string name="delete_this_transaction_record">この取引記録を削除する?</string>
 </resources>

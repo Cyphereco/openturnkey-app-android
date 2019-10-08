@@ -88,7 +88,7 @@
     <string name="copy">复制</string>
     <string name="alias">別名</string>
     <string name="delete">刪除</string>
-    <string name="delete_address_dialog_message">删除此地址？</string>
+    <string name="delete_address_dialog_message">删除此地址?</string>
     <string name="edit">编辑</string>
     <string name="use_all_funds">发送全部余额</string>
     <string name="save">保存</string>
@@ -117,4 +117,5 @@
     <string name="not_supported">不支持</string>
     <string name="transaction_not_found">找不到交易記錄</string>
     <string name="failed_to_delete">删除失败</string>
+    <string name="delete_this_transaction_record">删除此交易记录?</string>
 </resources>

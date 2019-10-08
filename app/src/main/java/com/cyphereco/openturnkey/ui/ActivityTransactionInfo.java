@@ -161,8 +161,8 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     private void processDeleteBtnClick() {
         Log.d(TAG, "processDeleteBtnClick");
         new AlertDialog.Builder(this)
-                .setMessage("Do you want to delete this transaction")
-                .setNeutralButton(R.string.cancel,
+                .setMessage(getString(R.string.delete_this_transaction_record))
+                .setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -272,7 +272,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.raw_data))
                 .setMessage(item.getRawData())
-                .setNeutralButton(R.string.cancel,
+                .setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
