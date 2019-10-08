@@ -53,6 +53,9 @@ public class FragmentPay extends Fragment {
     private static final String ARG_LC = "LC";
     private static final String ARG_USE_ALL_FUNDS = "USE_ALL_FUNDS";
 
+    private EditText mEtCc;
+    private EditText mEtLc;
+
 
     public static FragmentPay newInstance(String to, String btcAmount, String lcAmount, boolean isUseAllFundsChecked) {
         FragmentPay fragment = new FragmentPay();
@@ -125,18 +128,18 @@ public class FragmentPay extends Fragment {
         });
 
         iv = view.findViewById(R.id.icon_read_nfc);
-        final EditText etCc = view.findViewById(R.id.input_crypto_currency);
-        final EditText etLc = view.findViewById(R.id.input_local_currency);
+        mEtCc = view.findViewById(R.id.input_crypto_currency);
+        mEtLc = view.findViewById(R.id.input_local_currency);
 
         if (getArguments() != null) {
-            etCc.setText(getArguments().getString(ARG_BTC));
+            mEtCc.setText(getArguments().getString(ARG_BTC));
             try {
-                mBtc = Double.parseDouble(etCc.getText().toString());
+                mBtc = Double.parseDouble(mEtCc.getText().toString());
             }
             catch (NumberFormatException e) {
-                etCc.setText("");
+                mEtCc.setText("");
             }
-            etLc.setText(getArguments().getString(ARG_LC));
+            mEtLc.setText(getArguments().getString(ARG_LC));
             String to = getArguments().getString(ARG_TO);
             if (to != null && to.length() > 0) {
                 updateRecipientAddress(view, to);
@@ -145,6 +148,7 @@ public class FragmentPay extends Fragment {
             boolean b = getArguments().getBoolean(ARG_USE_ALL_FUNDS);
             logger.info("Checked:" + b);
             cb.setChecked(b);
+            updateCurrency();
         }
 
         iv.setOnClickListener(new View.OnClickListener() {
@@ -152,15 +156,15 @@ public class FragmentPay extends Fragment {
             public void onClick(View view) {
                 if (mListener != null) {
                     CheckBox cb = getView().findViewById(R.id.checkBox_use_all_funds);
-                    mListener.onGetRecipientAddressByReadNfcButtonClick(mRecipientAddress, etCc.getText().toString(), etLc.getText().toString(), cb.isChecked());
+                    mListener.onGetRecipientAddressByReadNfcButtonClick(mRecipientAddress, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
                 }
             }
         });
 
-        etCc.addTextChangedListener(new CurrencyTextWatcher(etCc) {
+        mEtCc.addTextChangedListener(new CurrencyTextWatcher(mEtCc) {
             @Override
             public void afterTextChanged(Editable editable) {
-                if (mIsAmountConverting == true || !etCc.isFocused()) {
+                if (mIsAmountConverting == true || !mEtCc.isFocused()) {
                     // It's updated by changing of lc
                     return;
                 }
@@ -168,21 +172,21 @@ public class FragmentPay extends Fragment {
                 mIsCryptoCurrencySet = true;
                 mIsAmountConverting = true;
                 try {
-                    double cc = Double.parseDouble(etCc.getText().toString());
-                    etLc.setText(String.format("%.2f", Double.valueOf(getLocalCurrency(cc))));
+                    double cc = Double.parseDouble(mEtCc.getText().toString());
+                    mEtLc.setText(String.format("%.2f", Double.valueOf(getLocalCurrency(cc))));
                     mBtc = cc;
                 }
                 catch (NumberFormatException e) {
-                    etLc.setText("");
+                    mEtLc.setText("");
                 }
                 mIsAmountConverting = false;
             }
         });
 
-        etLc.addTextChangedListener(new CurrencyTextWatcher(etLc) {
+        mEtLc.addTextChangedListener(new CurrencyTextWatcher(mEtLc) {
             @Override
             public void afterTextChanged(Editable editable) {
-                if (mIsAmountConverting == true || !etLc.isFocused()) {
+                if (mIsAmountConverting == true || !mEtLc.isFocused()) {
                     // It's updated by changing of cc or back to this fragment from somewhere
                     return;
                 }
@@ -190,12 +194,12 @@ public class FragmentPay extends Fragment {
                 mIsCryptoCurrencySet = false;
                 mIsAmountConverting = true;
                 try {
-                    double lc = Double.parseDouble(etLc.getText().toString());
+                    double lc = Double.parseDouble(mEtLc.getText().toString());
                     mBtc = Double.valueOf(getCryptoCurrency(lc));
-                    etCc.setText(String.format("%.8f", mBtc));
+                    mEtCc.setText(String.format("%.8f", mBtc));
 
                 } catch (NumberFormatException e) {
-                    etCc.setText("");
+                    mEtCc.setText("");
                 }
                 mIsAmountConverting = false;
             }
@@ -225,7 +229,7 @@ public class FragmentPay extends Fragment {
                     CheckBox cb = v.findViewById(R.id.checkBox_use_all_funds);
                     if (cb.isChecked()) {
                         if (mListener != null) {
-                            mListener.onSignPaymentButtonClick(mRecipientAddress, -1, etCc.getText().toString(), etLc.getText().toString(), cb.isChecked());
+                            mListener.onSignPaymentButtonClick(mRecipientAddress, -1, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
                         }
                     }
                     else {
@@ -236,7 +240,7 @@ public class FragmentPay extends Fragment {
                         }
 
                         if (mListener != null) {
-                            mListener.onSignPaymentButtonClick(mRecipientAddress, mBtc, etCc.getText().toString(), etLc.getText().toString(), cb.isChecked());
+                            mListener.onSignPaymentButtonClick(mRecipientAddress, mBtc, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
                         }
                     }
                 }
@@ -254,12 +258,12 @@ public class FragmentPay extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
                 if (isChecked) {
-                    etCc.setEnabled(false);
-                    etLc.setEnabled(false);
+                    mEtCc.setEnabled(false);
+                    mEtLc.setEnabled(false);
                 }
                 else {
-                    etCc.setEnabled(true);
-                    etLc.setEnabled(true);
+                    mEtCc.setEnabled(true);
+                    mEtLc.setEnabled(true);
                 }
             }
         });
@@ -343,8 +347,6 @@ public class FragmentPay extends Fragment {
 
     private void updateCurrency() {
         try {
-            EditText etLc = getView().findViewById(R.id.input_local_currency);
-            EditText etCc = getView().findViewById(R.id.input_crypto_currency);
             if (mIsCryptoCurrencySet == true) {
                 if (mBtc == 0.0) {
                     // No need to update if amount is 0.
@@ -353,22 +355,22 @@ public class FragmentPay extends Fragment {
                 // update local currency
                 mIsAmountConverting = true;
                 try {
-                    etLc.setText(String.format("%.2f", Double.valueOf(getLocalCurrency(mBtc))));
+                    mEtLc.setText(String.format("%.2f", Double.valueOf(getLocalCurrency(mBtc))));
                 }
                 catch (NumberFormatException e) {
-                    etLc.setText("");
+                    mEtLc.setText("");
                 }
                 mIsAmountConverting = false;
             }
             else {
                 mIsAmountConverting = true;
                 try {
-                    double lc = Double.parseDouble(etLc.getText().toString());
+                    double lc = Double.parseDouble(mEtLc.getText().toString());
                     mBtc = Double.valueOf(getCryptoCurrency(lc));
-                    etCc.setText(String.format("%.8f", mBtc));
+                    mEtCc.setText(String.format("%.8f", mBtc));
                 }
                 catch (NumberFormatException e) {
-                    etCc.setText("");
+                    mEtCc.setText("");
                 }
                 mIsAmountConverting = false;
             }

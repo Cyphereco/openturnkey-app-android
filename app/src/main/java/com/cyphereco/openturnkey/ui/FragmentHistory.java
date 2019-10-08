@@ -42,7 +42,8 @@ public class FragmentHistory extends Fragment {
                 if (null != item) {
                     Intent intent = new Intent(getContext(), ActivityTransactionInfo.class);
                     intent.putExtra(ActivityTransactionInfo.KEY_CURRENT_TRANS_ID, item.getId());
-                    startActivityForResult(intent, MainActivity.REQUEST_CODE_TRANSACTION_INFO);
+                    getActivity().startActivityForResult(intent,
+                            MainActivity.REQUEST_CODE_TRANSACTION_INFO);
                 }
                 else {
                     Log.e(TAG, "Cannot find transaction item. Position: " + position);

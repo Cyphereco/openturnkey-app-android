@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity
     public static final String KEY_SET_PIN_CODE = "KEY_SET_PIN_CODE";
     public static final String KEY_SET_KEY = "KEY_SET_KEY";
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
+    public static final int REQUEST_RESULT_CODE_REPAY = 1000;
 
     private static final String BEGIN_BITCOIN_SIGNED_MESSAGE = "-----BEGIN BITCOIN SIGNED MESSAGE-----";
     private static final String AMOUNT_EQUAL_TO = "amount=";
@@ -187,6 +188,12 @@ public class MainActivity extends AppCompatActivity
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.frame_main, mSelectedFragment).commitAllowingStateLoss();
             }
+            else if (resultCode == REQUEST_RESULT_CODE_REPAY) {
+                mRecipientAddress = intent.getStringExtra("REPAY_ADDRESS");
+                mBtcAmount = intent.getStringExtra("REPAY_AMOUNT");
+                BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+                bottomNav.setSelectedItemId(R.id.nav_menu_pay);
+            }
         }
     }
 
@@ -247,7 +254,8 @@ public class MainActivity extends AppCompatActivity
                             ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
                             break;
                     }
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frame_main, mSelectedFragment).commit();
+                    getSupportFragmentManager().beginTransaction().replace(
+                            R.id.frame_main, mSelectedFragment).commitAllowingStateLoss();
                     return true;
                 }
             };

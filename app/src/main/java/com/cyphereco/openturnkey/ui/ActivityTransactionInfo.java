@@ -32,7 +32,7 @@ import java.util.Locale;
 public class ActivityTransactionInfo extends AppCompatActivity {
     private final static String TAG = ActivityTransactionInfo.class.getSimpleName();
 
-    private ImageView mBtnRefresh;
+    private ImageView mBtnResend;
     private ImageView mBtnDelete;
     private Button mBtnExportRawData;
     private Button mBtnViewOnline;
@@ -57,7 +57,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        mBtnRefresh = findViewById(R.id.iv_icon_tx_info_refresh);
+        mBtnResend = findViewById(R.id.iv_icon_tx_info_resend);
         mBtnDelete = findViewById(R.id.iv_icon_tx_info_delete);
         mBtnExportRawData = findViewById(R.id.btn_tx_info_export_raw_data);
         mBtnViewOnline = findViewById(R.id.btn_tx_info_view_online);
@@ -104,10 +104,10 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     }
 
     private void configUI() {
-        mBtnRefresh.setOnClickListener(new View.OnClickListener() {
+        mBtnResend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                processRefreshBtnClick();
+                processResendBtnClick();
             }
         });
         mBtnDelete.setOnClickListener(new View.OnClickListener() {
@@ -148,75 +148,83 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         });
     }
 
-    private void processRefreshBtnClick() {
-        Log.d(TAG, "processRefreshBtnClick");
-        DBTransItem newItem = null;
-        DBTransItem oriItem = mTransactionDataSet.get(mCurrentPosition);
-
-        mTransactionDataSet = mOtkDB.getAllTransaction();
-        for (int i = 0; i < mTransactionDataSet.size(); i++) {
-            if (mTransactionDataSet.get(i).getId() == oriItem.getId()) {
-                newItem = mTransactionDataSet.get(i);
-                mCurrentPosition = i;
-                break;
-            }
-        }
-        if (null == newItem) {
-            mCurrentPosition = 0;
-            newItem = mTransactionDataSet.get(mCurrentPosition);
-        }
-        showTransactionInfo(newItem);
+    private void processResendBtnClick() {
+        Log.d(TAG, "processResendBtnClick");
+        DBTransItem item = mTransactionDataSet.get(mCurrentPosition);
+        Intent intent = new Intent();
+        intent.putExtra("REPAY_ADDRESS", item.getPayeeAddr());
+        intent.putExtra("REPAY_AMOUNT", String.valueOf(item.getAmount()));
+        setResult(MainActivity.REQUEST_RESULT_CODE_REPAY, intent);
+        finish();
     }
 
     private void processDeleteBtnClick() {
         Log.d(TAG, "processDeleteBtnClick");
-        DBTransItem oriItem = mTransactionDataSet.get(mCurrentPosition);
-        DBTransItem previousItem = null;
-        DBTransItem nextItem = null;
+        new AlertDialog.Builder(this)
+                .setMessage("Do you want to delete this transaction")
+                .setNeutralButton(R.string.cancel,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                .setPositiveButton(R.string.delete,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                DBTransItem oriItem = mTransactionDataSet.get(mCurrentPosition);
+                                DBTransItem previousItem = null;
+                                DBTransItem nextItem = null;
 
-        if ((mCurrentPosition - 1) >= 0) {
-            previousItem = mTransactionDataSet.get(mCurrentPosition - 1);
-        }
-        if ((mCurrentPosition + 1) < mTransactionDataSet.size()) {
-            nextItem = mTransactionDataSet.get(mCurrentPosition + 1);
-        }
+                                if ((mCurrentPosition - 1) >= 0) {
+                                    previousItem = mTransactionDataSet.get(mCurrentPosition - 1);
+                                }
+                                if ((mCurrentPosition + 1) < mTransactionDataSet.size()) {
+                                    nextItem = mTransactionDataSet.get(mCurrentPosition + 1);
+                                }
 
-        if (OpenturnkeyDB.ReturnValue.SUCCESS !=
-                mOtkDB.deleteTransactionById(oriItem.getId())) {
-            Toast.makeText(getApplicationContext(), getString(R.string.failed_to_delete),
-                    Toast.LENGTH_LONG).show();
-            return;
-        }
+                                if (OpenturnkeyDB.ReturnValue.SUCCESS !=
+                                        mOtkDB.deleteTransactionById(oriItem.getId())) {
+                                    Toast.makeText(getApplicationContext(),
+                                            getString(R.string.failed_to_delete),
+                                            Toast.LENGTH_LONG).show();
+                                    return;
+                                }
 
-        // Get new data set
-        mTransactionDataSet = mOtkDB.getAllTransaction();
+                                // Get new data set
+                                mTransactionDataSet = mOtkDB.getAllTransaction();
 
-        if (null != previousItem) {
-            for (int i = 0; i < mTransactionDataSet.size(); i++) {
-                if (previousItem.getId() == mTransactionDataSet.get(i).getId()) {
-                    mCurrentPosition = i;
-                }
-            }
-        }
-        else if (null != nextItem) {
-            for (int i = 0; i < mTransactionDataSet.size(); i++) {
-                if (nextItem.getId() == mTransactionDataSet.get(i).getId()) {
-                    mCurrentPosition = i;
-                }
-            }
-        }
-        else {
-            if (mTransactionDataSet.size() > 0) {
-                mCurrentPosition = 0;
-            }
-            else {
-                mCurrentPosition = -1;
-                showEmptyTransactionDialog();
-            }
-        }
-        if (mCurrentPosition >= 0) {
-            showTransactionInfo(mTransactionDataSet.get(mCurrentPosition));
-        }
+                                if (null != previousItem) {
+                                    for (int i = 0; i < mTransactionDataSet.size(); i++) {
+                                        if (previousItem.getId() ==
+                                                mTransactionDataSet.get(i).getId()) {
+                                            mCurrentPosition = i;
+                                        }
+                                    }
+                                }
+                                else if (null != nextItem) {
+                                    for (int i = 0; i < mTransactionDataSet.size(); i++) {
+                                        if (nextItem.getId() ==
+                                                mTransactionDataSet.get(i).getId()) {
+                                            mCurrentPosition = i;
+                                        }
+                                    }
+                                }
+                                else {
+                                    if (mTransactionDataSet.size() > 0) {
+                                        mCurrentPosition = 0;
+                                    }
+                                    else {
+                                        mCurrentPosition = -1;
+                                        showEmptyTransactionDialog();
+                                    }
+                                }
+                                if (mCurrentPosition >= 0) {
+                                    showTransactionInfo(mTransactionDataSet.get(mCurrentPosition));
+                                }
+                            }
+                        })
+                .show();
     }
 
     private void processViewOnLineBtnClick() {
