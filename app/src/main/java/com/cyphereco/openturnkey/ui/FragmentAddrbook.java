@@ -25,6 +25,8 @@ import com.cyphereco.openturnkey.utils.QRCodeUtils;
 import com.google.zxing.qrcode.encoder.QRCode;
 import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -135,6 +137,14 @@ public class FragmentAddrbook extends Fragment {
 
     private void updateAddressDataset() {
         List<DBAddrItem> addrDataset = mOtkDB.getAllAddressbook();
+
+        // Sort by alias
+        Collections.sort(addrDataset, new Comparator<DBAddrItem>() {
+            @Override
+            public int compare(DBAddrItem o1, DBAddrItem o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
 
         if (0 < addrDataset.size()) {
             mTVNoAddressMessage.setVisibility(View.INVISIBLE);
