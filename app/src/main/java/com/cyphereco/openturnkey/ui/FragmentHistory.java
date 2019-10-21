@@ -131,4 +131,9 @@ public class FragmentHistory extends Fragment {
         Log.d(TAG, "onResume");
         updateTransactionDataset();
     }
+
+    public void refresh() {
+        Log.d(TAG, "refresh()");
+        updateTransactionDataset();
+    }
 }

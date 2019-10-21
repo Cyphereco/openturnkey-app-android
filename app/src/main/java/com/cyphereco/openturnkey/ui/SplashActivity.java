@@ -106,10 +106,6 @@ public class SplashActivity extends AppCompatActivity {
             intent.setClass(SplashActivity.this, OpenturnkeyInfoActivity.class);
             startActivity(intent);
         }
-        else if (ActivityAddressEditor.isActive()) {
-            intent.setClass(SplashActivity.this, ActivityAddressEditor.class);
-            startActivity(intent);
-        }
         else {
             intent.setClass(SplashActivity.this, MainActivity.class);
             startActivity(intent);

@@ -216,4 +216,9 @@ public class FragmentAddrbook extends Fragment {
     public interface FragmentAddrbookListener {
         void onAddressbookPayingButtonClick(String address);
     }
+
+    public void refresh() {
+        Log.d(TAG, "refresh()");
+        updateAddressDataset();
+    }
 }
