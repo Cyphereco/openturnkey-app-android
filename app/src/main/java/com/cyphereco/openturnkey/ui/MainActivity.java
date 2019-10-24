@@ -58,7 +58,10 @@ public class MainActivity extends AppCompatActivity
     public static final String KEY_SET_PIN_CODE = "KEY_SET_PIN_CODE";
     public static final String KEY_SET_KEY = "KEY_SET_KEY";
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
+    public static final String KEY_ADDRESS_EDITOR_TEMP_ALIAS = "KEY_ADDRESS_EDITOR_TMEP_ALIAS";
+    public static final String KEY_ADDRESS_EDITOR_TEMP_ADDR = "KEY_ADDRESS_EDITOR_TMEP_ADDR";
     public static final int REQUEST_RESULT_CODE_REPAY = 1000;
+    public static final int REQUEST_RESULT_CODE_READ_NFC = 1001;
 
     private static final String BEGIN_BITCOIN_SIGNED_MESSAGE = "-----BEGIN BITCOIN SIGNED MESSAGE-----";
     private static final String AMOUNT_EQUAL_TO = "amount=";
@@ -92,6 +95,12 @@ public class MainActivity extends AppCompatActivity
     private String mBtcAmount = "";
     private String mLcAmount = "";
     private boolean mIsUseAllFundsChecked = false;
+
+    private boolean mSwitchToOTKFragment = false;
+    private boolean mWaitingAddressFromAddrEditor = false;
+    private String mAddressEditorTempAlias = "";
+    private String mAddressEditorTempAddress = "";
+    private boolean mSwitchToAddressBookFragment = false;
 
     /**
      * Process activity result
@@ -179,16 +188,31 @@ public class MainActivity extends AppCompatActivity
         }
         else if (requestCode == REQUEST_CODE_ADDRESS_EDIT) {
             if (resultCode == RESULT_OK) {
-                mSelectedFragment = new FragmentAddrbook();
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.frame_main, mSelectedFragment).commitAllowingStateLoss();
+                if (mSelectedFragment instanceof FragmentAddrbook) {
+                    // Refresh address book
+                    ((FragmentAddrbook) mSelectedFragment).refresh();
+                }
+                else {
+                    // switch to address book
+                    mSwitchToAddressBookFragment = true;
+                }
+            }
+            else if (resultCode == RESULT_CANCELED) {
+                mSwitchToAddressBookFragment = true;
+            }
+            else if (resultCode == REQUEST_RESULT_CODE_READ_NFC) {
+                // Switch to OTK fragment
+                mSwitchToOTKFragment = true;
+                mWaitingAddressFromAddrEditor = true;
+                mAddressEditorTempAlias = intent.getStringExtra(KEY_ADDRESS_EDITOR_TEMP_ALIAS);
+                mAddressEditorTempAddress = intent.getStringExtra(KEY_ADDRESS_EDITOR_TEMP_ADDR);
             }
         }
         else if (requestCode == REQUEST_CODE_TRANSACTION_INFO) {
             if (resultCode == RESULT_OK) {
-                mSelectedFragment = new FragmentHistory();
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.frame_main, mSelectedFragment).commitAllowingStateLoss();
+                if (mSelectedFragment instanceof FragmentHistory) {
+                    ((FragmentHistory) mSelectedFragment).refresh();
+                }
             }
             else if (resultCode == REQUEST_RESULT_CODE_REPAY) {
                 mRecipientAddress = intent.getStringExtra("REPAY_ADDRESS");
@@ -260,7 +284,7 @@ public class MainActivity extends AppCompatActivity
                             break;
                     }
                     getSupportFragmentManager().beginTransaction().replace(
-                            R.id.frame_main, mSelectedFragment).commitAllowingStateLoss();
+                            R.id.frame_main, mSelectedFragment).commit();
                     return true;
                 }
             };
@@ -383,8 +407,15 @@ public class MainActivity extends AppCompatActivity
                         // Go back to pay fragment
                         mOp = Otk.Operation.OTK_OP_NONE;
                         mIsOpInProcessing = false;
-                        mRecipientAddress = event.getRecipientAddress();
-                        backToPayFragment();
+                        if (mWaitingAddressFromAddrEditor) {
+                            // Back to address editor activity
+                            backToAddressEditorActivity(mAddressEditorTempAlias,
+                                    event.getRecipientAddress());
+                        }
+                        else {
+                            mRecipientAddress = event.getRecipientAddress();
+                            backToPayFragment();
+                        }
                     }
                 } else if (type == OtkEvent.Type.OTK_UNAUTHORIZED) {
                     // Dismiss progress dialog
@@ -469,6 +500,19 @@ public class MainActivity extends AppCompatActivity
 
         if (mNfcAdapter != null) {
             mNfcAdapter.enableForegroundDispatch(this, pendingIntent, nfcIntentFilter, null);
+        }
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        if (mSwitchToOTKFragment) {
+            mSwitchToOTKFragment = false;
+            // Cache op
+            mOp = Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS;
+            bottomNav.setSelectedItemId(R.id.nav_menu_openturnkey);
+            mIsOpInProcessing = true;
+        }
+        else if (mSwitchToAddressBookFragment) {
+            mSwitchToAddressBookFragment = false;
+            bottomNav.setSelectedItemId(R.id.nav_menu_addresses);
         }
     }
 
@@ -840,7 +884,12 @@ public class MainActivity extends AppCompatActivity
         mOtk.cancelOperation();
         mOp = Otk.Operation.OTK_OP_NONE;
         mIsOpInProcessing = false;
-        backToPayFragment();
+        if (mWaitingAddressFromAddrEditor) {
+            backToAddressEditorActivity(mAddressEditorTempAlias, mAddressEditorTempAddress);
+        }
+        else {
+            backToPayFragment();
+        }
     }
 
     public void onCancelTimeout() {
@@ -934,6 +983,7 @@ public class MainActivity extends AppCompatActivity
                         // Terminate current op
                         mOtk.cancelOperation();
                         mIsOpInProcessing = false;
+                        mWaitingAddressFromAddrEditor = false;
                         clearCachedPayFragmentData();
                         if (isOtkOptionsSet) {
                             ((FragmentOtk) mSelectedFragment).hideCancelButton();
@@ -1080,9 +1130,21 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClearHistorySuccess() {
         // Reload history fragment
-        mSelectedFragment = new FragmentHistory();
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frame_main, mSelectedFragment).commitAllowingStateLoss();
+        if (mSelectedFragment instanceof FragmentHistory) {
+            ((FragmentHistory) mSelectedFragment).refresh();
+        }
+    }
+
+    private void backToAddressEditorActivity(String alias, String address) {
+        mWaitingAddressFromAddrEditor = false;
+
+        Intent intent = new Intent(getApplicationContext(), ActivityAddressEditor.class);
+
+        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_TYPE,
+                ActivityAddressEditor.EDITOR_TYPE_EDIT);
+        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ALIAS, alias);
+        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ADDR, address);
+        startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
     }
 }
 

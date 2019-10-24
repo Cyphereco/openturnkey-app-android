@@ -20,17 +20,12 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.core.Otk;
-import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.db.DBAddrItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.AddressUtils;
@@ -59,16 +54,9 @@ public class ActivityAddressEditor extends AppCompatActivity {
     private ImageView mPasteClipboardBtn;
     private ImageView mReadNFCBtn;
     private Button mSaveBtn;
-    private ProgressBar mReadNFCProgressBar;
 
     private NfcAdapter mNfcAdapter = null;
-    private static Otk mOtk = null;
-    private static boolean mWaitingNFC = false;
 
-
-    static public boolean isActive() {
-        return (mOtk != null);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +76,6 @@ public class ActivityAddressEditor extends AppCompatActivity {
         mQRCodeScanBtn = findViewById(R.id.icon_scan_qrcode_edit_addr);
         mReadNFCBtn = findViewById(R.id.icon_read_nfc_edit_addr);
         mSaveBtn = findViewById(R.id.button_save_edit_addr);
-        mReadNFCProgressBar = findViewById(R.id.progressBar_read_nfc_edit_addr);
 
         mOtkDB = new OpenturnkeyDB(getApplicationContext());
 
@@ -107,41 +94,6 @@ public class ActivityAddressEditor extends AppCompatActivity {
 
         /* init NFC. */
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        mOtk = Otk.getInstance(getApplicationContext());
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        String action = intent.getAction();
-
-        if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action) ||
-                NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
-            if (mOtk == null) {
-                Log.d(TAG, "mOtk is null");
-                return;
-            }
-            if (!mWaitingNFC) {
-                Log.d(TAG, "NFC processing is disable");
-                return;
-            }
-            int ret = mOtk.processIntent(intent, new Otk.OtkEventListener() {
-                @Override
-                public void onOtkEvent(OtkEvent event) {
-                    Log.d(TAG, "onOtkEvent");
-                    if (event.getType() != OtkEvent.Type.GENERAL_INFORMATION) {
-                        return;
-                    }
-                    // Update Address info
-                    mInputAddress.setText(event.getData().getSessionData().getAddress());
-                }
-            });
-            if (ret != Otk.OTK_RETURN_OK) {
-                Log.d(TAG, "process intent failed:" + ret);
-            }
-
-            disableReadNFCProcessing();
-        }
     }
 
     @Override
@@ -172,17 +124,6 @@ public class ActivityAddressEditor extends AppCompatActivity {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
-        if (mOtk == null) {
-            Log.d(TAG, "mOtk is null");
-            return;
-        }
-        mOtk = null;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (android.R.id.home == item.getItemId()) {
             onBackPressed();
@@ -191,13 +132,6 @@ public class ActivityAddressEditor extends AppCompatActivity {
         else {
             return super.onOptionsItemSelected(item);
         }
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        // Setup onTouchEvent for detecting type of touch gesture
-        disableReadNFCProcessing();
-        return super.dispatchTouchEvent(event);
     }
 
     private void setUIListener() {
@@ -229,8 +163,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Waiting NFC scan and process it.
-                mWaitingNFC = true;
-                mReadNFCProgressBar.setVisibility(View.VISIBLE);
+                finishActivityToLaunchNFCReader();
             }
         });
 
@@ -341,14 +274,6 @@ public class ActivityAddressEditor extends AppCompatActivity {
         }
     }
 
-    private void disableReadNFCProcessing() {
-        if (mReadNFCProgressBar.getVisibility() == View.VISIBLE) {
-            mReadNFCProgressBar.setVisibility(View.INVISIBLE);
-            // Disable NFC process
-            mWaitingNFC = false;
-        }
-    }
-
     private void saveContact(View v) {
         String alias = Objects.requireNonNull(mInputAlias.getText()).toString();
         String address = Objects.requireNonNull(mInputAddress.getText()).toString();
@@ -405,8 +330,28 @@ public class ActivityAddressEditor extends AppCompatActivity {
         finish();
     }
 
+    private void finishActivityToLaunchNFCReader() {
+        Intent intent = new Intent();
+        if (null == mInputAlias.getText()) {
+            intent.putExtra(MainActivity.KEY_ADDRESS_EDITOR_TEMP_ALIAS, "");
+        }
+        else {
+            intent.putExtra(MainActivity.KEY_ADDRESS_EDITOR_TEMP_ALIAS,
+                    mInputAlias.getText().toString());
+        }
+
+        if (null == mInputAddress.getText()) {
+            intent.putExtra(MainActivity.KEY_ADDRESS_EDITOR_TEMP_ADDR, "");
+        }
+        else {
+            intent.putExtra(MainActivity.KEY_ADDRESS_EDITOR_TEMP_ADDR,
+                    mInputAddress.getText().toString());
+        }
+        setResult(MainActivity.REQUEST_RESULT_CODE_READ_NFC, intent);
+        finish();
+    }
+
     private void launchQRcodeScanActivity() {
-        Log.d(TAG, "launchQRcodeScanActivity");
         if (ContextCompat.checkSelfPermission(ActivityAddressEditor.this,
                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
