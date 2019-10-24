@@ -21,6 +21,7 @@ public class OtkData implements Serializable {
         OTK_DATA_TYPE_SIGNATURE,
         OTK_DATA_TYPE_KEY_INFO,
         OTK_DATA_TYPE_COMMAND_EXEC_FAILURE,
+        OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS,
     }
     private Type mType;
     String mAppUri;
@@ -57,6 +58,9 @@ public class OtkData implements Serializable {
         }
         else if (otkState.getFailureReason() != OtkState.FailureReason.NFC_REASON_INVALID) {
             mType = Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE;
+        }
+        else if (otkState.getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
+            mType = Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS;
         }
         else {
             mType = Type.OTK_DATA_TYPE_GENERAL_INFO;

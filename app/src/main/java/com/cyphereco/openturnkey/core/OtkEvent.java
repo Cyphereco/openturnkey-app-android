@@ -24,6 +24,9 @@ public class OtkEvent {
         COMMAND_EXECUTION_FAILED,
         BALANCE_UPDATE,
         UNSIGNED_TX,
+        UNLOCK_SUCCESS,
+        UNLOCK_FAIL,
+        OTK_IS_NOT_LOCKED,
     }
 
     private Type mType;

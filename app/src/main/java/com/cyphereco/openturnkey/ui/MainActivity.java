@@ -74,12 +74,14 @@ public class MainActivity extends AppCompatActivity
     private CurrencyExchangeRate mCurrencyExRate;
     AlertDialog.Builder mProgressDialogBuilder = null;
     AlertDialog mProgressDialog = null;
-    AlertDialog mOtkRemovedDialog = null;
-    AlertDialog.Builder mOtkRemovedDialogBuilder = null;
+    AlertDialog mStatusDialog = null;
+    AlertDialog.Builder mStatusDialogBuilder = null;
     AlertDialog.Builder mConfirmTerminateOpDialogBuilder = null;
     AlertDialog.Builder mConfirmPaymentDialogBuilder = null;
     AlertDialog mConfirmTerminateOpDialog = null;
     AlertDialog mConfirmPaymentDialog = null;
+    AlertDialog.Builder mCommandResultDialogBuilder = null;
+    AlertDialog mCommandResultDialog = null;
     private boolean mConfirmDialogResultValue;
     private boolean mConfirmPaymentDialogResultValue;
 
@@ -227,12 +229,14 @@ public class MainActivity extends AppCompatActivity
                             getMenuInflater().inflate(R.menu.menu_history, menu);
                             mSelectedFragment = new FragmentHistory();
                             clearCachedPayFragmentData();
+                            mOp = Otk.Operation.OTK_OP_NONE;
                             break;
                         case R.id.nav_menu_addresses:
                             getSupportActionBar().setTitle(getString(R.string.addresses));
                             getMenuInflater().inflate(R.menu.menu_addresses, menu);
                             mSelectedFragment = new FragmentAddrbook();
                             clearCachedPayFragmentData();
+                            mOp = Otk.Operation.OTK_OP_NONE;
                             break;
                         case R.id.nav_menu_openturnkey:
                             getSupportActionBar().setTitle(getString(R.string._openturnkey));
@@ -252,6 +256,7 @@ public class MainActivity extends AppCompatActivity
                             // Restore cached data
                             mSelectedFragment = FragmentPay.newInstance(mRecipientAddress, mBtcAmount, mLcAmount, mIsUseAllFundsChecked);
                             ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
+                            mOp = Otk.Operation.OTK_OP_NONE;
                             break;
                     }
                     getSupportFragmentManager().beginTransaction().replace(
@@ -285,9 +290,10 @@ public class MainActivity extends AppCompatActivity
         }
 
         mProgressDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-        mOtkRemovedDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        mStatusDialogBuilder = new AlertDialog.Builder(MainActivity.this);
         mConfirmTerminateOpDialogBuilder = new AlertDialog.Builder(MainActivity.this);
         mConfirmPaymentDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        mCommandResultDialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
         mOtk = Otk.getInstance(getApplicationContext());
         mOtk.setEventListener(new Otk.OtkEventListener() {
@@ -309,15 +315,15 @@ public class MainActivity extends AppCompatActivity
                 } else if (type == OtkEvent.Type.APPROACH_OTK) {
                     hideProgressDialog();
                     // Show dialog to indicate user not to remove OTK
-                    showOtkRemovedDialog();
+                    showStatusDialog(getString(R.string.in_operation), getString(R.string.do_not_remove_otk));
                 } else if (type == OtkEvent.Type.OPERATION_IN_PROCESSING) {
                     // Stop cancel timer
                     if (mSelectedFragment instanceof FragmentOtk) {
                         // Update rate
                         ((FragmentOtk) mSelectedFragment).stopCancelTimer();
                     }
-                    // Hide otk removed dialog
-                    hideOtkRemovedDialog();
+                    // Hide status dialog
+                    hideStatusDialog();
                     // Show progress spin circle
                     showProgressDialog(getString(R.string.processing));
                 } else if (type == OtkEvent.Type.GENERAL_INFORMATION) {
@@ -385,11 +391,10 @@ public class MainActivity extends AppCompatActivity
                     hideProgressDialog();
                     // Show pre-auth with pin dialog
                     dialogAuthByPin();
-                } else if (type == OtkEvent.Type.UNSIGNED_TX){
+                } else if (type == OtkEvent.Type.UNSIGNED_TX) {
                     if (mOp != Otk.Operation.OTK_OP_SIGN_PAYMENT) {
                         logger.error("Got unsigned tx but sign payment is already terminated");
-                    }
-                    else {
+                    } else {
                         // Show dialog for user to confirm the payment
                         UnsignedTx utx = event.getUnsignedTx();
                         if (true == showConfirmPaymentDialog(utx)) {
@@ -400,6 +405,34 @@ public class MainActivity extends AppCompatActivity
                             onCancelButtonClick();
                         }
                     }
+                } else if (type == OtkEvent.Type.OTK_IS_NOT_LOCKED) {
+                    hideStatusDialog();
+                    showCommandResultDialog(getString(R.string.unlock_failed), getString(R.string.otk_is_not_locked));
+                    mOp = Otk.Operation.OTK_OP_NONE;
+                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    Intent intent = new Intent(getApplicationContext(), OpenturnkeyInfoActivity.class);
+                    intent.putExtra(KEY_OTK_DATA, event.getData());
+                    startActivity(intent);
+
+                } else if (type == OtkEvent.Type.UNLOCK_SUCCESS) {
+                    hideStatusDialog();
+                    showCommandResultDialog(getString(R.string.unlock_success), getString(R.string.otk_is_unlocked));
+                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+                    mOp = Otk.Operation.OTK_OP_NONE;
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    Intent intent = new Intent(getApplicationContext(), OpenturnkeyInfoActivity.class);
+                    intent.putExtra(KEY_OTK_DATA, event.getData());
+                    startActivity(intent);
+                } else if (type == OtkEvent.Type.UNLOCK_FAIL) {
+                    hideStatusDialog();
+                    mOp = Otk.Operation.OTK_OP_NONE;
+                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    showStatusDialog(getString(R.string.unlock_failed), "");
                 } else {
                 }
             }
@@ -525,10 +558,18 @@ public class MainActivity extends AppCompatActivity
                         ActivityAddressEditor.EDITOR_TYPE_ADD);
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
                 return true;
+            case R.id.menu_openturnkey_unlock:
+                setNfcCommTypeText(item.getItemId());
+                mOp = Otk.Operation.OTK_OP_UNLOCK;
+                mOtk.setOperation(mOp);
+                return true;
             case R.id.menu_openturnkey_read_generalinformation:
+                setNfcCommTypeText(item.getItemId());
+                mOp = Otk.Operation.OTK_OP_NONE;
+                mOtk.cancelOperation();
+                return true;
             case R.id.menu_openturnkey_authenticity_check:
             case R.id.menu_openturnkey_get_key:
-            case R.id.menu_openturnkey_unlock:
             case R.id.menu_openturnkey_set_note:
             case R.id.menu_openturnkey_choose_key:
             case R.id.menu_openturnkey_set_pin:
@@ -795,7 +836,7 @@ public class MainActivity extends AppCompatActivity
         hideConfirmPaymentDialog();
         hideProgressDialog();
         hideConfirmTerminateOpDialog();
-        hideOtkRemovedDialog();
+        hideStatusDialog();
         mOtk.cancelOperation();
         mOp = Otk.Operation.OTK_OP_NONE;
         mIsOpInProcessing = false;
@@ -840,20 +881,23 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void showOtkRemovedDialog() {
-        if (mOtkRemovedDialog != null && mOtkRemovedDialog.isShowing()) {
+    private void showStatusDialog(String title, String message) {
+        if (mStatusDialog != null && mStatusDialog.isShowing()) {
+            // Update title and message
+            mStatusDialog.setTitle(title);
+            mStatusDialog.setMessage(message);
             return;
         }
-        mOtkRemovedDialog = mOtkRemovedDialogBuilder.setTitle(getString(R.string.in_operation))
-                .setMessage(R.string.do_not_remove_otk)
+        mStatusDialog = mStatusDialogBuilder.setTitle(title)
+                .setMessage(message)
                 .setPositiveButton(R.string.ok, null)
-                .setCancelable(true)
+                .setCancelable(false)
                 .show();
     }
 
-    private void hideOtkRemovedDialog() {
-        if (mOtkRemovedDialog != null) {
-            mOtkRemovedDialog.dismiss();
+    private void hideStatusDialog() {
+        if (mStatusDialog != null) {
+            mStatusDialog.dismiss();
         }
     }
 
@@ -965,6 +1009,37 @@ public class MainActivity extends AppCompatActivity
         } catch (RuntimeException e) {
         }
         return mConfirmPaymentDialogResultValue;
+    }
+
+    boolean showCommandResultDialog(String title, String message) {
+        final Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message mesg) {
+                logger.info("msg:" + mesg.toString());
+                throw new RuntimeException();
+            }
+        };
+
+        if (mCommandResultDialog != null && mCommandResultDialog.isShowing()) {
+            logger.error("Command result dialog is shown, should be some error!");
+        }
+        mCommandResultDialog = mConfirmPaymentDialogBuilder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        logger.info("onOk()");
+                        mCommandResultDialog.dismiss();
+                        handler.sendMessage(handler.obtainMessage());
+                    }
+                })
+                .setCancelable(false)
+                .show();
+        try {
+            Looper.loop();
+        } catch (RuntimeException e) {
+        }
+        return true;
     }
 
     private void hideConfirmPaymentDialog() {

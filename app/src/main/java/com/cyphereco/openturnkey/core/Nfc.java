@@ -176,8 +176,9 @@ public class Nfc {
 
         if (args != null && args.size() > 0) {
             logger.info("args:" + args.toString());
-            recordNum += 1;
         }
+        // request data is required
+        recordNum += 1;
 
         if (pin != null && pin.length() > 0) {
             recordNum += 1;
@@ -187,7 +188,6 @@ public class Nfc {
             logger.error("Too many record numbers " + recordNum);
             return Otk.OTK_RETURN_ERROR;
         }
-
         NdefRecord record[] = new NdefRecord[recordNum];
         Random r = new Random();
         int rdn = r.nextInt();
@@ -208,6 +208,7 @@ public class Nfc {
             // 3: command
             record[2] = NdefRecord.createTextRecord("en", cmd.toString());
 
+            int idx = 3;
             // 4: request data
             String requestData = "";
 
@@ -222,7 +223,14 @@ public class Nfc {
                     }
                 }
                 logger.info("requestData:" + requestData);
-                record[3] = NdefRecord.createTextRecord("en", requestData);
+                record[idx] = NdefRecord.createTextRecord("en", requestData);
+                idx++;
+            }
+            else {
+                requestData = "OpenTurnKey";
+                logger.info("requestData:" + requestData);
+                record[idx] = NdefRecord.createTextRecord("en", requestData);
+                idx++;
             }
 
             // 5 Options
@@ -241,7 +249,7 @@ public class Nfc {
             if (options.length() > 0) {
                 // remove last delimiter
                 options.substring(0, options.length() - 1);
-                record[4] = NdefRecord.createTextRecord("en", options);
+                record[idx] = NdefRecord.createTextRecord("en", options);
             }
 
             ndef.writeNdefMessage(new NdefMessage(record));
