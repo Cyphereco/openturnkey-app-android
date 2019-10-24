@@ -26,6 +26,9 @@ import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -70,7 +73,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         long selectedTransId = intent.getLongExtra(KEY_CURRENT_TRANS_ID, 0);
 
         mOtkDB = new OpenturnkeyDB(getApplicationContext());
-        mTransactionDataSet = mOtkDB.getAllTransaction();
+        getDatasetFromDB();
 
         DBTransItem item = null;
         for (int idx = 0; idx < mTransactionDataSet.size(); idx++) {
@@ -192,7 +195,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                                 }
 
                                 // Get new data set
-                                mTransactionDataSet = mOtkDB.getAllTransaction();
+                                getDatasetFromDB();
 
                                 if (null != previousItem) {
                                     for (int i = 0; i < mTransactionDataSet.size(); i++) {
@@ -378,5 +381,25 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         String result = String.format(Locale.getDefault(),"%.8f", src);
         return (result.substring(0, result.length() - 4) + " " +
                 result.substring(result.length() - 4));
+    }
+
+    private void getDatasetFromDB() {
+        mTransactionDataSet = mOtkDB.getAllTransaction();
+
+        Collections.sort(mTransactionDataSet, new Comparator<DBTransItem>() {
+            @Override
+            public int compare(DBTransItem o1, DBTransItem o2) {
+                Date dt1 = new Date(o1.getDatetime());
+                Date dt2 = new Date(o2.getDatetime());
+                if (dt1.before(dt2)) {
+                    return 1;
+                }
+                else if (dt1.equals(dt2)) {
+                    return 0;
+                }
+                return -1;
+            }
+        });
+
     }
 }
