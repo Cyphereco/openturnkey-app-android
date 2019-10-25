@@ -27,6 +27,8 @@ public class OtkEvent {
         UNLOCK_SUCCESS,
         UNLOCK_FAIL,
         OTK_IS_NOT_LOCKED,
+        WRITE_NOTE_SUCCESS,
+        WRITE_NOTE_FAIL,
     }
 
     private Type mType;
