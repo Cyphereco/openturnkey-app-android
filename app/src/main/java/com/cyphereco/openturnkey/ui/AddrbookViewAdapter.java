@@ -6,6 +6,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -13,15 +15,18 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBAddrItem;
 import com.cyphereco.openturnkey.utils.AddressUtils;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
-public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapter.ViewHolder> {
+public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapter.ViewHolder> implements Filterable {
 //    private final static String TAG = AddrbookViewAdapter.class.getSimpleName();
 
     private Context mContext;
     private AdapterListener mAdapterListener = null;
     private List<DBAddrItem> mAddressbookDataset;
+    private AddressFilter mAddressFilter;
 
     public interface AdapterListener {
         void onDeleteAddress(int position);
@@ -40,6 +45,7 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
 
     AddrbookViewAdapter(Context context) {
         this.mContext = context;
+        mAddressbookDataset = new ArrayList<>();
     }
 
     @NonNull
@@ -128,6 +134,57 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
                     }
                 }
             });
+        }
+    }
+
+    @Override
+    public Filter getFilter() {
+        if (null == mAddressFilter) {
+            mAddressFilter = new AddressFilter(this, mAddressbookDataset);
+        }
+        return mAddressFilter;
+    }
+
+    private static class AddressFilter extends Filter {
+
+        private final AddrbookViewAdapter mAdapter;
+        private final List<DBAddrItem> mOriginalList;
+        private final List<DBAddrItem> mFilteredList;
+
+        private AddressFilter(AddrbookViewAdapter adapter, List<DBAddrItem> originalList) {
+            super();
+            this.mAdapter = adapter;
+            this.mOriginalList = new LinkedList<>(originalList);
+            this.mFilteredList = new ArrayList<>();
+        }
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            mFilteredList.clear();
+            final FilterResults results = new FilterResults();
+
+            if (0 == constraint.length()) {
+                mFilteredList.addAll(mOriginalList);
+            }
+            else {
+                final String filterPattern = constraint.toString().toLowerCase().trim();
+                for (DBAddrItem item : mOriginalList) {
+                    if (item.getName().toLowerCase().contains(filterPattern)) {
+                        mFilteredList.add(item);
+                    }
+                }
+            }
+            results.values = mFilteredList;
+            results.count = mFilteredList.size();
+            return results;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            mAdapter.mAddressbookDataset.clear();
+            mAdapter.mAddressbookDataset.addAll((List<DBAddrItem>) results.values);
+            mAdapter.notifyDataSetChanged();
         }
     }
 }

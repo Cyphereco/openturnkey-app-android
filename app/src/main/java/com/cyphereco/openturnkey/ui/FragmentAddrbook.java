@@ -22,7 +22,6 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBAddrItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
-import com.google.zxing.qrcode.encoder.QRCode;
 import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
 
 import java.util.Collections;
@@ -31,7 +30,7 @@ import java.util.List;
 
 
 public class FragmentAddrbook extends Fragment {
-    private final static String TAG = AddrbookViewAdapter.class.getSimpleName();
+    private final static String TAG = FragmentAddrbook.class.getSimpleName();
 
     private TextView mTVNoAddressMessage;
     private RecyclerView mRVAddressList;
@@ -220,5 +219,9 @@ public class FragmentAddrbook extends Fragment {
     public void refresh() {
         Log.d(TAG, "refresh()");
         updateAddressDataset();
+    }
+
+    public void showAddressFilter(String searchString) {
+        mAdapter.getFilter().filter(searchString);
     }
 }
