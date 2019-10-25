@@ -131,5 +131,9 @@
     <string name="transaction_not_found">Transaction not found</string>
     <string name="failed_to_delete">Failed to delete</string>
     <string name="delete_this_transaction_record">Delete this transaction record?</string>
+    <string name="otk_is_not_locked">OTK is not locked</string>
+    <string name="unlock_success">Unlock success</string>
+    <string name="unlock_failed">Unclock failed</string>
+    <string name="otk_is_unlocked">OTK is unlocked</string>
 
 </resources>

@@ -147,6 +147,7 @@ public class OtkState implements Serializable {
 
     public LockState getLockState() {return mLockState;}
     public FailureReason getFailureReason() {return mFailureReason;}
+    public ExecutionState getExecutionState() {return mNfcCmdExecSate;}
     public String toString() {
         String s = "\n\tLock state:" + mLockState.name() + "\n\tExec state:" + mNfcCmdExecSate.name() + "\n\tCommand:" + mCommand.name() + "\n\tFailure reason:" + mFailureReason.name();
         return s;
