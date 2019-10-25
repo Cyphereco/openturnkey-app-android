@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -255,6 +256,7 @@ public class MainActivity extends AppCompatActivity
                         case R.id.nav_menu_addresses:
                             getSupportActionBar().setTitle(getString(R.string.addresses));
                             getMenuInflater().inflate(R.menu.menu_addresses, menu);
+                            setAddressSearchView(menu);
                             mSelectedFragment = new FragmentAddrbook();
                             clearCachedPayFragmentData();
                             break;
@@ -1070,6 +1072,28 @@ public class MainActivity extends AppCompatActivity
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ALIAS, alias);
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ADDR, address);
         startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
+    }
+
+    private void setAddressSearchView(Menu menu) {
+        SearchView searchView = (SearchView) menu.findItem(R.id.menu_addresses_search).getActionView();
+        if (null != searchView) {
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    logger.debug("SearchView onQueryTextSubmit: " + query);
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    logger.debug("SearchView onQueryTextChange: " + newText);
+                    if (mSelectedFragment instanceof FragmentAddrbook) {
+                        ((FragmentAddrbook) mSelectedFragment).showAddressFilter(newText);
+                    }
+                    return false;
+                }
+            });
+        }
     }
 }
 
