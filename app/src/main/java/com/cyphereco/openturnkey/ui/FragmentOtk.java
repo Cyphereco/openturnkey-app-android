@@ -51,6 +51,23 @@ public class FragmentOtk extends Fragment {
         }
     }
 
+    public void showCancelButton() {
+        // show cancel timer
+        stopCancelTimer();
+        Button btn = getView().findViewById(R.id.button_otk_cancel);
+        if (btn != null) {
+            btn.setVisibility(View.VISIBLE);
+            btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mListener != null) {
+                        mListener.onCancelButtonClick();
+                    }
+                }
+            });
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,9 +138,9 @@ public class FragmentOtk extends Fragment {
             tv.setText(R.string.set_pin_code);
             btn.setVisibility(View.INVISIBLE);
         }
-        else if (mOp == Otk.Operation.OTK_OP_WRITE_MEMO) {
+        else if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE) {
             tv.setText(R.string.write_memo);
-            btn.setVisibility(View.INVISIBLE);
+            btn.setVisibility(View.VISIBLE);
         }
         else if (mOp == Otk.Operation.OTK_OP_UNLOCK) {
             tv.setText(R.string.unlock);

@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity
         implements DialogLocalCurrency.DialogLocalCurrecyListener,
         DialogTransactionFee.DialogTransactionFeeListener,
         DialogAuthByPin.DialogAuthByPinListener,
+        DialogAddNote.DialogAddNoteListener,
         DialogClearHistory.DialogClearHistoryListener,
         FragmentPay.FragmentPayListener,
         FragmentOtk.FragmentOtkListener,
@@ -466,7 +467,27 @@ public class MainActivity extends AppCompatActivity
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
                     showStatusDialog(getString(R.string.unlock_failed), "");
-                } else {
+                }  else if (type == OtkEvent.Type.WRITE_NOTE_SUCCESS) {
+                    hideStatusDialog();
+                    showCommandResultDialog(getString(R.string.write_note_success), getString(R.string.note_is_wrote));
+                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+                    mOp = Otk.Operation.OTK_OP_NONE;
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    ((FragmentOtk) mSelectedFragment).hideCancelButton();
+                    Intent intent = new Intent(getApplicationContext(), OpenturnkeyInfoActivity.class);
+                    intent.putExtra(KEY_OTK_DATA, event.getData());
+                    startActivity(intent);
+                } else if (type == OtkEvent.Type.WRITE_NOTE_FAIL) {
+                    hideStatusDialog();
+                    mOp = Otk.Operation.OTK_OP_NONE;
+                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    ((FragmentOtk) mSelectedFragment).hideCancelButton();
+                    showStatusDialog(getString(R.string.write_note_fail), "");
+                }
+                else {
                 }
             }
         });
@@ -614,9 +635,12 @@ public class MainActivity extends AppCompatActivity
                 mOp = Otk.Operation.OTK_OP_NONE;
                 mOtk.cancelOperation();
                 return true;
+            case R.id.menu_openturnkey_set_note:
+                // show add note dialog
+                dialogAddNote();
+                return true;
             case R.id.menu_openturnkey_authenticity_check:
             case R.id.menu_openturnkey_get_key:
-            case R.id.menu_openturnkey_set_note:
             case R.id.menu_openturnkey_choose_key:
             case R.id.menu_openturnkey_set_pin:
             case R.id.menu_openturnkey_sign_message:
@@ -636,6 +660,20 @@ public class MainActivity extends AppCompatActivity
         }
         // Update currency in option menu
         updatePayConfig(toolbarMenu);
+    }
+
+    public void addNote(String note) {
+        logger.info("note:" + note);
+        mOp = Otk.Operation.OTK_OP_WRITE_NOTE;
+        setNfcCommTypeText(R.id.menu_openturnkey_set_note);
+        ((FragmentOtk) mSelectedFragment).showCancelButton();
+        mOtk.setNote(note);
+    }
+
+    public void cancelAddNote() {
+        mOtk.cancelOperation();
+        mOp = Otk.Operation.OTK_OP_NONE;
+        mIsOpInProcessing = false;
     }
 
     public void authByPin(String pin) {
@@ -674,6 +712,11 @@ public class MainActivity extends AppCompatActivity
         logger.info("Customized fee:" + txFee);
         Preferences.setCustomizedTxFee(getApplicationContext(), BtcUtils.btcToSatoshi(txFee));
         updatePayConfig(toolbarMenu);
+    }
+
+    private void dialogAddNote() {
+        DialogAddNote dialog = new DialogAddNote();
+        dialog.show(getSupportFragmentManager(), "dialog");
     }
 
     /* Local functions */
@@ -879,6 +922,16 @@ public class MainActivity extends AppCompatActivity
 
     public void onCancelButtonClick() {
         Toast.makeText(this, getString(R.string.operation_cancelled), Toast.LENGTH_LONG).show();
+        if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE) {
+            setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+            ((FragmentOtk) mSelectedFragment).hideCancelButton();
+            mOtk.cancelOperation();
+            mOp = Otk.Operation.OTK_OP_NONE;
+            mIsOpInProcessing = false;
+            return;
+        }
+
+        // For sign payment
         hideConfirmPaymentDialog();
         hideProgressDialog();
         hideConfirmTerminateOpDialog();

@@ -60,7 +60,7 @@ public class Otk {
         OTK_OP_SIGN_PAYMENT("Sing Payment"),
         OTK_OP_GET_RECIPIENT_ADDRESS("Get Recipient Address"),
         OTK_OP_UNLOCK("Unlock"),
-        OTK_OP_WRITE_MEMO("Write Memo"),
+        OTK_OP_WRITE_NOTE("Write Note"),
         OTK_OP_GET_KEY("Get Key"),
         OTK_OP_SIGN_MESSAGE("Sign Message"),
         OTK_OP_CHOOSE_KEY("Choose Key"),
@@ -295,6 +295,60 @@ public class Otk {
         }
     }
 
+    static void writeOtkCommand(Command cmd, String pin, List<String> args, boolean isMore) {
+        logger.info("writeOtkCommand:{} {} {} {}", cmd, pin, args, isMore);
+        OtkEvent event;
+        if (OTK_RETURN_OK == Nfc.writeCommand(mTag, cmd, mSessionId, pin, args, isMore)) {
+            // Try to read tag
+            OtkData otkData = Nfc.read(mTag);
+            if (otkData == null) {
+                // OTK is not connected
+                mCommandToWrite = Command.INVALID;
+                mPin = "";
+                event = new OtkEvent(OtkEvent.Type.APPROACH_OTK);
+                sendEvent(event);
+                return;
+            }
+            else {
+                if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
+                    if (cmd == Command.UNLOCK) {
+                        sendEvent(new OtkEvent(OtkEvent.Type.UNLOCK_SUCCESS, otkData));
+                    }
+                    else if (cmd == Command.SET_NOTE) {
+                        sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_SUCCESS, otkData));
+                    }
+                    else {
+                        logger.error("Not supported yet!");
+                    }
+                    clearOp();
+                    return;
+                }
+                else {
+                    // Fail case
+                    logger.info("Expect exec success but got " + otkData.getType().toString());
+                    if (cmd == Command.UNLOCK) {
+                        sendEvent(new OtkEvent(OtkEvent.Type.UNLOCK_FAIL, otkData));
+
+                    } else if (cmd == Command.SET_NOTE) {
+                        sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_FAIL, otkData));
+                    } else {
+                        logger.error("Not supported yet!");
+                    }
+                }
+                return;
+
+            }
+        }
+        else {
+            // OTK is not connected, cache command
+            mCommandToWrite = cmd;
+            mPin = pin;
+            event = new OtkEvent(OtkEvent.Type.APPROACH_OTK);
+            sendEvent(event);
+            return;
+        }
+    }
+
     /**
      * Method to process all NFC intents
      */
@@ -383,6 +437,7 @@ public class Otk {
         if (otkData == null) {
             return OTK_RETURN_ERROR;
         }
+        logger.info("processOtkData() mOp:{}", mOp);
         if (mOp == Operation.OTK_OP_READ_GENERAL_INFO || mOp == Operation.OTK_OP_NONE) {
             OtkEvent event = new OtkEvent(OtkEvent.Type.GENERAL_INFORMATION, otkData);
             if (listener != null) {
@@ -485,6 +540,44 @@ public class Otk {
             } else {
                 logger.info("Unexpected data type:%s", otkData.getType());
             }
+            return OTK_RETURN_OK;
+        }
+        if (mOp == Operation.OTK_OP_WRITE_NOTE) {
+            logger.debug("otkData:{}", otkData.getType());
+            if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
+                if (isInProcessing == true) {
+                    logger.error("It's already in processing.");
+                    if (!mSessionId.equals(otkData.getSessionData().getSessionId())) {
+                        // OTK must be restarted, consider failed.
+                        sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_FAIL));
+                        return OTK_RETURN_ERROR;
+                    }
+                    return OTK_RETURN_OK;
+                }
+
+                // Processing unlock command
+                isInProcessing = true;
+                mSessionId = otkData.getSessionData().getSessionId();
+
+                // Check if OTK is authorized
+                if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
+                    // Send unauthorized event.
+                    sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
+                    // clear cached command so that it won't write command without pin
+                    mCommandToWrite = Command.INVALID;
+                } else {
+                    // Clear cached pin
+                    mPin = "";
+                    // Authorized. Write command
+                    writeOtkCommand(Command.SET_NOTE, mPin, mArgs, false);
+                }
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
+                sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_FAIL));
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
+                sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_SUCCESS, otkData));
+            } else {
+                logger.info("Unexpected data type:%s", otkData.getType());
+            }
         }
         return OTK_RETURN_OK;
     }
@@ -501,6 +594,7 @@ public class Otk {
         mPin = "";
         mIsAuthorized = false;
         isInProcessing = false;
+        mArgs.clear();
         return OTK_RETURN_OK;
     }
 
@@ -542,6 +636,20 @@ public class Otk {
         }
         logger.info("Set op to:" + op.name());
         mOp = op;
+        return OTK_RETURN_OK;
+    }
+
+    public int setNote(String note) {
+        if (mOp != Operation.OTK_OP_NONE && isInProcessing == true) {
+            /* Some operation is in processing, set another operation is not allowed.
+             * Should cancel current operation first.
+             */
+            return OTK_RETURN_ERROR_OP_IN_PROCESSING;
+        }
+        logger.info("Set note:" + note);
+        mOp = Operation.OTK_OP_WRITE_NOTE;
+        mArgs.clear();
+        mArgs.add(note);
         return OTK_RETURN_OK;
     }
 
@@ -590,10 +698,12 @@ public class Otk {
 
         if (mCommandToWrite == Command.SIGN) {
             writeSignCommand(pin);
+            return OTK_RETURN_OK;
         }
-        else if (mCommandToWrite == Command.UNLOCK) {
-            writeUnlockCommand(pin);
-        }
+
+        // Unlock, set not
+        writeOtkCommand(mCommandToWrite, pin, mArgs, false);
+
         return OTK_RETURN_OK;
     }
 
@@ -606,9 +716,10 @@ public class Otk {
         // Set command
         if (mOp == Operation.OTK_OP_SIGN_PAYMENT) {
             mCommandToWrite = Command.SIGN;
-        }
-        else if (mOp == Operation.OTK_OP_UNLOCK) {
+        } else if (mOp == Operation.OTK_OP_UNLOCK) {
             mCommandToWrite = Command.UNLOCK;
+        } else if (mOp == Operation.OTK_OP_WRITE_NOTE) {
+            mCommandToWrite = Command.SET_NOTE;
         }
         writeCommand(pin);
         return OTK_RETURN_OK;
