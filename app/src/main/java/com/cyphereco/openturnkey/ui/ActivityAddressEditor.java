@@ -307,7 +307,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
             Log.d(TAG, "Run save contact alias: " + alias + ", address: " + address);
             DBAddrItem item = new DBAddrItem(address, alias);
             // Check this contact if already in database
-            if (null != mOtkDB.getAddressItemByAddr(address)) {
+            if (null != mOtkDB.getAddressItemByAlias(alias)) {
                 // update address information
                 if (!mOtkDB.updateAddressbook(item)) {
                     Log.e(TAG, "Update address failed");
@@ -315,7 +315,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
             }
             else {
                 // Add new address
-                if (null == mOtkDB.addAddress(item)) {
+                if (!mOtkDB.addAddress(item)) {
                     Log.e(TAG, "Add address failed");
                 }
             }

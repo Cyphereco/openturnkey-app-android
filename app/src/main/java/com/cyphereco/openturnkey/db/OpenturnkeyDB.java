@@ -66,8 +66,8 @@ public class OpenturnkeyDB {
      */
     static final String CREATE_ADDRBOOK_TABLE_SQL = "CREATE TABLE " +
             ADDR_BOOK_TABLE_NAME + " (" +
-            ADDRBOOK_ADDR_COL + " VARCHAR(64) PRIMARY KEY NOT NULL, " +
-            ADDRBOOK_USR_NAME_COL + " VARCHAR(128) NOT NULL " +
+            ADDRBOOK_USR_NAME_COL + " VARCHAR(128) PRIMARY KEY NOT NULL, " +
+            ADDRBOOK_ADDR_COL + " VARCHAR(64) NOT NULL " +
             ");";
 
     // Database object
@@ -95,15 +95,10 @@ public class OpenturnkeyDB {
     private DBAddrItem generateAddrbookItemByQueryResult(Cursor cursor) {
         DBAddrItem item = new DBAddrItem();
 
-        item.setAddress(cursor.getString(0));
-        item.setName(cursor.getString(1));
+        item.setName(cursor.getString(0));
+        item.setAddress(cursor.getString(1));
 
         return item;
-    }
-
-    public class ReturnValue {
-        static final int FAIL = 0;
-        public static final int SUCCESS = 1;
     }
 
     public OpenturnkeyDB(Context context) {
@@ -146,7 +141,7 @@ public class OpenturnkeyDB {
         return item;
     }
 
-    public int updateTransaction(DBTransItem item) {
+    public boolean updateTransaction(DBTransItem item) {
         ContentValues cv = new ContentValues();
 
         cv.put(TRANS_DATETIME_COL, item.getDatetime());
@@ -161,18 +156,18 @@ public class OpenturnkeyDB {
         String where = TRANS_KEY_ID_COL + "=" + item.getId();
 
         if (otkDB.update(TRANS_TABLE_NAME, cv, where, null) > 0) {
-            return ReturnValue.SUCCESS;
+            return true;
         }
-        return ReturnValue.FAIL;
+        return false;
     }
 
-    public int deleteTransactionById(long id) {
+    public boolean deleteTransactionById(long id) {
         String where = TRANS_KEY_ID_COL + "=" + id;
 
         if (otkDB.delete(TRANS_TABLE_NAME, where , null) > 0) {
-            return ReturnValue.SUCCESS;
+            return true;
         }
-        return ReturnValue.FAIL;
+        return false;
     }
 
     public DBTransItem getTransactionItemById(long id) {
@@ -204,17 +199,15 @@ public class OpenturnkeyDB {
         return result;
     }
 
-    public int clearTransactionTable() {
-        int ret = ReturnValue.SUCCESS;
-
+    public boolean clearTransactionTable() {
         try {
             otkDB.execSQL("DROP TABLE IF EXISTS " + TRANS_TABLE_NAME);
             otkDB.execSQL(CREATE_TRANS_TABLE_SQL);
         } catch (Exception e) {
             Log.e(TAG, "clearTransactionTable FAILd. e: " + e);
-            ret = ReturnValue.FAIL;
+            return false;
         }
-        return ret;
+        return true;
     }
 
     public int getAddrbookCount() {
@@ -231,32 +224,54 @@ public class OpenturnkeyDB {
         return ret;
     }
 
-    public DBAddrItem addAddress(DBAddrItem item) {
-        ContentValues cv = new ContentValues();
+    public boolean addAddress(DBAddrItem item) {
+        // Check if this item is in database already
+        DBAddrItem addrItem = getAddressItemByAlias(item.getName());
 
-        cv.put(ADDRBOOK_ADDR_COL, item.getAddress());
-        cv.put(ADDRBOOK_USR_NAME_COL, item.getName());
+        if (null == addrItem) {
+            ContentValues cv = new ContentValues();
 
-        if (0 > otkDB.insert(ADDR_BOOK_TABLE_NAME, null, cv)) {
-            return null;
+            cv.put(ADDRBOOK_ADDR_COL, item.getAddress());
+            cv.put(ADDRBOOK_USR_NAME_COL, item.getName());
+
+            if (0 > otkDB.insert(ADDR_BOOK_TABLE_NAME, null, cv)) {
+                return false;
+            }
+            return true;
         }
-        return item;
+        else {
+            return updateAddressbook(item);
+        }
     }
 
     public boolean updateAddressbook(DBAddrItem item) {
-        ContentValues cv = new ContentValues();
+        // Check if this item is in database already
+        DBAddrItem addrItem = getAddressItemByAlias(item.getName());
 
-        cv.put(ADDRBOOK_USR_NAME_COL, item.getName());
-        return otkDB.update(ADDR_BOOK_TABLE_NAME, cv,
-                ADDRBOOK_ADDR_COL + "=?",new String[] { item.getAddress() }) > 0;
+        if (null == addrItem) {
+            return addAddress(item);
+        }
+        else {
+            ContentValues cv = new ContentValues();
+
+            cv.put(ADDRBOOK_ADDR_COL, item.getAddress());
+            return otkDB.update(ADDR_BOOK_TABLE_NAME, cv,
+                    ADDRBOOK_USR_NAME_COL + "=?",new String[] { item.getName() }) > 0;
+        }
     }
 
-    public int deleteAddressbookByAddr(String address) {
-        if (0 < otkDB.delete(ADDR_BOOK_TABLE_NAME, ADDRBOOK_ADDR_COL + "=?" ,
-                new String[]{address})) {
-            return ReturnValue.SUCCESS;
+    public boolean deleteAddressbookByAddr(String address) {
+        if (0 < otkDB.delete(ADDR_BOOK_TABLE_NAME, ADDRBOOK_ADDR_COL + "=?" , new String[]{address})) {
+            return true;
         }
-        return ReturnValue.FAIL;
+        return false;
+    }
+
+    public boolean deleteAddressbookByAlias(String alias) {
+        if (0 < otkDB.delete(ADDR_BOOK_TABLE_NAME, ADDRBOOK_USR_NAME_COL + "=?" , new String[]{alias})) {
+            return true;
+        }
+        return false;
     }
 
     public List<DBAddrItem> getAllAddressbook() {
@@ -271,11 +286,11 @@ public class OpenturnkeyDB {
         return result;
     }
 
-    public DBAddrItem getAddressItemByAddr(String address) {
+    public DBAddrItem getAddressItemByAlias(String alias) {
         DBAddrItem item = null;
 
         try (Cursor cursor = otkDB.query(ADDR_BOOK_TABLE_NAME, null,
-                ADDRBOOK_ADDR_COL + "=?", new String[]{address},
+                ADDRBOOK_USR_NAME_COL + "=?", new String[]{alias},
                 null, null, null, null)) {
             if (1 == cursor.getCount()) {
                 cursor.moveToNext();

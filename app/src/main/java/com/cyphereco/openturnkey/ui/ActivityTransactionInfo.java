@@ -186,8 +186,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                                     nextItem = mTransactionDataSet.get(mCurrentPosition + 1);
                                 }
 
-                                if (OpenturnkeyDB.ReturnValue.SUCCESS !=
-                                        mOtkDB.deleteTransactionById(oriItem.getId())) {
+                                if (!mOtkDB.deleteTransactionById(oriItem.getId())) {
                                     Toast.makeText(getApplicationContext(),
                                             getString(R.string.failed_to_delete),
                                             Toast.LENGTH_LONG).show();
