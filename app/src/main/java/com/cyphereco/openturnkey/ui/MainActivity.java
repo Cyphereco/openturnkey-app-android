@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity
     private String mAddressEditorTempAlias = "";
     private String mAddressEditorTempAddress = "";
     private boolean mSwitchToAddressBookFragment = false;
+    private boolean mSwitchToPayFragment = false;
 
     /**
      * Process activity result
@@ -219,8 +220,7 @@ public class MainActivity extends AppCompatActivity
             else if (resultCode == REQUEST_RESULT_CODE_REPAY) {
                 mRecipientAddress = intent.getStringExtra("REPAY_ADDRESS");
                 mBtcAmount = intent.getStringExtra("REPAY_AMOUNT");
-                BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-                bottomNav.setSelectedItemId(R.id.nav_menu_pay);
+                mSwitchToPayFragment = true;
             }
         }
     }
@@ -536,6 +536,10 @@ public class MainActivity extends AppCompatActivity
         else if (mSwitchToAddressBookFragment) {
             mSwitchToAddressBookFragment = false;
             bottomNav.setSelectedItemId(R.id.nav_menu_addresses);
+        }
+        else if (mSwitchToPayFragment) {
+            mSwitchToPayFragment = false;
+            bottomNav.setSelectedItemId(R.id.nav_menu_pay);
         }
     }
 
