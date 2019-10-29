@@ -6,7 +6,6 @@ import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -139,7 +138,7 @@ public class FragmentOtk extends Fragment {
             btn.setVisibility(View.INVISIBLE);
         }
         else if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE) {
-            tv.setText(R.string.write_memo);
+            tv.setText(R.string.write_note);
             btn.setVisibility(View.VISIBLE);
         }
         else if (mOp == Otk.Operation.OTK_OP_UNLOCK) {

@@ -23,7 +23,7 @@ public class DialogAddNote extends AppCompatDialogFragment {
         final View view = inflater.inflate(R.layout.dialog_add_note, null);
 
         builder.setView(view)
-                .setTitle(R.string.write_memo)
+                .setTitle(R.string.write_note)
                 .setCancelable(false)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override

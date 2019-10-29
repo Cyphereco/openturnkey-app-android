@@ -20,7 +20,7 @@
         android:title="@string/set_key" />
     <item
         android:id="@+id/menu_openturnkey_set_note"
-        android:title="@string/write_memo" />
+        android:title="@string/write_note" />
     <item
         android:id="@+id/menu_openturnkey_unlock"
         android:title="@string/unlock" />
