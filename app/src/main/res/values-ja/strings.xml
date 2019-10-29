@@ -37,7 +37,6 @@
     <string name="customized_fees">限定手数料</string>
     <string name="suggested">おすすめ</string>
     <string name="command_executed_successfuly">コマンドが正常に実行された</string>
-    <string name="write_note">メモ書き</string>
     <string name="processing">処理中</string>
     <string name="transaction_sent">取引を発送終了</string>
     <string name="get_recipient_address">入金アドレスを取得</string>
@@ -125,4 +124,9 @@
     <string name="write_note_fail">メモ書き失敗する</string>
     <string name="write_note_success">メモ書き成功する</string>
     <string name="write_note_hint">メモを書きます（64文字未満）：</string>
+    <string name="enter_pin_code">Please Enter a 8-digits Number as the New PIN Code</string>
+    <string name="pin_length_incorrect">PIN length should be 8</string>
+    <string name="title_set_pin">Set PIN</string>
+    <string name="pin_confirmation_doesnt_match">PIN confirmation doesn\'t match</string>
+    <string name="write_note">メモを書きます</string>
 </resources>

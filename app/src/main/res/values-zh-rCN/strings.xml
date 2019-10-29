@@ -37,7 +37,6 @@
     <string name="customized_fees">自订手续费</string>
     <string name="suggested">推荐</string>
     <string name="command_executed_successfuly">命令成功执行</string>
-    <string name="write_memo">写入备注</string>
     <string name="processing">处理中</string>
     <string name="operation_cancelled">操作取消</string>
     <string name="qr_code_scan_cancelled">取消二维码扫描</string>
@@ -122,11 +121,12 @@
     <string name="unlock_success">解锁成功</string>
     <string name="unlock_failed">解锁失敗</string>
     <string name="otk_is_unlocked">OpenTurnKey已解锁</string>
-    <string name="write_momo_success">写入备注成功</string>
-    <string name="write_memo_fail">写入备注失败</string>
-    <string name="enter_your_memo">写入备注(不超过64字)</string>
     <string name="title_set_pin">Set PIN</string>
     <string name="pin_length_incorrect">PIN length should be 8</string>
     <string name="pin_confirmation_doesnt_match">PIN confirmation doesn\'t match</string>
     <string name="enter_pin_code">Please Enter a 8-digits Number as the New PIN Code</string>
+    <string name="write_note_success">写入备注成功</string>
+    <string name="write_note_fail">写入备注失败</string>
+    <string name="write_note_hint">写入备注(不超过64字)</string>
+    <string name="write_note">写入备注</string>
 </resources>

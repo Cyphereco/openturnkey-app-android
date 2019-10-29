@@ -51,7 +51,6 @@
     <string name="_0_00001" translatable="false">0.00001</string>
     <string name="command_executed_successfuly">Command Executed Successfuly!</string>
     <string name="suggested">Suggested</string>
-    <string name="write_memo">Write Memo</string>
     <string name="nfc_unavailable">NFC is not available</string>
     <string name="title_activity_qrcode_scan">Scan QR Code</string>
 
@@ -134,12 +133,13 @@
     <string name="unlock_success">Unlock success</string>
     <string name="unlock_failed">Unclock failed</string>
     <string name="otk_is_unlocked">OpenTurnKey unlocked</string>
-    <string name="write_momo_success">Write Note Success</string>
-    <string name="write_memo_fail">Wirte Note Failed</string>
-    <string name="enter_your_memo">Write memo (Less than 64 characters)</string>
+    <string name="write_note_success">Write Note Success</string>
+    <string name="write_note_fail">Wirte Note Failed</string>
     <string name="title_set_pin">Set PIN</string>
     <string name="pin_length_incorrect">PIN length should be 8</string>
     <string name="pin_confirmation_doesnt_match">PIN confirmation doesn\'t match</string>
     <string name="enter_pin_code">Please Enter a 8-digits Number as the New PIN Code</string>
+    <string name="write_note_hint">Write Note (Less than 64 characters)</string>
+    <string name="write_note">Write Note</string>
 
 </resources>
