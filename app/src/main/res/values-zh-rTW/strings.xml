@@ -121,12 +121,13 @@
     <string name="unlock_success">解鎖成功</string>
     <string name="unlock_failed">解鎖失敗</string>
     <string name="otk_is_unlocked">OpenTurnKey已解鎖</string>
-    <string name="title_set_pin">Set PIN</string>
-    <string name="pin_length_incorrect">PIN length should be 8</string>
-    <string name="pin_confirmation_doesnt_match">PIN confirmation doesn\'t match</string>
-    <string name="enter_pin_code">Please Enter a 8-digits Number as the New PIN Code</string>
-    <string name="write_note_fail">寫入備注失敗</string>
-    <string name="write_note_hint">寫入備注(不超過64字)</string>
-    <string name="write_note_success">寫入備注成功</string>
+    <string name="title_set_pin">設定PIN碼</string>
+    <string name="pin_length_incorrect">PIN碼須為八位數字</string>
+    <string name="enter_pin_code">請輸入八位數數字</string>
     <string name="write_note">寫入備注</string>
+    <string name="currency_btc">BTC (比特幣)</string>
+    <string name="pin_confirmation_doesnt_match">輸入的PIN碼不一致</string>
+    <string name="write_note_success">寫入備注成功</string>
+    <string name="write_note_fail">寫入備注失敗</string>
+    <string name="write_note_hint">備注(不超過64字)</string>
 </resources>

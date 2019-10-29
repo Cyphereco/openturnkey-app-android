@@ -123,10 +123,11 @@
     <string name="otk_is_unlocked">OpenTurnKeyロック解除しました</string>
     <string name="write_note_fail">メモ書き失敗する</string>
     <string name="write_note_success">メモ書き成功する</string>
-    <string name="write_note_hint">メモを書きます（64文字未満）：</string>
-    <string name="enter_pin_code">Please Enter a 8-digits Number as the New PIN Code</string>
-    <string name="pin_length_incorrect">PIN length should be 8</string>
-    <string name="title_set_pin">Set PIN</string>
-    <string name="pin_confirmation_doesnt_match">PIN confirmation doesn\'t match</string>
+    <string name="enter_pin_code">8桁の数字を入力してください</string>
+    <string name="pin_length_incorrect">ピンコードは8桁でなければなりません</string>
+    <string name="title_set_pin">ピンコード設定</string>
     <string name="write_note">メモを書きます</string>
+    <string name="currency_btc">BTC (ビットコイン)</string>
+    <string name="pin_confirmation_doesnt_match">ピンコードが一致しません</string>
+    <string name="write_note_hint">メモ (64文字未満)</string>
 </resources>

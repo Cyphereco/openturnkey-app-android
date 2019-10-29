@@ -18,7 +18,7 @@
     <string name="currency_twd">TWD (Taiwan Dollar)</string>
     <string name="currency_usd">USD (US Dollar)</string>
     <string name="currency_eur">EUR (Euro)</string>
-    <string name="_currency_btc" translatable="false">BTC</string>
+    <string name="_unit_btc" translatable="false">BTC</string>
     <string name="_numerical_zero" translatable="false">0.0</string>
     <string name="_symbol_equal" translatable="false">=</string>
     <string name="amount">Amount</string>
@@ -136,10 +136,15 @@
     <string name="write_note_success">Write Note Success</string>
     <string name="write_note_fail">Wirte Note Failed</string>
     <string name="title_set_pin">Set PIN</string>
-    <string name="pin_length_incorrect">PIN length should be 8</string>
-    <string name="pin_confirmation_doesnt_match">PIN confirmation doesn\'t match</string>
-    <string name="enter_pin_code">Please Enter a 8-digits Number as the New PIN Code</string>
-    <string name="write_note_hint">Write Note (Less than 64 characters)</string>
+    <string name="pin_length_incorrect">PIN code should be 8 digits</string>
+    <string name="pin_confirmation_doesnt_match">PIN codes do not match</string>
+    <string name="enter_pin_code">"Please Enter a 8-digits Number "</string>
     <string name="write_note">Write Note</string>
-
+    <string name="_unit_usd" translatable="false">USD</string>
+    <string name="_unit_twd" translatable="false">TWD</string>
+    <string name="_unit_eur" translatable="false">EUR</string>
+    <string name="_unit_jpy" translatable="false">JPY</string>
+    <string name="_unit_cny" translatable="false">CNY</string>
+    <string name="currency_btc">BTC (Bitcoin)</string>
+    <string name="write_note_hint">Note (Less than 64 characters)</string>
 </resources>
