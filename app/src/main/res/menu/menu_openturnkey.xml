@@ -7,7 +7,8 @@
         android:title="@string/read_general_information" />
     <item
         android:id="@+id/menu_openturnkey_authenticity_check"
-        android:title="@string/authenticity_check" />
+        android:title="@string/authenticity_check"
+        android:visible="false" />
     <item
         android:id="@+id/menu_openturnkey_get_key"
         android:title="@string/read_key_information" />

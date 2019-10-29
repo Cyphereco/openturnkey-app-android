@@ -44,7 +44,7 @@ public class FragmentPay extends Fragment {
     private String mRecipientAddress;
 
     boolean mIsCryptoCurrencySet = true;
-    private LocalCurrency mLocalCurrency = LocalCurrency.LOCAL_CURRENCY_TWD;
+    private LocalCurrency mLocalCurrency = LocalCurrency.LOCAL_CURRENCY_USD;
     private CurrencyExchangeRate mCurrencyExRate;
     private boolean mIsAmountConverting = false;
     private double mBtc = 0.0;

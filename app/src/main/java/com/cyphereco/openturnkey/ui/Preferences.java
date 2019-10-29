@@ -1,6 +1,7 @@
 package com.cyphereco.openturnkey.ui;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -38,7 +39,7 @@ public class Preferences {
             return LocalCurrency.LOCAL_CURRENCY_JPY;
         }
 
-        return LocalCurrency.LOCAL_CURRENCY_TWD;
+        return LocalCurrency.LOCAL_CURRENCY_USD;
     }
 
     static public void setLocalCurrency(Context ctx, LocalCurrency lc) {
