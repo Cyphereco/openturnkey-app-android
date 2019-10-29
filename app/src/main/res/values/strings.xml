@@ -41,7 +41,6 @@
     <string name="set_key">Choose Key</string>
     <string name="unlock">Unlock</string>
     <string name="software_version">Software Version</string>
-    <string name="_version_number" translatable="false">1.0_beta</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="clear_all_payment_history">Clear all payment history?</string>
@@ -131,13 +130,12 @@
     <string name="transaction_not_found">Transaction not found</string>
     <string name="failed_to_delete">Failed to delete</string>
     <string name="delete_this_transaction_record">Delete this transaction record?</string>
-    <string name="otk_is_not_locked">OTK is not locked</string>
+    <string name="otk_is_not_locked">OpenTurnKey is not locked</string>
     <string name="unlock_success">Unlock success</string>
     <string name="unlock_failed">Unclock failed</string>
-    <string name="otk_is_unlocked">OTK is unlocked</string>
-    <string name="title_write_note">Write Note</string>
-    <string name="write_note_success">Write Note Success</string>
-    <string name="note_is_wrote">Note is wrote</string>
-    <string name="write_note_fail">Wirte Note Failed</string>
+    <string name="otk_is_unlocked">OpenTurnKey unlocked</string>
+    <string name="write_momo_success">Write Note Success</string>
+    <string name="write_memo_fail">Wirte Note Failed</string>
+    <string name="enter_your_memo">Write memo (Less than 64 characters)</string>
 
 </resources>

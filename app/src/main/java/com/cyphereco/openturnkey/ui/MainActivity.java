@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -469,7 +470,7 @@ public class MainActivity extends AppCompatActivity
                     showStatusDialog(getString(R.string.unlock_failed), "");
                 }  else if (type == OtkEvent.Type.WRITE_NOTE_SUCCESS) {
                     hideStatusDialog();
-                    showCommandResultDialog(getString(R.string.write_note_success), getString(R.string.note_is_wrote));
+                    showCommandResultDialog(getString(R.string.write_memo), getString(R.string.write_momo_success));
                     setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
@@ -485,7 +486,7 @@ public class MainActivity extends AppCompatActivity
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
                     ((FragmentOtk) mSelectedFragment).hideCancelButton();
-                    showStatusDialog(getString(R.string.write_note_fail), "");
+                    showStatusDialog(getString(R.string.write_memo_fail), "");
                 }
                 else {
                 }
@@ -619,6 +620,11 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.menu_pay_use_fix_address:
                 useFixAddr = item.setChecked(!item.isChecked()).isChecked();
+                return true;
+            case R.id.menu_pay_user_guide:
+                String url = "https://openturnkey.com/guide";
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(browserIntent);
                 return true;
             case R.id.menu_pay_about:
                 dialogAbout();

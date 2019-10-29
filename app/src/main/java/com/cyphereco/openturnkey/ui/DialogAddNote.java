@@ -1,6 +1,5 @@
 package com.cyphereco.openturnkey.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -9,11 +8,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
-import com.poovam.pinedittextfield.CirclePinField;
 
 public class DialogAddNote extends AppCompatDialogFragment {
     public DialogAddNoteListener listener;
@@ -26,7 +23,7 @@ public class DialogAddNote extends AppCompatDialogFragment {
         final View view = inflater.inflate(R.layout.dialog_add_note, null);
 
         builder.setView(view)
-                .setTitle(R.string.title_write_note)
+                .setTitle(R.string.write_memo)
                 .setCancelable(false)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override

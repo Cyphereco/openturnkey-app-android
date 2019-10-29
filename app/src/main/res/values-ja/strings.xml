@@ -74,7 +74,7 @@
     <string name="fetching">データ更新中...</string>
     <string name="address_copied">アドレスコピーしました</string>
     <string name="please_wait">お少々待ちください</string>
-    <string name="operation_timeout">" 操作タイムアウト"</string>
+    <string name="operation_timeout">操作タイムアウト</string>
     <string name="do_not_remove_otk">OpenTurnKey外さないでください</string>
     <string name="confirm_payment">支払いを確認する</string>
     <string name="subject_text_estimated_time">推定所要時間(MIN):</string>
@@ -118,12 +118,11 @@
     <string name="transaction_not_found">找不到交易记录</string>
     <string name="failed_to_delete">削除できませんでした</string>
     <string name="delete_this_transaction_record">この取引記録を削除する?</string>
-    <string name="otk_is_not_locked">OTK is not locked</string>
-    <string name="unlock_success">Unlock success</string>
-    <string name="unlock_failed">Unclock failed</string>
-    <string name="otk_is_unlocked">OTK is unlocked</string>
-    <string name="title_write_note">Write Note</string>
-    <string name="write_note_success">Write Note Success</string>
-    <string name="note_is_wrote">Note is wrote</string>
-    <string name="write_note_fail">Wirte Note Failed</string>
+    <string name="otk_is_not_locked">OpenTurnKeyはロックされていません</string>
+    <string name="unlock_success">ロック解除成功</string>
+    <string name="unlock_failed">ロック解除失敗</string>
+    <string name="otk_is_unlocked">OpenTurnKeyロック解除しました</string>
+    <string name="write_memo_fail">メモ書き失敗する</string>
+    <string name="write_momo_success">メモ書き成功する</string>
+    <string name="enter_your_memo">メモを書きます（64文字未満）：</string>
 </resources>

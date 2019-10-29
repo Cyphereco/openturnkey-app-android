@@ -3,12 +3,15 @@ package com.cyphereco.openturnkey.ui;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.cyphereco.openturnkey.BuildConfig;
+
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
@@ -25,7 +28,8 @@ public class DialogAbout extends AppCompatDialogFragment {
 
     private void setVersion(View v) {
         TextView tvVersion = v.findViewById(R.id.version_number);
-        String ver = tvVersion.getText().toString();
+        String ver = BuildConfig.VERSION_NAME + "." + String.valueOf(BuildConfig.VERSION_CODE);
+        tvVersion.setText(ver);
         if (Preferences.isTestnet(getContext())) {
             // Add postfix 't' to version number
             tvVersion.setText(String.format("%s%s", tvVersion.getText(), TESTNET_POSTFIX));
