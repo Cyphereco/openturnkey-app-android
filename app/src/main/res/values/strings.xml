@@ -42,7 +42,7 @@
     <string name="unlock">Unlock</string>
     <string name="software_version">Software Version</string>
     <string name="ok">OK</string>
-    <string name="cancel">Cancel</string>
+    <string name="cancel">CANCEL</string>
     <string name="clear_all_payment_history">Clear all payment history?</string>
     <string name="_left_bracket" translatable="false">(</string>
     <string name="_right_bracket" translatable="false">)</string>

@@ -1,6 +1,8 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBAddrItem;
@@ -27,6 +31,9 @@ import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static android.content.Context.CLIPBOARD_SERVICE;
+import static android.support.v4.content.ContextCompat.*;
 
 
 public class FragmentAddrbook extends Fragment {
@@ -111,6 +118,7 @@ public class FragmentAddrbook extends Fragment {
         TextView tvAlias = v.findViewById(R.id.textView_addrbook_item_dialog_alias);
         TextView tvAddress = v.findViewById(R.id.textView_addrbook_item_dialog_address);
         ImageView ivQRCode = v.findViewById(R.id.imageView_addrbook_item_address_qrcode);
+        final String address = item.getAddress();
 
         tvAlias.setText(item.getName());
         tvAddress.setText(item.getAddress());
@@ -121,6 +129,19 @@ public class FragmentAddrbook extends Fragment {
                     ivQRCode.getDrawable().getIntrinsicHeight());
             ivQRCode.setImageBitmap(bitmap);
         }
+
+        // copy button
+        ImageView copy = v.findViewById(R.id.btc_addr_copy);
+        copy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Context context = view.getContext();
+                ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("address", address);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(context, R.string.address_copied, Toast.LENGTH_SHORT).show();
+            }
+        });
 
         new AlertDialog.Builder(getActivity())
                 .setTitle(getString(R.string.btc_qr_code))
