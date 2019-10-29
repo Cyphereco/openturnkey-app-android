@@ -470,7 +470,7 @@ public class MainActivity extends AppCompatActivity
                     showStatusDialog(getString(R.string.unlock_failed), "");
                 }  else if (type == OtkEvent.Type.WRITE_NOTE_SUCCESS) {
                     hideStatusDialog();
-                    showCommandResultDialog(getString(R.string.write_memo), getString(R.string.write_momo_success));
+                    showCommandResultDialog(getString(R.string.write_note), getString(R.string.write_note_success));
                     setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
@@ -486,7 +486,7 @@ public class MainActivity extends AppCompatActivity
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
                     ((FragmentOtk) mSelectedFragment).hideCancelButton();
-                    showStatusDialog(getString(R.string.write_memo_fail), "");
+                    showStatusDialog(getString(R.string.write_note_fail), "");
                 }
                 else {
                 }
@@ -578,7 +578,7 @@ public class MainActivity extends AppCompatActivity
                     tv.setText(R.string.unlock);
                     return;
                 case R.id.menu_openturnkey_set_note:
-                    tv.setText(R.string.write_memo);
+                    tv.setText(R.string.write_note);
                     return;
                 case R.id.menu_openturnkey_choose_key:
                     tv.setText(R.string.set_key);
