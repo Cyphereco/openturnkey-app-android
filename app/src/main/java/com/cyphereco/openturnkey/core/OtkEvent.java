@@ -29,6 +29,8 @@ public class OtkEvent {
         OTK_IS_NOT_LOCKED,
         WRITE_NOTE_SUCCESS,
         WRITE_NOTE_FAIL,
+        SET_PIN_SUCCESS,
+        SET_PIN_FAIL,
     }
 
     private Type mType;

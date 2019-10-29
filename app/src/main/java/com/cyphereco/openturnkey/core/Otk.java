@@ -317,6 +317,9 @@ public class Otk {
                     else if (cmd == Command.SET_NOTE) {
                         sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_SUCCESS, otkData));
                     }
+                    else if (cmd == Command.SET_PIN) {
+                        sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_SUCCESS, otkData));
+                    }
                     else {
                         logger.error("Not supported yet!");
                     }
@@ -331,6 +334,8 @@ public class Otk {
 
                     } else if (cmd == Command.SET_NOTE) {
                         sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_FAIL, otkData));
+                    } else if (cmd == Command.SET_PIN) {
+                        sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_FAIL, otkData));
                     } else {
                         logger.error("Not supported yet!");
                     }
@@ -579,6 +584,43 @@ public class Otk {
                 logger.info("Unexpected data type:%s", otkData.getType());
             }
         }
+        if (mOp == Operation.OTK_OP_SET_PIN_CODE) {
+            logger.debug("otkData:{}", otkData.getType());
+            if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
+                if (isInProcessing == true) {
+                    logger.error("It's already in processing.");
+                    if (!mSessionId.equals(otkData.getSessionData().getSessionId())) {
+                        // OTK must be restarted, consider failed.
+                        sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_FAIL));
+                        return OTK_RETURN_ERROR;
+                    }
+                    return OTK_RETURN_OK;
+                }
+
+                // Processing unlock command
+                isInProcessing = true;
+                mSessionId = otkData.getSessionData().getSessionId();
+
+                // Check if OTK is authorized
+                if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
+                    // Send unauthorized event.
+                    sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
+                    // clear cached command so that it won't write command without pin
+                    mCommandToWrite = Command.INVALID;
+                } else {
+                    // Clear cached pin
+                    mPin = "";
+                    // Authorized. Write command
+                    writeOtkCommand(Command.SET_PIN, mPin, mArgs, false);
+                }
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
+                sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_FAIL));
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
+                sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_SUCCESS, otkData));
+            } else {
+                logger.info("Unexpected data type:%s", otkData.getType());
+            }
+        }
         return OTK_RETURN_OK;
     }
 
@@ -653,6 +695,20 @@ public class Otk {
         return OTK_RETURN_OK;
     }
 
+    public int setPIN(String pin) {
+        if (mOp != Operation.OTK_OP_NONE && isInProcessing == true) {
+            /* Some operation is in processing, set another operation is not allowed.
+             * Should cancel current operation first.
+             */
+            return OTK_RETURN_ERROR_OP_IN_PROCESSING;
+        }
+        logger.info("Set pin:" + pin);
+        mOp = Operation.OTK_OP_SET_PIN_CODE;
+        mArgs.clear();
+        mArgs.add(pin);
+        return OTK_RETURN_OK;
+    }
+
     /**
      * Set operation to pay
      */
@@ -720,6 +776,11 @@ public class Otk {
             mCommandToWrite = Command.UNLOCK;
         } else if (mOp == Operation.OTK_OP_WRITE_NOTE) {
             mCommandToWrite = Command.SET_NOTE;
+        } else if (mOp == Operation.OTK_OP_SET_PIN_CODE) {
+            mCommandToWrite = Command.SET_PIN;
+        } else {
+            logger.error("Operation {} is not implemented yet.", mOp.toString());
+            return OTK_RETURN_ERROR;
         }
         writeCommand(pin);
         return OTK_RETURN_OK;

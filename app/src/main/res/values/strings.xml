@@ -139,5 +139,9 @@
     <string name="write_note_success">Write Note Success</string>
     <string name="note_is_wrote">Note is wrote</string>
     <string name="write_note_fail">Wirte Note Failed</string>
+    <string name="title_set_pin">Set PIN</string>
+    <string name="pin_length_incorrect">PIN length should be 8</string>
+    <string name="pin_confirmation_doesnt_match">PIN confirmation doesn\'t match</string>
+    <string name="enter_pin_code">Please Enter a 8-digits Number as the New PIN Code</string>
 
 </resources>

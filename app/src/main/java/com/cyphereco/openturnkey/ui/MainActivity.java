@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity
         DialogTransactionFee.DialogTransactionFeeListener,
         DialogAuthByPin.DialogAuthByPinListener,
         DialogAddNote.DialogAddNoteListener,
+        DialogSetPIN.DialogSetPINListener,
         DialogClearHistory.DialogClearHistoryListener,
         FragmentPay.FragmentPayListener,
         FragmentOtk.FragmentOtkListener,
@@ -643,10 +644,13 @@ public class MainActivity extends AppCompatActivity
                 // show add note dialog
                 dialogAddNote();
                 return true;
+            case R.id.menu_openturnkey_set_pin:
+                // show set pin dialog
+                dialogSetPIN();
+                return true;
             case R.id.menu_openturnkey_authenticity_check:
             case R.id.menu_openturnkey_get_key:
             case R.id.menu_openturnkey_choose_key:
-            case R.id.menu_openturnkey_set_pin:
             case R.id.menu_openturnkey_sign_message:
                 setNfcCommTypeText(item.getItemId());
                 return true;
@@ -671,6 +675,7 @@ public class MainActivity extends AppCompatActivity
         mOp = Otk.Operation.OTK_OP_WRITE_NOTE;
         setNfcCommTypeText(R.id.menu_openturnkey_set_note);
         ((FragmentOtk) mSelectedFragment).showCancelButton();
+        mIsOpInProcessing = true;
         mOtk.setNote(note);
     }
 
@@ -678,6 +683,23 @@ public class MainActivity extends AppCompatActivity
         mOtk.cancelOperation();
         mOp = Otk.Operation.OTK_OP_NONE;
         mIsOpInProcessing = false;
+        setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+    }
+
+    public void setPIN(String pin) {
+        logger.debug("pin:" + pin);
+        mOp = Otk.Operation.OTK_OP_SET_PIN_CODE;
+        setNfcCommTypeText(R.id.menu_openturnkey_set_pin);
+        ((FragmentOtk) mSelectedFragment).showCancelButton();
+        mOtk.setPIN(pin);
+        mIsOpInProcessing = true;
+    }
+
+    public void cancelSetPIN() {
+        mOtk.cancelOperation();
+        mOp = Otk.Operation.OTK_OP_NONE;
+        mIsOpInProcessing = false;
+        setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
     }
 
     public void authByPin(String pin) {
@@ -720,6 +742,11 @@ public class MainActivity extends AppCompatActivity
 
     private void dialogAddNote() {
         DialogAddNote dialog = new DialogAddNote();
+        dialog.show(getSupportFragmentManager(), "dialog");
+    }
+
+    private void dialogSetPIN() {
+        DialogSetPIN dialog = new DialogSetPIN();
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
