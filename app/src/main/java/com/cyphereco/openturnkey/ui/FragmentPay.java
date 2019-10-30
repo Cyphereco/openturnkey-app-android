@@ -453,6 +453,10 @@ public class FragmentPay extends Fragment {
         return mRecipientAddress;
     }
 
+    public void updateUseFixAddress(boolean isChecked) {
+        mUseFixAddress = isChecked;
+    }
+
     private void showFixAddressDialog() {
         new AlertDialog.Builder(getActivity())
                 .setMessage("Please disable using fix address first")

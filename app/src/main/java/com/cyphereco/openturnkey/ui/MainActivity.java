@@ -306,6 +306,7 @@ public class MainActivity extends AppCompatActivity
                                 mSelectedFragment = FragmentPay.newInstance(mRecipientAddress, mBtcAmount,
                                         mLcAmount, mIsUseAllFundsChecked);
                             }
+                            ((FragmentPay) mSelectedFragment).updateUseFixAddress(useFixAddr);
                             ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
                             mOp = Otk.Operation.OTK_OP_NONE;
                             break;
