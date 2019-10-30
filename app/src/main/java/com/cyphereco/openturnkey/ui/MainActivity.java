@@ -37,6 +37,10 @@ import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 public class MainActivity extends AppCompatActivity
         implements DialogLocalCurrency.DialogLocalCurrecyListener,
         DialogTransactionFee.DialogTransactionFeeListener,
@@ -344,13 +348,18 @@ public class MainActivity extends AppCompatActivity
                 } else if (type == OtkEvent.Type.APPROACH_OTK) {
                     hideProgressDialog();
                     // Show dialog to indicate user not to remove OTK
-                    showStatusDialog(getString(R.string.in_operation), getString(R.string.do_not_remove_otk));
-                } else if (type == OtkEvent.Type.OPERATION_IN_PROCESSING) {
+                    showStatusDialog(getString(R.string.signing_transaction), getString(R.string.do_not_remove_otk));
+                } else if (type == OtkEvent.Type.FIND_UTXO) {
                     // Stop cancel timer
                     if (mSelectedFragment instanceof FragmentOtk) {
                         // Update rate
                         ((FragmentOtk) mSelectedFragment).stopCancelTimer();
                     }
+                    // Hide status dialog
+                    hideStatusDialog();
+                    // Show progress spin circle
+                    showProgressDialog(getString(R.string.check_balance));
+                } else if (type == OtkEvent.Type.OPERATION_IN_PROCESSING) {
                     // Hide status dialog
                     hideStatusDialog();
                     // Show progress spin circle
@@ -829,7 +838,7 @@ public class MainActivity extends AppCompatActivity
         DialogSendBtcResult dialog = new DialogSendBtcResult();
         Bundle bundle = new Bundle();
         // result string id
-        bundle.putInt("sendBtcResult", R.string.transaction_sent);
+        bundle.putInt("sendBtcResult", R.string.transaction_reciept);
         bundle.putString("from", tx.getFrom());
         bundle.putString("to", tx.getTo());
         bundle.putString("hash", tx.getHash());
@@ -1210,9 +1219,15 @@ public class MainActivity extends AppCompatActivity
             return;
         }
         logger.debug("addTxToDb() tx:\n{}", tx.toString());
+
+        // Get timezone offset
+        Calendar mCalendar = new GregorianCalendar();
+        TimeZone mTimeZone = mCalendar.getTimeZone();
+        int mGMTOffset = mTimeZone.getRawOffset();
+
         // Add transaction to database.
         DBTransItem dbTrans = new DBTransItem(0,
-                BtcUtils.convertDateTimeStringToLong(tx.getTime()),
+                BtcUtils.convertDateTimeStringToLong(tx.getTime()) + mGMTOffset,
                 tx.getHash(), tx.getFrom(), tx.getTo(), tx.getAmount(), tx.getFee(),
                 tx.getStatus().toInt(), tx.getDesc(), tx.getRaw());
         OpenturnkeyDB otkDB = new OpenturnkeyDB(getApplicationContext());

@@ -37,11 +37,11 @@
     <string name="customized_fees">自订手续费</string>
     <string name="suggested">推荐</string>
     <string name="command_executed_successfuly">命令成功执行</string>
-    <string name="processing">处理中</string>
+    <string name="processing">交易处理中</string>
     <string name="operation_cancelled">操作取消</string>
     <string name="qr_code_scan_cancelled">取消二维码扫描</string>
     <string name="subject_reason">原因:</string>
-    <string name="transaction_sent">交易已发送</string>
+    <string name="transaction_reciept">交易收据</string>
     <string name="get_recipient_address">获取收款地址</string>
     <string name="nfc_unavailable">无法使用NFC</string>
     <string name="send_btc_failed">BTC发送失败</string>
@@ -72,14 +72,14 @@
     <string name="openturnkey_information">OpenTurnKey信息</string>
     <string name="fetching">数据更新中...</string>
     <string name="address_copied">地址已复制</string>
-    <string name="please_wait">请稍候...</string>
+    <string name="please_wait">您现在可以移开OpenTurnKey.\n请稍候...</string>
     <string name="operation_timeout">操作逾时</string>
-    <string name="do_not_remove_otk">请勿移开OpenTurnKey</string>
+    <string name="do_not_remove_otk">请靠近OpenTurnKey完成交易签署.\n完成前请勿移开OpenTurnKey.</string>
     <string name="confirm_payment">确认支付</string>
     <string name="subject_text_estimated_time">預計交易完成時間(MIN):</string>
     <string name="subject_fees_in_satoshi">手续费(SAT):</string>
     <string name="unknown_reason">不明原因</string>
-    <string name="in_operation">处理中</string>
+    <string name="signing_transaction">签署交易</string>
     <string name="seg_wit_address_is_not_supported">暂不支持SegWit格式地址</string>
     <string name="invalid_address">无效的地址</string>
     <string name="success">成功</string>
@@ -130,4 +130,5 @@
     <string name="write_note">写入备注</string>
     <string name="currency_btc">BTC (比特币)</string>
     <string name="write_note_hint">备注(不超过64字)</string>
+    <string name="check_balance">查询余额</string>
 </resources>

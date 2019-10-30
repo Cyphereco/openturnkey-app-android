@@ -31,6 +31,7 @@ public class OtkEvent {
         WRITE_NOTE_FAIL,
         SET_PIN_SUCCESS,
         SET_PIN_FAIL,
+        FIND_UTXO
     }
 
     private Type mType;

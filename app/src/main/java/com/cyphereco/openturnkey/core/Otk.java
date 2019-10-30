@@ -477,9 +477,8 @@ public class Otk {
                 mFrom = otkData.getSessionData().getAddress();
                 mSessionId = otkData.getSessionData().getSessionId();
                 sendBitcoin(mFrom, mTo, mAmount, mTxFees, mFeeIncluded);
-                OtkEvent event = new OtkEvent(OtkEvent.Type.OPERATION_IN_PROCESSING);
+                OtkEvent event = new OtkEvent(OtkEvent.Type.FIND_UTXO);
                 sendEvent(event);
-
             }
             else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_SIGNATURE) {
                 // Got signature(s), process them

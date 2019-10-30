@@ -37,8 +37,8 @@
     <string name="customized_fees">限定手数料</string>
     <string name="suggested">おすすめ</string>
     <string name="command_executed_successfuly">コマンドが正常に実行された</string>
-    <string name="processing">処理中</string>
-    <string name="transaction_sent">取引を発送終了</string>
+    <string name="processing">トランザクション処理中</string>
+    <string name="transaction_reciept">取引領収書</string>
     <string name="get_recipient_address">入金アドレスを取得</string>
     <string name="nfc_unavailable">NFCは利用できません</string>
     <string name="operation_cancelled">操作がキャンセルされました</string>
@@ -72,14 +72,14 @@
     <string name="openturnkey_information">OpenTurnKey情報</string>
     <string name="fetching">データ更新中...</string>
     <string name="address_copied">アドレスコピーしました</string>
-    <string name="please_wait">お少々待ちください</string>
+    <string name="please_wait">OpenTurnKeyから離れることができます\nお少々待ちください</string>
     <string name="operation_timeout">操作タイムアウト</string>
-    <string name="do_not_remove_otk">OpenTurnKey外さないでください</string>
+    <string name="do_not_remove_otk">Openturnkeyに近づいてください.\nサイン完了する前にOpenTurnKey外さないでください</string>
     <string name="confirm_payment">支払いを確認する</string>
     <string name="subject_text_estimated_time">推定所要時間(MIN):</string>
     <string name="subject_fees_in_satoshi">手数料(SAT):</string>
     <string name="unknown_reason">不明な理由</string>
-    <string name="in_operation">処理中</string>
+    <string name="signing_transaction">トランザクションをサインする</string>
     <string name="seg_wit_address_is_not_supported">SigWitアドレスは現在サポートされていません</string>
     <string name="invalid_address">無効なアドレス</string>
     <string name="success">成功</string>
@@ -130,4 +130,5 @@
     <string name="currency_btc">BTC (ビットコイン)</string>
     <string name="pin_confirmation_doesnt_match">ピンコードが一致しません</string>
     <string name="write_note_hint">メモ (64文字未満)</string>
+    <string name="check_balance">残高の確認</string>
 </resources>
