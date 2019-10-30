@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity
     private double customTransactionFee = 0.00001;
     private boolean includeFee = false;
     private boolean useFixAddr = false;
+    private String mFixedAddress = "";
     private NfcAdapter mNfcAdapter = null;
     static private Otk mOtk = null;
     private Fragment mSelectedFragment = null;
@@ -287,7 +288,24 @@ public class MainActivity extends AppCompatActivity
                             getMenuInflater().inflate(R.menu.menu_pay, menu);
                             updatePayConfig(menu);
                             // Restore cached data
-                            mSelectedFragment = FragmentPay.newInstance(mRecipientAddress, mBtcAmount, mLcAmount, mIsUseAllFundsChecked);
+                            if (useFixAddr && (!mFixedAddress.equals(mRecipientAddress))) {
+                                if (!mRecipientAddress.isEmpty()) {
+                                    new AlertDialog.Builder(MainActivity.this)
+                                            .setMessage("Fix address is enabled.")
+                                            .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                }
+                                            })
+                                            .show();
+                                }
+                                mSelectedFragment = FragmentPay.newInstance(mFixedAddress, mBtcAmount,
+                                        mLcAmount, mIsUseAllFundsChecked);
+                            }
+                            else {
+                                mSelectedFragment = FragmentPay.newInstance(mRecipientAddress, mBtcAmount,
+                                        mLcAmount, mIsUseAllFundsChecked);
+                            }
                             ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
                             mOp = Otk.Operation.OTK_OP_NONE;
                             break;
@@ -629,7 +647,16 @@ public class MainActivity extends AppCompatActivity
                 includeFee = item.setChecked(!item.isChecked()).isChecked();
                 return true;
             case R.id.menu_pay_use_fix_address:
-                useFixAddr = item.setChecked(!item.isChecked()).isChecked();
+                if (mSelectedFragment instanceof FragmentPay) {
+                    useFixAddr = ((FragmentPay) mSelectedFragment).processFixAddressClick(!item.isChecked());
+                    item.setChecked(useFixAddr);
+                    if (useFixAddr) {
+                        mFixedAddress = ((FragmentPay) mSelectedFragment).getRecipientAddress();
+                    }
+                    else {
+                        mFixedAddress = "";
+                    }
+                }
                 return true;
             case R.id.menu_pay_user_guide:
                 String url = "https://openturnkey.com/guide";

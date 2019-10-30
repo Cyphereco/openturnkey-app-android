@@ -157,7 +157,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         DBTransItem item = mTransactionDataSet.get(mCurrentPosition);
         Intent intent = new Intent();
         intent.putExtra("REPAY_ADDRESS", item.getPayeeAddr());
-        intent.putExtra("REPAY_AMOUNT", String.valueOf(item.getAmount()));
+        intent.putExtra("REPAY_AMOUNT", String.format(Locale.getDefault(), "%.8f", item.getAmount()));
         setResult(MainActivity.REQUEST_RESULT_CODE_REPAY, intent);
         finish();
     }
