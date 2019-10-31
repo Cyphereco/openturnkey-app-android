@@ -2,6 +2,7 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -33,15 +34,13 @@
 
     <TextView
         android:id="@+id/label_addrbook_item_dialog_address"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:layout_marginStart="30dp"
-        android:layout_marginEnd="30dp"
+        android:layout_marginTop="20dp"
         android:text="@string/btc_address"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView_addrbook_item_dialog_alias" />
 
@@ -67,5 +66,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView_addrbook_item_dialog_address"
         app:srcCompat="@drawable/ic_scan_qrcode_foreground" />
+
+    <ImageView
+        android:id="@+id/btc_addr_copy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/label_addrbook_item_dialog_address"
+        app:layout_constraintStart_toEndOf="@+id/label_addrbook_item_dialog_address"
+        app:layout_constraintTop_toTopOf="@+id/label_addrbook_item_dialog_address"
+        app:srcCompat="@drawable/ic_content_copy_black_24dp" />
 
 </android.support.constraint.ConstraintLayout>

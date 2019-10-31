@@ -18,7 +18,7 @@
     <string name="currency_twd">TWD (Taiwan Dollar)</string>
     <string name="currency_usd">USD (US Dollar)</string>
     <string name="currency_eur">EUR (Euro)</string>
-    <string name="_currency_btc" translatable="false">BTC</string>
+    <string name="_unit_btc" translatable="false">BTC</string>
     <string name="_numerical_zero" translatable="false">0.0</string>
     <string name="_symbol_equal" translatable="false">=</string>
     <string name="amount">Amount</string>
@@ -42,7 +42,7 @@
     <string name="unlock">Unlock</string>
     <string name="software_version">Software Version</string>
     <string name="ok">OK</string>
-    <string name="cancel">Cancel</string>
+    <string name="cancel">CANCEL</string>
     <string name="clear_all_payment_history">Clear all payment history?</string>
     <string name="_left_bracket" translatable="false">(</string>
     <string name="_right_bracket" translatable="false">)</string>
@@ -60,9 +60,9 @@
     <string name="get_recipient_address">Get Recipient Address</string>
     <string name="operation_cancelled">Operartion cancelled</string>
     <string name="send_btc_failed">Send BTC Failed</string>
-    <string name="transaction_sent">Transaction Sent</string>
+    <string name="transaction_reciept">Transaction Reciept</string>
     <string name="subject_reason">Reason:</string>
-    <string name="processing">Processing</string>
+    <string name="processing">Processing Transaction</string>
     <string name="recipient_is_empty">Recipient address is empty</string>
     <string name="incorrect_amount">Incorrect amount</string>
     <string name="incorrect_recipient_amount">Incorrect recipient address or amount</string>
@@ -88,15 +88,15 @@
     <string name="openturnkey_information">OpenTurnKey Information</string>
     <string name="fetching">Fetching...</string>
     <string name="address_copied">Address copied</string>
-    <string name="please_wait">Please wait a moment...</string>
+    <string name="please_wait">You can remove OpenTurnKey now. \n Please wait a moment.</string>
     <string name="use_all_funds">Use All Funds</string>
     <string name="operation_timeout">Operation Timeout</string>
-    <string name="do_not_remove_otk">Do not remove OpenTurnKey</string>
+    <string name="do_not_remove_otk">Pleaes appraoch to OpenTurnKey to complete singing transaction.\nDo not remove OpenTurnKey until it\'s done.</string>
     <string name="confirm_payment">Confirm Payment</string>
     <string name="subject_text_estimated_time">"Est. Time to Complete(MIN): "</string>
     <string name="subject_fees_in_satoshi">Fees(SAT):</string>
     <string name="unknown_reason">Unknown Reason</string>
-    <string name="in_operation">Processing</string>
+    <string name="signing_transaction">Signing Transaction</string>
     <string name="seg_wit_address_is_not_supported">SigWit Address is not supported at the moment</string>
     <string name="invalid_address">Invalid Address</string>
     <string name="alias">Alias</string>
@@ -136,11 +136,18 @@
     <string name="write_note_success">Write Note Success</string>
     <string name="write_note_fail">Wirte Note Failed</string>
     <string name="title_set_pin">Set PIN</string>
-    <string name="pin_length_incorrect">PIN length should be 8</string>
-    <string name="pin_confirmation_doesnt_match">PIN confirmation doesn\'t match</string>
-    <string name="enter_pin_code">Please Enter a 8-digits Number as the New PIN Code</string>
-    <string name="write_note_hint">Write Note (Less than 64 characters)</string>
+    <string name="pin_length_incorrect">PIN code should be 8 digits</string>
+    <string name="pin_confirmation_doesnt_match">PIN codes do not match</string>
+    <string name="enter_pin_code">"Please Enter a 8-digits Number "</string>
     <string name="write_note">Write Note</string>
+    <string name="_unit_usd" translatable="false">USD</string>
+    <string name="_unit_twd" translatable="false">TWD</string>
+    <string name="_unit_eur" translatable="false">EUR</string>
+    <string name="_unit_jpy" translatable="false">JPY</string>
+    <string name="_unit_cny" translatable="false">CNY</string>
+    <string name="currency_btc">BTC (Bitcoin)</string>
+    <string name="write_note_hint">Note (Less than 64 characters)</string>
+    <string name="check_balance">Checking Balance</string>
     <string name="set_pin">Set PIN</string>
     <string name="set_pin_success">Set PIN success</string>
     <string name="set_pin_fail">Set PIN Failed</string>

@@ -1,8 +1,10 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -43,6 +45,7 @@ public class FragmentPay extends Fragment {
     private FragmentPayListener mListener;
     private String mRecipientAddress;
 
+    boolean mUseFixAddress = false;
     boolean mIsCryptoCurrencySet = true;
     private LocalCurrency mLocalCurrency = LocalCurrency.LOCAL_CURRENCY_USD;
     private CurrencyExchangeRate mCurrencyExRate;
@@ -70,24 +73,34 @@ public class FragmentPay extends Fragment {
     }
 
     public void launchQRcodeScanActivity(View v) {
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.CAMERA}, ZXING_CAMERA_PERMISSION);
-        } else {
-            Intent intent = new Intent(getContext(), QRcodeScanActivity.class);
-            getActivity().startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
+        if (mUseFixAddress) {
+            showFixAddressDialog();
+        }
+        else {
+            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.CAMERA}, ZXING_CAMERA_PERMISSION);
+            } else {
+                Intent intent = new Intent(getContext(), QRcodeScanActivity.class);
+                getActivity().startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
+            }
         }
     }
 
     public void pasteAddressFromClipboard(View v) {
-        ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard.hasPrimaryClip()) {
-            android.content.ClipDescription description = clipboard.getPrimaryClipDescription();
-            android.content.ClipData data = clipboard.getPrimaryClip();
-            if (data != null && description != null) {
-                String address = String.valueOf(data.getItemAt(0).coerceToText(getContext()));
-                updateRecipientAddress(address);
+        if (mUseFixAddress) {
+            showFixAddressDialog();
+        }
+        else {
+            ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard.hasPrimaryClip()) {
+                android.content.ClipDescription description = clipboard.getPrimaryClipDescription();
+                android.content.ClipData data = clipboard.getPrimaryClip();
+                if (data != null && description != null) {
+                    String address = String.valueOf(data.getItemAt(0).coerceToText(getContext()));
+                    updateRecipientAddress(address);
+                }
             }
         }
     }
@@ -154,9 +167,14 @@ public class FragmentPay extends Fragment {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mListener != null) {
-                    CheckBox cb = getView().findViewById(R.id.checkBox_use_all_funds);
-                    mListener.onGetRecipientAddressByReadNfcButtonClick(mRecipientAddress, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
+                if (mUseFixAddress) {
+                    showFixAddressDialog();
+                }
+                else {
+                    if (mListener != null) {
+                        CheckBox cb = getView().findViewById(R.id.checkBox_use_all_funds);
+                        mListener.onGetRecipientAddressByReadNfcButtonClick(mRecipientAddress, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
+                    }
                 }
             }
         });
@@ -406,5 +424,47 @@ public class FragmentPay extends Fragment {
     public interface FragmentPayListener {
         void onGetRecipientAddressByReadNfcButtonClick(String to, String  btc, String lc, boolean isAllFundChecked);
         void onSignPaymentButtonClick(String to, double amount, String  btc, String lc, boolean isAllFundChecked);
+    }
+
+    public boolean processFixAddressClick(boolean isChecked) {
+        if (isChecked) {
+            // If address editor is empty, prompt warning dialog
+            if ((null == mRecipientAddress) || (mRecipientAddress.isEmpty())) {
+                mUseFixAddress = false;
+                new AlertDialog.Builder(getActivity())
+                        .setMessage("The address is empty")
+                        .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .show();
+                return false;
+            }
+            // There is address
+            mUseFixAddress = true;
+            return true;
+        }
+        mUseFixAddress = false;
+        return false;
+    }
+
+    public String getRecipientAddress() {
+        return mRecipientAddress;
+    }
+
+    public void updateUseFixAddress(boolean isChecked) {
+        mUseFixAddress = isChecked;
+    }
+
+    private void showFixAddressDialog() {
+        new AlertDialog.Builder(getActivity())
+                .setMessage("Please disable using fix address first")
+                .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
     }
 }

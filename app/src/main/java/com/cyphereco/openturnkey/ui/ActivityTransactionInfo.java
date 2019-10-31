@@ -31,6 +31,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class ActivityTransactionInfo extends AppCompatActivity {
     private final static String TAG = ActivityTransactionInfo.class.getSimpleName();
@@ -156,7 +157,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         DBTransItem item = mTransactionDataSet.get(mCurrentPosition);
         Intent intent = new Intent();
         intent.putExtra("REPAY_ADDRESS", item.getPayeeAddr());
-        intent.putExtra("REPAY_AMOUNT", String.valueOf(item.getAmount()));
+        intent.putExtra("REPAY_AMOUNT", String.format(Locale.getDefault(), "%.8f", item.getAmount()));
         setResult(MainActivity.REQUEST_RESULT_CODE_REPAY, intent);
         finish();
     }
@@ -336,7 +337,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
             });
         }
 
-        tvDateTime.setText(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US).format(
+        tvDateTime.setText(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(
                 item.getDatetime()));
         tvFrom.setText(item.getPayerAddr());
         tvTo.setText(item.getPayeeAddr());

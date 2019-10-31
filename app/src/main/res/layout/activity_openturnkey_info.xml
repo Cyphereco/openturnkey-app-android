@@ -53,79 +53,25 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
     <TextView
-        android:id="@+id/label_account_balance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/subject_account_balance"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
-
-    <EditText
-        android:id="@+id/text_balance_btc"
-        android:layout_width="160dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:autofillHints=""
-        android:ems="10"
-        android:focusable="false"
-        android:hint="@string/_numerical_zero"
-        android:inputType="numberDecimal"
-        android:textAlignment="viewEnd"
-        android:textIsSelectable="false"
-        app:layout_constraintEnd_toStartOf="@+id/label_equal"
-        app:layout_constraintTop_toBottomOf="@+id/label_account_balance"
-        tools:targetApi="o" />
-
-    <TextView
         android:id="@+id/label_btc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="@string/_currency_btc"
+        android:layout_marginEnd="16dp"
+        android:text="@string/_unit_btc"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintEnd_toEndOf="@+id/text_balance_btc"
-        app:layout_constraintTop_toBottomOf="@+id/text_balance_btc" />
-
-    <TextView
-        android:id="@+id/label_equal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="@string/_symbol_equal"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toBottomOf="@+id/text_balance_btc"
-        app:layout_constraintEnd_toStartOf="@+id/text_balance_fiat"
-        app:layout_constraintTop_toTopOf="@+id/text_balance_btc" />
-
-    <EditText
-        android:id="@+id/text_balance_fiat"
-        android:layout_width="160dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:autofillHints=""
-        android:ems="10"
-        android:focusable="false"
-        android:hint="@string/_numerical_zero"
-        android:inputType="numberDecimal"
-        android:textAlignment="viewEnd"
-        android:textIsSelectable="false"
         app:layout_constraintBottom_toBottomOf="@+id/text_balance_btc"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/text_balance_btc"
-        tools:targetApi="o" />
+        app:layout_constraintTop_toTopOf="@+id/text_balance_btc" />
 
     <TextView
         android:id="@+id/label_fiat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/currency_twd"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintEnd_toEndOf="@+id/text_balance_fiat"
-        app:layout_constraintTop_toBottomOf="@+id/text_balance_fiat" />
+        android:text="@string/_unit_usd"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintBottom_toBottomOf="@+id/text_balance_fiat"
+        app:layout_constraintEnd_toStartOf="@+id/textView25"
+        app:layout_constraintTop_toTopOf="@+id/text_balance_fiat" />
 
     <TextView
         android:id="@+id/note"
@@ -162,7 +108,7 @@
         android:contentDescription="@string/btc_qr_code"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/label_btc"
+        app:layout_constraintTop_toBottomOf="@+id/label_fiat"
         app:srcCompat="@drawable/ic_scan_qrcode_foreground" />
 
     <TextView
@@ -198,5 +144,46 @@
         app:layout_constraintStart_toEndOf="@+id/user_note_context"
         app:layout_constraintTop_toTopOf="@+id/user_note_context"
         app:srcCompat="@drawable/ic_info_outline_black_24dp" />
+
+    <TextView
+        android:id="@+id/text_balance_fiat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="0.0"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toStartOf="@+id/label_fiat"
+        app:layout_constraintTop_toBottomOf="@+id/text_balance_btc" />
+
+    <TextView
+        android:id="@+id/text_balance_btc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="72dp"
+        android:layout_marginEnd="8dp"
+        android:text="0.0"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        app:layout_constraintEnd_toStartOf="@+id/label_btc"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+    <TextView
+        android:id="@+id/textView24"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="(~= "
+        app:layout_constraintBottom_toBottomOf="@+id/text_balance_fiat"
+        app:layout_constraintEnd_toStartOf="@+id/text_balance_fiat"
+        app:layout_constraintTop_toTopOf="@+id/text_balance_fiat" />
+
+    <TextView
+        android:id="@+id/textView25"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text=")"
+        app:layout_constraintBottom_toBottomOf="@+id/label_fiat"
+        app:layout_constraintEnd_toEndOf="@+id/label_btc"
+        app:layout_constraintTop_toTopOf="@+id/label_fiat" />
 
 </android.support.constraint.ConstraintLayout>

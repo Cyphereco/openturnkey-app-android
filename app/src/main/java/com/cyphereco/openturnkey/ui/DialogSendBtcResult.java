@@ -16,7 +16,7 @@ public class DialogSendBtcResult extends AppCompatDialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        int resultStringId = R.string.transaction_sent;
+        int resultStringId = R.string.transaction_reciept;
         String reason = "";
         String from;
         String to;
@@ -33,7 +33,7 @@ public class DialogSendBtcResult extends AppCompatDialogFragment {
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view;
-        if (resultStringId == R.string.transaction_sent) {
+        if (resultStringId == R.string.transaction_reciept) {
             hash = getArguments().getString("hash");
             from = getArguments().getString("from");
             to = getArguments().getString("to");

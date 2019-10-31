@@ -37,6 +37,10 @@ import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 public class MainActivity extends AppCompatActivity
         implements DialogLocalCurrency.DialogLocalCurrecyListener,
         DialogTransactionFee.DialogTransactionFeeListener,
@@ -75,6 +79,7 @@ public class MainActivity extends AppCompatActivity
     private double customTransactionFee = 0.00001;
     private boolean includeFee = false;
     private boolean useFixAddr = false;
+    private String mFixedAddress = "";
     private NfcAdapter mNfcAdapter = null;
     static private Otk mOtk = null;
     private Fragment mSelectedFragment = null;
@@ -104,6 +109,7 @@ public class MainActivity extends AppCompatActivity
     private boolean mWaitingAddressFromAddrEditor = false;
     private String mAddressEditorTempAlias = "";
     private String mAddressEditorTempAddress = "";
+    private long mAddressEditorDBId = 0;
     private boolean mSwitchToAddressBookFragment = false;
     private boolean mSwitchToPayFragment = false;
 
@@ -211,6 +217,7 @@ public class MainActivity extends AppCompatActivity
                 mWaitingAddressFromAddrEditor = true;
                 mAddressEditorTempAlias = intent.getStringExtra(KEY_ADDRESS_EDITOR_TEMP_ALIAS);
                 mAddressEditorTempAddress = intent.getStringExtra(KEY_ADDRESS_EDITOR_TEMP_ADDR);
+                mAddressEditorDBId = intent.getLongExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_DB_ID, 0);
             }
         }
         else if (requestCode == REQUEST_CODE_TRANSACTION_INFO) {
@@ -283,7 +290,25 @@ public class MainActivity extends AppCompatActivity
                             getMenuInflater().inflate(R.menu.menu_pay, menu);
                             updatePayConfig(menu);
                             // Restore cached data
-                            mSelectedFragment = FragmentPay.newInstance(mRecipientAddress, mBtcAmount, mLcAmount, mIsUseAllFundsChecked);
+                            if (useFixAddr && (!mFixedAddress.equals(mRecipientAddress))) {
+                                if (!mRecipientAddress.isEmpty()) {
+                                    new AlertDialog.Builder(MainActivity.this)
+                                            .setMessage("Fix address is enabled.")
+                                            .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                }
+                                            })
+                                            .show();
+                                }
+                                mSelectedFragment = FragmentPay.newInstance(mFixedAddress, mBtcAmount,
+                                        mLcAmount, mIsUseAllFundsChecked);
+                            }
+                            else {
+                                mSelectedFragment = FragmentPay.newInstance(mRecipientAddress, mBtcAmount,
+                                        mLcAmount, mIsUseAllFundsChecked);
+                            }
+                            ((FragmentPay) mSelectedFragment).updateUseFixAddress(useFixAddr);
                             ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
                             mOp = Otk.Operation.OTK_OP_NONE;
                             break;
@@ -344,13 +369,18 @@ public class MainActivity extends AppCompatActivity
                 } else if (type == OtkEvent.Type.APPROACH_OTK) {
                     hideProgressDialog();
                     // Show dialog to indicate user not to remove OTK
-                    showStatusDialog(getString(R.string.in_operation), getString(R.string.do_not_remove_otk));
-                } else if (type == OtkEvent.Type.OPERATION_IN_PROCESSING) {
+                    showStatusDialog(getString(R.string.signing_transaction), getString(R.string.do_not_remove_otk));
+                } else if (type == OtkEvent.Type.FIND_UTXO) {
                     // Stop cancel timer
                     if (mSelectedFragment instanceof FragmentOtk) {
                         // Update rate
                         ((FragmentOtk) mSelectedFragment).stopCancelTimer();
                     }
+                    // Hide status dialog
+                    hideStatusDialog();
+                    // Show progress spin circle
+                    showProgressDialog(getString(R.string.check_balance));
+                } else if (type == OtkEvent.Type.OPERATION_IN_PROCESSING) {
                     // Hide status dialog
                     hideStatusDialog();
                     // Show progress spin circle
@@ -641,7 +671,16 @@ public class MainActivity extends AppCompatActivity
                 includeFee = item.setChecked(!item.isChecked()).isChecked();
                 return true;
             case R.id.menu_pay_use_fix_address:
-                useFixAddr = item.setChecked(!item.isChecked()).isChecked();
+                if (mSelectedFragment instanceof FragmentPay) {
+                    useFixAddr = ((FragmentPay) mSelectedFragment).processFixAddressClick(!item.isChecked());
+                    item.setChecked(useFixAddr);
+                    if (useFixAddr) {
+                        mFixedAddress = ((FragmentPay) mSelectedFragment).getRecipientAddress();
+                    }
+                    else {
+                        mFixedAddress = "";
+                    }
+                }
                 return true;
             case R.id.menu_pay_user_guide:
                 String url = "https://openturnkey.com/guide";
@@ -653,8 +692,6 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.menu_addresses_add:
                 Intent intent = new Intent(this, ActivityAddressEditor.class);
-                intent.putExtra(ActivityAddressEditor.KEY_EDITOR_TYPE,
-                        ActivityAddressEditor.EDITOR_TYPE_ADD);
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
                 return true;
             case R.id.menu_openturnkey_unlock:
@@ -850,7 +887,7 @@ public class MainActivity extends AppCompatActivity
         DialogSendBtcResult dialog = new DialogSendBtcResult();
         Bundle bundle = new Bundle();
         // result string id
-        bundle.putInt("sendBtcResult", R.string.transaction_sent);
+        bundle.putInt("sendBtcResult", R.string.transaction_reciept);
         bundle.putString("from", tx.getFrom());
         bundle.putString("to", tx.getTo());
         bundle.putString("hash", tx.getHash());
@@ -1231,9 +1268,15 @@ public class MainActivity extends AppCompatActivity
             return;
         }
         logger.debug("addTxToDb() tx:\n{}", tx.toString());
+
+        // Get timezone offset
+        Calendar mCalendar = new GregorianCalendar();
+        TimeZone mTimeZone = mCalendar.getTimeZone();
+        int mGMTOffset = mTimeZone.getRawOffset();
+
         // Add transaction to database.
         DBTransItem dbTrans = new DBTransItem(0,
-                BtcUtils.convertDateTimeStringToLong(tx.getTime()),
+                BtcUtils.convertDateTimeStringToLong(tx.getTime()) + mGMTOffset,
                 tx.getHash(), tx.getFrom(), tx.getTo(), tx.getAmount(), tx.getFee(),
                 tx.getStatus().toInt(), tx.getDesc(), tx.getRaw());
         OpenturnkeyDB otkDB = new OpenturnkeyDB(getApplicationContext());
@@ -1254,8 +1297,7 @@ public class MainActivity extends AppCompatActivity
 
         Intent intent = new Intent(getApplicationContext(), ActivityAddressEditor.class);
 
-        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_TYPE,
-                ActivityAddressEditor.EDITOR_TYPE_EDIT);
+        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_DB_ID, mAddressEditorDBId);
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ALIAS, alias);
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ADDR, address);
         startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);

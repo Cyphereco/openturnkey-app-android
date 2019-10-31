@@ -20,7 +20,8 @@
             android:id="@+id/note"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/write_note_hint" />
+            android:hint="@string/write_note_hint"
+            android:maxLength="64" />
     </android.support.design.widget.TextInputLayout>
 
 </android.support.constraint.ConstraintLayout>
