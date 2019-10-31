@@ -468,8 +468,8 @@ public class MainActivity extends AppCompatActivity
                     setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    showStatusDialog(getString(R.string.unlock_failed), "");
-                }  else if (type == OtkEvent.Type.WRITE_NOTE_SUCCESS) {
+                    showStatusDialog(getString(R.string.unlock_failed), event.getFailureReason());
+                } else if (type == OtkEvent.Type.WRITE_NOTE_SUCCESS) {
                     hideStatusDialog();
                     showCommandResultDialog(getString(R.string.write_note), getString(R.string.write_note_success));
                     setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
@@ -487,9 +487,30 @@ public class MainActivity extends AppCompatActivity
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
                     ((FragmentOtk) mSelectedFragment).hideCancelButton();
-                    showStatusDialog(getString(R.string.write_note_fail), "");
+                    showStatusDialog(getString(R.string.write_note_fail), event.getFailureReason());
+                }
+                else if (type == OtkEvent.Type.SET_PIN_SUCCESS) {
+                    hideStatusDialog();
+                    showCommandResultDialog(getString(R.string.set_pin), getString(R.string.set_pin_success));
+                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+                    mOp = Otk.Operation.OTK_OP_NONE;
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    ((FragmentOtk) mSelectedFragment).hideCancelButton();
+                    Intent intent = new Intent(getApplicationContext(), OpenturnkeyInfoActivity.class);
+                    intent.putExtra(KEY_OTK_DATA, event.getData());
+                    startActivity(intent);
+                } else if (type == OtkEvent.Type.SET_PIN_FAIL) {
+                    hideStatusDialog();
+                    mOp = Otk.Operation.OTK_OP_NONE;
+                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    ((FragmentOtk) mSelectedFragment).hideCancelButton();
+                    showStatusDialog(getString(R.string.set_pin_fail), event.getFailureReason());
                 }
                 else {
+                    logger.info("Unhandled event:{}", type.name());
                 }
             }
         });

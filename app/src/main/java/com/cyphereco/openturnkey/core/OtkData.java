@@ -5,6 +5,9 @@ import android.util.Log;
 import com.cyphereco.openturnkey.core.protocol.MintInfo;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.core.protocol.SessionData;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
+
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,6 +17,7 @@ import java.io.Serializable;
 
 public class OtkData implements Serializable {
     private static final String TAG = OtkData.class.getSimpleName();
+    static Logger logger = Log4jHelper.getLogger(TAG);
 
     /* Data type. */
     public enum Type {
@@ -30,11 +34,13 @@ public class OtkData implements Serializable {
     OtkState mOtkState;
     String mPublicKey;
     private SessionData mSessionData;
+    String mFailureReason;
 
     public Type getType() {return mType;}
     public SessionData getSessionData() {return mSessionData;}
     public OtkState getOtkState() { return mOtkState;}
     public String getPublicKey() { return mPublicKey;}
+    public String getFailureReason() { return mFailureReason;}
     public MintInfo getMintInfo() { return mMintInfo;}
 
     /**
@@ -58,6 +64,7 @@ public class OtkData implements Serializable {
         }
         else if (otkState.getFailureReason() != OtkState.FailureReason.NFC_REASON_INVALID) {
             mType = Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE;
+            mFailureReason = otkState.getFailureReason().getReasonString();
         }
         else if (otkState.getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
             mType = Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS;

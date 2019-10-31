@@ -488,7 +488,7 @@ public class Otk {
                 processSignature(otkData);
             }
             else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
-                OtkEvent event = new OtkEvent(OtkEvent.Type.COMMAND_EXECUTION_FAILED, otkData.getOtkState().getFailureReason().name());
+                OtkEvent event = new OtkEvent(OtkEvent.Type.COMMAND_EXECUTION_FAILED, otkData.getFailureReason());
                 sendEvent(event);
                 clearOp();
             }
@@ -539,7 +539,7 @@ public class Otk {
                     writeUnlockCommand(mPin);
                 }
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
-                sendEvent(new OtkEvent(OtkEvent.Type.UNLOCK_FAIL));
+                sendEvent(new OtkEvent(OtkEvent.Type.UNLOCK_FAIL, otkData.getFailureReason()));
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
                 sendEvent(new OtkEvent(OtkEvent.Type.UNLOCK_SUCCESS, otkData));
             } else {
@@ -577,7 +577,7 @@ public class Otk {
                     writeOtkCommand(Command.SET_NOTE, mPin, mArgs, false);
                 }
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
-                sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_FAIL));
+                sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_FAIL, otkData.getFailureReason()));
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
                 sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_SUCCESS, otkData));
             } else {
@@ -614,7 +614,7 @@ public class Otk {
                     writeOtkCommand(Command.SET_PIN, mPin, mArgs, false);
                 }
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
-                sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_FAIL));
+                sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_FAIL, otkData.getFailureReason()));
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
                 sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_SUCCESS, otkData));
             } else {

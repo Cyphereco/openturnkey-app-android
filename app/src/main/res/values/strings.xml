@@ -141,5 +141,8 @@
     <string name="enter_pin_code">Please Enter a 8-digits Number as the New PIN Code</string>
     <string name="write_note_hint">Write Note (Less than 64 characters)</string>
     <string name="write_note">Write Note</string>
+    <string name="set_pin">Set PIN</string>
+    <string name="set_pin_success">Set PIN success</string>
+    <string name="set_pin_fail">Set PIN Failed</string>
 
 </resources>

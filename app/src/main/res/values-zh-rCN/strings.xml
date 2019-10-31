@@ -129,4 +129,7 @@
     <string name="write_note_fail">写入备注失败</string>
     <string name="write_note_hint">写入备注(不超过64字)</string>
     <string name="write_note">写入备注</string>
+    <string name="set_pin">Set PIN</string>
+    <string name="set_pin_success">Set PIN success</string>
+    <string name="set_pin_fail">Set PIN Failed</string>
 </resources>

@@ -36,19 +36,24 @@ public class OtkState implements Serializable {
     }
 
     public enum FailureReason {
-        NFC_REASON_INVALID("00"),  /*   0 / 0x00, Invalid,  For check purpose. */
-        NFC_REASON_TIMEOUT("C0"),  /* 192 / 0xC0, Enroll fingerpint on OTK. */
-        NFC_REASON_AUTH_FAILED("C1"),     /* 193 / 0xC1, Erase enrolled fingerprint and reset secure PIN to default, OTK (pre)authorization is required. */
-        NFC_REASON_CMD_INVALID("C2"),     /* 194 / 0xC2, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
-        NFC_REASON_PARAM_INVALID("C3"),   /* 195 / 0xC3, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
-        NFC_REASON_PARAM_MISSING("C4"),   /* 196 / 0xC4, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
-        NFC_REASON_LAST("FF");
+        NFC_REASON_INVALID("00", "Invalid"),  /*   0 / 0x00, Invalid,  For check purpose. */
+        NFC_REASON_TIMEOUT("C0", "Timeout"),  /* 192 / 0xC0, Enroll fingerpint on OTK. */
+        NFC_REASON_AUTH_FAILED("C1", "Authorization Failed"),     /* 193 / 0xC1, Erase enrolled fingerprint and reset secure PIN to default, OTK (pre)authorization is required. */
+        NFC_REASON_CMD_INVALID("C2", "Invalid Command"),     /* 194 / 0xC2, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
+        NFC_REASON_PARAM_INVALID("C3", "Invalid Parameters"),   /* 195 / 0xC3, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
+        NFC_REASON_PARAM_MISSING("C4", "Missing Parameters"),   /* 196 / 0xC4, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
+        NFC_REASON_LAST("FF", "");
         private final String value;
-        private FailureReason(String s) {
-            value = s;
+        private final String reason;
+        private FailureReason(String v, String r) {
+            value = v;
+            reason = r;
         }
-        public String toString() {
+        public String getValue() {
             return value;
+        }
+        public String getReasonString() {
+            return reason;
         }
     }
 
@@ -120,19 +125,19 @@ public class OtkState implements Serializable {
 
         // Failure reason
         code = stateStr.substring(6, 8);
-        if (code.equalsIgnoreCase(FailureReason.NFC_REASON_AUTH_FAILED.toString())) {
+        if (code.equalsIgnoreCase(FailureReason.NFC_REASON_AUTH_FAILED.getValue())) {
             mFailureReason = FailureReason.NFC_REASON_AUTH_FAILED;
         }
-        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_CMD_INVALID.toString()))) {
+        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_CMD_INVALID.getValue()))) {
             mFailureReason = FailureReason.NFC_REASON_CMD_INVALID;
         }
-        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_PARAM_INVALID.toString()))) {
+        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_PARAM_INVALID.getValue()))) {
             mFailureReason = FailureReason.NFC_REASON_PARAM_INVALID;
         }
-        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_PARAM_MISSING.toString()))) {
+        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_PARAM_MISSING.getValue()))) {
             mFailureReason = FailureReason.NFC_REASON_PARAM_MISSING;
         }
-        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_TIMEOUT.toString()))) {
+        else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_TIMEOUT.getValue()))) {
             mFailureReason = FailureReason.NFC_REASON_TIMEOUT;
         }
         else {
