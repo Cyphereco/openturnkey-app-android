@@ -1,9 +1,11 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -41,11 +43,10 @@ public class ActivityAddressEditor extends AppCompatActivity {
     private static final String AMOUNT_EQUAL_TO = "amount=";
 
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
-    public static final String KEY_EDITOR_TYPE = "KEY_EDITOR_TYPE";
+    public static final String KEY_EDITOR_CONTACT_DB_ID = "KEY_EDITOR_CONTACT_DB_ID";
     public static final String KEY_EDITOR_CONTACT_ALIAS = "KEY_EDITOR_CONTACT_ALIAS";
     public static final String KEY_EDITOR_CONTACT_ADDR = "KEY_EDITOR_CONTACT_ADDR";
-    public static final int EDITOR_TYPE_ADD = 1;
-    public static final int EDITOR_TYPE_EDIT = 2;
+    public static final long DEFAULT_DB_ID = 0; // If this is selected, this editor is for add
 
     private OpenturnkeyDB mOtkDB;
     private TextInputEditText mInputAlias;
@@ -56,6 +57,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
     private Button mSaveBtn;
 
     private NfcAdapter mNfcAdapter = null;
+    private long mAddrDBId = DEFAULT_DB_ID;
 
 
     @Override
@@ -80,13 +82,16 @@ public class ActivityAddressEditor extends AppCompatActivity {
         mOtkDB = new OpenturnkeyDB(getApplicationContext());
 
         Intent intent = this.getIntent();
-        if (EDITOR_TYPE_EDIT == intent.getIntExtra(KEY_EDITOR_TYPE, 0)) {
+        mAddrDBId = intent.getLongExtra(KEY_EDITOR_CONTACT_DB_ID, 0);
+        Log.d(TAG, "mAddrDBId: " + mAddrDBId);
+        if (null != intent.getStringExtra(KEY_EDITOR_CONTACT_ALIAS)) {
             mInputAlias.setText(intent.getStringExtra(KEY_EDITOR_CONTACT_ALIAS));
+        }
+        if (null != intent.getStringExtra(KEY_EDITOR_CONTACT_ADDR)) {
             mInputAddress.setText(intent.getStringExtra(KEY_EDITOR_CONTACT_ADDR));
         }
 
-        if ((null != mInputAddress.getText()) &&
-                (!mInputAddress.getText().toString().isEmpty())) {
+        if ((null != mInputAddress.getText()) && (!mInputAddress.getText().toString().isEmpty())) {
             mSaveBtn.setEnabled(true);
         }
 
@@ -304,17 +309,26 @@ public class ActivityAddressEditor extends AppCompatActivity {
         }
 
         if ((!alias.isEmpty()) && (!address.isEmpty())) {
-            Log.d(TAG, "Run save contact alias: " + alias + ", address: " + address);
             DBAddrItem item = new DBAddrItem(address, alias);
-            // Check this contact if already in database
-            if (null != mOtkDB.getAddressItemByAlias(alias)) {
-                // update address information
+            DBAddrItem existItem = mOtkDB.getAddressItemByAlias(alias);
+            if (mAddrDBId > 0) {
+                if ((existItem != null) && (existItem.getDbId() != mAddrDBId)) {
+                    // Show dialog
+                    showAliasDuplicateDialog();
+                    return;
+                }
+                // Update database
+                item.setDbId(mAddrDBId);
                 if (!mOtkDB.updateAddressbook(item)) {
                     Log.e(TAG, "Update address failed");
                 }
             }
             else {
-                // Add new address
+                if (existItem != null) {
+                    // Show dialog
+                    showAliasDuplicateDialog();
+                    return;
+                }
                 if (!mOtkDB.addAddress(item)) {
                     Log.e(TAG, "Add address failed");
                 }
@@ -347,6 +361,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
             intent.putExtra(MainActivity.KEY_ADDRESS_EDITOR_TEMP_ADDR,
                     mInputAddress.getText().toString());
         }
+        intent.putExtra(KEY_EDITOR_CONTACT_DB_ID, mAddrDBId);
         setResult(MainActivity.REQUEST_RESULT_CODE_READ_NFC, intent);
         finish();
     }
@@ -363,4 +378,14 @@ public class ActivityAddressEditor extends AppCompatActivity {
         }
     }
 
+    private void showAliasDuplicateDialog() {
+        new AlertDialog.Builder(this)
+                .setMessage("Alias exist already!!!")
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
+    }
 }

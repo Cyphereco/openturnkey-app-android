@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper {
 //    private static final String TAG = DBHelper.class.getSimpleName();
-    private static final int DB_VERSION = 3;
+    private static final int DB_VERSION = 4;
     private static final String DB_NAME = "OpenTurnKey.db";
 
     private static SQLiteDatabase database = null;

@@ -102,13 +102,11 @@ public class FragmentAddrbook extends Fragment {
         DBAddrItem item = mAdapter.getAddressItemByPosition(position);
         Intent intent = new Intent(getContext(), ActivityAddressEditor.class);
 
-        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_TYPE,
-                ActivityAddressEditor.EDITOR_TYPE_EDIT);
+        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_DB_ID, item.getDbId());
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ALIAS, item.getName());
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ADDR, item.getAddress());
         if (null != getActivity()) {
-            getActivity().startActivityForResult(intent,
-                    MainActivity.REQUEST_CODE_ADDRESS_EDIT);
+            getActivity().startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
         }
     }
 

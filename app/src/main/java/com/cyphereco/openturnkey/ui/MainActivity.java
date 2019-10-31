@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity
     private boolean mWaitingAddressFromAddrEditor = false;
     private String mAddressEditorTempAlias = "";
     private String mAddressEditorTempAddress = "";
+    private long mAddressEditorDBId = 0;
     private boolean mSwitchToAddressBookFragment = false;
     private boolean mSwitchToPayFragment = false;
 
@@ -216,6 +217,7 @@ public class MainActivity extends AppCompatActivity
                 mWaitingAddressFromAddrEditor = true;
                 mAddressEditorTempAlias = intent.getStringExtra(KEY_ADDRESS_EDITOR_TEMP_ALIAS);
                 mAddressEditorTempAddress = intent.getStringExtra(KEY_ADDRESS_EDITOR_TEMP_ADDR);
+                mAddressEditorDBId = intent.getLongExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_DB_ID, 0);
             }
         }
         else if (requestCode == REQUEST_CODE_TRANSACTION_INFO) {
@@ -669,8 +671,6 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.menu_addresses_add:
                 Intent intent = new Intent(this, ActivityAddressEditor.class);
-                intent.putExtra(ActivityAddressEditor.KEY_EDITOR_TYPE,
-                        ActivityAddressEditor.EDITOR_TYPE_ADD);
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
                 return true;
             case R.id.menu_openturnkey_unlock:
@@ -1276,8 +1276,7 @@ public class MainActivity extends AppCompatActivity
 
         Intent intent = new Intent(getApplicationContext(), ActivityAddressEditor.class);
 
-        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_TYPE,
-                ActivityAddressEditor.EDITOR_TYPE_EDIT);
+        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_DB_ID, mAddressEditorDBId);
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ALIAS, alias);
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ADDR, address);
         startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
