@@ -134,4 +134,6 @@
     <string name="set_pin">Set PIN</string>
     <string name="set_pin_success">Set PIN success</string>
     <string name="set_pin_fail">Set PIN Failed</string>
+    <string name="choose_key_description">Choose key from L1 to L5.</string>
+    <string name="choose_key_hint">0~2147483647</string>
 </resources>
