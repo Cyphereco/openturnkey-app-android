@@ -23,6 +23,11 @@
         android:theme="@style/AppTheme">
         <activity android:name=".ui.ActivityTransactionInfo" />
         <activity
+            android:name=".ui.ChooseKeyActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".ui.OpenturnkeyInfoActivity"
             android:configChanges="orientation"
             android:launchMode="singleTop"

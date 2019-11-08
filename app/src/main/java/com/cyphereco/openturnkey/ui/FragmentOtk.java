@@ -67,6 +67,55 @@ public class FragmentOtk extends Fragment {
         }
     }
 
+    private void updateOp(View view) {
+        TextView tv;
+        tv = view.findViewById(R.id.text_nfc_comm_type);
+        // Cancel button
+        Button btn = view.findViewById(R.id.button_otk_cancel);
+
+        if (mOp == Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS) {
+            tv.setText(R.string.get_recipient_address);
+            btn.setVisibility(View.VISIBLE);
+            btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mListener != null) {
+                        mListener.onCancelButtonClick();
+                    }
+                }
+            });
+        }
+        else if (mOp == Otk.Operation.OTK_OP_GET_KEY) {
+            tv.setText(R.string.read_key_information);
+            btn.setVisibility(View.INVISIBLE);
+        }
+        else if (mOp == Otk.Operation.OTK_OP_SET_PIN_CODE) {
+            tv.setText(R.string.set_pin_code);
+            btn.setVisibility(View.INVISIBLE);
+        }
+        else if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE) {
+            tv.setText(R.string.write_note);
+            btn.setVisibility(View.VISIBLE);
+        }
+        else if (mOp == Otk.Operation.OTK_OP_UNLOCK) {
+            tv.setText(R.string.unlock);
+            btn.setVisibility(View.INVISIBLE);
+        }
+        else if (mOp == Otk.Operation.OTK_OP_SIGN_MESSAGE) {
+            tv.setText(R.string.sign_message);
+            btn.setVisibility(View.INVISIBLE);
+        }
+        else if (mOp == Otk.Operation.OTK_OP_CHOOSE_KEY) {
+            tv.setText(R.string.set_key);
+            btn.setVisibility(View.VISIBLE);
+        }
+        else {
+            btn.setVisibility(View.INVISIBLE);
+            // Default is read general info
+            tv.setText(R.string.read_general_information);
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,47 +166,8 @@ public class FragmentOtk extends Fragment {
             };
             mCancelTimer.start();
         }
-        else if (mOp == Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS) {
-            tv.setText(R.string.get_recipient_address);
-            btn.setVisibility(View.VISIBLE);
-            btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (mListener != null) {
-                        mListener.onCancelButtonClick();
-                    }
-                }
-            });
-        }
-        else if (mOp == Otk.Operation.OTK_OP_GET_KEY) {
-            tv.setText(R.string.read_key_information);
-            btn.setVisibility(View.INVISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_SET_PIN_CODE) {
-            tv.setText(R.string.set_pin_code);
-            btn.setVisibility(View.INVISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE) {
-            tv.setText(R.string.write_note);
-            btn.setVisibility(View.VISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_UNLOCK) {
-            tv.setText(R.string.unlock);
-            btn.setVisibility(View.INVISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_SIGN_MESSAGE) {
-            tv.setText(R.string.sign_message);
-            btn.setVisibility(View.INVISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_CHOOSE_KEY) {
-            tv.setText(R.string.set_key);
-            btn.setVisibility(View.INVISIBLE);
-        }
-        else {
-            btn.setVisibility(View.INVISIBLE);
-            // Default is read general info
-            tv.setText(R.string.read_general_information);
-        }
+
+        updateOp(view);
 
         return view;
     }
@@ -185,6 +195,11 @@ public class FragmentOtk extends Fragment {
         }
         Button btn = getView().findViewById(R.id.button_otk_cancel);
         btn.setText(R.string.cancel);
+    }
+
+    public void updateOperation(Otk.Operation op) {
+        mOp = op;
+        updateOp(getView());
     }
 
     public interface FragmentOtkListener {

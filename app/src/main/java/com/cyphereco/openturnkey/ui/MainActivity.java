@@ -58,13 +58,13 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_CODE_QR_CODE = 0;
     public static final int REQUEST_CODE_PRE_AUTH = 1;
     public static final int REQUEST_CODE_SET_PIN = 2;
-    public static final int REQUEST_CODE_SET_KEY = 3;
+    public static final int REQUEST_CODE_CHOOSE_KEY = 3;
     public static final int REQUEST_CODE_ADDRESS_EDIT = 4;
     public static final int REQUEST_CODE_TRANSACTION_INFO = 5;
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
     public static final String KEY_PRE_AUTH_PIN_CODE = "KEY_PRE_AUTH_PIN_CODE";
     public static final String KEY_SET_PIN_CODE = "KEY_SET_PIN_CODE";
-    public static final String KEY_SET_KEY = "KEY_SET_KEY";
+    public static final String KEY_CHOOSE_KEY = "KEY_CHOOSE_KEY";
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
     public static final String KEY_ADDRESS_EDITOR_TEMP_ALIAS = "KEY_ADDRESS_EDITOR_TMEP_ALIAS";
     public static final String KEY_ADDRESS_EDITOR_TEMP_ADDR = "KEY_ADDRESS_EDITOR_TMEP_ADDR";
@@ -89,8 +89,10 @@ public class MainActivity extends AppCompatActivity
     AlertDialog mStatusDialog = null;
     AlertDialog.Builder mStatusDialogBuilder = null;
     AlertDialog.Builder mConfirmTerminateOpDialogBuilder = null;
+    AlertDialog.Builder mConfirmOpDialogBuilder = null;
     AlertDialog.Builder mConfirmPaymentDialogBuilder = null;
     AlertDialog mConfirmTerminateOpDialog = null;
+    AlertDialog mConfirmOpDialog = null;
     AlertDialog mConfirmPaymentDialog = null;
     AlertDialog.Builder mCommandResultDialogBuilder = null;
     AlertDialog mCommandResultDialog = null;
@@ -232,6 +234,24 @@ public class MainActivity extends AppCompatActivity
                 mSwitchToPayFragment = true;
             }
         }
+        else if (requestCode == REQUEST_CODE_CHOOSE_KEY) {
+            if (resultCode == RESULT_OK) {
+                String path = intent.getStringExtra(KEY_CHOOSE_KEY);
+                mOp = Otk.Operation.OTK_OP_CHOOSE_KEY;
+                mOtk.setOperation(mOp, path);
+                if (mSelectedFragment instanceof FragmentOtk) {
+                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                }
+                mIsOpInProcessing = true;
+            }
+            else {
+                // Cancelled
+                mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                if (mSelectedFragment instanceof FragmentOtk) {
+                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                }
+            }
+        }
     }
 
     /* declarations */
@@ -247,7 +267,10 @@ public class MainActivity extends AppCompatActivity
 
                     if (mIsOpInProcessing == true) {
                         // Cache selected item
-                        if (false == showConfirmDialogAndWaitResult(mOp, false)) {
+                        if (false == showConfirmDialogAndWaitResult(getString(R.string.terminate_op),
+                                String.format(getString(R.string.confirm_terminate_op), mOp.toString()),
+                                getString(R.string.terminate),
+                                false)) {
                             logger.info("Confirmation cancelled!");
                             return false;
                         }
@@ -346,6 +369,7 @@ public class MainActivity extends AppCompatActivity
         mProgressDialogBuilder = new AlertDialog.Builder(MainActivity.this);
         mStatusDialogBuilder = new AlertDialog.Builder(MainActivity.this);
         mConfirmTerminateOpDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        mConfirmOpDialogBuilder = new AlertDialog.Builder(MainActivity.this);
         mConfirmPaymentDialogBuilder = new AlertDialog.Builder(MainActivity.this);
         mCommandResultDialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
@@ -650,13 +674,19 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         TextView tv;
+        Intent intent;
 
         if (mIsOpInProcessing) {
-            if (false == showConfirmDialogAndWaitResult(mOp, true)) {
+            if (false == showConfirmDialogAndWaitResult(getString(R.string.terminate_op),
+                    String.format(getString(R.string.confirm_terminate_op), mOp.toString()),
+                    getString(R.string.terminate),
+                    true)) {
                 return false;
             }
-        }
+            mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+            mOtk.cancelOperation();
 
+        }
         switch (item.getItemId()) {
             case R.id.menu_history_clear_history:
                 dialogClearHistory();
@@ -691,7 +721,7 @@ public class MainActivity extends AppCompatActivity
                 dialogAbout();
                 return true;
             case R.id.menu_addresses_add:
-                Intent intent = new Intent(this, ActivityAddressEditor.class);
+                intent = new Intent(this, ActivityAddressEditor.class);
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
                 return true;
             case R.id.menu_openturnkey_unlock:
@@ -712,9 +742,23 @@ public class MainActivity extends AppCompatActivity
                 // show set pin dialog
                 dialogSetPIN();
                 return true;
+            case R.id.menu_openturnkey_choose_key:
+                // show confirm dialog
+                if (false == showConfirmDialogAndWaitResult(getString(R.string.warning),
+                        getString(R.string.choose_key_warning_message),
+                        getString(R.string.confirm),
+                        false)) {
+                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    logger.info("Choose key confirmation cancelled!");
+                    return false;
+                }
+                logger.info("Choose key Confirmed.");
+                intent = new Intent(this, ChooseKeyActivity.class);
+                startActivityForResult(intent, MainActivity.REQUEST_CODE_CHOOSE_KEY);
+                return true;
             case R.id.menu_openturnkey_authenticity_check:
             case R.id.menu_openturnkey_get_key:
-            case R.id.menu_openturnkey_choose_key:
             case R.id.menu_openturnkey_sign_message:
                 setNfcCommTypeText(item.getItemId());
                 return true;
@@ -1018,7 +1062,7 @@ public class MainActivity extends AppCompatActivity
     public void onCancelButtonClick() {
         Toast.makeText(this, getString(R.string.operation_cancelled), Toast.LENGTH_LONG).show();
         if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE ||
-                mOp == Otk.Operation.OTK_OP_SET_PIN_CODE) {
+                mOp == Otk.Operation.OTK_OP_SET_PIN_CODE || mOp == Otk.Operation.OTK_OP_CHOOSE_KEY) {
             setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
             ((FragmentOtk) mSelectedFragment).hideCancelButton();
             mOtk.cancelOperation();
@@ -1030,7 +1074,7 @@ public class MainActivity extends AppCompatActivity
         // For sign payment
         hideConfirmPaymentDialog();
         hideProgressDialog();
-        hideConfirmTerminateOpDialog();
+        hideConfirmOpDialog();
         hideStatusDialog();
         mOtk.cancelOperation();
         mOp = Otk.Operation.OTK_OP_NONE;
@@ -1101,7 +1145,8 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    boolean showConfirmDialogAndWaitResult(Otk.Operation op, final boolean isOtkOptionsSet) {
+
+    boolean showConfirmDialogAndWaitResult(String title, String message, String positveButtonString, final boolean isOtkOptionsSet) {
         final Handler handler = new Handler() {
             @Override
             public void handleMessage(Message mesg) {
@@ -1110,26 +1155,26 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        if (mConfirmTerminateOpDialog != null && mConfirmTerminateOpDialog.isShowing()) {
+        if (mConfirmOpDialog != null && mConfirmOpDialog.isShowing()) {
             logger.info("Confirm dialog is shown, should be some error!");
         }
 
-        mConfirmTerminateOpDialog = mConfirmTerminateOpDialogBuilder.setTitle(R.string.terminate_op)
-                .setMessage(String.format(getString(R.string.confirm_terminate_op), op.toString()))
+        mConfirmOpDialog = mConfirmOpDialogBuilder.setTitle(title)
+                .setMessage(message)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         logger.info("onCancel()");
                         mConfirmDialogResultValue = false;
                         handler.sendMessage(handler.obtainMessage());
-                        hideConfirmTerminateOpDialog();
+                        hideConfirmOpDialog();
                     }
                 })
-                .setPositiveButton(R.string.terminate, new DialogInterface.OnClickListener() {
+                .setPositiveButton(positveButtonString, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         logger.info("onTerminate()");
-                        hideConfirmTerminateOpDialog();
+                        hideConfirmOpDialog();
                         mConfirmDialogResultValue = true;
                         // Terminate current op
                         mOtk.cancelOperation();
@@ -1153,9 +1198,9 @@ public class MainActivity extends AppCompatActivity
         return mConfirmDialogResultValue;
     }
 
-    private void hideConfirmTerminateOpDialog() {
-        if (mConfirmTerminateOpDialog != null) {
-            mConfirmTerminateOpDialog.dismiss();
+    private void hideConfirmOpDialog() {
+        if (mConfirmOpDialog != null) {
+            mConfirmOpDialog.dismiss();
         }
     }
 
