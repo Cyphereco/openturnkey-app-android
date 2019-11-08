@@ -563,6 +563,25 @@ public class MainActivity extends AppCompatActivity
                     ((FragmentOtk) mSelectedFragment).hideCancelButton();
                     showStatusDialog(getString(R.string.set_pin_fail), event.getFailureReason());
                 }
+                else if (type == OtkEvent.Type.CHOOSE_KEY_SUCCESS) {
+                    hideStatusDialog();
+                    showCommandResultDialog(getString(R.string.choose_key), getString(R.string.choose_key_success));
+                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
+                } else if (type == OtkEvent.Type.CHOOSE_KEY_FAIL) {
+                    hideStatusDialog();
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
+                    showStatusDialog(getString(R.string.choose_key_fail), event.getFailureReason());
+                }
                 else {
                     logger.info("Unhandled event:{}", type.name());
                 }

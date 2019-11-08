@@ -157,5 +157,8 @@
     <string name="choose_key_warning_message">Please back up your current key path if there are funds or you will be using it later. Otherwise, you can lose the access to the current key if you forget the key path.</string>
     <string name="confirm">Confirm</string>
     <string name="invalid_key_path">Invalid key path</string>
+    <string name="choose_key">Choose Key</string>
+    <string name="choose_key_success">Choose key success</string>
+    <string name="choose_key_fail">Choose key failed</string>
 
 </resources>
