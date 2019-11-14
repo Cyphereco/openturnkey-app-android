@@ -582,6 +582,9 @@ public class MainActivity extends AppCompatActivity
                     }
                     showStatusDialog(getString(R.string.choose_key_fail), event.getFailureReason());
                 }
+                else if ((type == OtkEvent.Type.GET_KEY_SUCCESS) || (type == OtkEvent.Type.GET_KEY_FAIL)) {
+                    processOtkGetKeyEvent(event);
+                }
                 else {
                     logger.info("Unhandled event:{}", type.name());
                 }
@@ -780,6 +783,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.menu_openturnkey_get_key:
             case R.id.menu_openturnkey_sign_message:
                 setNfcCommTypeText(item.getItemId());
+                if (item.getItemId() == R.id.menu_openturnkey_get_key) {
+                    readOtkKeyInformation();
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -1386,6 +1392,36 @@ public class MainActivity extends AppCompatActivity
                     return false;
                 }
             });
+        }
+    }
+
+    private void readOtkKeyInformation() {
+        mOp = Otk.Operation.OTK_OP_GET_KEY;
+        if (mSelectedFragment instanceof FragmentOtk) {
+            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+        }
+        mOtk.setOperation(mOp);
+    }
+
+    private void processOtkGetKeyEvent(OtkEvent event) {
+        Intent intent;
+
+        logger.debug("processOtkGetKeyEvent");
+        hideStatusDialog();
+        mIsOpInProcessing = false;
+        mOtk.cancelOperation();
+        mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+        if (mSelectedFragment instanceof FragmentOtk) {
+            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+        }
+
+        if (OtkEvent.Type.GET_KEY_SUCCESS == event.getType()) {
+            intent = new Intent(this, ActivityKeyInformation.class);
+            intent.putExtra(KEY_OTK_DATA, event.getData());
+            startActivity(intent);
+        }
+        else if (OtkEvent.Type.GET_KEY_FAIL == event.getType()) {
+            showStatusDialog(getString(R.string.choose_key_fail), event.getFailureReason());
         }
     }
 }

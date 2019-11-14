@@ -33,7 +33,9 @@ public class OtkEvent {
         SET_PIN_FAIL,
         CHOOSE_KEY_SUCCESS,
         CHOOSE_KEY_FAIL,
-        FIND_UTXO
+        FIND_UTXO,
+        GET_KEY_SUCCESS,
+        GET_KEY_FAIL,
     }
 
     private Type mType;

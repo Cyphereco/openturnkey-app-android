@@ -21,6 +21,8 @@
         android:roundIcon="@mipmap/ic_cyphereco_color_logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity
+            android:name=".ui.ActivityKeyInformation" />
         <activity android:name=".ui.ActivityTransactionInfo" />
         <activity
             android:name=".ui.ChooseKeyActivity"

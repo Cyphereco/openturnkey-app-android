@@ -662,6 +662,39 @@ public class Otk {
                 logger.info("Unexpected data type:%s", otkData.getType());
             }
         }
+        if (mOp == Operation.OTK_OP_GET_KEY) {
+            if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
+                // Write read KEY information command to OTK
+                if (isInProcessing == true) {
+                    logger.error("It's already in processing.");
+                    if (!mSessionId.equals(otkData.getSessionData().getSessionId())) {
+                        // OTK must be restarted, consider failed.
+                        sendEvent(new OtkEvent(OtkEvent.Type.GET_KEY_FAIL));
+                        return OTK_RETURN_ERROR;
+                    }
+                    return OTK_RETURN_OK;
+                }
+
+                // Processing unlock command
+                isInProcessing = true;
+                mSessionId = otkData.getSessionData().getSessionId();
+                // Check if OTK is authorized
+                if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
+                    // Send unauthorized event.
+                    sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
+                    // clear cached command so that it won't write command without pin
+                    mCommandToWrite = Command.INVALID;
+                } else {
+                    // Clear cached pin
+                    mPin = "";
+                    // Authorized. Write command
+                    writeOtkCommand(Command.SHOW_KEY, mPin, mArgs, false);
+                }
+            }
+            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_KEY_INFO) {
+                sendEvent(new OtkEvent(OtkEvent.Type.GET_KEY_SUCCESS, otkData));
+            }
+        }
         return OTK_RETURN_OK;
     }
 
@@ -839,6 +872,8 @@ public class Otk {
             mCommandToWrite = Command.SET_PIN;
         } else if (mOp == Operation.OTK_OP_CHOOSE_KEY) {
             mCommandToWrite = Command.SET_KEY;
+        } else if (mOp == Operation.OTK_OP_GET_KEY) {
+            mCommandToWrite = Command.SHOW_KEY;
         } else {
             logger.error("Operation {} is not implemented yet.", mOp.toString());
             return OTK_RETURN_ERROR;
