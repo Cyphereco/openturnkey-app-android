@@ -61,11 +61,13 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_CODE_CHOOSE_KEY = 3;
     public static final int REQUEST_CODE_ADDRESS_EDIT = 4;
     public static final int REQUEST_CODE_TRANSACTION_INFO = 5;
+    public static final int REQUEST_CODE_SIGN_MESSAGE = 6;
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
     public static final String KEY_PRE_AUTH_PIN_CODE = "KEY_PRE_AUTH_PIN_CODE";
     public static final String KEY_SET_PIN_CODE = "KEY_SET_PIN_CODE";
     public static final String KEY_CHOOSE_KEY = "KEY_CHOOSE_KEY";
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
+    public static final String KEY_SIGN_VALIDATE_MESSAGE = "KEY_SIGN_VALIDATE_MESSAGE";
     public static final String KEY_ADDRESS_EDITOR_TEMP_ALIAS = "KEY_ADDRESS_EDITOR_TMEP_ALIAS";
     public static final String KEY_ADDRESS_EDITOR_TEMP_ADDR = "KEY_ADDRESS_EDITOR_TMEP_ADDR";
     public static final int REQUEST_RESULT_CODE_REPAY = 1000;
@@ -779,9 +781,13 @@ public class MainActivity extends AppCompatActivity
                 intent = new Intent(this, ChooseKeyActivity.class);
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_CHOOSE_KEY);
                 return true;
+            case R.id.menu_openturnkey_sign_message:
+                intent = new Intent(this, ChooseKeyActivity.class);
+                startActivityForResult(intent, MainActivity.REQUEST_CODE_SIGN_MESSAGE);
+                return true;
             case R.id.menu_openturnkey_authenticity_check:
             case R.id.menu_openturnkey_get_key:
-            case R.id.menu_openturnkey_sign_message:
+
                 setNfcCommTypeText(item.getItemId());
                 if (item.getItemId() == R.id.menu_openturnkey_get_key) {
                     readOtkKeyInformation();
