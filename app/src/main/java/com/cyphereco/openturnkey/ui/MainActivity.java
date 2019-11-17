@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity
     public static final String KEY_SET_PIN_CODE = "KEY_SET_PIN_CODE";
     public static final String KEY_CHOOSE_KEY = "KEY_CHOOSE_KEY";
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
+    public static final String KEY_MESSAGE_TO_SIGN = "KEY_MESSAGE_TO_SIGN";
     public static final String KEY_SIGN_VALIDATE_MESSAGE = "KEY_SIGN_VALIDATE_MESSAGE";
     public static final String KEY_ADDRESS_EDITOR_TEMP_ALIAS = "KEY_ADDRESS_EDITOR_TMEP_ALIAS";
     public static final String KEY_ADDRESS_EDITOR_TEMP_ADDR = "KEY_ADDRESS_EDITOR_TMEP_ADDR";
@@ -241,6 +242,24 @@ public class MainActivity extends AppCompatActivity
                 String path = intent.getStringExtra(KEY_CHOOSE_KEY);
                 mOp = Otk.Operation.OTK_OP_CHOOSE_KEY;
                 mOtk.setOperation(mOp, path);
+                if (mSelectedFragment instanceof FragmentOtk) {
+                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                }
+                mIsOpInProcessing = true;
+            }
+            else {
+                // Cancelled
+                mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                if (mSelectedFragment instanceof FragmentOtk) {
+                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                }
+            }
+        }
+        else if (requestCode == REQUEST_CODE_SIGN_MESSAGE) {
+            if (resultCode == RESULT_OK) {
+                String messageToSign = intent.getStringExtra(KEY_SIGN_VALIDATE_MESSAGE);
+                mOp = Otk.Operation.OTK_OP_SIGN_MESSAGE;
+                mOtk.setOperation(mOp, messageToSign);
                 if (mSelectedFragment instanceof FragmentOtk) {
                     ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                 }
@@ -587,6 +606,29 @@ public class MainActivity extends AppCompatActivity
                 else if ((type == OtkEvent.Type.GET_KEY_SUCCESS) || (type == OtkEvent.Type.GET_KEY_FAIL)) {
                     processOtkGetKeyEvent(event);
                 }
+                else if (type == OtkEvent.Type.SIGN_MESSAGE_SUCCESS){
+                    hideStatusDialog();
+                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
+                    Intent intent = new Intent(getApplicationContext() , SignValidateMessageActivity.class);
+                    intent.putExtra(KEY_OTK_DATA, event.getData());
+                    intent.putExtra(KEY_MESSAGE_TO_SIGN, event.getMessageToSign());
+                    startActivityForResult(intent, MainActivity.REQUEST_CODE_SIGN_MESSAGE);
+                }
+                else if (type == OtkEvent.Type.SIGN_MESSAGE_FAIL){
+                    hideStatusDialog();
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
+                    showStatusDialog(getString(R.string.sign_message_fail), event.getFailureReason());
+                }
                 else {
                     logger.info("Unhandled event:{}", type.name());
                 }
@@ -782,7 +824,7 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_CHOOSE_KEY);
                 return true;
             case R.id.menu_openturnkey_sign_message:
-                intent = new Intent(this, ChooseKeyActivity.class);
+                intent = new Intent(this, SignValidateMessageActivity.class);
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_SIGN_MESSAGE);
                 return true;
             case R.id.menu_openturnkey_authenticity_check:
@@ -1093,12 +1135,14 @@ public class MainActivity extends AppCompatActivity
     public void onCancelButtonClick() {
         Toast.makeText(this, getString(R.string.operation_cancelled), Toast.LENGTH_LONG).show();
         if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE ||
-                mOp == Otk.Operation.OTK_OP_SET_PIN_CODE || mOp == Otk.Operation.OTK_OP_CHOOSE_KEY) {
-            setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
-            ((FragmentOtk) mSelectedFragment).hideCancelButton();
-            mOtk.cancelOperation();
-            mOp = Otk.Operation.OTK_OP_NONE;
+                mOp == Otk.Operation.OTK_OP_SET_PIN_CODE || mOp == Otk.Operation.OTK_OP_CHOOSE_KEY ||
+                mOp == Otk.Operation.OTK_OP_SIGN_MESSAGE) {
+            mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
             mIsOpInProcessing = false;
+            if (mSelectedFragment instanceof FragmentOtk) {
+                ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+            }
+            mOtk.cancelOperation();
             return;
         }
 

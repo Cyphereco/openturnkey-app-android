@@ -166,7 +166,7 @@ public class BtcUtils {
         return Utils.doubleDigest(message);
     }
 
-    static boolean verifySignature(String address, String message, String signature) {
+    static public boolean verifySignature(String address, String message, String signature) {
         try {
             return ECKey.verifyMessage(address, message, signature);
         }

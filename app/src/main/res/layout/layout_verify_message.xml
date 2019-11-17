@@ -7,13 +7,13 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/button_sign_payment2"
+        android:id="@+id/buttonVerifyMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
         android:drawableStart="@drawable/ic_verify_in_black_24dp"
-        android:text="Verify Signed Message"
+        android:text="@string/verify_signed_message"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -24,13 +24,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="120dp"
-        android:text="Message to Be Verified"
+        android:text="@string/message_to_be_verified"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/editText3"
+        android:id="@+id/editTextMessageToBeVerified"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -39,12 +39,13 @@
         android:ems="10"
         android:gravity="start|top"
         android:inputType="textMultiLine"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView17" />
 
     <ImageView
-        android:id="@+id/imageView5"
+        android:id="@+id/imageViewVerifyScanQR"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginEnd="16dp"
@@ -54,34 +55,35 @@
         app:srcCompat="@drawable/ic_action_scan_qr_code" />
 
     <ImageView
-        android:id="@+id/imageView6"
+        android:id="@+id/imageViewVerifyPaste"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/textView17"
-        app:layout_constraintEnd_toStartOf="@+id/imageView5"
+        app:layout_constraintEnd_toStartOf="@+id/imageViewVerifyScanQR"
         app:layout_constraintTop_toTopOf="@+id/textView17"
         app:srcCompat="@drawable/ic_content_paste_black_24dp" />
 
     <ImageView
-        android:id="@+id/imageView7"
+        android:id="@+id/imageViewVerifyGreen"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/button_sign_payment2"
+        app:layout_constraintBottom_toTopOf="@+id/buttonVerifyMessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_check_circle_green_24dp" />
 
     <ImageView
-        android:id="@+id/imageView8"
+        android:id="@+id/imageViewVerifyFail"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginStart="8dp"
-        app:layout_constraintStart_toEndOf="@+id/imageView7"
-        app:layout_constraintTop_toTopOf="@+id/imageView7"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewVerifyGreen"
+        app:layout_constraintStart_toStartOf="@+id/imageViewVerifyGreen"
+        app:layout_constraintTop_toTopOf="@+id/imageViewVerifyGreen"
         app:srcCompat="@drawable/ic_fail_24dp" />
 
 </android.support.constraint.ConstraintLayout>

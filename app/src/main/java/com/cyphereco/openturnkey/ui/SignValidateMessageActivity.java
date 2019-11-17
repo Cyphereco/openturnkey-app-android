@@ -1,8 +1,13 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -13,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -25,6 +31,8 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
+import com.cyphereco.openturnkey.utils.QRCodeUtils;
+import com.cyphereco.openturnkey.utils.SignedMessage;
 
 import org.slf4j.Logger;
 
@@ -35,7 +43,8 @@ public class SignValidateMessageActivity extends AppCompatActivity {
     private TabLayout mTabs;
     private ViewPager mViewPager;
 
-    private String mSignedMsg;
+    private String mFormattedSignedMsg;
+    private String mMsgToSign;
 
     private static final int ZXING_CAMERA_PERMISSION = 1;
     public static final int REQUEST_CODE_QR_CODE = 0;
@@ -57,7 +66,8 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // Handle successful scan
                 String contents = intent.getStringExtra(MainActivity.KEY_QR_CODE);
-                // TODO
+                EditText etMsgToBeVerified = findViewById(R.id.editTextMessageToBeVerified);
+                etMsgToBeVerified.setText(contents);
             }
             else if (resultCode == RESULT_CANCELED) {
                 //Handle cancel
@@ -71,9 +81,10 @@ public class SignValidateMessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         logger.debug("onCreate");
         setContentView(R.layout.activity_sign_validate_message);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+
+        Toolbar toolbar = findViewById(R.id.toolbar_sign_verify_message);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
         mTabs = findViewById(R.id.tabLayoutSignVerify);
 
@@ -108,12 +119,15 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             return;
         }
 
-        // TODO get msgToSign from OtkData
-        String msgToSign = "";
-        mSignedMsg = BtcUtils.processSignedMessage(
-                BtcUtils.hexStringToBytes(msgToSign),
+        mMsgToSign = (String)intent.getSerializableExtra(MainActivity.KEY_MESSAGE_TO_SIGN);
+        logger.info("message to sign:{} pubKey:{} signature:{}", mMsgToSign, otkData.getPublicKey(), otkData.getSessionData().getRequestSigList().get(0));
+        String signedMsg = BtcUtils.processSignedMessage(
+                BtcUtils.generateMessageToSign(mMsgToSign),
                 BtcUtils.hexStringToBytes(otkData.getPublicKey()),
                 BtcUtils.hexStringToBytes(otkData.getSessionData().getRequestSigList().get(0)));
+        String publicAddress = BtcUtils.keyToAddress(otkData.getPublicKey());
+        SignedMessage sm = new SignedMessage(publicAddress, signedMsg, mMsgToSign);
+        mFormattedSignedMsg = sm.getFormattedMessage();
     }
 
     class SignVerifyPagerAdapter extends PagerAdapter {
@@ -140,21 +154,77 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             }
         }
 
-        private void initSignMessageTab(final View view) {
-            ImageView ivQr = view.findViewById(R.id.signMessageGenerateQRcode);
-            ivQr.setEnabled(false);
-            ivQr.setVisibility(View.INVISIBLE);
-            ImageView ivCopy = view.findViewById(R.id.signMessageCopy);
-            ivCopy.setEnabled(false);
-            ivCopy.setVisibility(View.INVISIBLE);
-            EditText etSignedMsg = view.findViewById(R.id.editTextSignedMessage);
-            etSignedMsg.setEnabled(false);
-            etSignedMsg.setVisibility(View.INVISIBLE);
-            TextView tvSignedMsg = view.findViewById(R.id.textViewSignedMessage);
-            tvSignedMsg.setEnabled(false);
-            tvSignedMsg.setVisibility(View.INVISIBLE);
+        private void updateVerifyMessageButton(View view, String msgToSign) {
+            Button btn = view.findViewById(R.id.buttonVerifyMessage);
+            if (msgToSign.length() > 0) {
+                btn.setEnabled(true);
+                btn.setAlpha(1.0f);
+            }
+            else {
+                btn.setEnabled(false);
+                btn.setAlpha(.5f);
+            }
+        }
 
+        private void initSignMessageTab(final View view) {
+            if (mFormattedSignedMsg != null && mFormattedSignedMsg.length() > 0) {
+                ImageView ivQr = view.findViewById(R.id.signMessageGenerateQRcode);
+                ivQr.setEnabled(true);
+                ivQr.setVisibility(View.VISIBLE);
+                ivQr.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ImageView image = new ImageView(getApplicationContext());
+                        DisplayMetrics displayMetrics = new DisplayMetrics();
+                        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                        int width = displayMetrics.widthPixels * 7 / 10 ;
+                        Bitmap bitmap = QRCodeUtils.encodeAsBitmap(mFormattedSignedMsg, width, width);
+                        image.setImageBitmap(bitmap);
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(SignValidateMessageActivity.this)
+                                .setCancelable(true)
+                                .setView(image);
+                        builder.create().show();
+                    }
+                });
+                ImageView ivCopy = view.findViewById(R.id.signMessageCopy);
+                ivCopy.setEnabled(true);
+                ivCopy.setVisibility(View.VISIBLE);
+                ivCopy.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View view) {
+                          ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                          ClipData clip = ClipData.newPlainText("Signed message", mFormattedSignedMsg);
+                          clipboard.setPrimaryClip(clip);
+                          Toast.makeText(getApplicationContext(), R.string.signed_message_copied, Toast.LENGTH_LONG).show();
+                      }
+                  });
+                EditText etSignedMsg = view.findViewById(R.id.editTextSignedMessage);
+                etSignedMsg.setEnabled(true);
+                etSignedMsg.setVisibility(View.VISIBLE);
+                etSignedMsg.setText(mFormattedSignedMsg);
+                TextView tvSignedMsg = view.findViewById(R.id.textViewSignedMessage);
+                tvSignedMsg.setEnabled(true);
+                tvSignedMsg.setVisibility(View.VISIBLE);
+            }
+            else {
+                ImageView ivQr = view.findViewById(R.id.signMessageGenerateQRcode);
+                ivQr.setEnabled(false);
+                ivQr.setVisibility(View.INVISIBLE);
+                ImageView ivCopy = view.findViewById(R.id.signMessageCopy);
+                ivCopy.setEnabled(false);
+                ivCopy.setVisibility(View.INVISIBLE);
+                EditText etSignedMsg = view.findViewById(R.id.editTextSignedMessage);
+                etSignedMsg.setEnabled(false);
+                etSignedMsg.setVisibility(View.INVISIBLE);
+                TextView tvSignedMsg = view.findViewById(R.id.textViewSignedMessage);
+                tvSignedMsg.setEnabled(false);
+                tvSignedMsg.setVisibility(View.INVISIBLE);
+            }
             EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
+            if (mMsgToSign != null && mMsgToSign.length() > 0) {
+                etMsgToSign.setText(mMsgToSign);
+            }
             updateSignMessageButton(view, etMsgToSign.getText().toString());
             etMsgToSign.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -178,9 +248,8 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                     EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
                     String msgToSign = etMsgToSign.getText().toString();
                     logger.debug("Message to sign:{}", msgToSign);
-                    byte[] encodedMessageToSign = BtcUtils.generateMessageToSign(msgToSign);
                     Intent intent = new Intent();
-                    intent.putExtra(MainActivity.KEY_SIGN_VALIDATE_MESSAGE, BtcUtils.bytesToHexString(encodedMessageToSign));
+                    intent.putExtra(MainActivity.KEY_SIGN_VALIDATE_MESSAGE, msgToSign);
                     setResult(RESULT_OK, intent);
                     finish();
                 }
@@ -188,7 +257,71 @@ public class SignValidateMessageActivity extends AppCompatActivity {
         }
 
         private void initVerifyMessageTab(final View view) {
-            //TODO
+            final EditText etMsgToBeVerified = view.findViewById(R.id.editTextMessageToBeVerified);
+
+            ImageView ivGreen = findViewById(R.id.imageViewVerifyGreen);
+            ImageView ivFail = findViewById(R.id.imageViewVerifyFail);
+            ivGreen.setVisibility(View.INVISIBLE);
+            ivFail.setVisibility(View.INVISIBLE);
+
+            ImageView ivPaste = findViewById(R.id.imageViewVerifyPaste);
+            ivPaste.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = clipboard.getPrimaryClip();
+                    etMsgToBeVerified.setText(clip.getItemAt(0).getText());
+                }
+            });
+            ImageView ivScanQR = findViewById(R.id.imageViewVerifyScanQR);
+            ivScanQR.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    launchQRcodeScanActivity(view);
+                }
+            });
+
+            updateVerifyMessageButton(view, etMsgToBeVerified.getText().toString());
+            etMsgToBeVerified.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void afterTextChanged(Editable arg0) {
+                    updateVerifyMessageButton(view, arg0.toString());
+                }
+
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
+            });
+
+            Button btnVerifyMsg = view.findViewById(R.id.buttonVerifyMessage);
+            btnVerifyMsg.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String msgToBeVerified = etMsgToBeVerified.getText().toString();
+                    SignedMessage sm = SignedMessage.parseSignedMessage(msgToBeVerified);
+                    ImageView ivGreen = findViewById(R.id.imageViewVerifyGreen);
+                    ImageView ivFail = findViewById(R.id.imageViewVerifyFail);
+
+                    if (sm != null) {
+                        boolean isVerified = BtcUtils.verifySignature(sm.getAddress(), sm.getMessage(), sm.getSignature());
+                        if (isVerified == true) {
+                            ivGreen.setVisibility(View.VISIBLE);
+                            ivFail.setVisibility(View.INVISIBLE);
+                        } else {
+                            ivGreen.setVisibility(View.INVISIBLE);
+                            ivFail.setVisibility(View.VISIBLE);
+                        }
+                    }
+                    else {
+                        ivGreen.setVisibility(View.INVISIBLE);
+                        ivFail.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
         }
 
         @Override

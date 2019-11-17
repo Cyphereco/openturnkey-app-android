@@ -97,6 +97,7 @@ public class Otk {
     static String mFrom;
     static String mTo;
     static String mSessionId;
+    static String mMessageToSign;
     static boolean mFeeIncluded;
     static long mTxFees;
     static List<String> mArgs = new ArrayList<String>();
@@ -564,7 +565,7 @@ public class Otk {
                     return OTK_RETURN_OK;
                 }
 
-                // Processing unlock command
+                // Processing command
                 isInProcessing = true;
                 mSessionId = otkData.getSessionData().getSessionId();
 
@@ -601,7 +602,7 @@ public class Otk {
                     return OTK_RETURN_OK;
                 }
 
-                // Processing unlock command
+                // Processing command
                 isInProcessing = true;
                 mSessionId = otkData.getSessionData().getSessionId();
 
@@ -638,7 +639,7 @@ public class Otk {
                     return OTK_RETURN_OK;
                 }
 
-                // Processing unlock command
+                // Processing command
                 isInProcessing = true;
                 mSessionId = otkData.getSessionData().getSessionId();
 
@@ -675,7 +676,7 @@ public class Otk {
                     return OTK_RETURN_OK;
                 }
 
-                // Processing unlock command
+                // Processing  command
                 isInProcessing = true;
                 mSessionId = otkData.getSessionData().getSessionId();
                 // Check if OTK is authorized
@@ -695,6 +696,51 @@ public class Otk {
                 sendEvent(new OtkEvent(OtkEvent.Type.GET_KEY_SUCCESS, otkData));
             }
         }
+        if (mOp == Operation.OTK_OP_SIGN_MESSAGE) {
+            logger.debug("otkData:{} msgToSign:{}", otkData.getType(), mArgs.get(0));
+
+            if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
+                if (isInProcessing == true) {
+                    logger.error("It's already in processing.");
+                    if (!mSessionId.equals(otkData.getSessionData().getSessionId())) {
+                        // OTK must be restarted, consider failed.
+                        sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_FAIL));
+                        return OTK_RETURN_ERROR;
+                    }
+                    return OTK_RETURN_OK;
+                }
+
+                mMessageToSign = mArgs.get(0);
+                // Encode message
+                mArgs.clear();
+                byte[] encodedMessageToSign = BtcUtils.generateMessageToSign(mMessageToSign);
+                mArgs.add(BtcUtils.bytesToHexString(encodedMessageToSign));
+                // Processing command
+                isInProcessing = true;
+                mSessionId = otkData.getSessionData().getSessionId();
+
+                // Check if OTK is authorized
+                if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
+                    // Send unauthorized event.
+                    sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
+                    // clear cached command so that it won't write command without pin
+                    mCommandToWrite = Command.INVALID;
+                } else {
+                    // Clear cached pin
+                    mPin = "";
+                    // Authorized. Write command
+                    writeOtkCommand(Command.SIGN, mPin, mArgs, false);
+                }
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_SIGNATURE) {
+                sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_SUCCESS, otkData, mMessageToSign));
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
+                sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_FAIL, otkData.getFailureReason()));
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
+                sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_SUCCESS, otkData, mMessageToSign));
+            } else {
+                logger.info("Unexpected data type:%s", otkData.getType());
+            }
+        }
         return OTK_RETURN_OK;
     }
 
@@ -710,6 +756,7 @@ public class Otk {
         mPin = "";
         mIsAuthorized = false;
         isInProcessing = false;
+        mMessageToSign = "";
         mArgs.clear();
         return OTK_RETURN_OK;
     }
@@ -759,17 +806,17 @@ public class Otk {
     /**
      * Set operation for choose key
      */
-    public int setOperation(Operation op, String path) {
+    public int setOperation(Operation op, String arg) {
         if (mOp != Operation.OTK_OP_NONE && isInProcessing == true) {
             /* Some operation is in processing, set another operation is not allowed.
              * Should cancel current operation first.
              */
             return OTK_RETURN_ERROR_OP_IN_PROCESSING;
         }
-        logger.info("Set op to:{} path:{}", op.name(), path);
+        logger.info("Set op to:{} arg:{}", op.name(), arg);
         mOp = op;
         mArgs.clear();
-        mArgs.add(path);
+        mArgs.add(arg);
         return OTK_RETURN_OK;
     }
 
@@ -874,6 +921,8 @@ public class Otk {
             mCommandToWrite = Command.SET_KEY;
         } else if (mOp == Operation.OTK_OP_GET_KEY) {
             mCommandToWrite = Command.SHOW_KEY;
+        } else if (mOp == Operation.OTK_OP_SIGN_MESSAGE) {
+            mCommandToWrite = Command.SIGN;
         } else {
             logger.error("Operation {} is not implemented yet.", mOp.toString());
             return OTK_RETURN_ERROR;

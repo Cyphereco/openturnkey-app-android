@@ -143,4 +143,12 @@
     <string name="choose_key">Choose Key</string>
     <string name="choose_key_success">Choose key success</string>
     <string name="choose_key_fail">Choose key failed</string>
+    <string name="sign_message_fail">Sign Message Fail</string>
+    <string name="sign_message_success">Sign Message Success</string>
+    <string name="signed_message_copied">Signed message copied to clipboard</string>
+    <string name="message_to_be_signed">Message to Be Signed</string>
+    <string name="message_to_be_signed_hint">Input message to sign here...</string>
+    <string name="signed_message">Signed Message</string>
+    <string name="message_to_be_verified">Message to Be Verified</string>
+    <string name="verify_signed_message">Verify Signed Message</string>
 </resources>

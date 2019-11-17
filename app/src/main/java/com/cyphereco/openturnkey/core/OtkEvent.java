@@ -36,6 +36,9 @@ public class OtkEvent {
         FIND_UTXO,
         GET_KEY_SUCCESS,
         GET_KEY_FAIL,
+        SIGN_MESSAGE_SUCCESS,
+        SIGN_MESSAGE_FAIL,
+
     }
 
     private Type mType;
@@ -53,6 +56,12 @@ public class OtkEvent {
     public OtkEvent(Type eventType, OtkData data) {
         mType = eventType;
         mData = data;
+    }
+
+    public OtkEvent(Type eventType, OtkData data, String msgToSign) {
+        mType = eventType;
+        mData = data;
+        mDesc = msgToSign;
     }
 
     public OtkEvent(Type eventType, String desc) {
@@ -96,6 +105,7 @@ public class OtkEvent {
     public String getRecipientAddress() { return mDesc;}
     public String getAddress() { return mDesc;}
     public String getFailureReason() { return mDesc;}
+    public String getMessageToSign() { return mDesc;}
     public Tx getTx() { return mTx;}
     public UnsignedTx getUnsignedTx() { return mUnsignedTx;}
     public OtkData getData() {return mData;}
