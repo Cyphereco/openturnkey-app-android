@@ -160,6 +160,9 @@
     <string name="choose_key">Choose Key</string>
     <string name="choose_key_success">Choose key success</string>
     <string name="choose_key_fail">Choose key failed</string>
+    <string name="get_key">Get Key</string>
+    <string name="get_key_success">Get key success</string>
+    <string name="get_key_fail">Get key failed</string>
     <string name="sign_message_fail">Sign Message Fail</string>
     <string name="sign_message_success">Sign Message Success</string>
     <string name="signed_message_copied">Signed message copied to clipboard</string>

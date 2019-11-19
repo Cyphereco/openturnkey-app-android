@@ -1471,7 +1471,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         }
         else if (OtkEvent.Type.GET_KEY_FAIL == event.getType()) {
-            showStatusDialog(getString(R.string.choose_key_fail), event.getFailureReason());
+            showStatusDialog(getString(R.string.get_key_fail), event.getFailureReason());
         }
     }
 }
