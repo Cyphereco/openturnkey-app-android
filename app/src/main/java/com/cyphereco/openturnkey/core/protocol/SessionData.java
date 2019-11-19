@@ -14,6 +14,7 @@ public class SessionData implements Serializable {
     private static final String OTK_LABEL_SESSION_ID = "<Session_ID>\r\n";
     private static final String OTK_LABEL_REQUEST_SIG = "<Request_Signature>\r\n";
     private static final String OTK_LABEL_REQUEST_ID = "<Request_ID>\r\n";
+    private static final String OTK_LABEL_PUBLIC_KEY = "<Public_Key>\r\n";
     private static final String OTK_LABEL_MASTER_EXT_KEY = "<Master_Extended_Key>\r\n";
     private static final String OTK_LABEL_DERIVATIVE_EXT_KEY = "<Derivative_Exteded_Key>\r\n";
     private static final String OTK_LABEL_DERIVATIVE_PATH = "<Derivative_Path>\r\n";
@@ -29,6 +30,7 @@ public class SessionData implements Serializable {
     private String derivativeExtKey = null;
     private String derivativePath = null;
     private String securePIN = null;
+    private String publicKey = null;
     List<String> sigList = new ArrayList<String>();
 
     public SessionData(String sessData) {
@@ -85,6 +87,14 @@ public class SessionData implements Serializable {
             requestId = sessData.substring(reqIdStart, crlf);
         }
 
+        // Public Key
+        int lablePubKeyStart = sessData.indexOf(OTK_LABEL_PUBLIC_KEY);
+        if (lablePubKeyStart != -1) {
+            int pubKeyStart = lablePubKeyStart + OTK_LABEL_PUBLIC_KEY.length();
+            int crlf = sessData.indexOf(CRLF, pubKeyStart);
+            publicKey = sessData.substring(pubKeyStart, crlf);
+        }
+
         // Master ext key
         int lableMasterExtKeyStart = sessData.indexOf(OTK_LABEL_MASTER_EXT_KEY);
         if (lableMasterExtKeyStart != -1) {
@@ -135,6 +145,9 @@ public class SessionData implements Serializable {
         return masterExtKey;
     }
 
+    public String getPublicKey() {
+        return publicKey;
+    }
     public String getDerivativeExtKey() {
         return derivativeExtKey;
     }

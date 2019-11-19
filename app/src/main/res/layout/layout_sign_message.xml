@@ -54,7 +54,7 @@
         android:text="@string/signed_message"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextMessageToBeSign" />
+        app:layout_constraintTop_toBottomOf="@+id/checkBoxUsingMasterKey" />
 
     <ImageView
         android:id="@+id/signMessageGenerateQRcode"
@@ -95,5 +95,14 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewSignedMessage" />
+
+    <CheckBox
+        android:id="@+id/checkBoxUsingMasterKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/using_master_key"
+        app:layout_constraintEnd_toEndOf="@+id/editTextMessageToBeSign"
+        app:layout_constraintTop_toBottomOf="@+id/editTextMessageToBeSign" />
 
 </android.support.constraint.ConstraintLayout>

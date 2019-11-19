@@ -171,5 +171,7 @@
     <string name="signed_message">Signed Message</string>
     <string name="message_to_be_verified">Message to Be Verified</string>
     <string name="verify_signed_message">Verify Signed Message</string>
+    <string name="using_master_key">Using Master Key</string>
+    <string name="failed_to_process_signed_message">Failed to process signed message</string>
 
 </resources>

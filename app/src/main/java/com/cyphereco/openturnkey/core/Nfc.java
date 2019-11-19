@@ -164,7 +164,7 @@ public class Nfc {
         return Otk.OTK_RETURN_OK;
     }
 
-    static int writeCommand(Tag tag, Command cmd, String sessId, String pin, List<String> args, boolean isMore) {
+    static int writeCommand(Tag tag, Command cmd, String sessId, String pin, List<String> args, boolean isMore, boolean usingMasterKey) {
         logger.info("write Command:" + cmd.toString());
         mIssuedCommand = Command.INVALID;
         if (tag == null) {
@@ -235,6 +235,11 @@ public class Nfc {
 
             // 5 Options
             String options = "";
+            // using master key
+            if (usingMasterKey) {
+                logger.info("usgin master key");
+                options += "key=1" + OTK_REQUEST_DATA_DELIM;
+            }
             // more
             if (isMore) {
                 logger.info("more data to write");
@@ -246,6 +251,7 @@ public class Nfc {
                 logger.info("pin=" + pin);
                 options += "pin=" + pin + OTK_REQUEST_DATA_DELIM;
             }
+
             if (options.length() > 0) {
                 // remove last delimiter
                 options.substring(0, options.length() - 1);

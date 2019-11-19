@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
     public static final String KEY_MESSAGE_TO_SIGN = "KEY_MESSAGE_TO_SIGN";
     public static final String KEY_SIGN_VALIDATE_MESSAGE = "KEY_SIGN_VALIDATE_MESSAGE";
+    public static final String KEY_USING_MASTER_KEY = "KEY_USING_MASTER_KEY";
     public static final String KEY_ADDRESS_EDITOR_TEMP_ALIAS = "KEY_ADDRESS_EDITOR_TMEP_ALIAS";
     public static final String KEY_ADDRESS_EDITOR_TEMP_ADDR = "KEY_ADDRESS_EDITOR_TMEP_ADDR";
     public static final int REQUEST_RESULT_CODE_REPAY = 1000;
@@ -258,8 +259,9 @@ public class MainActivity extends AppCompatActivity
         else if (requestCode == REQUEST_CODE_SIGN_MESSAGE) {
             if (resultCode == RESULT_OK) {
                 String messageToSign = intent.getStringExtra(KEY_SIGN_VALIDATE_MESSAGE);
+                boolean usingMasterKey = intent.getBooleanExtra(KEY_USING_MASTER_KEY, false);
                 mOp = Otk.Operation.OTK_OP_SIGN_MESSAGE;
-                mOtk.setOperation(mOp, messageToSign);
+                mOtk.setOperation(mOp, messageToSign, usingMasterKey);
                 if (mSelectedFragment instanceof FragmentOtk) {
                     ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                 }
@@ -617,6 +619,7 @@ public class MainActivity extends AppCompatActivity
                     Intent intent = new Intent(getApplicationContext() , SignValidateMessageActivity.class);
                     intent.putExtra(KEY_OTK_DATA, event.getData());
                     intent.putExtra(KEY_MESSAGE_TO_SIGN, event.getMessageToSign());
+                    intent.putExtra(KEY_USING_MASTER_KEY, event.getUsingMasterKey());
                     startActivityForResult(intent, MainActivity.REQUEST_CODE_SIGN_MESSAGE);
                 }
                 else if (type == OtkEvent.Type.SIGN_MESSAGE_FAIL){

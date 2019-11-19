@@ -105,6 +105,7 @@ public class Otk {
     static CurrencyExchangeRate mCurrencyExRate;
     static Tag mTag;
     static boolean mIsAuthorized;
+    static boolean mUsingMasterKey;
     static String mPin;
     // Periodic Timer
     static Timer mTimerRate = new Timer();
@@ -220,8 +221,8 @@ public class Otk {
         return mOtk;
     }
 
-    static void writeSignCommand(String pin) {
-        logger.info("writeSignCommand:" + pin);
+    static void writeSignCommand(String pin, boolean usingMasterKey) {
+        logger.info("writeSignCommand:{} usingMasterKey:{}", pin, usingMasterKey);
         OtkEvent event;
         // Try to wirte maximum size we can
         List<String> args = new ArrayList<String>();
@@ -231,7 +232,7 @@ public class Otk {
             isMore = true;
         }
         args = mArgs.subList(0, hashSize);
-        if (OTK_RETURN_OK == Nfc.writeCommand(mTag, Command.SIGN, mSessionId, pin, args, isMore)) {
+        if (OTK_RETURN_OK == Nfc.writeCommand(mTag, Command.SIGN, mSessionId, pin, args, isMore, usingMasterKey)) {
             // Command written, read signature(s).
             OtkData otkData = Nfc.read(mTag);
             if (otkData == null) {
@@ -247,7 +248,13 @@ public class Otk {
                     sendEvent(event);
                     return;
                 }
-                processSignature(otkData);
+                if (mOp == Operation.OTK_OP_SIGN_PAYMENT) {
+                    processSignature(otkData);
+                }
+                else {
+                    // Must be sign message
+                    sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_SUCCESS, otkData, mMessageToSign, mUsingMasterKey));
+                }
             }
         }
         else {
@@ -262,9 +269,8 @@ public class Otk {
     static void writeUnlockCommand(String pin) {
         logger.info("writeUnlockCommand:" + pin);
         OtkEvent event;
-        boolean isMore = false;
         List<String> args = new ArrayList<String>();
-        if (OTK_RETURN_OK == Nfc.writeCommand(mTag, Command.UNLOCK, mSessionId, pin, args, isMore)) {
+        if (OTK_RETURN_OK == Nfc.writeCommand(mTag, Command.UNLOCK, mSessionId, pin, args, false, false)) {
             // Try to read tag
             OtkData otkData = Nfc.read(mTag);
             if (otkData == null) {
@@ -296,10 +302,10 @@ public class Otk {
         }
     }
 
-    static void writeOtkCommand(Command cmd, String pin, List<String> args, boolean isMore) {
-        logger.info("writeOtkCommand:{} {} {} {}", cmd, pin, args, isMore);
+    static void writeOtkCommand(Command cmd, String pin, List<String> args, boolean isMore, boolean usingMasterKey) {
+        logger.info("writeOtkCommand:{} {} {} {} {}", cmd, pin, args, isMore, usingMasterKey);
         OtkEvent event;
-        if (OTK_RETURN_OK == Nfc.writeCommand(mTag, cmd, mSessionId, pin, args, isMore)) {
+        if (OTK_RETURN_OK == Nfc.writeCommand(mTag, cmd, mSessionId, pin, args, isMore, usingMasterKey)) {
             // Try to read tag
             OtkData otkData = Nfc.read(mTag);
             if (otkData == null) {
@@ -433,7 +439,7 @@ public class Otk {
         if (mArgs.size() > 0) {
             logger.info("We have more hash to sign. " + mArgs.size());
             // write remain hashs
-            writeSignCommand(mPin);
+            writeSignCommand(mPin, false);
         }
         else {
             // Got all signature(s), complete tx
@@ -579,7 +585,7 @@ public class Otk {
                     // Clear cached pin
                     mPin = "";
                     // Authorized. Write command
-                    writeOtkCommand(Command.SET_NOTE, mPin, mArgs, false);
+                    writeOtkCommand(Command.SET_NOTE, mPin, mArgs, false, false);
                 }
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
                 sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_FAIL, otkData.getFailureReason()));
@@ -616,7 +622,7 @@ public class Otk {
                     // Clear cached pin
                     mPin = "";
                     // Authorized. Write command
-                    writeOtkCommand(Command.SET_PIN, mPin, mArgs, false);
+                    writeOtkCommand(Command.SET_PIN, mPin, mArgs, false, false);
                 }
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
                 sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_FAIL, otkData.getFailureReason()));
@@ -653,7 +659,7 @@ public class Otk {
                     // Clear cached pin
                     mPin = "";
                     // Authorized. Write command
-                    writeOtkCommand(Command.SET_KEY, mPin, mArgs, false);
+                    writeOtkCommand(Command.SET_KEY, mPin, mArgs, false, false);
                 }
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
                 sendEvent(new OtkEvent(OtkEvent.Type.CHOOSE_KEY_FAIL, otkData.getFailureReason()));
@@ -689,7 +695,7 @@ public class Otk {
                     // Clear cached pin
                     mPin = "";
                     // Authorized. Write command
-                    writeOtkCommand(Command.SHOW_KEY, mPin, mArgs, false);
+                    writeOtkCommand(Command.SHOW_KEY, mPin, mArgs, false, false);
                 }
             }
             else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_KEY_INFO) {
@@ -729,14 +735,14 @@ public class Otk {
                     // Clear cached pin
                     mPin = "";
                     // Authorized. Write command
-                    writeOtkCommand(Command.SIGN, mPin, mArgs, false);
+                    writeOtkCommand(Command.SIGN, mPin, mArgs, false, mUsingMasterKey);
                 }
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_SIGNATURE) {
-                sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_SUCCESS, otkData, mMessageToSign));
+                sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_SUCCESS, otkData, mMessageToSign, mUsingMasterKey));
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
                 sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_FAIL, otkData.getFailureReason()));
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
-                sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_SUCCESS, otkData, mMessageToSign));
+                sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_SUCCESS, otkData, mMessageToSign, mUsingMasterKey));
             } else {
                 logger.info("Unexpected data type:%s", otkData.getType());
             }
@@ -757,6 +763,7 @@ public class Otk {
         mIsAuthorized = false;
         isInProcessing = false;
         mMessageToSign = "";
+        mUsingMasterKey = false;
         mArgs.clear();
         return OTK_RETURN_OK;
     }
@@ -817,6 +824,24 @@ public class Otk {
         mOp = op;
         mArgs.clear();
         mArgs.add(arg);
+        return OTK_RETURN_OK;
+    }
+
+    /**
+     * Set operation for sing message
+     */
+    public int setOperation(Operation op, String arg, boolean usingMasterKey) {
+        if (mOp != Operation.OTK_OP_NONE && isInProcessing == true) {
+            /* Some operation is in processing, set another operation is not allowed.
+             * Should cancel current operation first.
+             */
+            return OTK_RETURN_ERROR_OP_IN_PROCESSING;
+        }
+        logger.info("Set op to:{} arg:{} usingMasterKey:{}", op.name(), arg, usingMasterKey);
+        mOp = op;
+        mArgs.clear();
+        mArgs.add(arg);
+        mUsingMasterKey = usingMasterKey;
         return OTK_RETURN_OK;
     }
 
@@ -892,12 +917,12 @@ public class Otk {
         }
 
         if (mCommandToWrite == Command.SIGN) {
-            writeSignCommand(pin);
+            writeSignCommand(pin, mUsingMasterKey);
             return OTK_RETURN_OK;
         }
 
-        // Unlock, set not
-        writeOtkCommand(mCommandToWrite, pin, mArgs, false);
+        // Unlock, set note ...
+        writeOtkCommand(mCommandToWrite, pin, mArgs, false, false);
 
         return OTK_RETURN_OK;
     }
@@ -1046,7 +1071,7 @@ public class Otk {
             // Clear cached pin
             mPin = "";
             // Authorized. Write command
-            writeSignCommand(mPin);
+            writeSignCommand(mPin, false);
         }
     }
 }

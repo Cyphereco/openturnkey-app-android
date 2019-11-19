@@ -49,6 +49,7 @@ public class OtkEvent {
     private UnsignedTx mUnsignedTx;
     private BigDecimal mBalance;
     private TxFee mTxFee;
+    private boolean mUsingMasterKey;
 
     /**
      * Constructor for general info event
@@ -58,10 +59,11 @@ public class OtkEvent {
         mData = data;
     }
 
-    public OtkEvent(Type eventType, OtkData data, String msgToSign) {
+    public OtkEvent(Type eventType, OtkData data, String msgToSign, boolean usingMasterKey) {
         mType = eventType;
         mData = data;
         mDesc = msgToSign;
+        mUsingMasterKey = usingMasterKey;
     }
 
     public OtkEvent(Type eventType, String desc) {
@@ -106,6 +108,7 @@ public class OtkEvent {
     public String getAddress() { return mDesc;}
     public String getFailureReason() { return mDesc;}
     public String getMessageToSign() { return mDesc;}
+    public boolean getUsingMasterKey() { return mUsingMasterKey;}
     public Tx getTx() { return mTx;}
     public UnsignedTx getUnsignedTx() { return mUnsignedTx;}
     public OtkData getData() {return mData;}

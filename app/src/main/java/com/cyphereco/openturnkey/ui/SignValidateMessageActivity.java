@@ -2,12 +2,15 @@ package com.cyphereco.openturnkey.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -22,6 +25,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,6 +44,8 @@ public class SignValidateMessageActivity extends AppCompatActivity {
     public static final String TAG = SignValidateMessageActivity.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
 
+    private NfcAdapter mNfcAdapter = null;
+
     private TabLayout mTabs;
     private ViewPager mViewPager;
 
@@ -48,6 +54,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
 
     private static final int ZXING_CAMERA_PERMISSION = 1;
     public static final int REQUEST_CODE_QR_CODE = 0;
+    private boolean mUsingMasterKey;
 
     public void launchQRcodeScanActivity(View v) {
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA)
@@ -120,14 +127,25 @@ public class SignValidateMessageActivity extends AppCompatActivity {
         }
 
         mMsgToSign = (String)intent.getSerializableExtra(MainActivity.KEY_MESSAGE_TO_SIGN);
-        logger.info("message to sign:{} pubKey:{} signature:{}", mMsgToSign, otkData.getPublicKey(), otkData.getSessionData().getRequestSigList().get(0));
-        String signedMsg = BtcUtils.processSignedMessage(
-                BtcUtils.generateMessageToSign(mMsgToSign),
-                BtcUtils.hexStringToBytes(otkData.getPublicKey()),
-                BtcUtils.hexStringToBytes(otkData.getSessionData().getRequestSigList().get(0)));
-        String publicAddress = BtcUtils.keyToAddress(otkData.getPublicKey());
-        SignedMessage sm = new SignedMessage(publicAddress, signedMsg, mMsgToSign);
-        mFormattedSignedMsg = sm.getFormattedMessage();
+        mUsingMasterKey = intent.getBooleanExtra(MainActivity.KEY_USING_MASTER_KEY, false);
+        String pubKey = otkData.getSessionData().getPublicKey();
+        logger.info("message to sign:{} pubKey:{} signature:{}", mMsgToSign, pubKey, otkData.getSessionData().getRequestSigList().get(0));
+        try {
+            String signedMsg = BtcUtils.processSignedMessage(
+                    BtcUtils.generateMessageToSign(mMsgToSign),
+                    BtcUtils.hexStringToBytes(pubKey),
+                    BtcUtils.hexStringToBytes(otkData.getSessionData().getRequestSigList().get(0)));
+            String publicAddress = BtcUtils.keyToAddress(pubKey);
+            SignedMessage sm = new SignedMessage(publicAddress, signedMsg, mMsgToSign);
+            mFormattedSignedMsg = sm.getFormattedMessage();
+        }
+        catch (Exception e) {
+            // Failed to process signed message
+            Toast.makeText(getApplicationContext(), R.string.failed_to_process_signed_message, Toast.LENGTH_LONG).show();
+        }
+
+        /* init NFC. */
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
     }
 
     class SignVerifyPagerAdapter extends PagerAdapter {
@@ -225,6 +243,10 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             if (mMsgToSign != null && mMsgToSign.length() > 0) {
                 etMsgToSign.setText(mMsgToSign);
             }
+
+            CheckBox cbUsingMasterKey = view.findViewById(R.id.checkBoxUsingMasterKey);
+            cbUsingMasterKey.setChecked(mUsingMasterKey);
+
             updateSignMessageButton(view, etMsgToSign.getText().toString());
             etMsgToSign.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -245,11 +267,14 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             btnSignMsg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    // Using Master Key checkbox
+                    CheckBox cbUsingMasterKey = view.findViewById(R.id.checkBoxUsingMasterKey);
                     EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
                     String msgToSign = etMsgToSign.getText().toString();
-                    logger.debug("Message to sign:{}", msgToSign);
+                    logger.debug("Message to sign:{}, using master key:{}", msgToSign, cbUsingMasterKey.isChecked());
                     Intent intent = new Intent();
                     intent.putExtra(MainActivity.KEY_SIGN_VALIDATE_MESSAGE, msgToSign);
+                    intent.putExtra(MainActivity.KEY_USING_MASTER_KEY, cbUsingMasterKey.isChecked());
                     setResult(RESULT_OK, intent);
                     finish();
                 }
@@ -346,4 +371,27 @@ public class SignValidateMessageActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
+        IntentFilter ndefDetected = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
+        IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+        IntentFilter[] nfcIntentFilter = new IntentFilter[]{techDetected, tagDetected, ndefDetected};
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+
+        if (mNfcAdapter != null) {
+            mNfcAdapter.enableForegroundDispatch(this, pendingIntent, nfcIntentFilter, null);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mNfcAdapter != null)
+            mNfcAdapter.disableForegroundDispatch(this);
+    }
 }
