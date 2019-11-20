@@ -179,12 +179,8 @@ public class ActivityKeyInformation extends AppCompatActivity {
         final View v = View.inflate(this, R.layout.dialog_key_qrcode, null);
         TextView tv = v.findViewById(R.id.dialog_key_qrcode_tv_content);
         ImageView ivQRCode = v.findViewById(R.id.dialog_key_qrcode_iv_qrcode);
-        BitcoinPaymentURI uri = new BitcoinPaymentURI.Builder().address(text).build();
 
-        if (null == uri) {
-            return;
-        }
-        Bitmap bitmap = QRCodeUtils.encodeAsBitmap(uri.getURI(),
+        Bitmap bitmap = QRCodeUtils.encodeAsBitmap(text,
                 ivQRCode.getDrawable().getIntrinsicWidth(),
                 ivQRCode.getDrawable().getIntrinsicHeight());
         ivQRCode.setImageBitmap(bitmap);
