@@ -455,6 +455,16 @@ public class Otk {
             return OTK_RETURN_ERROR;
         }
         logger.info("processOtkData() mOp:{}", mOp);
+
+        /* Process special error event */
+        if ((otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) &&
+                (otkData.getOtkState().getFailureReason() == OtkState.FailureReason.NFC_REASON_PIN_UNSET )) {
+            logger.error("OTK_DATA_TYPE_COMMAND_EXEC_FAILURE NFC_REASON_PIN_UNSET");
+            OtkEvent event = new OtkEvent(OtkEvent.Type.OTK_PIN_UNSET);
+            sendEvent(event);
+            return OTK_RETURN_ERROR;
+        }
+
         if (mOp == Operation.OTK_OP_READ_GENERAL_INFO || mOp == Operation.OTK_OP_NONE) {
             OtkEvent event = new OtkEvent(OtkEvent.Type.GENERAL_INFORMATION, otkData);
             if (listener != null) {
@@ -670,6 +680,7 @@ public class Otk {
             }
         }
         if (mOp == Operation.OTK_OP_GET_KEY) {
+            logger.debug("[DC] otkData.getType(): {}", otkData.getType());
             if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
                 // Write read KEY information command to OTK
                 if (isInProcessing == true) {
@@ -687,11 +698,13 @@ public class Otk {
                 mSessionId = otkData.getSessionData().getSessionId();
                 // Check if OTK is authorized
                 if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
+                    logger.debug("[DC] OTK_UNAUTHORIZED");
                     // Send unauthorized event.
                     sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
                     // clear cached command so that it won't write command without pin
                     mCommandToWrite = Command.INVALID;
                 } else {
+                    logger.debug("[DC] Show key");
                     // Clear cached pin
                     mPin = "";
                     // Authorized. Write command
@@ -700,6 +713,15 @@ public class Otk {
             }
             else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_KEY_INFO) {
                 sendEvent(new OtkEvent(OtkEvent.Type.GET_KEY_SUCCESS, otkData));
+            }
+            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
+                sendEvent(new OtkEvent(OtkEvent.Type.GET_KEY_FAIL, otkData.getFailureReason()));
+            }
+            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
+                sendEvent(new OtkEvent(OtkEvent.Type.GET_KEY_SUCCESS, otkData));
+            }
+            else {
+                logger.info("Unexpected data type:%s", otkData.getType());
             }
         }
         if (mOp == Operation.OTK_OP_SIGN_MESSAGE) {

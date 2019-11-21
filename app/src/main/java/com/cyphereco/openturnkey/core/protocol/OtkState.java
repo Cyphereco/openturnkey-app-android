@@ -42,6 +42,7 @@ public class OtkState implements Serializable {
         NFC_REASON_CMD_INVALID("C2", "Invalid Command"),     /* 194 / 0xC2, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
         NFC_REASON_PARAM_INVALID("C3", "Invalid Parameters"),   /* 195 / 0xC3, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
         NFC_REASON_PARAM_MISSING("C4", "Missing Parameters"),   /* 196 / 0xC4, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
+        NFC_REASON_PIN_UNSET("C7", "PIN code is not set yet"),   /* 197 / 0xC7, PIN code is not set yet. */
         NFC_REASON_LAST("FF", "");
         private final String value;
         private final String reason;
@@ -139,6 +140,9 @@ public class OtkState implements Serializable {
         }
         else if (code.equalsIgnoreCase((FailureReason.NFC_REASON_TIMEOUT.getValue()))) {
             mFailureReason = FailureReason.NFC_REASON_TIMEOUT;
+        }
+        else if (code.equalsIgnoreCase(FailureReason.NFC_REASON_PIN_UNSET.getValue())) {
+            mFailureReason = FailureReason.NFC_REASON_PIN_UNSET;
         }
         else {
             mFailureReason = FailureReason.NFC_REASON_INVALID;

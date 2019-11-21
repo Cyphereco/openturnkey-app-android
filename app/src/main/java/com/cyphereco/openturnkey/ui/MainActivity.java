@@ -632,6 +632,17 @@ public class MainActivity extends AppCompatActivity
                     }
                     showStatusDialog(getString(R.string.sign_message_fail), event.getFailureReason());
                 }
+                else if (type == OtkEvent.Type.OTK_PIN_UNSET) {
+                    /* Clear current OTK op */
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    /* Go to set PIN page */
+                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
+                    showStatusDialog("Please set PIN code before operating", event.getFailureReason());
+                }
                 else {
                     logger.info("Unhandled event:{}", type.name());
                 }

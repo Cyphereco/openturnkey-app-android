@@ -38,7 +38,7 @@ public class OtkEvent {
         GET_KEY_FAIL,
         SIGN_MESSAGE_SUCCESS,
         SIGN_MESSAGE_FAIL,
-
+        OTK_PIN_UNSET,
     }
 
     private Type mType;
