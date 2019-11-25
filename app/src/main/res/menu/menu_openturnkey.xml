@@ -16,15 +16,27 @@
         android:id="@+id/menu_openturnkey_set_pin"
         android:title="@string/set_pin_code" />
     <item
-        android:id="@+id/menu_openturnkey_choose_key"
-        android:title="@string/set_key" />
-    <item
         android:id="@+id/menu_openturnkey_set_note"
         android:title="@string/write_note" />
     <item
-        android:id="@+id/menu_openturnkey_unlock"
-        android:title="@string/unlock" />
-    <item
-        android:id="@+id/menu_openturnkey_sign_message"
-        android:title="@string/message_sign_validate" />
+        android:id="@+id/menu_openturnkey_advance"
+        android:title="@string/advance">
+        <menu>
+            <item
+                android:id="@+id/menu_openturnkey_sign_message"
+                android:title="@string/message_sign_validate" />
+            <item
+                android:id="@+id/menu_openturnkey_choose_key"
+                android:title="@string/set_key" />
+            <item
+                android:id="@+id/menu_openturnkey_unlock"
+                android:title="@string/unlock" />
+            <item
+                android:id="@+id/menu_openturnkey_reset"
+                android:title="@string/reset" />
+            <item
+                android:id="@+id/menu_openturnkey_export_wif_key"
+                android:title="@string/export_private_key" />
+        </menu>
+    </item>
 </menu>

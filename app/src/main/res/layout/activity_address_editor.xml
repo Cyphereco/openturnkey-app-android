@@ -51,7 +51,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
-            android:hint="@string/recipient_address" />
+            android:hint="@string/recipient_address"
+            android:textIsSelectable="true" />
     </android.support.design.widget.TextInputLayout>
 
     <ImageView

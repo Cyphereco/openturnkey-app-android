@@ -153,4 +153,6 @@
     <string name="verify_signed_message">Verify Signed Message</string>
     <string name="using_master_key">Using Master Key</string>
     <string name="failed_to_process_signed_message">Failed to process signed message</string>
+    <string name="export_private_key">Export Private Key</string>
+    <string name="reset">Reset</string>
 </resources>
