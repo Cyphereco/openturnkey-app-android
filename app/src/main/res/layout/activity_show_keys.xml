@@ -260,13 +260,15 @@
         app:layout_constraintTop_toTopOf="@+id/ki_iv_icon_derivative_pk_path_copy"
         app:srcCompat="@drawable/ic_action_qr_code" />
 
-    <Button
-        android:id="@+id/button"
+    <TextView
+        android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="Validate"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:autoLink="web"
+        android:text="How to Validate?"
+        android:textColor="#3F51B5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ki_tv_derivative_pk_content" />
 
