@@ -19,6 +19,7 @@ public class SessionData implements Serializable {
     private static final String OTK_LABEL_DERIVATIVE_EXT_KEY = "<Derivative_Exteded_Key>\r\n";
     private static final String OTK_LABEL_DERIVATIVE_PATH = "<Derivative_Path>\r\n";
     private static final String OTK_LABEL_SECURE_PIN = "<Secure_Pin>\r\n";
+    private static final String OTK_LABEL_WIF_KEY = "<WIF_Key>\r\n";
     private static final String OTK_REQUEST_DATA_DELIM = "\n";
     private static final String OTK_REQUEST_SIGNATURE_DELIM = "\n";
 
@@ -31,6 +32,7 @@ public class SessionData implements Serializable {
     private String derivativePath = null;
     private String securePIN = null;
     private String publicKey = null;
+    private String wifKey = null;
     List<String> sigList = new ArrayList<String>();
 
     public SessionData(String sessData) {
@@ -127,6 +129,13 @@ public class SessionData implements Serializable {
             securePIN = sessData.substring(pinStart, crlf);
         }
 
+        // WIF_Key
+        int lableWIFKeyStart = sessData.indexOf(OTK_LABEL_WIF_KEY);
+        if (lableWIFKeyStart != -1) {
+            int wifKeyStart = lableWIFKeyStart + OTK_LABEL_WIF_KEY.length();
+            int crlf = sessData.indexOf(CRLF, wifKeyStart);
+            wifKey = sessData.substring(wifKeyStart, crlf);
+        }
     }
 
     public String getAddress() {
@@ -158,6 +167,10 @@ public class SessionData implements Serializable {
 
     public String getSecurePIN() {
         return securePIN;
+    }
+
+    public String getWIFKey() {
+        return wifKey;
     }
 
     public List<String> getRequestSigList() {

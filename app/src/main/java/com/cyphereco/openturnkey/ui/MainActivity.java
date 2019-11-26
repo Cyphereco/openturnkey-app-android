@@ -2,9 +2,13 @@ package com.cyphereco.openturnkey.ui;
 
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.Looper;
@@ -18,6 +22,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,8 +40,10 @@ import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
+import com.cyphereco.openturnkey.utils.QRCodeUtils;
 
 import org.slf4j.Logger;
+import org.w3c.dom.Text;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -643,6 +651,11 @@ public class MainActivity extends AppCompatActivity
                     }
                     showStatusDialog("Please set PIN code before operating", event.getFailureReason());
                 }
+                else if ((type == OtkEvent.Type.EXPORT_WIF_KEY_SUCCESS) ||
+                        (type == OtkEvent.Type.EXPORT_WIF_KEY_FAIL)) {
+                    processOtkExportPrivateKeyEvent(event);
+                    /* Show Private key WIF format */
+                }
                 else {
                     logger.info("Unhandled event:{}", type.name());
                 }
@@ -744,6 +757,8 @@ public class MainActivity extends AppCompatActivity
                     return;
                 case R.id.menu_openturnkey_sign_message:
                     tv.setText(R.string.sign_message);
+                    return;
+                case R.id.menu_openturnkey_export_wif_key:
                     return;
             }
         } catch (NullPointerException e) {
@@ -848,6 +863,9 @@ public class MainActivity extends AppCompatActivity
                 if (item.getItemId() == R.id.menu_openturnkey_get_key) {
                     readOtkKeyInformation();
                 }
+                return true;
+            case R.id.menu_openturnkey_export_wif_key:
+                export_private_key();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -1486,6 +1504,67 @@ public class MainActivity extends AppCompatActivity
         }
         else if (OtkEvent.Type.GET_KEY_FAIL == event.getType()) {
             showStatusDialog(getString(R.string.get_key_fail), event.getFailureReason());
+        }
+    }
+
+    private void export_private_key() {
+        logger.debug("export_private_key");
+        mOp = Otk.Operation.OTK_OP_EXPORT_WIF_KEY;
+        if (mSelectedFragment instanceof FragmentOtk) {
+            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+        }
+        mOtk.setOperation(mOp);
+    }
+
+    private void processOtkExportPrivateKeyEvent(OtkEvent event) {
+        logger.debug("processOtkExportPrivateKeyEvent");
+        hideStatusDialog();
+        mIsOpInProcessing = false;
+        mOtk.cancelOperation();
+        mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+        if (mSelectedFragment instanceof FragmentOtk) {
+            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+        }
+
+        if (OtkEvent.Type.EXPORT_WIF_KEY_FAIL == event.getType()) {
+            showStatusDialog(getString(R.string.export_private_key_wif_fail), event.getFailureReason());
+        }
+        else if (OtkEvent.Type.EXPORT_WIF_KEY_SUCCESS == event.getType()) {
+            /* Show Private key which is WIF format */
+            final String keyInfo = event.getData().getSessionData().getWIFKey();
+            final View v = View.inflate(this, R.layout.dialog_private_key_wif, null);
+            TextView tvKeyString = v.findViewById(R.id.textView_export_key_string);
+            ImageView ivQRCode = v.findViewById(R.id.imageView_export_key_qrcode);
+
+            logger.debug("Show private key in dialog. key: {}", keyInfo);
+
+            tvKeyString.setText(keyInfo);
+            Bitmap bitmap = QRCodeUtils.encodeAsBitmap(keyInfo,
+                    ivQRCode.getDrawable().getIntrinsicWidth(),
+                    ivQRCode.getDrawable().getIntrinsicHeight());
+            ivQRCode.setImageBitmap(bitmap);
+            // copy button
+            ImageView copy = v.findViewById(R.id.wif_key_copy);
+            copy.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Context context = view.getContext();
+                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("wif_key", keyInfo);
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(context, R.string.copy, Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle(getString(R.string.export_private_key))
+                    .setView(v)
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    })
+                    .show();
         }
     }
 }

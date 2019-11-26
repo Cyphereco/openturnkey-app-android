@@ -119,6 +119,9 @@ public class OtkState implements Serializable {
         else if (code.equalsIgnoreCase(Command.CANCEL.toString())) {
             mCommand = Command.CANCEL;
         }
+        else if (code.equalsIgnoreCase(Command.EXPORT_WIF_KEY.toString())) {
+            mCommand = Command.EXPORT_WIF_KEY;
+        }
         else {
             /* Should not be here. */
             mCommand = Command.INVALID;

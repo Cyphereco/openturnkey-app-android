@@ -64,7 +64,8 @@ public class Otk {
         OTK_OP_GET_KEY("Get Key"),
         OTK_OP_SIGN_MESSAGE("Sign Message"),
         OTK_OP_CHOOSE_KEY("Choose Key"),
-        OTK_OP_SET_PIN_CODE("Set Pin Code");
+        OTK_OP_SET_PIN_CODE("Set Pin Code"),
+        OTK_OP_EXPORT_WIF_KEY("Export WIF Key");
 
         private final String value;
         private Operation(String s) {
@@ -680,7 +681,6 @@ public class Otk {
             }
         }
         if (mOp == Operation.OTK_OP_GET_KEY) {
-            logger.debug("[DC] otkData.getType(): {}", otkData.getType());
             if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
                 // Write read KEY information command to OTK
                 if (isInProcessing == true) {
@@ -698,13 +698,11 @@ public class Otk {
                 mSessionId = otkData.getSessionData().getSessionId();
                 // Check if OTK is authorized
                 if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
-                    logger.debug("[DC] OTK_UNAUTHORIZED");
                     // Send unauthorized event.
                     sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
                     // clear cached command so that it won't write command without pin
                     mCommandToWrite = Command.INVALID;
                 } else {
-                    logger.debug("[DC] Show key");
                     // Clear cached pin
                     mPin = "";
                     // Authorized. Write command
@@ -766,6 +764,49 @@ public class Otk {
             } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
                 sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_SUCCESS, otkData, mMessageToSign, mUsingMasterKey));
             } else {
+                logger.info("Unexpected data type:%s", otkData.getType());
+            }
+        }
+
+        if (mOp == Operation.OTK_OP_EXPORT_WIF_KEY) {
+            if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
+                // Write read KEY information command to OTK
+                if (isInProcessing == true) {
+                    logger.error("It's already in processing.");
+                    if (!mSessionId.equals(otkData.getSessionData().getSessionId())) {
+                        // OTK must be restarted, consider failed.
+                        sendEvent(new OtkEvent(OtkEvent.Type.GET_KEY_FAIL));
+                        return OTK_RETURN_ERROR;
+                    }
+                    return OTK_RETURN_OK;
+                }
+
+                // Processing  command
+                isInProcessing = true;
+                mSessionId = otkData.getSessionData().getSessionId();
+                // Check if OTK is authorized
+                if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
+                    // Send unauthorized event.
+                    sendEvent(new OtkEvent(OtkEvent.Type.EXPORT_WIF_KEY_FAIL, "UNAUTHORIZED"));
+                    // clear cached command so that it won't write command without pin
+                    mCommandToWrite = Command.INVALID;
+                } else {
+                    // Clear cached pin
+                    mPin = "";
+                    // Authorized. Write command
+                    writeOtkCommand(Command.EXPORT_WIF_KEY, mPin, mArgs, false, false);
+                }
+            }
+            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_KEY_INFO) {
+                sendEvent(new OtkEvent(OtkEvent.Type.EXPORT_WIF_KEY_SUCCESS, otkData));
+            }
+            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
+                sendEvent(new OtkEvent(OtkEvent.Type.EXPORT_WIF_KEY_FAIL, otkData.getFailureReason()));
+            }
+            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
+                sendEvent(new OtkEvent(OtkEvent.Type.EXPORT_WIF_KEY_SUCCESS, otkData));
+            }
+            else {
                 logger.info("Unexpected data type:%s", otkData.getType());
             }
         }
@@ -970,6 +1011,8 @@ public class Otk {
             mCommandToWrite = Command.SHOW_KEY;
         } else if (mOp == Operation.OTK_OP_SIGN_MESSAGE) {
             mCommandToWrite = Command.SIGN;
+        } else if (mOp == Operation.OTK_OP_EXPORT_WIF_KEY) {
+            mCommandToWrite = Command.EXPORT_WIF_KEY;
         } else {
             logger.error("Operation {} is not implemented yet.", mOp.toString());
             return OTK_RETURN_ERROR;

@@ -155,4 +155,9 @@
     <string name="failed_to_process_signed_message">Failed to process signed message</string>
     <string name="export_private_key">Export Private Key</string>
     <string name="reset">Reset</string>
+    <string name="export_private_key_wif_fail">Export Private Fail</string>
+    <string name="export_private_key_wif_success">Export Private Key Success</string>
+    <string name="get_key">Get Key</string>
+    <string name="get_key_fail">Get key failed</string>
+    <string name="get_key_success">Get key success</string>
 </resources>

@@ -176,5 +176,7 @@
     <string name="advance">Advance</string>
     <string name="export_private_key">Export Private Key</string>
     <string name="reset">Reset</string>
+    <string name="export_private_key_wif_fail">Export Private Fail</string>
+    <string name="export_private_key_wif_success">Export Private Key Success</string>
 
 </resources>

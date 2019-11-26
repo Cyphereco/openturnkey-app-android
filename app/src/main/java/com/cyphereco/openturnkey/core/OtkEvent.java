@@ -39,6 +39,8 @@ public class OtkEvent {
         SIGN_MESSAGE_SUCCESS,
         SIGN_MESSAGE_FAIL,
         OTK_PIN_UNSET,
+        EXPORT_WIF_KEY_SUCCESS,
+        EXPORT_WIF_KEY_FAIL,
     }
 
     private Type mType;
