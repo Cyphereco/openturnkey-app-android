@@ -540,10 +540,12 @@ public class MainActivity extends AppCompatActivity
                 } else if (type == OtkEvent.Type.UNLOCK_SUCCESS) {
                     hideStatusDialog();
                     showCommandResultDialog(getString(R.string.unlock_success), getString(R.string.otk_is_unlocked));
-                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
                     Intent intent = new Intent(getApplicationContext(), OpenturnkeyInfoActivity.class);
                     intent.putExtra(KEY_OTK_DATA, event.getData());
                     startActivity(intent);
