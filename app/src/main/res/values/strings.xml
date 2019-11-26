@@ -178,5 +178,7 @@
     <string name="reset">Reset</string>
     <string name="export_private_key_wif_fail">Export Private Fail</string>
     <string name="export_private_key_wif_success">Export Private Key Success</string>
+    <string name="reset_fail">Reset Fail</string>
+    <string name="reset_success">Reset Success</string>
 
 </resources>

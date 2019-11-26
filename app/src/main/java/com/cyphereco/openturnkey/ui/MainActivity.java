@@ -651,6 +651,9 @@ public class MainActivity extends AppCompatActivity
                     }
                     showStatusDialog("Please set PIN code before operating", event.getFailureReason());
                 }
+                else if ((type == OtkEvent.Type.RESET_SUCCESS) || (type == OtkEvent.Type.RESET_FAIL)) {
+                    processOtkResetEvent(event);
+                }
                 else if ((type == OtkEvent.Type.EXPORT_WIF_KEY_SUCCESS) ||
                         (type == OtkEvent.Type.EXPORT_WIF_KEY_FAIL)) {
                     processOtkExportPrivateKeyEvent(event);
@@ -865,7 +868,10 @@ public class MainActivity extends AppCompatActivity
                 }
                 return true;
             case R.id.menu_openturnkey_export_wif_key:
-                export_private_key();
+                exportPrivateKey();
+                return true;
+            case R.id.menu_openturnkey_reset:
+                resetOTKDevice();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -1507,8 +1513,35 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void export_private_key() {
-        logger.debug("export_private_key");
+    private void resetOTKDevice() {
+        logger.debug("Reset OTK");
+        mOp = Otk.Operation.OTK_OP_RESET;
+        if (mSelectedFragment instanceof FragmentOtk) {
+            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+        }
+        mOtk.setOperation(mOp);
+    }
+
+    private void processOtkResetEvent(OtkEvent event) {
+        logger.debug("processOtkResetEvent");
+        hideStatusDialog();
+        mIsOpInProcessing = false;
+        mOtk.cancelOperation();
+        mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+        if (mSelectedFragment instanceof FragmentOtk) {
+            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+        }
+
+        if (OtkEvent.Type.RESET_FAIL == event.getType()) {
+            showStatusDialog(getString(R.string.reset_fail), event.getFailureReason());
+        }
+        else if (OtkEvent.Type.RESET_SUCCESS == event.getType()) {
+            showStatusDialog(getString(R.string.reset_success), "");
+        }
+    }
+
+    private void exportPrivateKey() {
+        logger.debug("exportPrivateKey");
         mOp = Otk.Operation.OTK_OP_EXPORT_WIF_KEY;
         if (mSelectedFragment instanceof FragmentOtk) {
             ((FragmentOtk) mSelectedFragment).updateOperation(mOp);

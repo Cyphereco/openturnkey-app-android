@@ -10,6 +10,7 @@ public enum Command {
     SET_PIN("165"),
     SET_NOTE("166"),
     CANCEL("167"),
+    RESET("168"),
     EXPORT_WIF_KEY("169");
 
     private final String value;

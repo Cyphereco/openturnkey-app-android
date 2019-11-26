@@ -144,6 +144,14 @@ public class FragmentOtk extends Fragment {
             tv.setText(R.string.set_key);
             btn.setVisibility(View.VISIBLE);
         }
+        else if (mOp == Otk.Operation.OTK_OP_RESET) {
+            tv.setText(R.string.reset);
+            btn.setVisibility(View.VISIBLE);
+        }
+        else if (mOp == Otk.Operation.OTK_OP_EXPORT_WIF_KEY) {
+            tv.setText(R.string.export_private_key);
+            btn.setVisibility(View.VISIBLE);
+        }
         else {
             btn.setVisibility(View.INVISIBLE);
             // Default is read general info

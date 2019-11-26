@@ -160,4 +160,6 @@
     <string name="get_key">Get Key</string>
     <string name="get_key_fail">Get key failed</string>
     <string name="get_key_success">Get key success</string>
+    <string name="reset_fail">Reset Fail</string>
+    <string name="reset_success">Reset Success</string>
 </resources>
