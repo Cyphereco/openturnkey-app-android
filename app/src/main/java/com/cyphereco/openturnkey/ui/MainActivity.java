@@ -550,10 +550,12 @@ public class MainActivity extends AppCompatActivity
                 } else if (type == OtkEvent.Type.UNLOCK_FAIL) {
                     hideStatusDialog();
                     mOp = Otk.Operation.OTK_OP_NONE;
-                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
                     showStatusDialog(getString(R.string.unlock_failed), event.getFailureReason());
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
                 } else if (type == OtkEvent.Type.WRITE_NOTE_SUCCESS) {
                     hideStatusDialog();
                     showCommandResultDialog(getString(R.string.write_note), getString(R.string.write_note_success));
@@ -823,9 +825,10 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
                 return true;
             case R.id.menu_openturnkey_unlock:
-                setNfcCommTypeText(item.getItemId());
                 mOp = Otk.Operation.OTK_OP_UNLOCK;
                 mOtk.setOperation(mOp);
+                mIsOpInProcessing = true;
+                ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                 return true;
             case R.id.menu_openturnkey_read_generalinformation:
                 setNfcCommTypeText(item.getItemId());
@@ -1174,7 +1177,7 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(this, getString(R.string.operation_cancelled), Toast.LENGTH_LONG).show();
         if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE ||
                 mOp == Otk.Operation.OTK_OP_SET_PIN_CODE || mOp == Otk.Operation.OTK_OP_CHOOSE_KEY ||
-                mOp == Otk.Operation.OTK_OP_SIGN_MESSAGE) {
+                mOp == Otk.Operation.OTK_OP_SIGN_MESSAGE || mOp == Otk.Operation.OTK_OP_UNLOCK) {
             mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
             mIsOpInProcessing = false;
             if (mSelectedFragment instanceof FragmentOtk) {

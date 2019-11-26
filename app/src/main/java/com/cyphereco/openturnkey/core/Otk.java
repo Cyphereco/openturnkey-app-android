@@ -273,27 +273,11 @@ public class Otk {
         OtkEvent event;
         List<String> args = new ArrayList<String>();
         if (OTK_RETURN_OK == Nfc.writeCommand(mTag, Command.UNLOCK, mSessionId, pin, args, false, false)) {
-            // Try to read tag
-            OtkData otkData = Nfc.read(mTag);
-            if (otkData == null) {
-                // OTK is not connected
-                mCommandToWrite = Command.INVALID;
-                mPin = "";
-                event = new OtkEvent(OtkEvent.Type.APPROACH_OTK);
-                sendEvent(event);
-            }
-            else {
-                if (otkData.getType() != OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
-                    logger.info("Expect exec success but got " + otkData.getType().toString());
-                    event = new OtkEvent(OtkEvent.Type.UNLOCK_FAIL);
-                    sendEvent(event);
-                    return;
-                }
-                // Success
-                event = new OtkEvent(OtkEvent.Type.UNLOCK_SUCCESS, otkData);
-                sendEvent(event);
-                clearOp();
-            }
+            // Don't read NFC right after unlock command is written
+            mCommandToWrite = Command.INVALID;
+            mPin = "";
+            event = new OtkEvent(OtkEvent.Type.APPROACH_OTK);
+            sendEvent(event);
         }
         else {
             // OTK is not connected, cache command

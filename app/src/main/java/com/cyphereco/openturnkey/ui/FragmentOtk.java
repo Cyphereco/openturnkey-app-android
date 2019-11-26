@@ -134,7 +134,7 @@ public class FragmentOtk extends Fragment {
         }
         else if (mOp == Otk.Operation.OTK_OP_UNLOCK) {
             tv.setText(R.string.unlock);
-            btn.setVisibility(View.INVISIBLE);
+            btn.setVisibility(View.VISIBLE);
         }
         else if (mOp == Otk.Operation.OTK_OP_SIGN_MESSAGE) {
             tv.setText(R.string.sign_message);
