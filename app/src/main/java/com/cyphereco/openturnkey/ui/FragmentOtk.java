@@ -156,6 +156,7 @@ public class FragmentOtk extends Fragment {
             btn.setVisibility(View.INVISIBLE);
             // Default is read general info
             tv.setText(R.string.read_general_information);
+            btn.setVisibility(View.INVISIBLE);
         }
     }
 
