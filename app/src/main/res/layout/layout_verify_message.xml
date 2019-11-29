@@ -13,7 +13,7 @@
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
         android:drawableStart="@drawable/ic_verify_in_black_24dp"
-        android:text="@string/verify_signed_message"
+        android:text="@string/verify_signature"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

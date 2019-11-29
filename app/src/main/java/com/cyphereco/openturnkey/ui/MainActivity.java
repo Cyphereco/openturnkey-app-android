@@ -580,7 +580,7 @@ public class MainActivity extends AppCompatActivity
                 }
                 else if (type == OtkEvent.Type.SET_PIN_SUCCESS) {
                     hideStatusDialog();
-                    showCommandResultDialog(getString(R.string.set_pin), getString(R.string.set_pin_success));
+                    showCommandResultDialog(getString(R.string.set_pin_code), getString(R.string.set_pin_success));
                     setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
@@ -743,9 +743,6 @@ public class MainActivity extends AppCompatActivity
             switch (item) {
                 case R.id.menu_openturnkey_read_generalinformation:
                     tv.setText(R.string.read_general_information);
-                    return;
-                case R.id.menu_openturnkey_authenticity_check:
-                    tv.setText(R.string.authenticity_check);
                     return;
                 case R.id.menu_openturnkey_get_key:
                     tv.setText(R.string.read_key_information);

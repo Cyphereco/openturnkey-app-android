@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="@string/choose_key_description"
+        android:text="@string/choose_key"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
@@ -39,7 +39,7 @@
         android:ems="10"
         android:inputType="number"
         android:text=""
-        android:hint="@string/choose_key_hint"
+        android:hint="@string/_choose_key_hint"
         app:layout_constraintStart_toEndOf="@+id/textView15"
         app:layout_constraintTop_toBottomOf="@+id/imageChooseKeyScanQRCode" />
 
@@ -64,7 +64,7 @@
         android:ems="10"
         android:inputType="number"
         android:text=""
-        android:hint="@string/choose_key_hint"
+        android:hint="@string/_choose_key_hint"
         app:layout_constraintStart_toEndOf="@+id/textView15"
         app:layout_constraintTop_toBottomOf="@+id/editTextChooseKeyL1" />
 
@@ -88,7 +88,7 @@
         android:ems="10"
         android:inputType="number"
         android:text=""
-        android:hint="@string/choose_key_hint"
+        android:hint="@string/_choose_key_hint"
         app:layout_constraintStart_toEndOf="@+id/textView15"
         app:layout_constraintTop_toBottomOf="@+id/editTextChooseKeyL2" />
 
@@ -112,7 +112,7 @@
         android:ems="10"
         android:inputType="number"
         android:text=""
-        android:hint="@string/choose_key_hint"
+        android:hint="@string/_choose_key_hint"
         app:layout_constraintStart_toEndOf="@+id/textView15"
         app:layout_constraintTop_toBottomOf="@+id/editTextChooseKeyL3" />
 
@@ -137,7 +137,7 @@
         android:ems="10"
         android:inputType="number"
         android:text=""
-        android:hint="@string/choose_key_hint"
+        android:hint="@string/_choose_key_hint"
         app:layout_constraintStart_toEndOf="@+id/textView15"
         app:layout_constraintTop_toBottomOf="@+id/editTextChooseKeyL4" />
 

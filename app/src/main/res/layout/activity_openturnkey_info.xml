@@ -186,4 +186,18 @@
         app:layout_constraintEnd_toEndOf="@+id/label_btc"
         app:layout_constraintTop_toTopOf="@+id/label_fiat" />
 
+    <ImageView
+        android:id="@+id/unlock_shade"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:tint="#FFC107"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/btc_address_context"
+        app:layout_constraintEnd_toEndOf="@+id/btc_address_qrcode"
+        app:layout_constraintStart_toStartOf="@+id/btc_address_qrcode"
+        app:layout_constraintTop_toTopOf="@+id/btc_address_qrcode"
+        app:srcCompat="@android:drawable/ic_partial_secure" />
+
 </android.support.constraint.ConstraintLayout>

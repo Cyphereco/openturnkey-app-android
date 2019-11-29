@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="Master Public Key:"
+        android:text="@string/master_public_key"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
@@ -48,7 +48,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:text="Derivative Public Key"
+        android:text="@string/derivative_public_key"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ki_tv_master_pk_content" />
@@ -70,7 +70,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:text="Derivative Key Paths:"
+        android:text="@string/derivative_key_paths"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ki_tv_derivative_pk_content" />
@@ -223,7 +223,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:text="OK"
+        android:text="@string/ok"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -232,6 +232,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:contentDescription="Master key QR code"
         app:layout_constraintBottom_toBottomOf="@+id/ki_iv_icon_master_pk_copy"
         app:layout_constraintStart_toEndOf="@+id/ki_iv_icon_master_pk_copy"
         app:layout_constraintTop_toTopOf="@+id/ki_iv_icon_master_pk_copy"
@@ -242,6 +243,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:contentDescription="Derivative key QR code"
         app:layout_constraintBottom_toBottomOf="@+id/ki_iv_icon_derivative_pk_copy"
         app:layout_constraintStart_toEndOf="@+id/ki_iv_icon_derivative_pk_copy"
         app:layout_constraintTop_toTopOf="@+id/ki_iv_icon_derivative_pk_copy"
@@ -252,6 +254,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:contentDescription="Key path QR code"
         app:layout_constraintBottom_toBottomOf="@+id/ki_iv_icon_derivative_pk_path_copy"
         app:layout_constraintStart_toEndOf="@+id/ki_iv_icon_derivative_pk_path_copy"
         app:layout_constraintTop_toTopOf="@+id/ki_iv_icon_derivative_pk_path_copy"
@@ -264,7 +267,8 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:autoLink="web"
-        android:text="How to Validate?"
+        android:linksClickable="true"
+        android:text="@string/how_to_validate"
         android:textColor="#3F51B5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ki_tv_derivative_pk_content" />

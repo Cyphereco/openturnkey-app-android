@@ -141,7 +141,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
         }
         catch (Exception e) {
             // Failed to process signed message
-            Toast.makeText(getApplicationContext(), R.string.failed_to_process_signed_message, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.sign_message_fail, Toast.LENGTH_LONG).show();
         }
 
         /* init NFC. */
@@ -214,7 +214,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                           ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                           ClipData clip = ClipData.newPlainText("Signed message", mFormattedSignedMsg);
                           clipboard.setPrimaryClip(clip);
-                          Toast.makeText(getApplicationContext(), R.string.signed_message_copied, Toast.LENGTH_LONG).show();
+                          Toast.makeText(getApplicationContext(), R.string.data_copied, Toast.LENGTH_LONG).show();
                       }
                   });
                 EditText etSignedMsg = view.findViewById(R.id.editTextSignedMessage);
