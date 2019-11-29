@@ -653,7 +653,7 @@ public class MainActivity extends AppCompatActivity
                     if (mSelectedFragment instanceof FragmentOtk) {
                         ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                     }
-                    showStatusDialog("Please set PIN code before operating", event.getFailureReason());
+                    showStatusDialog(String(R.string.pin_unset), event.getFailureReason());
                 }
                 else if ((type == OtkEvent.Type.RESET_SUCCESS) || (type == OtkEvent.Type.RESET_FAIL)) {
                     processOtkResetEvent(event);
@@ -861,7 +861,6 @@ public class MainActivity extends AppCompatActivity
                 intent = new Intent(this, SignValidateMessageActivity.class);
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_SIGN_MESSAGE);
                 return true;
-            case R.id.menu_openturnkey_authenticity_check:
             case R.id.menu_openturnkey_get_key:
 
                 setNfcCommTypeText(item.getItemId());

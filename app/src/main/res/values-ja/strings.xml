@@ -162,4 +162,5 @@
     <string name="derivative_key_paths">派生径路</string>
     <string name="how_to_validate">検証方法</string>
     <string name="master_public_key">マスター公開鍵</string>
+    <string name="pin_unset">ピンコード未設定</string>
 </resources>

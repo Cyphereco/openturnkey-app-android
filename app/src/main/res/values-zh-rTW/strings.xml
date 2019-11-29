@@ -162,4 +162,5 @@
     <string name="failed_to_clear_history">清除交易記錄失敗</string>
     <string name="how_to_validate">如何驗證?</string>
     <string name="master_public_key">主公鑰:</string>
+    <string name="pin_unset">PIN碼未設定</string>
 </resources>
