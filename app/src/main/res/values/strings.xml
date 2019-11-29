@@ -1,5 +1,5 @@
 <resources>
-    <string name="_app_name" translatable="false">OpenTurnKey</string>
+    <string name="_app_name" translatable="false">Crypto Economy</string>
     <string name="history">History</string>
     <string name="addresses">Addresses</string>
     <string name="pay">Pay</string>
@@ -76,7 +76,6 @@
     <string name="confirm_terminate_op">Are you sure you want to terminate %s?</string>
     <string name="terminate_op">Terminate Operation</string>
     <string name="sign_message">Sign Message</string>
-    <string name="authenticity_check">Authenticity Check</string>
     <string name="btc_address">BTC Address</string>
     <string name="subject_note">Note:</string>
     <string name="btc_qr_code">BTC QR Code</string>
@@ -97,7 +96,7 @@
     <string name="subject_fees_in_satoshi">Fees(SAT):</string>
     <string name="unknown_reason">Unknown Reason</string>
     <string name="signing_transaction">Signing Transaction</string>
-    <string name="seg_wit_address_is_not_supported">SigWit Address is not supported at the moment</string>
+    <string name="seg_wit_address_is_not_supported">SigWit Address is Not Supported at the moment</string>
     <string name="invalid_address">Invalid Address</string>
     <string name="alias">Alias</string>
     <string name="save">Save</string>
@@ -114,7 +113,7 @@
     <string name="view_online">View Online</string>
     <string name="resend_payment">resend payment</string>
     <string name="delete_transaction_record">Delete transaction record</string>
-    <string name="transaction_execution_status">transaction execution status</string>
+    <string name="transaction_execution_status">Transaction Processing Status</string>
     <string name="failure_reason">failure reason</string>
     <string name="previous_transaction_record">previous transaction record</string>
     <string name="next_transaction_record">next transaction record</string>
@@ -125,8 +124,8 @@
     <string name="raw_data">Raw Data</string>
     <string name="all_history_cleared">All history cleared</string>
     <string name="failed_to_clear_history">Failed to clear history</string>
-    <string name="not_supported">not supported</string>
-    <string name="transaction_not_found">Transaction not found</string>
+    <string name="not_supported">Not supported</string>
+    <string name="transaction_not_found">Transaction Not Found</string>
     <string name="failed_to_delete">Failed to delete</string>
     <string name="delete_this_transaction_record">Delete this transaction record?</string>
     <string name="otk_is_not_locked">OpenTurnKey is not locked</string>
@@ -148,37 +147,38 @@
     <string name="currency_btc">BTC (Bitcoin)</string>
     <string name="write_note_hint">Note (Less than 64 characters)</string>
     <string name="check_balance">Checking Balance</string>
-    <string name="set_pin">Set PIN</string>
-    <string name="set_pin_success">Set PIN success</string>
-    <string name="set_pin_fail">Set PIN Failed</string>
-    <string name="choose_key_description">Choose key from L1 to L5.</string>
-    <string name="choose_key_hint">0~2147483647</string>
+    <string name="set_pin_success">Set PIN Code Succeeded</string>
+    <string name="set_pin_fail">Set PIN Code Failed</string>
+    <string name="_choose_key_hint" translatable="false">0~2147483647</string>
     <string name="warning">Warning!</string>
-    <string name="choose_key_warning_message">Please back up your current key path if there are funds or you will be using it later. Otherwise, you can lose the access to the current key if you forget the key path.</string>
+    <string name="choose_key_warning_message">You may lost the access to your funds if you don\'t have a backup. Please backup the current key path before changing it.</string>
     <string name="confirm">Confirm</string>
-    <string name="invalid_key_path">Invalid key path</string>
+    <string name="invalid_key_path">Invalid path</string>
     <string name="choose_key">Choose Key</string>
-    <string name="choose_key_success">Choose key success</string>
-    <string name="choose_key_fail">Choose key failed</string>
-    <string name="get_key">Get Key</string>
-    <string name="get_key_success">Get key success</string>
-    <string name="get_key_fail">Get key failed</string>
+    <string name="choose_key_success">Choose Key Success</string>
+    <string name="choose_key_fail">Choose Key Failed</string>
+    <string name="get_key">Read Key Information</string>
+    <string name="get_key_success">Read key information success</string>
+    <string name="get_key_fail">Read key information failed</string>
     <string name="sign_message_fail">Sign Message Fail</string>
     <string name="sign_message_success">Sign Message Success</string>
-    <string name="signed_message_copied">Signed message copied to clipboard</string>
+    <string name="data_copied">Data copied</string>
     <string name="message_to_be_signed">Message to Be Signed</string>
-    <string name="message_to_be_signed_hint">Input message to sign here...</string>
+    <string name="message_to_be_signed_hint">Message</string>
     <string name="signed_message">Signed Message</string>
     <string name="message_to_be_verified">Message to Be Verified</string>
-    <string name="verify_signed_message">Verify Signed Message</string>
+    <string name="verify_signature">Verify Signature</string>
     <string name="using_master_key">Using Master Key</string>
-    <string name="failed_to_process_signed_message">Failed to process signed message</string>
     <string name="advance">Advance</string>
     <string name="export_private_key">Export Private Key</string>
     <string name="reset">Reset</string>
-    <string name="export_private_key_wif_fail">Export Private Fail</string>
-    <string name="export_private_key_wif_success">Export Private Key Success</string>
+    <string name="export_private_key_wif_fail">Export Fail</string>
+    <string name="export_private_key_wif_success">Export Success</string>
     <string name="reset_fail">Reset Fail</string>
     <string name="reset_success">Reset Success</string>
+    <string name="master_public_key">Master Public Key:</string>
+    <string name="derivative_public_key">Derivative Public Key</string>
+    <string name="derivative_key_paths">Derivative Paths:</string>
+    <string name="how_to_validate">How to Validate?</string>
 
 </resources>
