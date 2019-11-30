@@ -653,7 +653,7 @@ public class MainActivity extends AppCompatActivity
                     if (mSelectedFragment instanceof FragmentOtk) {
                         ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                     }
-                    showStatusDialog(String(R.string.pin_unset), event.getFailureReason());
+                    showStatusDialog(getString(R.string.pin_unset), event.getFailureReason());
                 }
                 else if ((type == OtkEvent.Type.RESET_SUCCESS) || (type == OtkEvent.Type.RESET_FAIL)) {
                     processOtkResetEvent(event);
@@ -772,10 +772,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        TextView tv;
         Intent intent;
 
-        if (mIsOpInProcessing) {
+        if (mIsOpInProcessing && (item.getItemId() != R.id.menu_openturnkey_advance)) {
             if (false == showConfirmDialogAndWaitResult(getString(R.string.terminate_op),
                     String.format(getString(R.string.confirm_terminate_op), mOp.toString()),
                     getString(R.string.terminate),
