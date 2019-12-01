@@ -121,7 +121,7 @@ public class FragmentOtk extends Fragment {
 
         }
         else if (mOp == Otk.Operation.OTK_OP_GET_KEY) {
-            tv.setText(R.string.read_key_information);
+            tv.setText(R.string.full_pubkey_information);
             btn.setVisibility(View.INVISIBLE);
         }
         else if (mOp == Otk.Operation.OTK_OP_SET_PIN_CODE) {

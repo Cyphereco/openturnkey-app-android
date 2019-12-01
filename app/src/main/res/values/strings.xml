@@ -35,7 +35,7 @@
     <string name="search">Search</string>
     <string name="auth_with_pin">Authorization with PIN Code</string>
     <string name="set_pin_code">Set PIN Code</string>
-    <string name="read_key_information">Read Key Information</string>
+    <string name="full_pubkey_information">Full Public Key Information</string>
     <string name="about">About</string>
     <string name="use_fix_addresss">Use Fix Addresss</string>
     <string name="set_key">Choose Key</string>
@@ -151,7 +151,7 @@
     <string name="set_pin_fail">Set PIN Code Failed</string>
     <string name="_choose_key_hint" translatable="false">0~2147483647</string>
     <string name="warning">Warning!</string>
-    <string name="choose_key_warning_message">You may lost the access to your funds if you don\'t have a backup. Please backup the current key path before changing it.</string>
+    <string name="choose_key_warning_message">You should backup the current key path or export the current key before changing it. Otherwise, You may lost the access to your current funds.</string>
     <string name="confirm">Confirm</string>
     <string name="invalid_key_path">Invalid path</string>
     <string name="choose_key">Choose Key</string>
@@ -170,16 +170,24 @@
     <string name="verify_signature">Verify Signature</string>
     <string name="using_master_key">Using Master Key</string>
     <string name="advance">Advance</string>
-    <string name="export_private_key">Export Private Key</string>
+    <string name="export_private_key">Export Key</string>
     <string name="reset">Reset</string>
     <string name="export_private_key_wif_fail">Export Failed</string>
     <string name="export_private_key_wif_success">Export Succeeded</string>
-    <string name="reset_fail">Reset Fail</string>
-    <string name="reset_success">Reset Success</string>
+    <string name="reset_fail">Reset Command Not Sent</string>
+    <string name="reset_success">Reset Command Sent</string>
     <string name="master_public_key">Master Public Key:</string>
     <string name="derivative_public_key">Derivative Public Key</string>
     <string name="derivative_key_paths">Derivative Paths:</string>
     <string name="how_to_validate">How to Validate?</string>
     <string name="pin_unset">PIN Code Unset</string>
+    <string name="need_fp_preauth">To export the WIF Key, user must pre-authorized OpenTurnKey with fingerprint authentication!</string>
+    <string name="wallet_import_format_key">Wallet Import Format Key</string>
+    <string name="understood">I Understood!</string>
+    <string name="reset_warning_message">Reset OpenTurnKey will erase the enrolled fingerprint. unset the PIN code, and choose a new random key. If you don\'t have a backup to the current key, you will lose the access to the current funds. Please be careful!</string>
+    <string name="export_wif_warning_message">If it is not necessary, DO  NOT export the WIF key!  A WIF key is the private key that has the full access to the current funds. If you export a WIF key, make sure you keep the exported key in a safe deposit, or your funds may be stolen.</string>
+    <string name="pin_code_warning_message">PIN code setting gaurantee an alternavie backup access to the key when OpenTurnKey fingerprint authentication run into problem. In the most cases, we recommend you to use fingerprint authentication if possible. If PIN code authorization is to be used, make sure you use it only on trusted secure devices.</string>
+    <string name="full_pubkey_info_warning">The full public key information is for you to validate the authenticity of OpenTurnKey. An authentic OpenTurnKey should allow user to choose any level 5 derivative non-hardened key which can be validated with external tools. A public key itself cannot be used for signing payment or derive private key, however, it is recommended to keep this information only in a safe deposit.</string>
+    <string name="reset_step_intro">To complete the reset process, please press and hold the fingerprint sensor on OpenTurnKey for 8 seconds.</string>
 
 </resources>

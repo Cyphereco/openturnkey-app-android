@@ -43,7 +43,6 @@ import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 
 import org.slf4j.Logger;
-import org.w3c.dom.Text;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -424,7 +423,7 @@ public class MainActivity extends AppCompatActivity
                 } else if (type == OtkEvent.Type.APPROACH_OTK) {
                     hideProgressDialog();
                     // Show dialog to indicate user not to remove OTK
-                    showStatusDialog(getString(R.string.signing_transaction), getString(R.string.do_not_remove_otk));
+                    //showStatusDialog(getString(R.string.signing_transaction), getString(R.string.do_not_remove_otk));
                 } else if (type == OtkEvent.Type.FIND_UTXO) {
                     // Stop cancel timer
                     if (mSelectedFragment instanceof FragmentOtk) {
@@ -745,7 +744,7 @@ public class MainActivity extends AppCompatActivity
                     tv.setText(R.string.read_general_information);
                     return;
                 case R.id.menu_openturnkey_get_key:
-                    tv.setText(R.string.read_key_information);
+                    tv.setText(R.string.full_pubkey_information);
                     return;
                 case R.id.menu_openturnkey_unlock:
                     tv.setText(R.string.unlock);
@@ -838,6 +837,15 @@ public class MainActivity extends AppCompatActivity
                 dialogAddNote();
                 return true;
             case R.id.menu_openturnkey_set_pin:
+                if (false == showConfirmDialogAndWaitResult(getString(R.string.warning),
+                        getString(R.string.pin_code_warning_message),
+                        getString(R.string.understood),
+                        false)) {
+                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    logger.info("Choose key confirmation cancelled!");
+                    return false;
+                }
                 // show set pin dialog
                 dialogSetPIN();
                 return true;
@@ -845,7 +853,7 @@ public class MainActivity extends AppCompatActivity
                 // show confirm dialog
                 if (false == showConfirmDialogAndWaitResult(getString(R.string.warning),
                         getString(R.string.choose_key_warning_message),
-                        getString(R.string.confirm),
+                        getString(R.string.understood),
                         false)) {
                     mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
                     ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
@@ -861,16 +869,42 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_SIGN_MESSAGE);
                 return true;
             case R.id.menu_openturnkey_get_key:
-
+                if (false == showConfirmDialogAndWaitResult(getString(R.string.warning),
+                        getString(R.string.full_pubkey_info_warning),
+                        getString(R.string.understood),
+                        false)) {
+                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    logger.info("Choose key confirmation cancelled!");
+                    return false;
+                }
                 setNfcCommTypeText(item.getItemId());
                 if (item.getItemId() == R.id.menu_openturnkey_get_key) {
                     readOtkKeyInformation();
                 }
                 return true;
             case R.id.menu_openturnkey_export_wif_key:
+                if (false == showConfirmDialogAndWaitResult(getString(R.string.warning),
+                        getString(R.string.export_wif_warning_message),
+                        getString(R.string.understood),
+                        false)) {
+                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    logger.info("Choose key confirmation cancelled!");
+                    return false;
+                }
                 exportPrivateKey();
                 return true;
             case R.id.menu_openturnkey_reset:
+                if (false == showConfirmDialogAndWaitResult(getString(R.string.warning),
+                        getString(R.string.reset_warning_message),
+                        getString(R.string.understood),
+                        false)) {
+                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    logger.info("Choose key confirmation cancelled!");
+                    return false;
+                }
                 resetOTKDevice();
                 return true;
             default:
@@ -1536,7 +1570,7 @@ public class MainActivity extends AppCompatActivity
             showStatusDialog(getString(R.string.reset_fail), event.getFailureReason());
         }
         else if (OtkEvent.Type.RESET_SUCCESS == event.getType()) {
-            showStatusDialog(getString(R.string.reset_success), "");
+            showStatusDialog(getString(R.string.reset_success), getString(R.string.reset_step_intro));
         }
     }
 
@@ -1560,7 +1594,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (OtkEvent.Type.EXPORT_WIF_KEY_FAIL == event.getType()) {
-            showStatusDialog(getString(R.string.export_private_key_wif_fail), event.getFailureReason());
+            showStatusDialog(getString(R.string.export_private_key_wif_fail), getString(R.string.need_fp_preauth));
         }
         else if (OtkEvent.Type.EXPORT_WIF_KEY_SUCCESS == event.getType()) {
             /* Show Private key which is WIF format */

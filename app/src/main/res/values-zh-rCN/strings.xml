@@ -5,7 +5,7 @@
     <string name="no_freq_addr">没有常用地址</string>
     <string name="clear_history">清除记录</string>
     <string name="fee_included">包含手续费</string>
-    <string name="read_key_information">读取密钥信息</string>
+    <string name="full_pubkey_information">完整公钥信息</string>
     <string name="history" translatable="false">支付记录</string>
     <string name="local_currency">当地货币</string>
     <string name="no_payment_records">没有支付记录</string>
@@ -132,8 +132,8 @@
     <string name="set_pin_success">设定PIN码成功</string>
     <string name="set_pin_fail">设定PIN码失敗</string>
     <string name="warning">注意!</string>
-    <string name="choose_key_warning_message">如果您尚未备份当前派送密钥路径，您可能会丢失对其中资金的存取权限。请再变更前先进行备份。</string>
-    <string name="confirm">Confirm</string>
+    <string name="choose_key_warning_message">在变更密钥前您应该先备份现有密钥路径或汇出当前密钥，否则，您将会失去对现有资金的存取。</string>
+    <string name="confirm">确认</string>
     <string name="invalid_key_path">无效的路径</string>
     <string name="choose_key">选择密钥</string>
     <string name="choose_key_success">选择密钥成功</string>
@@ -147,15 +147,15 @@
     <string name="message_to_be_verified">已签名消息</string>
     <string name="verify_signature">验证签名</string>
     <string name="using_master_key">使用主钥</string>
-    <string name="export_private_key">汇出私钥</string>
+    <string name="export_private_key">汇出密钥</string>
     <string name="reset">重置</string>
     <string name="export_private_key_wif_fail">汇出失败</string>
     <string name="export_private_key_wif_success">汇出成功</string>
     <string name="get_key">读取密钥信息</string>
     <string name="get_key_fail">读取密钥信息失败</string>
     <string name="get_key_success">读取密钥信息成功</string>
-    <string name="reset_fail">重置失敗</string>
-    <string name="reset_success">重置成功</string>
+    <string name="reset_fail">重置命令未发送</string>
+    <string name="reset_success">重置命令已发送</string>
     <string name="advance">高级</string>
     <string name="derivative_public_key">导出公钥</string>
     <string name="derivative_key_paths">导出路径</string>
@@ -163,4 +163,12 @@
     <string name="how_to_validate">如何验证?</string>
     <string name="master_public_key">主公钥:</string>
     <string name="pin_unset">PIN码未设定</string>
+    <string name="need_fp_preauth">用户必须在OpenTurnKey上使用指纹预先授权才可汇出WIF密钥</string>
+    <string name="wallet_import_format_key">钱包导入格式密钥</string>
+    <string name="understood">我已了解!</string>
+    <string name="reset_warning_message">重置OpenTurnKey将会擦除已登录的指纹，清除PIN码设置，并重新选择新的随机密钥。如果您没有当前密钥的备份，您将失去对当前资金的存取，请特别注意！</string>
+    <string name="pin_code_warning_message">设置PIN码可以保障您的OpenTurnKey在指纹验证功能发生问题时，仍然保有一个存取密钥的备援手段。但多数情况下，如果指纹验证功能正常，建议您优先使用指纹认证，如要使用PIN码认证，请仅在信任的安全设备上使用。</string>
+    <string name="export_wif_warning_message">如非必要，请不要汇出WIF密钥！WIF密钥是拥有存取当前资金完整权限的密钥。如果您将密钥汇出，请确保您的密钥保管于安全的场所，否则您可能会丢失您的资金。</string>
+    <string name="full_pubkey_info_warning">完整公钥信息提供用户于验证OpenTurnKey真实性，一个真实的OpenTurnKey应该允许用户选取任一第五层非强化导出密钥并可以使用外部工具验证。公钥本身并不能用来签署交易或推导私钥，但仍建议您将此信息保存于安全的场所。</string>
+    <string name="reset_step_intro">要完成重置请持续按住OpenTurnKey上的指纹传感器8秒钟。</string>
 </resources>
