@@ -432,7 +432,7 @@ public class FragmentPay extends Fragment {
             if ((null == mRecipientAddress) || (mRecipientAddress.isEmpty())) {
                 mUseFixAddress = false;
                 new AlertDialog.Builder(getActivity())
-                        .setMessage("The address is empty")
+                        .setMessage(getString(R.string.recipient_is_empty))
                         .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
