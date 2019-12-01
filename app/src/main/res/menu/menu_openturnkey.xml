@@ -4,13 +4,14 @@
 
     <item
         android:id="@+id/menu_openturnkey_read_generalinformation"
-        android:title="@string/read_general_information" />
-    <item
-        android:id="@+id/menu_openturnkey_get_key"
-        android:title="@string/read_key_information" />
+        android:title="@string/read_general_information"
+        android:visible="false" />
     <item
         android:id="@+id/menu_openturnkey_set_pin"
         android:title="@string/set_pin_code" />
+    <item
+        android:id="@+id/menu_openturnkey_get_key"
+        android:title="@string/read_key_information" />
     <item
         android:id="@+id/menu_openturnkey_set_note"
         android:title="@string/write_note" />
