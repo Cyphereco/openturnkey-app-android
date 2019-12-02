@@ -191,5 +191,6 @@
     <string name="reset_step_intro">To complete the reset process, please press and hold the fingerprint sensor on OpenTurnKey for 8 seconds.</string>
     <string name="session_timeout">Session timeout</string>
     <string name="read_response_timeout">Read Response Timeout</string>
+    <string name="cannot_reach_network">Cannot  reach to the network</string>
 
 </resources>

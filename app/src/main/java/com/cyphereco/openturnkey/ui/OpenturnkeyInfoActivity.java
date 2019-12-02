@@ -78,6 +78,12 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
                 TextView tv = findViewById(R.id.text_balance_btc);
                 OtkEvent event = (OtkEvent) msg.obj;
                 BigDecimal b = event.getBalance();
+                if (b.equals(BigDecimal.valueOf(-1))) {
+                    tv.setText(R.string.cannot_reach_network);
+                    tv = findViewById(R.id.text_balance_fiat);
+                    tv.setText(R.string.cannot_reach_network);
+                    return;
+                }
                 double btc = BtcUtils.satoshiToBtc(b.longValue());
                 if (b != null) {
                     tv.setText(String.format("%.8f", btc));

@@ -88,7 +88,7 @@ public class BlockCypher extends BtcBase {
         } catch (Exception e) {
             logger.error("e:" + e.toString());
         }
-        return BigDecimal.ZERO;
+        return BigDecimal.valueOf(-1);
     }
 
     /**

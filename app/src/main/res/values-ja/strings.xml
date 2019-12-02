@@ -173,4 +173,5 @@
     <string name="reset_step_intro">リセットプロセスを完了するには、OpenTurnKeyの指紋センサーを8秒間押し続けます。</string>
     <string name="session_timeout">Session timeout</string>
     <string name="read_response_timeout">Read Response Timeout</string>
+    <string name="cannot_reach_network">Cannot  reach to the network</string>
 </resources>

@@ -173,4 +173,5 @@
     <string name="reset_step_intro">要完成重置請持續按住OpenTurnKey上的指紋傳感器8秒鐘。</string>
     <string name="session_timeout">Session timeout</string>
     <string name="read_response_timeout">Read Response Timeout</string>
+    <string name="cannot_reach_network">Cannot  reach to the network</string>
 </resources>
