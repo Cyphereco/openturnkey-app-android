@@ -189,5 +189,7 @@
     <string name="pin_code_warning_message">PIN code setting gaurantee an alternavie backup access to the key when OpenTurnKey fingerprint authentication run into problem. In the most cases, we recommend you to use fingerprint authentication if possible. If PIN code authorization is to be used, make sure you use it only on trusted secure devices.</string>
     <string name="full_pubkey_info_warning">The full public key information is for you to validate the authenticity of OpenTurnKey. An authentic OpenTurnKey should allow user to choose any level 5 derivative non-hardened key which can be validated with external tools. A public key itself cannot be used for signing payment or derive private key, however, it is recommended to keep this information only in a safe deposit.</string>
     <string name="reset_step_intro">To complete the reset process, please press and hold the fingerprint sensor on OpenTurnKey for 8 seconds.</string>
+    <string name="session_timeout">Session timeout</string>
+    <string name="read_response_timeout">Read Response Timeout</string>
 
 </resources>

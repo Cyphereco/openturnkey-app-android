@@ -171,4 +171,6 @@
     <string name="pin_code_warning_message">PINコード設定は、OpenTurnKey指紋認証で問題が発生した場合に、キーへの代替バックアップアクセスを保証します。 ほとんどの場合、可能であれば指紋認証を使用することをお勧めします。 PINコード認証を使用する場合は、信頼できる安全なデバイスでのみ使用するようにしてください。</string>
     <string name="full_pubkey_info_warning">完全な公開鍵情報は、OpenTurnKeyの信頼性を検証するためのものです。 本物のOpenTurnKeyを使用すると、ユーザーは外部ツールで検証できるレベル5の派生非強化キーを選択できます。 公開鍵自体を支払いの署名に使用したり、秘密鍵を導出したりすることはできませんが、この情報は安全な保管場所にのみ保管することをお勧めします。</string>
     <string name="reset_step_intro">リセットプロセスを完了するには、OpenTurnKeyの指紋センサーを8秒間押し続けます。</string>
+    <string name="session_timeout">Session timeout</string>
+    <string name="read_response_timeout">Read Response Timeout</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.cyphereco.openturnkey.ui;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ClipData;
@@ -102,7 +103,6 @@ public class MainActivity extends AppCompatActivity
     AlertDialog.Builder mConfirmTerminateOpDialogBuilder = null;
     AlertDialog.Builder mConfirmOpDialogBuilder = null;
     AlertDialog.Builder mConfirmPaymentDialogBuilder = null;
-    AlertDialog mConfirmTerminateOpDialog = null;
     AlertDialog mConfirmOpDialog = null;
     AlertDialog mConfirmPaymentDialog = null;
     AlertDialog.Builder mCommandResultDialogBuilder = null;
@@ -125,6 +125,8 @@ public class MainActivity extends AppCompatActivity
     private long mAddressEditorDBId = 0;
     private boolean mSwitchToAddressBookFragment = false;
     private boolean mSwitchToPayFragment = false;
+
+    DialogAuthByPin mDialogAuthByPin;
 
     /**
      * Process activity result
@@ -662,6 +664,30 @@ public class MainActivity extends AppCompatActivity
                     processOtkExportPrivateKeyEvent(event);
                     /* Show Private key WIF format */
                 }
+                else if ((type == OtkEvent.Type.SESSION_TIMED_OUT) ||
+                        (type == OtkEvent.Type.READ_RESPONSE_TIMED_OUT)) {
+                    // Dismiss dialogs
+                    hideProgressDialog();
+                    hideConfirmOpDialog();
+                    hideConfirmPaymentDialog();
+                    hideStatusDialog();
+                    hideDialogAuthByPin();
+                    // TODO update error description
+                    if (type == OtkEvent.Type.SESSION_TIMED_OUT) {
+                        showStatusDialog(getString(R.string.operation_timeout), getString(R.string.session_timeout));
+                    }
+                    else {
+                        showStatusDialog(getString(R.string.operation_timeout), getString(R.string.read_response_timeout));
+                    }
+                    /* Clear current OTK op */
+                    mIsOpInProcessing = false;
+                    mOtk.cancelOperation();
+                    /* Go to set PIN page */
+                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
+                }
                 else {
                     logger.info("Unhandled event:{}", type.name());
                 }
@@ -1052,9 +1078,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void dialogAuthByPin() {
-        DialogAuthByPin dialog = new DialogAuthByPin();
-        dialog.setCancelable(false);
-        dialog.show(getSupportFragmentManager(), "dialog");
+        mDialogAuthByPin = new DialogAuthByPin();
+        mDialogAuthByPin.setCancelable(false);
+        mDialogAuthByPin.show(getSupportFragmentManager(), "dialog");
+    }
+
+    public void hideDialogAuthByPin() {
+        if ((mDialogAuthByPin != null) && mDialogAuthByPin.isVisible()) {
+            mDialogAuthByPin.dismiss();
+        }
     }
 
     public void dialogAbout() {

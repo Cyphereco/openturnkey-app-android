@@ -160,10 +160,6 @@ public class Nfc {
         }
     }
 
-    static int writeCommand(Command cmd) {
-        return Otk.OTK_RETURN_OK;
-    }
-
     static int writeCommand(Tag tag, Command cmd, String sessId, String pin, List<String> args, boolean isMore, boolean usingMasterKey) {
         logger.info("write Command:" + cmd.toString());
         mIssuedCommand = Command.INVALID;

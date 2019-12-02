@@ -171,4 +171,6 @@
     <string name="pin_code_warning_message">設置PIN碼可以保障您的OpenTurnKey在指紋驗證功能發生問題時，仍然保有一個存取密鑰的備援方法，但多數情況下，如果指紋驗證功能正常，建議您優先使用指紋認證，如要使用PIN碼認證，請僅在信任的安全設備上使用。</string>
     <string name="full_pubkey_info_warning">完整公鑰資訊提供用戶於驗證OpenTurnKey真實性。一個真實的OpenTurnKey應該允許用戶選取任一第五層非强化導出密鑰並可以使用外部工具驗證。公鑰本身并不能用來簽署交易或推導私鑰，但仍建議您將此資訊保存於安全的場所。</string>
     <string name="reset_step_intro">要完成重置請持續按住OpenTurnKey上的指紋傳感器8秒鐘。</string>
+    <string name="session_timeout">Session timeout</string>
+    <string name="read_response_timeout">Read Response Timeout</string>
 </resources>

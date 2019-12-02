@@ -43,6 +43,8 @@ public class OtkEvent {
         RESET_FAIL,
         EXPORT_WIF_KEY_SUCCESS,
         EXPORT_WIF_KEY_FAIL,
+        SESSION_TIMED_OUT,
+        READ_RESPONSE_TIMED_OUT,
     }
 
     private Type mType;

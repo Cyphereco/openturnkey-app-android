@@ -47,8 +47,6 @@ public class DialogAuthByPin extends AppCompatDialogFragment {
             public boolean onTextComplete (String enteredText) {
                 mPin = enteredText;
                 listener.authByPin(mPin);
-                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
                 DialogAuthByPin.this.dismiss();
                 return false; // Return false to keep the keyboard open else return true to close the keyboard
             }
@@ -68,6 +66,13 @@ public class DialogAuthByPin extends AppCompatDialogFragment {
                     "must implement DialogLocalCurrecyListener");
         }
 
+    }
+
+    @Override
+    public void dismiss() {
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+        super.dismiss();
     }
 
     public interface DialogAuthByPinListener {
