@@ -531,7 +531,9 @@ public class MainActivity extends AppCompatActivity
                     hideStatusDialog();
                     showCommandResultDialog(getString(R.string.unlock_failed), getString(R.string.otk_is_not_locked));
                     mOp = Otk.Operation.OTK_OP_NONE;
-                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
                     Intent intent = new Intent(getApplicationContext(), OpenturnkeyInfoActivity.class);
@@ -562,41 +564,46 @@ public class MainActivity extends AppCompatActivity
                 } else if (type == OtkEvent.Type.WRITE_NOTE_SUCCESS) {
                     hideStatusDialog();
                     showCommandResultDialog(getString(R.string.write_note), getString(R.string.write_note_success));
-                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    ((FragmentOtk) mSelectedFragment).hideCancelButton();
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
                     Intent intent = new Intent(getApplicationContext(), OpenturnkeyInfoActivity.class);
                     intent.putExtra(KEY_OTK_DATA, event.getData());
                     startActivity(intent);
                 } else if (type == OtkEvent.Type.WRITE_NOTE_FAIL) {
                     hideStatusDialog();
                     mOp = Otk.Operation.OTK_OP_NONE;
-                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    ((FragmentOtk) mSelectedFragment).hideCancelButton();
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
                     showStatusDialog(getString(R.string.write_note_fail), event.getFailureReason());
                 }
                 else if (type == OtkEvent.Type.SET_PIN_SUCCESS) {
                     hideStatusDialog();
                     showCommandResultDialog(getString(R.string.set_pin_code), getString(R.string.set_pin_success));
-                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    ((FragmentOtk) mSelectedFragment).hideCancelButton();
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
                     Intent intent = new Intent(getApplicationContext(), OpenturnkeyInfoActivity.class);
                     intent.putExtra(KEY_OTK_DATA, event.getData());
                     startActivity(intent);
                 } else if (type == OtkEvent.Type.SET_PIN_FAIL) {
                     hideStatusDialog();
                     mOp = Otk.Operation.OTK_OP_NONE;
-                    setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
                     ((FragmentOtk) mSelectedFragment).hideCancelButton();
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                    }
                     showStatusDialog(getString(R.string.set_pin_fail), event.getFailureReason());
                 }
                 else if (type == OtkEvent.Type.CHOOSE_KEY_SUCCESS) {
@@ -761,40 +768,6 @@ public class MainActivity extends AppCompatActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void setNfcCommTypeText(int item) {
-        TextView tv;
-        tv = findViewById(R.id.text_nfc_comm_type);
-        try {
-            switch (item) {
-                case R.id.menu_openturnkey_read_generalinformation:
-                    tv.setText(R.string.read_general_information);
-                    return;
-                case R.id.menu_openturnkey_get_key:
-                    tv.setText(R.string.full_pubkey_information);
-                    return;
-                case R.id.menu_openturnkey_unlock:
-                    tv.setText(R.string.unlock);
-                    return;
-                case R.id.menu_openturnkey_set_note:
-                    tv.setText(R.string.write_note);
-                    return;
-                case R.id.menu_openturnkey_choose_key:
-                    tv.setText(R.string.set_key);
-                    return;
-                case R.id.menu_openturnkey_set_pin:
-                    tv.setText(R.string.set_pin_code);
-                    return;
-                case R.id.menu_openturnkey_sign_message:
-                    tv.setText(R.string.sign_message);
-                    return;
-                case R.id.menu_openturnkey_export_wif_key:
-                    return;
-            }
-        } catch (NullPointerException e) {
-            // Do nothing
-        }
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
@@ -853,11 +826,6 @@ public class MainActivity extends AppCompatActivity
                 mIsOpInProcessing = true;
                 ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                 return true;
-            case R.id.menu_openturnkey_read_generalinformation:
-                setNfcCommTypeText(item.getItemId());
-                mOp = Otk.Operation.OTK_OP_NONE;
-                mOtk.cancelOperation();
-                return true;
             case R.id.menu_openturnkey_set_note:
                 // show add note dialog
                 dialogAddNote();
@@ -904,7 +872,10 @@ public class MainActivity extends AppCompatActivity
                     logger.info("Choose key confirmation cancelled!");
                     return false;
                 }
-                setNfcCommTypeText(item.getItemId());
+                mIsOpInProcessing = true;
+                if (mSelectedFragment instanceof FragmentOtk) {
+                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                }
                 if (item.getItemId() == R.id.menu_openturnkey_get_key) {
                     readOtkKeyInformation();
                 }
@@ -952,8 +923,7 @@ public class MainActivity extends AppCompatActivity
     public void addNote(String note) {
         logger.info("note:" + note);
         mOp = Otk.Operation.OTK_OP_WRITE_NOTE;
-        setNfcCommTypeText(R.id.menu_openturnkey_set_note);
-        ((FragmentOtk) mSelectedFragment).showCancelButton();
+        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
         mIsOpInProcessing = true;
         mOtk.setNote(note);
     }
@@ -962,14 +932,13 @@ public class MainActivity extends AppCompatActivity
         mOtk.cancelOperation();
         mOp = Otk.Operation.OTK_OP_NONE;
         mIsOpInProcessing = false;
-        setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
     }
 
     public void setPIN(String pin) {
         logger.debug("pin:" + pin);
         mOp = Otk.Operation.OTK_OP_SET_PIN_CODE;
-        setNfcCommTypeText(R.id.menu_openturnkey_set_pin);
-        ((FragmentOtk) mSelectedFragment).showCancelButton();
+        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
         mOtk.setPIN(pin);
         mIsOpInProcessing = true;
     }
@@ -978,7 +947,7 @@ public class MainActivity extends AppCompatActivity
         mOtk.cancelOperation();
         mOp = Otk.Operation.OTK_OP_NONE;
         mIsOpInProcessing = false;
-        setNfcCommTypeText(R.id.menu_openturnkey_read_generalinformation);
+        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
     }
 
     public void authByPin(String pin) {
@@ -1238,9 +1207,7 @@ public class MainActivity extends AppCompatActivity
 
     public void onCancelButtonClick() {
         Toast.makeText(this, getString(R.string.operation_cancelled), Toast.LENGTH_LONG).show();
-        if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE ||
-                mOp == Otk.Operation.OTK_OP_SET_PIN_CODE || mOp == Otk.Operation.OTK_OP_CHOOSE_KEY ||
-                mOp == Otk.Operation.OTK_OP_SIGN_MESSAGE || mOp == Otk.Operation.OTK_OP_UNLOCK) {
+        if (mOp != Otk.Operation.OTK_OP_SIGN_PAYMENT) {
             mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
             mIsOpInProcessing = false;
             if (mSelectedFragment instanceof FragmentOtk) {
@@ -1585,6 +1552,7 @@ public class MainActivity extends AppCompatActivity
         if (mSelectedFragment instanceof FragmentOtk) {
             ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
         }
+        mIsOpInProcessing = true;
         mOtk.setOperation(mOp);
     }
 
@@ -1609,6 +1577,7 @@ public class MainActivity extends AppCompatActivity
     private void exportPrivateKey() {
         logger.debug("exportPrivateKey");
         mOp = Otk.Operation.OTK_OP_EXPORT_WIF_KEY;
+        mIsOpInProcessing = true;
         if (mSelectedFragment instanceof FragmentOtk) {
             ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
         }

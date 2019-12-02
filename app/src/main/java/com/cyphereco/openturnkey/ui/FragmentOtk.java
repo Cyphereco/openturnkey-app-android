@@ -78,6 +78,9 @@ public class FragmentOtk extends Fragment {
             @Override
             public void onClick(View view) {
                 if (mListener != null) {
+                    if (mCancelTimer != null) {
+                        mCancelTimer.cancel();
+                    }
                     mListener.onCancelButtonClick();
                 }
             }
@@ -91,29 +94,13 @@ public class FragmentOtk extends Fragment {
                 public void onClick(View view) {
                     stopCancelTimer();
                     if (mListener != null) {
+                        if (mCancelTimer != null) {
+                            mCancelTimer.cancel();
+                        }
                         mListener.onCancelButtonClick();
                     }
                 }
             });
-            mCancelTimer = new CountDownTimer(AUTO_DISMISS_MILLIS, 100) {
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    btn.setText(String.format(
-                            Locale.getDefault(), "%s (%d)",
-                            getString(R.string.cancel),
-                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) + 1 //add one so it never displays zero
-                    ));
-                }
-                public void onFinish() {
-                    if (mListener != null) {
-                        mListener.onCancelTimeout();
-                        btn.setVisibility(View.INVISIBLE);
-                        // Default is read general info
-                        tv.setText(R.string.read_general_information);
-                    }
-                }
-            };
-            mCancelTimer.start();
         }
         else if (mOp == Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS) {
             tv.setText(R.string.get_recipient_address);
@@ -122,11 +109,11 @@ public class FragmentOtk extends Fragment {
         }
         else if (mOp == Otk.Operation.OTK_OP_GET_KEY) {
             tv.setText(R.string.full_pubkey_information);
-            btn.setVisibility(View.INVISIBLE);
+            btn.setVisibility(View.VISIBLE);
         }
         else if (mOp == Otk.Operation.OTK_OP_SET_PIN_CODE) {
             tv.setText(R.string.set_pin_code);
-            btn.setVisibility(View.INVISIBLE);
+            btn.setVisibility(View.VISIBLE);
         }
         else if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE) {
             tv.setText(R.string.write_note);
@@ -156,6 +143,29 @@ public class FragmentOtk extends Fragment {
             btn.setVisibility(View.INVISIBLE);
             // Default is read general info
             tv.setText(R.string.read_general_information);
+        }
+
+        if ((mOp != Otk.Operation.OTK_OP_READ_GENERAL_INFO) &&
+                (mOp != Otk.Operation.OTK_OP_NONE)) {
+            mCancelTimer = new CountDownTimer(AUTO_DISMISS_MILLIS, 100) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    btn.setText(String.format(
+                            Locale.getDefault(), "%s (%d)",
+                            getString(R.string.cancel),
+                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) + 1 //add one so it never displays zero
+                    ));
+                }
+                public void onFinish() {
+                    if (mListener != null) {
+                        mListener.onCancelTimeout();
+                        btn.setVisibility(View.INVISIBLE);
+                        // Default is read general info
+                        tv.setText(R.string.read_general_information);
+                    }
+                }
+            };
+            mCancelTimer.start();
         }
     }
 
