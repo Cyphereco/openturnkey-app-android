@@ -751,8 +751,18 @@ public class Otk {
         mTimerWriteCommand = new Timer();
         mTimerWriteCommand.schedule(task,1000 * 15);
 
+        // RESET doesn't care if it's authorized
+        if (cmdToWrite == Command.RESET) {
+            return writeOtkCommand(cmdToWrite, mPin, mArgs, false, mUsingMasterKey);
+        }
         // Check if OTK is authorized
         if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
+            // Consider failed for export keys
+            if (cmdToWrite == Command.EXPORT_WIF_KEY) {
+                sendEvent(new OtkEvent(OtkEvent.Type.EXPORT_WIF_KEY_FAIL, "UNAUTHORIZED"));
+                // Return OK so that caller won't send failed event again.
+                return OTK_RETURN_OK;
+            }
             // Send unauthorized event.
             sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
             // clear cached command so that it won't write command without pin
