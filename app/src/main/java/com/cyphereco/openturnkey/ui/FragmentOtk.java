@@ -41,32 +41,6 @@ public class FragmentOtk extends Fragment {
         return fragment;
     }
 
-    public void hideCancelButton() {
-        // Stop cancel timer anyway
-        stopCancelTimer();
-        Button btn = getView().findViewById(R.id.button_otk_cancel);
-        if (btn != null) {
-            btn.setVisibility(View.INVISIBLE);
-        }
-    }
-
-    public void showCancelButton() {
-        // show cancel timer
-        stopCancelTimer();
-        Button btn = getView().findViewById(R.id.button_otk_cancel);
-        if (btn != null) {
-            btn.setVisibility(View.VISIBLE);
-            btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (mListener != null) {
-                        mListener.onCancelButtonClick();
-                    }
-                }
-            });
-        }
-    }
-
     private void updateOp(View view) {
         logger.info("updateOp mOp:" + mOp.toString());
 
@@ -143,6 +117,11 @@ public class FragmentOtk extends Fragment {
             btn.setVisibility(View.INVISIBLE);
             // Default is read general info
             tv.setText(R.string.read_general_information);
+        }
+
+        // Stop it if it's running
+        if (mCancelTimer != null) {
+            mCancelTimer.cancel();
         }
 
         if ((mOp != Otk.Operation.OTK_OP_READ_GENERAL_INFO) &&

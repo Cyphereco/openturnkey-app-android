@@ -26,9 +26,15 @@ public class KeyPathTextWatcher implements TextWatcher {
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         EditText editText = editTextWeakReference.get();
-        if (editText == null) return;
+        if (editText == null) {
+            isValid = false;
+            return;
+        }
         String now = s.toString();
-        if (now.isEmpty()) return;
+        if (now.isEmpty()) {
+            isValid = false;
+            return;
+        }
         editText.removeTextChangedListener(this);
         try {
             long parsed = Long.parseLong(now);

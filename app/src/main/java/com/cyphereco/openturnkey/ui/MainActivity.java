@@ -498,6 +498,7 @@ public class MainActivity extends AppCompatActivity
                         // Go back to pay fragment
                         mOp = Otk.Operation.OTK_OP_NONE;
                         mIsOpInProcessing = false;
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                         if (mWaitingAddressFromAddrEditor) {
                             // Back to address editor activity
                             backToAddressEditorActivity(mAddressEditorTempAlias,
@@ -600,7 +601,6 @@ public class MainActivity extends AppCompatActivity
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    ((FragmentOtk) mSelectedFragment).hideCancelButton();
                     if (mSelectedFragment instanceof FragmentOtk) {
                         ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                     }
@@ -1327,11 +1327,10 @@ public class MainActivity extends AppCompatActivity
                         mIsOpInProcessing = false;
                         mWaitingAddressFromAddrEditor = false;
                         clearCachedPayFragmentData();
-                        if (isOtkOptionsSet) {
-                            ((FragmentOtk) mSelectedFragment).hideCancelButton();
-                        }
-                        ((FragmentOtk) mSelectedFragment).stopCancelTimer();
                         mOp = Otk.Operation.OTK_OP_NONE;
+                        if (mSelectedFragment instanceof FragmentOtk) {
+                            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+                        }
                         handler.sendMessage(handler.obtainMessage());
                     }
                 })
