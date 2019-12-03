@@ -202,6 +202,9 @@ public class FragmentOtk extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        if (mCancelTimer != null) {
+            mCancelTimer.cancel();
+        }
     }
 
     public void stopCancelTimer() {
