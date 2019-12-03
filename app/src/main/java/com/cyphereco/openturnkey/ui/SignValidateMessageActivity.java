@@ -295,7 +295,12 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData clip = clipboard.getPrimaryClip();
-                    etMsgToBeVerified.setText(clip.getItemAt(0).getText());
+                    try {
+                        etMsgToBeVerified.setText(clip.getItemAt(0).getText());
+                    }
+                    catch (Exception e) {
+                        // Nothing to be pasted
+                    }
                 }
             });
             ImageView ivScanQR = findViewById(R.id.imageViewVerifyScanQR);

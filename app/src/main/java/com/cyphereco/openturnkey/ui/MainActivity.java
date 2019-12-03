@@ -424,6 +424,10 @@ public class MainActivity extends AppCompatActivity
                     Preferences.setTxFee(getApplicationContext(), event.getTxFee());
                 } else if (type == OtkEvent.Type.APPROACH_OTK) {
                     hideProgressDialog();
+                    // Stop cancel timer
+                    if (mSelectedFragment instanceof FragmentOtk) {
+                        ((FragmentOtk) mSelectedFragment).stopCancelTimer();
+                    }
                     // Show dialog to indicate user not to remove OTK
                     //showStatusDialog(getString(R.string.signing_transaction), getString(R.string.do_not_remove_otk));
                 } else if (type == OtkEvent.Type.FIND_UTXO) {
