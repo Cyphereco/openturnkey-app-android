@@ -176,7 +176,9 @@ public class Nfc {
         // request data is required
         recordNum += 1;
 
-        if (pin != null && pin.length() > 0) {
+        // Options
+        if ((pin != null && pin.length() > 0) ||
+                isMore || usingMasterKey) {
             recordNum += 1;
         }
 
