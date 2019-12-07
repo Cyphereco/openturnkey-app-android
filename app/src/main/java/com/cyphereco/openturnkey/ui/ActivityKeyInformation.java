@@ -7,8 +7,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,6 +50,16 @@ public class ActivityKeyInformation extends AppCompatActivity {
 
         updateInfo(otkData);
         setButtonListener();
+
+        TextView txt= (TextView) findViewById(R.id.how_to_validate);
+        txt.setMovementMethod(LinkMovementMethod.getInstance());
+        txt.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String url = "https://openturnkey.com/faq#validate_openturnkey";
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(browserIntent);
+            }
+        });
     }
 
     private void updateInfo(final OtkData otkData) {

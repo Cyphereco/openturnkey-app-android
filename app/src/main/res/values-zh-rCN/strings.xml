@@ -162,7 +162,7 @@
     <string name="failed_to_clear_history">清除交易记录失败</string>
     <string name="how_to_validate">如何验证?</string>
     <string name="master_public_key">主公钥:</string>
-    <string name="pin_unset">PIN码未设定</string>
+    <string name="pin_unset">PIN码未设定, 请先完成PIN码设定!</string>
     <string name="need_fp_preauth">用户必须在OpenTurnKey上使用指纹预先授权才可汇出WIF密钥</string>
     <string name="wallet_import_format_key">钱包导入格式密钥</string>
     <string name="understood">我已了解!</string>
@@ -171,7 +171,7 @@
     <string name="export_wif_warning_message">如非必要，请不要汇出WIF密钥！WIF密钥是拥有存取当前资金完整权限的密钥。如果您将密钥汇出，请确保您的密钥保管于安全的场所，否则您可能会丢失您的资金。</string>
     <string name="full_pubkey_info_warning">完整公钥信息提供用户于验证OpenTurnKey真实性，一个真实的OpenTurnKey应该允许用户选取任一第五层非强化导出密钥并可以使用外部工具验证。公钥本身并不能用来签署交易或推导私钥，但仍建议您将此信息保存于安全的场所。</string>
     <string name="reset_step_intro">要完成重置请持续按住OpenTurnKey上的指纹传感器8秒钟。</string>
-    <string name="session_timeout">Session timeout</string>
+    <string name="session_timeout">通信逾时</string>
     <string name="read_response_timeout">Read Response Timeout</string>
-    <string name="cannot_reach_network">Cannot  reach to the network</string>
+    <string name="cannot_reach_network">无法连接网络</string>
 </resources>

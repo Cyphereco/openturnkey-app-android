@@ -136,8 +136,8 @@
     <string name="confirm">確認</string>
     <string name="invalid_key_path">無效的路徑</string>
     <string name="choose_key">選擇密鑰</string>
-    <string name="choose_key_success">Choose key success</string>
-    <string name="choose_key_fail">Choose key failed</string>
+    <string name="choose_key_success">選擇密鑰成功</string>
+    <string name="choose_key_fail">選擇密鑰失敗</string>
     <string name="sign_message_fail">簽署消息失敗</string>
     <string name="sign_message_success">簽署消息成功</string>
     <string name="data_copied">資料已複製</string>
@@ -162,7 +162,7 @@
     <string name="failed_to_clear_history">清除交易記錄失敗</string>
     <string name="how_to_validate">如何驗證?</string>
     <string name="master_public_key">主公鑰:</string>
-    <string name="pin_unset">PIN碼未設定</string>
+    <string name="pin_unset">PIN碼未設定, 請先完成PIN碼設定!</string>
     <string name="need_fp_preauth">使用者必須在OpenTurnKey上使用指紋預先授權才可匯出WIF密鑰</string>
     <string name="wallet_import_format_key">錢包導入格式密鑰</string>
     <string name="understood">我已瞭解!</string>
@@ -171,7 +171,7 @@
     <string name="pin_code_warning_message">設置PIN碼可以保障您的OpenTurnKey在指紋驗證功能發生問題時，仍然保有一個存取密鑰的備援方法，但多數情況下，如果指紋驗證功能正常，建議您優先使用指紋認證，如要使用PIN碼認證，請僅在信任的安全設備上使用。</string>
     <string name="full_pubkey_info_warning">完整公鑰資訊提供用戶於驗證OpenTurnKey真實性。一個真實的OpenTurnKey應該允許用戶選取任一第五層非强化導出密鑰並可以使用外部工具驗證。公鑰本身并不能用來簽署交易或推導私鑰，但仍建議您將此資訊保存於安全的場所。</string>
     <string name="reset_step_intro">要完成重置請持續按住OpenTurnKey上的指紋傳感器8秒鐘。</string>
-    <string name="session_timeout">Session timeout</string>
+    <string name="session_timeout">通訊逾時</string>
     <string name="read_response_timeout">Read Response Timeout</string>
-    <string name="cannot_reach_network">Cannot  reach to the network</string>
+    <string name="cannot_reach_network">無法連接到網路</string>
 </resources>

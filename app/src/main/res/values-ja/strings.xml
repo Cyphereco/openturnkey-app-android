@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="about">OpenTurnKeyについて</string>
+    <string name="about">ついて</string>
     <string name="clear_history">歴史削除</string>
     <string name="fee_included">手数料込み</string>
     <string name="history">支払歴史</string>
@@ -23,7 +23,7 @@
     <string name="paste_clipboard">ペスト</string>
     <string name="no_payment_records">支払い記録なし</string>
     <string name="recipient_address">入金アドレス</string>
-    <string name="full_pubkey_information">完全のパブリックキーの情報</string>
+    <string name="full_pubkey_information">完全の公開鍵の情報</string>
     <string name="auth_with_pin">PINコード認証</string>
     <string name="tap_openturnkey">OpenTurnKey近づく</string>
     <string name="high_fees">高 (10-20分)</string>
@@ -59,7 +59,7 @@
     <string name="confirm_terminate_op">終了しますか %s？</string>
     <string name="terminate_op">操作の終了</string>
     <string name="sign_message">サインメッセージ</string>
-    <string name="add">増加</string>
+    <string name="add">追加</string>
     <string name="subject_note">ノート:</string>
     <string name="mint_inforamtion">ミント情報</string>
     <string name="lock_state">ロック状態</string>
@@ -85,7 +85,7 @@
     <string name="fail">矢敗</string>
     <string name="copy">コピー</string>
     <string name="alias">別称</string>
-    <string name="delete">消す</string>
+    <string name="delete">削除</string>
     <string name="delete_address_dialog_message">このアドレスを削除?</string>
     <string name="edit">編集する</string>
     <string name="use_all_funds">すべての資金を出す</string>
@@ -133,7 +133,7 @@
     <string name="set_pin_success">PINコードを設定しました</string>
     <string name="set_pin_fail">PINコードの設定に失敗しました</string>
     <string name="warning">注意!</string>
-    <string name="choose_key_warning_message">変更する前に、現在のキーパスをバックアップやキーを輸出する必要があります。 そうしないと、現在の資金へのアクセスが失われる可能性があります。</string>
+    <string name="choose_key_warning_message">変更する前に、現在のキーパスや公開鍵を輸出する必要があります。 そうしないと、現在の資金へのアクセスが失われる可能性があります。</string>
     <string name="confirm">確認する</string>
     <string name="invalid_key_path">無効な径路</string>
     <string name="choose_key">鍵を選んで</string>
@@ -141,7 +141,6 @@
     <string name="choose_key_fail">鍵を選択できませんでした</string>
     <string name="sign_message_fail">署名されたメッセージが失敗しました</string>
     <string name="sign_message_success">署名されたメッセージは成功しました</string>
-    <string name="data_copied">データをピーされた</string>
     <string name="message_to_be_signed">署名するメッセージ</string>
     <string name="message_to_be_signed_hint">メッセージ</string>
     <string name="signed_message">メッセージを署名された</string>
@@ -162,7 +161,7 @@
     <string name="derivative_key_paths">派生径路</string>
     <string name="how_to_validate">検証方法</string>
     <string name="master_public_key">マスター公開鍵</string>
-    <string name="pin_unset">ピンコード未設定</string>
+    <string name="pin_unset">ピンコード未設定, 初にPINコードを設定してください!</string>
     <string name="need_fp_preauth">WIFキーをエクスポートするには、指紋認証でOpenTurnKeyを事前に承認する必要があります！</string>
     <string name="wallet_import_format_key">ウォレットに輸入的形式の鍵</string>
     <string name="understood">了解しました。</string>
@@ -171,7 +170,8 @@
     <string name="pin_code_warning_message">PINコード設定は、OpenTurnKey指紋認証で問題が発生した場合に、キーへの代替バックアップアクセスを保証します。 ほとんどの場合、可能であれば指紋認証を使用することをお勧めします。 PINコード認証を使用する場合は、信頼できる安全なデバイスでのみ使用するようにしてください。</string>
     <string name="full_pubkey_info_warning">完全な公開鍵情報は、OpenTurnKeyの信頼性を検証するためのものです。 本物のOpenTurnKeyを使用すると、ユーザーは外部ツールで検証できるレベル5の派生非強化キーを選択できます。 公開鍵自体を支払いの署名に使用したり、秘密鍵を導出したりすることはできませんが、この情報は安全な保管場所にのみ保管することをお勧めします。</string>
     <string name="reset_step_intro">リセットプロセスを完了するには、OpenTurnKeyの指紋センサーを8秒間押し続けます。</string>
-    <string name="session_timeout">Session timeout</string>
+    <string name="session_timeout">通信タイムアウト</string>
     <string name="read_response_timeout">Read Response Timeout</string>
-    <string name="cannot_reach_network">Cannot  reach to the network</string>
+    <string name="cannot_reach_network">ネットワークと通信できません</string>
+    <string name="data_copied">データをコピーされた</string>
 </resources>

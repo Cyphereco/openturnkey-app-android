@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.nfc.NfcAdapter;
 import android.os.Handler;
 import android.os.Message;
@@ -122,9 +123,11 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
         ImageView iv = findViewById(R.id.lock_state);
         if (OtkState.LockState.LOCKED == otkData.getOtkState().getLockState()) {
             iv.setImageResource(R.drawable.ic_lock_outline_black_24dp);
+            iv.setColorFilter(Color.argb(255, 0xf4, 0x43, 0x36));
         }
         else {
             iv.setImageResource(R.drawable.ic_lock_open_black_24dp);
+            iv.setColorFilter(Color.argb(0xff, 0x4c, 0xaf, 0x50));
         }
 
         // Battery level
