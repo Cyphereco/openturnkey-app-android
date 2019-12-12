@@ -91,6 +91,20 @@ public class BlockCypher extends BtcBase {
         return BigDecimal.valueOf(-1);
     }
 
+    public Transaction getTransaction(String hash) {
+        Transaction tx = null;
+        try {
+            tx = mBcCtx.getTransactionService().getTransaction(hash);
+        }
+        catch (BlockCypherException e) {
+            logger.error("e:" + e.toString());
+        }
+        catch (Exception e) {
+            logger.error("e:" + e.toString());
+        }
+        return tx;
+    }
+
     /**
      * Send bitcoin.
      * @param from From address
@@ -142,8 +156,6 @@ public class BlockCypher extends BtcBase {
             }
             UnsignedTx utx = new UnsignedTx(from, to, a, txFees, unsignedTx.getTosign());
             return utx;
-//            ArrayList al = new ArrayList<String>();
-//            return unsignedTx.getTosign();
         }
         catch (BlockCypherException e) {
             logger.error("e:" + e.toString());
@@ -213,8 +225,9 @@ public class BlockCypher extends BtcBase {
             mCachedUnsignedTx.addSignature(signedString);
         }
 
+        Transaction trans = null;
         try {
-            Transaction trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
+            trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
             // Get tx for raw
             Transaction t = mBcCtx.getTransactionService().getTransaction(trans.getHash());
             logger.info("TX Sent: " + t.toString());
@@ -224,11 +237,19 @@ public class BlockCypher extends BtcBase {
         catch (BlockCypherException e) {
             logger.info("e:" + e.toString());
             mCachedUnsignedTx = null;
+            if (trans != null) {
+                // We don't have raw but it's succcess
+                return trans;
+            }
             throw e;
         }
         catch (Exception e) {
             logger.info("e:" + e.toString());
             mCachedUnsignedTx = null;
+            if (trans != null) {
+                // We don't have raw but it's succcess
+                return trans;
+            }
             throw e;
         }
     }

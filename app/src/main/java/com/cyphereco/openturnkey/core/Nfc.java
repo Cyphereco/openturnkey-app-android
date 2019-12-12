@@ -246,7 +246,7 @@ public class Nfc {
             }
             // pin
             if (pin != null && pin.length() > 0) {
-                logger.info("pin=" + pin);
+                logger.info("pin=" + "***");
                 options += "pin=" + pin + OTK_REQUEST_DATA_DELIM;
             }
 

@@ -44,10 +44,6 @@ public class SplashActivity extends AppCompatActivity {
                 logger.info("Permission is not granted");
             }
 
-            // Test code To be removed
-            OpenturnkeyDB mOtkDB = new OpenturnkeyDB(getApplicationContext());
-            logger.debug("trans:" + mOtkDB.getAllTransaction());
-
             if (MainActivity.isRunning()) {
                 Intent intent = new Intent(SplashActivity.this, MainActivity.class);
                 startActivity(intent);

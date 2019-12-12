@@ -319,7 +319,16 @@ public class ActivityTransactionInfo extends AppCompatActivity {
             ivHelpIcon.setVisibility(View.INVISIBLE);
             ivResultIcon.setImageResource(R.drawable.ic_success_24dp);
             mBtnViewOnline.setVisibility(View.VISIBLE);
-            tvResult.setText(R.string.success);
+            // append confirmation number
+            int confirmations = item.getConfirmations();
+            String c;
+            if (confirmations < 0) {
+                c = "(?)";
+            }
+            else {
+                c = "(" + confirmations + ")";
+            }
+            tvResult.setText(getString(R.string.success) + c);
             tvTransactionId.setText(item.getHash());
         }
         else {

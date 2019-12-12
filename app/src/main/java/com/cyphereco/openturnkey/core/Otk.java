@@ -114,6 +114,7 @@ public class Otk {
     static String mPin;
     // Periodic Timer
     static Timer mTimerRate = new Timer();
+    static Timer mTimerUpdateConfirmation = new Timer();
     static Timer mTimerTxFee = new Timer();
     static Timer mTimerWriteCommand = null;
     static Timer mTimerReadResponse = null;
@@ -165,13 +166,11 @@ public class Otk {
                             clearOp();
                             break;
                         case OTK_MSG_COMPLETE_PAYMENT_FAILED:
-                            tx = (Tx)msg.obj;
-                            if (tx == null) {
-                                event = new OtkEvent(OtkEvent.Type.COMPLETE_PAYMENT_FAIL, "Unknown Reason");
+                            String desc = (String)msg.obj;
+                            if (desc == null) {
+                                desc = mCtx.getString(R.string.unknown_reason);
                             }
-                            else {
-                                event = new OtkEvent(OtkEvent.Type.COMPLETE_PAYMENT_FAIL, tx);
-                            }
+                            event = new OtkEvent(OtkEvent.Type.COMPLETE_PAYMENT_FAIL, desc);
                             sendEvent(event);
                             clearOp();
                             break;
@@ -233,6 +232,32 @@ public class Otk {
                 }
             };
             mTimerTxFee.schedule(updateTxFeeTask,100,1000 * 60 * 60);
+
+            // Timer task which calling get current exchange api.
+            TimerTask updateConfirmationTask = new TimerTask() {
+                public void run () {
+                    OpenturnkeyDB mOtkDB = new OpenturnkeyDB(mCtx);
+                    List<DBTransItem> dataset = mOtkDB.getAllTransaction();
+                    Transaction tx;
+                    for (int i = 0; i < dataset.size(); i++) {
+                        logger.debug("size:{} now:{}", dataset.size(), i);
+                        DBTransItem dbItem = dataset.get(i);
+                        tx = null;
+                        if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt() && dbItem.getConfirmations() < 6) {
+                            logger.debug("getting tx:{} confirmation:{}", dbItem.getHash(), dbItem.getConfirmations());
+                            tx = BlockCypher.getInstance(mCtx).getTransaction(dbItem.getHash());
+                            if (tx != null) {
+                                // Update db
+                                dbItem.setConfrimations(tx.getConfirmations().intValue());
+                                mOtkDB.updateTransaction(dbItem);
+                                logger.debug("Got tx:{} confirmation:{}", dbItem.getHash(), dbItem.getConfirmations());
+                            }
+                        }
+                    }
+                }
+            };
+            // 30 minutes timer
+            mTimerUpdateConfirmation.schedule(updateConfirmationTask,5000,1000 * 60 * 30);
         }
         return mOtk;
     }
@@ -749,6 +774,7 @@ public class Otk {
             }
         };
         mTimerWriteCommand = new Timer();
+
         mTimerWriteCommand.schedule(task,1000 * 15);
 
         // RESET doesn't care if it's authorized
@@ -913,7 +939,8 @@ public class Otk {
              */
             return OTK_RETURN_ERROR_OP_IN_PROCESSING;
         }
-        logger.info("Set pin:" + pin);
+        // don't log pin
+        logger.info("Set pin:xxxx");
         mOp = Operation.OTK_OP_SET_PIN_CODE;
         mArgs.clear();
         mArgs.add(pin);
@@ -1048,15 +1075,17 @@ public class Otk {
 
     static private int completePayment(final String publicKey, final List<String> sigResult) {
         logger.info("completePayment");
+
         Thread t = new Thread() {
             @Override
             public void run() {
                 synchronized (this) {
+                    Tx tx = null;
                     try {
                         Transaction trans = BlockCypher.getInstance(mCtx).completeSendBitcoin(publicKey, sigResult);
                         if (trans != null) {
                             // Success
-                            Tx tx = new Tx(mFrom, mTo, trans, Tx.Status.STATUS_SUCCESS);
+                            tx = new Tx(mFrom, mTo, trans, Tx.Status.STATUS_SUCCESS);
                             Message msg = new Message();
                             msg.what = OTK_MSG_BITCOIN_SENT;
                             msg.obj = tx;
@@ -1072,11 +1101,16 @@ public class Otk {
                     }
                     catch (BlockCypherException e) {
                         // parse error
-                        String reason = BlockCypher.parseError(e.getBlockCypherError().getErrors().get(0).toString());
-                        Tx tx = new Tx(mFrom, mTo, e.getBlockCypherError().getTx(), Tx.Status.STATUS_UNKNOWN_FAILURE, reason);
+                        String reason = "";
+                        if (e != null && e.getBlockCypherError() != null && e.getBlockCypherError().getErrors() != null) {
+                            reason = BlockCypher.parseError(e.getBlockCypherError().getErrors().get(0).toString());
+                        }
+                        else if (e.getMessage() != null) {
+                             reason = e.getMessage();
+                        }
                         Message msg = new Message();
                         msg.what = OTK_MSG_COMPLETE_PAYMENT_FAILED;
-                        msg.obj = tx;
+                        msg.obj = reason;
                         mHandler.sendMessage(msg);
                     }
                     catch (Exception e) {

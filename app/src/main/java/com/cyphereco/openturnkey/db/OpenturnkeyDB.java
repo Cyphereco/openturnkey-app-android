@@ -37,6 +37,7 @@ public class OpenturnkeyDB {
     private static final String TRANS_STATUS_COL = "status";
     private static final String TRANS_COMMENTS_COL = "comments";
     private static final String TRANS_RAW_DATA_COL = "rawData";
+    private static final String TRANS_CONFIRMATIONS_COL = "confirmations";
 
     // Columns of address book
     private static final String ADDRBOOK_ADDR_KEY_ID_COL = "_id";
@@ -58,7 +59,8 @@ public class OpenturnkeyDB {
             TRANS_FEE_UNIT_STR_COL + " VARCHAR(32), " +
             TRANS_STATUS_COL + " INTEGER, " +
             TRANS_COMMENTS_COL + " TEXT, " +
-            TRANS_RAW_DATA_COL + " TEXT " +
+            TRANS_RAW_DATA_COL + " TEXT, " +
+            TRANS_CONFIRMATIONS_COL + " INTEGER " +
             ");";
 
     /**
@@ -89,6 +91,7 @@ public class OpenturnkeyDB {
         item.setStatus(cursor.getInt(9));
         item.setComment(cursor.getString(10));
         item.setRawData(cursor.getString(11));
+        item.setConfrimations(cursor.getInt(12));
 
         return item;
     }
@@ -136,6 +139,7 @@ public class OpenturnkeyDB {
         cv.put(TRANS_STATUS_COL, item.getStatus());
         cv.put(TRANS_COMMENTS_COL, item.getComment());
         cv.put(TRANS_RAW_DATA_COL, item.getRawData());
+        cv.put(TRANS_CONFIRMATIONS_COL, item.getConfirmations());
 
         long id = otkDB.insert(TRANS_TABLE_NAME, null, cv);
         item.setId(id);
@@ -154,6 +158,7 @@ public class OpenturnkeyDB {
         cv.put(TRANS_STATUS_COL, item.getStatus());
         cv.put(TRANS_COMMENTS_COL, item.getComment());
         cv.put(TRANS_RAW_DATA_COL, item.getRawData());
+        cv.put(TRANS_CONFIRMATIONS_COL, item.getConfirmations());
 
         String where = TRANS_KEY_ID_COL + "=" + item.getId();
 

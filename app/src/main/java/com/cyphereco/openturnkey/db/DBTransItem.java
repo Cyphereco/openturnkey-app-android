@@ -12,6 +12,7 @@ public class DBTransItem implements java.io.Serializable {
     private double fee;
     private String feeUnitString;
     private int status;
+    private int confirmations;
     private String hash;
     private String comment;
     private String rawData;
@@ -27,11 +28,12 @@ public class DBTransItem implements java.io.Serializable {
         this.status = 0;
         this.comment = "";
         this.rawData = "";
+        this.confirmations = 0;
     }
 
     public DBTransItem(long id, long datetime, String hash, String payerAddr, String payeeAddr,
                        double cryptoCurrencyAmount, double fee, int status,
-                       String comment, String rawData) {
+                       String comment, String rawData, int confirmations) {
         this.id = id;
         this.datetime = datetime;
         this.hash = hash;
@@ -42,6 +44,7 @@ public class DBTransItem implements java.io.Serializable {
         this.status = status;
         this.comment = comment;
         this.rawData = rawData;
+        this.confirmations = confirmations;
     }
 
     public long getId() {
@@ -103,9 +106,15 @@ public class DBTransItem implements java.io.Serializable {
     public int getStatus() {
         return status;
     }
+    public int getConfirmations() {
+        return confirmations;
+    }
 
     public void setStatus(int status) {
         this.status = status;
+    }
+    public void setConfrimations(int confirmations) {
+        this.confirmations = confirmations;
     }
 
     public String getComment() {

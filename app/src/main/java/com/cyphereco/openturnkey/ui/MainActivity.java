@@ -488,12 +488,19 @@ public class MainActivity extends AppCompatActivity
                     mOtk.cancelOperation();
                     // Make sure we are in FragmentOtk
                     if (mSelectedFragment instanceof FragmentOtk) {
-                        // Add tx to db
-                        addTxToDb(event.getTx());
                         // TODO: Go to history page and show the tx
                         goToHistoryFragment();
                         // Show error in doalog
-                        dialogSentBtcFailed(event.getTx().getDesc());
+                        String reason;
+                        if (event.getTx() != null) {
+                            // Add tx to db
+                            addTxToDb(event.getTx());
+                            reason = event.getTx().getDesc();
+                        }
+                        else {
+                            reason = event.getFailureReason();
+                        }
+                        dialogSentBtcFailed(reason);
                     }
 
                 } else if (type == OtkEvent.Type.RECIPIENT_ADDRESS) {
@@ -1472,7 +1479,7 @@ public class MainActivity extends AppCompatActivity
         DBTransItem dbTrans = new DBTransItem(0,
                 BtcUtils.convertDateTimeStringToLong(tx.getTime()) + mGMTOffset,
                 tx.getHash(), tx.getFrom(), tx.getTo(), tx.getAmount(), tx.getFee(),
-                tx.getStatus().toInt(), tx.getDesc(), tx.getRaw());
+                tx.getStatus().toInt(), tx.getDesc(), tx.getRaw(), tx.getConfirmations());
         OpenturnkeyDB otkDB = new OpenturnkeyDB(getApplicationContext());
         otkDB.addTransaction(dbTrans);
         logger.debug("DB tx count:{}", otkDB.getTransactionCount());

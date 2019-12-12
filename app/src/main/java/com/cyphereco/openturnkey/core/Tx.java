@@ -20,6 +20,7 @@ public class Tx {
     private String mHash;
     private Status mStatus;
     private String mDesc;
+    private int    mConfirmations;
 
     public enum Status {
         STATUS_SUCCESS(0),
@@ -59,6 +60,7 @@ public class Tx {
         mTime = trans.getReceived();
         mStatus = status;
         mDesc = errorDesc;
+        mConfirmations = trans.getConfirmations().intValue();
     }
 
     public Tx(String hash, String from, String to, double amount, double fee, String time, String raw, Status status, String errorDesc) {
@@ -84,6 +86,8 @@ public class Tx {
     public Status getStatus() { return mStatus;}
     public void setFrom(String from) {mFrom = from;}
     public void setTo(String to) {mTo = to;}
+    public void setDesc(String desc) { mDesc = desc;}
+    public int getConfirmations() { return mConfirmations;}
     public String toString() {
         return "Raw:" + mRaw +
                 "\nFrom:" + mFrom +
@@ -93,6 +97,7 @@ public class Tx {
                 "\nFee:" + mFee +
                 "\nTime:" + mTime +
                 "\nStatus:" + mStatus +
+                "\nConfirmations:" + mConfirmations +
                 "\nError desc:" + mDesc;
     }
 }
