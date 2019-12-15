@@ -245,7 +245,7 @@ public class Otk {
                         tx = null;
                         if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt() && dbItem.getConfirmations() < 6) {
                             logger.debug("getting tx:{} confirmation:{}", dbItem.getHash(), dbItem.getConfirmations());
-                            tx = BlockCypher.getInstance(mCtx).getTransaction(dbItem.getHash());
+                            tx = BlockCypher.getInstance(mCtx).getTransaction(dbItem.getHash(), false);
                             if (tx != null) {
                                 // Update db
                                 dbItem.setConfrimations(tx.getConfirmations().intValue());

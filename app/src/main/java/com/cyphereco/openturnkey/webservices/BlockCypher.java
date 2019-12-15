@@ -46,7 +46,9 @@ public class BlockCypher extends BtcBase {
             network = "main";
         }
         logger.info("newBlockCypherContext:{}", network);
-        mBcCtx = new BlockCypherContext("v1", "btc", network, "7744d177ce1e4ef48c7431fcb55531b9");
+        // Don't use the token for now.
+        //mBcCtx = new BlockCypherContext("v1", "btc", network, "7744d177ce1e4ef48c7431fcb55531b9");
+        mBcCtx = new BlockCypherContext("v1", "btc", network, "");
     }
 
     private BlockCypher(Context ctx) {
@@ -91,10 +93,10 @@ public class BlockCypher extends BtcBase {
         return BigDecimal.valueOf(-1);
     }
 
-    public Transaction getTransaction(String hash) {
+    public Transaction getTransaction(String hash, boolean includeHex) {
         Transaction tx = null;
         try {
-            tx = mBcCtx.getTransactionService().getTransaction(hash);
+            tx = mBcCtx.getTransactionService().getTransaction(hash, includeHex);
         }
         catch (BlockCypherException e) {
             logger.error("e:" + e.toString());
@@ -229,7 +231,7 @@ public class BlockCypher extends BtcBase {
         try {
             trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
             // Get tx for raw
-            Transaction t = mBcCtx.getTransactionService().getTransaction(trans.getHash());
+            Transaction t = mBcCtx.getTransactionService().getTransaction(trans.getHash(), true);
             logger.info("TX Sent: " + t.toString());
             mCachedUnsignedTx = null;
             return t;

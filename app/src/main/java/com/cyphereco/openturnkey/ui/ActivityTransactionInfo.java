@@ -325,8 +325,11 @@ public class ActivityTransactionInfo extends AppCompatActivity {
             if (confirmations < 0) {
                 c = "(?)";
             }
-            else {
+            else if (confirmations < 6){
                 c = "(" + confirmations + ")";
+            }
+            else {
+                c = "(>=6)";
             }
             tvResult.setText(getString(R.string.success) + c);
             tvTransactionId.setText(item.getHash());
