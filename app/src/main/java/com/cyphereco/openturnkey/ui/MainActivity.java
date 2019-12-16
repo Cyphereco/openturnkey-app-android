@@ -1,6 +1,5 @@
 package com.cyphereco.openturnkey.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ClipData;
@@ -1078,8 +1077,13 @@ public class MainActivity extends AppCompatActivity
         DialogSendBtcResult dialog = new DialogSendBtcResult();
         Bundle bundle = new Bundle();
         // result string id
-        bundle.putInt("sendBtcResult", R.string.send_btc_failed);
+        bundle.putInt("sendBtcResult", R.string.transaction_not_executed);
         bundle.putString("failureReason", reason);
+        /* Here we want to replace the reason from the web service to
+         * out own strings. Such as "Not enough balance, transaction canceled"
+         * or "Transaction cannot be completed at the moment, try again later"
+         */
+        //bundle.putString("failureReason", getString(R.string.try_later));
         dialog.setArguments(bundle);
         dialog.show(getSupportFragmentManager(), "dialog");
     }

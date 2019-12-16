@@ -114,6 +114,7 @@
         android:id="@+id/btc_address_context"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:autoLink="web"
         android:gravity="center"
         android:maxLength="34"
         android:text="1LG9fDp3do4X2tEf4k7V4uCYhNUmSq6vL8"

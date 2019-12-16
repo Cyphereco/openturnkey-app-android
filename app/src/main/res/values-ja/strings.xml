@@ -174,5 +174,6 @@
     <string name="read_response_timeout">Read Response Timeout</string>
     <string name="cannot_reach_network">ネットワークと通信できません</string>
     <string name="data_copied">データをコピーされた</string>
+    <string name="try_later">現在、取引は実行されません。しばらくしてからもう一度お試しください！</string>
     <string name="balance_insufficient">Balance Insufficient</string>
 </resources>

@@ -174,5 +174,6 @@
     <string name="session_timeout">通信逾时</string>
     <string name="read_response_timeout">Read Response Timeout</string>
     <string name="cannot_reach_network">无法连接网络</string>
+    <string name="try_later">目前无法完成交易,请稍后再试!</string>
     <string name="balance_insufficient">Balance Insufficient</string>
 </resources>

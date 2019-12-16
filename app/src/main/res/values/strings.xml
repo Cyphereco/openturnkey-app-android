@@ -192,6 +192,7 @@
     <string name="session_timeout">Session Timeout</string>
     <string name="read_response_timeout">Read Response Timeout</string>
     <string name="cannot_reach_network">Cannot  reach to the network</string>
+    <string name="try_later">Transaction cannot be completed at the moment, please try again later!</string>
     <string name="balance_insufficient">Balance Insufficient</string>
 
 </resources>
