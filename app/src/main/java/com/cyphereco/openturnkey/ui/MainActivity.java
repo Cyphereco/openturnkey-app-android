@@ -1,6 +1,5 @@
 package com.cyphereco.openturnkey.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ClipData;
@@ -1078,8 +1077,9 @@ public class MainActivity extends AppCompatActivity
         DialogSendBtcResult dialog = new DialogSendBtcResult();
         Bundle bundle = new Bundle();
         // result string id
-        bundle.putInt("sendBtcResult", R.string.send_btc_failed);
+        bundle.putInt("sendBtcResult", R.string.transaction_not_executed);
         bundle.putString("failureReason", reason);
+        //bundle.putString("failureReason", getString(R.string.try_later));
         dialog.setArguments(bundle);
         dialog.show(getSupportFragmentManager(), "dialog");
     }
