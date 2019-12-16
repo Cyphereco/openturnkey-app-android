@@ -1079,6 +1079,10 @@ public class MainActivity extends AppCompatActivity
         // result string id
         bundle.putInt("sendBtcResult", R.string.transaction_not_executed);
         bundle.putString("failureReason", reason);
+        /* Here we want to replace the reason from the web service to
+         * out own strings. Such as "Not enough balance, transaction canceled"
+         * or "Transaction cannot be completed at the moment, try again later"
+         */
         //bundle.putString("failureReason", getString(R.string.try_later));
         dialog.setArguments(bundle);
         dialog.show(getSupportFragmentManager(), "dialog");
