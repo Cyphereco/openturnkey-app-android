@@ -9,12 +9,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -99,6 +101,16 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
                 }
             }
         };
+
+        final TextView txt= (TextView) findViewById(R.id.btc_address_context);
+        txt.setMovementMethod(LinkMovementMethod.getInstance());
+        txt.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String url = "https://bitref.com/" + txt.getText().toString();
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(browserIntent);
+            }
+        });
 
         updateInfo(otkData);
     }

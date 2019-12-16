@@ -59,7 +59,7 @@
     <string name="qr_code_scan_cancelled">QR Code Scan Cancelled</string>
     <string name="get_recipient_address">Get Recipient Address</string>
     <string name="operation_cancelled">Operartion cancelled</string>
-    <string name="send_btc_failed">Send BTC Failed</string>
+    <string name="transaction_not_executed">Transaction Not Executed</string>
     <string name="transaction_reciept">Transaction Reciept</string>
     <string name="subject_reason">Reason:</string>
     <string name="processing">Processing Transaction</string>
@@ -192,5 +192,6 @@
     <string name="session_timeout">Session Timeout</string>
     <string name="read_response_timeout">Read Response Timeout</string>
     <string name="cannot_reach_network">Cannot  reach to the network</string>
+    <string name="try_later">Transaction cannot be completed at the moment, please try again later!</string>
 
 </resources>

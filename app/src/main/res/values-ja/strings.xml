@@ -42,7 +42,7 @@
     <string name="get_recipient_address">入金アドレスを取得</string>
     <string name="nfc_unavailable">NFCは利用できません</string>
     <string name="operation_cancelled">操作がキャンセルされました</string>
-    <string name="send_btc_failed">BTCの発送に失敗しました</string>
+    <string name="transaction_not_executed">取引は実行されません</string>
     <string name="title_activity_qrcode_scan">QRコードをスキャン</string>
     <string name="qr_code_scan_cancelled">QRコード撮りキャンセル</string>
     <string name="subject_reason">理由:</string>
@@ -174,4 +174,5 @@
     <string name="read_response_timeout">Read Response Timeout</string>
     <string name="cannot_reach_network">ネットワークと通信できません</string>
     <string name="data_copied">データをコピーされた</string>
+    <string name="try_later">現在、取引は実行されません。しばらくしてからもう一度お試しください！</string>
 </resources>
