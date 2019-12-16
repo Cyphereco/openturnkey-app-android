@@ -174,4 +174,5 @@
     <string name="session_timeout">通訊逾時</string>
     <string name="read_response_timeout">Read Response Timeout</string>
     <string name="cannot_reach_network">無法連接到網路</string>
+    <string name="balance_insufficient">Balance Insufficient</string>
 </resources>

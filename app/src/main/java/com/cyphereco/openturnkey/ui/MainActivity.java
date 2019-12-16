@@ -430,7 +430,7 @@ public class MainActivity extends AppCompatActivity
                     }
                     // Show dialog to indicate user not to remove OTK
                     //showStatusDialog(getString(R.string.signing_transaction), getString(R.string.do_not_remove_otk));
-                } else if (type == OtkEvent.Type.FIND_UTXO) {
+                } else if (type == OtkEvent.Type.FIND_UTXO || type == OtkEvent.Type.CHECKING_BALANCE_FOR_PAYMENT) {
                     // Stop cancel timer
                     if (mSelectedFragment instanceof FragmentOtk) {
                         // Update rate

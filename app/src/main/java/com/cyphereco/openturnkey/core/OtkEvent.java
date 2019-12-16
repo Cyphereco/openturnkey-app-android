@@ -45,6 +45,7 @@ public class OtkEvent {
         EXPORT_WIF_KEY_FAIL,
         SESSION_TIMED_OUT,
         READ_RESPONSE_TIMED_OUT,
+        CHECKING_BALANCE_FOR_PAYMENT,
     }
 
     private Type mType;

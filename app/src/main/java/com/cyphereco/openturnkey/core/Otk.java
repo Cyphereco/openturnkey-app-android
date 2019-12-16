@@ -22,6 +22,7 @@ import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.TxFee;
+import com.cyphereco.openturnkey.webservices.BlockChainInfo;
 import com.cyphereco.openturnkey.webservices.BlockCypher;
 
 import org.slf4j.Logger;
@@ -55,6 +56,7 @@ public class Otk {
     private static final int OTK_MSG_COMPLETE_PAYMENT_FAILED = 5;
     private static final int OTK_MSG_SESSION_TIMED_OUT = 6;
     private static final int OTK_MSG_READ_RESPONSE_TIMED_OUT = 7;
+    private static final int OTK_MSG_BALANCE_UPDATE = 8;
 
 
     public enum Operation {
@@ -197,6 +199,23 @@ public class Otk {
                             cmd = (Command) msg.obj;
                             sendEvent(new OtkEvent(OtkEvent.Type.READ_RESPONSE_TIMED_OUT, cmd.toString()));
                             break;
+                        case OTK_MSG_BALANCE_UPDATE:
+                            if (mOp == Operation.OTK_OP_SIGN_PAYMENT) {
+                                BigDecimal b = (BigDecimal)msg.obj;
+                                logger.debug("balance:{}", b.doubleValue());
+                                if (BtcUtils.satoshiToBtc(b.longValue()) < mAmount) {
+                                    // Insufficient amount
+                                    sendEvent(new OtkEvent(OtkEvent.Type.SEND_BITCOIN_FAIL, mCtx.getString(R.string.balance_insufficient)));
+                                    break;
+                                }
+                                // Continue payment
+                                sendBitcoin(mFrom, mTo, mAmount, mTxFees, mFeeIncluded);
+                                event = new OtkEvent(OtkEvent.Type.FIND_UTXO);
+                                sendEvent(event);
+                                break;
+                            }
+                            // Ignore it if it's not in sign payment process
+                            break;
                         default:
                     }
                 }
@@ -238,17 +257,17 @@ public class Otk {
                 public void run () {
                     OpenturnkeyDB mOtkDB = new OpenturnkeyDB(mCtx);
                     List<DBTransItem> dataset = mOtkDB.getAllTransaction();
-                    Transaction tx;
+                    int latestBlockHight = BlockChainInfo.getInstance(mCtx).getLatestBlochHight();
                     for (int i = 0; i < dataset.size(); i++) {
                         logger.debug("size:{} now:{}", dataset.size(), i);
                         DBTransItem dbItem = dataset.get(i);
-                        tx = null;
                         if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt() && dbItem.getConfirmations() < 6) {
                             logger.debug("getting tx:{} confirmation:{}", dbItem.getHash(), dbItem.getConfirmations());
-                            tx = BlockCypher.getInstance(mCtx).getTransaction(dbItem.getHash(), false);
-                            if (tx != null) {
+                            int blockHight = BlockChainInfo.getInstance(mCtx).getTxBlockHight(dbItem.getHash());
+                            int c = latestBlockHight - blockHight + 1;
+                            if (c > 0) {
                                 // Update db
-                                dbItem.setConfrimations(tx.getConfirmations().intValue());
+                                dbItem.setConfrimations(c);
                                 mOtkDB.updateTransaction(dbItem);
                                 logger.debug("Got tx:{} confirmation:{}", dbItem.getHash(), dbItem.getConfirmations());
                             }
@@ -257,7 +276,7 @@ public class Otk {
                 }
             };
             // 30 minutes timer
-            mTimerUpdateConfirmation.schedule(updateConfirmationTask,5000,1000 * 60 * 30);
+            mTimerUpdateConfirmation.schedule(updateConfirmationTask, 5000,1000 * 60 * 30);
         }
         return mOtk;
     }
@@ -538,9 +557,17 @@ public class Otk {
                 }
                 mFrom = otkData.getSessionData().getAddress();
                 mSessionId = otkData.getSessionData().getSessionId();
-                sendBitcoin(mFrom, mTo, mAmount, mTxFees, mFeeIncluded);
-                OtkEvent event = new OtkEvent(OtkEvent.Type.FIND_UTXO);
-                sendEvent(event);
+                if (mAmount > 0) {
+                    // Check balance
+                    getBalance(mFrom);
+                    OtkEvent event = new OtkEvent(OtkEvent.Type.CHECKING_BALANCE_FOR_PAYMENT);
+                    sendEvent(event);
+                }
+                else {
+                    sendBitcoin(mFrom, mTo, mAmount, mTxFees, mFeeIncluded);
+                    OtkEvent event = new OtkEvent(OtkEvent.Type.FIND_UTXO);
+                    sendEvent(event);
+                }
             }
             else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_SIGNATURE) {
                 processResponseRead();
@@ -1038,7 +1065,7 @@ public class Otk {
         return OTK_RETURN_OK;
     }
 
-    private void sendBitcoin(final String from, final String to, final double amount, final long txFees, final boolean feeIncluded) {
+    private static void sendBitcoin(final String from, final String to, final double amount, final long txFees, final boolean feeIncluded) {
         Thread t = new Thread() {
             @Override
             public void run() {
@@ -1082,14 +1109,25 @@ public class Otk {
                 synchronized (this) {
                     Tx tx = null;
                     try {
-                        Transaction trans = BlockCypher.getInstance(mCtx).completeSendBitcoin(publicKey, sigResult);
-                        if (trans != null) {
-                            // Success
-                            tx = new Tx(mFrom, mTo, trans, Tx.Status.STATUS_SUCCESS);
-                            Message msg = new Message();
-                            msg.what = OTK_MSG_BITCOIN_SENT;
-                            msg.obj = tx;
-                            mHandler.sendMessage(msg);
+                        tx = BlockCypher.getInstance(mCtx).completeSendBitcoin(publicKey, sigResult);
+                        if (tx != null) {
+                            if (tx.getStatus() == Tx.Status.STATUS_SUCCESS) {
+                                // Success
+                                Message msg = new Message();
+                                msg.what = OTK_MSG_BITCOIN_SENT;
+                                msg.obj = tx;
+                                mHandler.sendMessage(msg);
+                            }
+                            else {
+                                tx.setFrom(mFrom);
+                                tx.setTo(mTo);
+                                tx.setAmount(mAmount);
+                                tx.setFee(mTxFees);
+                                Message msg = new Message();
+                                msg.what = OTK_MSG_COMPLETE_PAYMENT_FAILED;
+                                msg.obj = tx;
+                                mHandler.sendMessage(msg);
+                            }
                         }
                         else {
                             // failed
@@ -1131,9 +1169,17 @@ public class Otk {
             @Override
             public void run() {
                 synchronized (this) {
-                    BigDecimal b = BlockCypher.getInstance(mCtx).getBalance(address);
-                    OtkEvent event = new OtkEvent(OtkEvent.Type.BALANCE_UPDATE, address, b, mCurrencyExRate);
-                    sendEvent(event);
+                    BigDecimal b = BlockChainInfo.getInstance(mCtx).getBalance(address);
+                    if (mOp == Operation.OTK_OP_SIGN_PAYMENT) {
+                        Message msg = new Message();
+                        msg.what = OTK_MSG_BALANCE_UPDATE;
+                        msg.obj = b;
+                        mHandler.sendMessage(msg);
+                    }
+                    else {
+                        OtkEvent event = new OtkEvent(OtkEvent.Type.BALANCE_UPDATE, address, b, mCurrencyExRate);
+                        sendEvent(event);
+                    }
                 }
             }
         };

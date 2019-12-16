@@ -11,6 +11,7 @@ import com.blockcypher.model.transaction.Transaction;
 import com.blockcypher.model.transaction.intermediary.IntermediaryTransaction;
 import com.blockcypher.model.transaction.output.Output;
 import com.cyphereco.openturnkey.core.Configurations;
+import com.cyphereco.openturnkey.core.Tx;
 import com.cyphereco.openturnkey.core.UnsignedTx;
 import com.cyphereco.openturnkey.ui.Preferences;
 import com.cyphereco.openturnkey.utils.BtcUtils;
@@ -204,7 +205,7 @@ public class BlockCypher extends BtcBase {
         return null;
     }
 
-    public Transaction completeSendBitcoin(String publicKey, List<String> sigList) throws BlockCypherException, Exception {
+    public Tx completeSendBitcoin(String publicKey, List<String> sigList) throws BlockCypherException, Exception {
         if (mCachedUnsignedTx == null) {
             logger.info("mCachedUnsignedTx is null");
             return null;
@@ -228,31 +229,31 @@ public class BlockCypher extends BtcBase {
         }
 
         Transaction trans = null;
+        logger.debug("Hash:{}", mCachedUnsignedTx.getTx().getHash());
+
         try {
             trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
-            // Get tx for raw
-            Transaction t = mBcCtx.getTransactionService().getTransaction(trans.getHash(), true);
-            logger.info("TX Sent: " + t.toString());
+            logger.info("TX Sent: " + trans.toString());
             mCachedUnsignedTx = null;
-            return t;
+            return new Tx(trans, Tx.Status.STATUS_SUCCESS, "");
         }
         catch (BlockCypherException e) {
             logger.info("e:" + e.toString());
+            Tx tx = new Tx(Tx.Status.STATUS_UNKNOWN_FAILURE, mCachedUnsignedTx.getTx().getHash(), "");
             mCachedUnsignedTx = null;
-            if (trans != null) {
-                // We don't have raw but it's succcess
-                return trans;
-            }
-            throw e;
+            return tx;
+
         }
         catch (Exception e) {
             logger.info("e:" + e.toString());
+            Tx tx = new Tx(Tx.Status.STATUS_UNKNOWN_FAILURE, mCachedUnsignedTx.getTx().getHash(), "");
             mCachedUnsignedTx = null;
-            if (trans != null) {
-                // We don't have raw but it's succcess
-                return trans;
-            }
-            throw e;
+            return tx;
         }
+    }
+
+    public Tx getTx(String hash) {
+        Tx tx = null;
+        return tx;
     }
 }

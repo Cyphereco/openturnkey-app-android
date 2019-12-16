@@ -37,8 +37,18 @@ public class Tx {
         }
     }
 
+    public Tx(Status status, String hash, String errorDesc) {
+        mHash = hash;
+        mStatus = status;
+        mDesc = errorDesc;
+    }
+
     public Tx(String from, String to, Transaction trans, Status status) {
         this(from, to, trans, status, "");
+    }
+
+    public Tx(Transaction trans, Status status, String desc) {
+        this("", "", trans, status, desc);
     }
 
     public Tx(String from, String to, Transaction trans, Status status, String errorDesc) {
@@ -86,6 +96,8 @@ public class Tx {
     public Status getStatus() { return mStatus;}
     public void setFrom(String from) {mFrom = from;}
     public void setTo(String to) {mTo = to;}
+    public void setAmount(double amount) {mAmount = amount;}
+    public void setFee(double fee) {mFee = fee;}
     public void setDesc(String desc) { mDesc = desc;}
     public int getConfirmations() { return mConfirmations;}
     public String toString() {
