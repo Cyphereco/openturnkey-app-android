@@ -180,7 +180,7 @@
     <string name="derivative_public_key">Derivative Public Key</string>
     <string name="derivative_key_paths">Derivative Path:</string>
     <string name="how_to_validate">How to Validate?</string>
-    <string name="pin_unset_msg">PIN Code Is not set yet. Please set PIN code first with fingerprint authentication.</string>
+    <string name="pin_unset_msg">PIN code Is not set yet. Please set PIN code first with fingerprint authentication.</string>
     <string name="need_fp_preauth">To export the WIF Key, user must pre-authorized OpenTurnKey with fingerprint authentication!</string>
     <string name="wallet_import_format_key">Wallet Import Format Key</string>
     <string name="understood">I Understood!</string>

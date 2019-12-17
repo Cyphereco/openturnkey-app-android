@@ -469,7 +469,7 @@ public class MainActivity extends AppCompatActivity
                     // Hide progress
                     hideProgressDialog();
                     // Show error in doalog
-                    dialogSentBtcFailed(event.getFailureReason());
+                    dialogSentBtcFailed(parseFailureReason(event.getFailureReason()));
 
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
@@ -497,7 +497,7 @@ public class MainActivity extends AppCompatActivity
                             reason = event.getTx().getDesc();
                         }
                         else {
-                            reason = event.getFailureReason();
+                            reason = parseFailureReason(event.getFailureReason());
                         }
                         dialogSentBtcFailed(reason);
                     }
@@ -568,7 +568,7 @@ public class MainActivity extends AppCompatActivity
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    showStatusDialog(getString(R.string.unlock_failed), event.getFailureReason());
+                    showStatusDialog(getString(R.string.unlock_failed), parseFailureReason(event.getFailureReason()));
                     if (mSelectedFragment instanceof FragmentOtk) {
                         ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                     }
@@ -592,7 +592,7 @@ public class MainActivity extends AppCompatActivity
                     if (mSelectedFragment instanceof FragmentOtk) {
                         ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                     }
-                    showStatusDialog(getString(R.string.write_note_fail), event.getFailureReason());
+                    showStatusDialog(getString(R.string.write_note_fail), parseFailureReason(event.getFailureReason()));
                 }
                 else if (type == OtkEvent.Type.SET_PIN_SUCCESS) {
                     hideStatusDialog();
@@ -614,7 +614,7 @@ public class MainActivity extends AppCompatActivity
                     if (mSelectedFragment instanceof FragmentOtk) {
                         ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                     }
-                    showStatusDialog(getString(R.string.set_pin_fail), event.getFailureReason());
+                    showStatusDialog(getString(R.string.set_pin_fail), parseFailureReason(event.getFailureReason()));
                 }
                 else if (type == OtkEvent.Type.CHOOSE_KEY_SUCCESS) {
                     hideStatusDialog();
@@ -633,7 +633,7 @@ public class MainActivity extends AppCompatActivity
                     if (mSelectedFragment instanceof FragmentOtk) {
                         ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                     }
-                    showStatusDialog(getString(R.string.choose_key_fail), event.getFailureReason());
+                    showStatusDialog(getString(R.string.choose_key_fail), parseFailureReason(event.getFailureReason()));
                 }
                 else if ((type == OtkEvent.Type.GET_KEY_SUCCESS) || (type == OtkEvent.Type.GET_KEY_FAIL)) {
                     processOtkGetKeyEvent(event);
@@ -660,7 +660,7 @@ public class MainActivity extends AppCompatActivity
                     if (mSelectedFragment instanceof FragmentOtk) {
                         ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                     }
-                    showStatusDialog(getString(R.string.sign_message_fail), event.getFailureReason());
+                    showStatusDialog(getString(R.string.sign_message_fail), parseFailureReason(event.getFailureReason()));
                 }
                 else if (type == OtkEvent.Type.OTK_PIN_UNSET) {
                     /* Clear current OTK op */
@@ -1556,7 +1556,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         }
         else if (OtkEvent.Type.GET_KEY_FAIL == event.getType()) {
-            showStatusDialog(getString(R.string.get_key_fail), event.getFailureReason());
+            showStatusDialog(getString(R.string.get_key_fail), parseFailureReason(event.getFailureReason()));
         }
     }
 
@@ -1581,7 +1581,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (OtkEvent.Type.RESET_FAIL == event.getType()) {
-            showStatusDialog(getString(R.string.reset_fail), event.getFailureReason());
+            showStatusDialog(getString(R.string.reset_fail), parseFailureReason(event.getFailureReason()));
         }
         else if (OtkEvent.Type.RESET_SUCCESS == event.getType()) {
             showStatusDialog(getString(R.string.reset_success), getString(R.string.reset_step_intro));
@@ -1647,6 +1647,27 @@ public class MainActivity extends AppCompatActivity
                         }
                     })
                     .show();
+        }
+    }
+
+    private String parseFailureReason(String desc) {
+        switch (desc) {
+            case "C0":
+                return getString(R.string.session_timeout);
+            case "C1":
+                return getString(R.string.auth_failed);
+            case "C3":
+                return getString(R.string.invalid_params);
+            case "C4":
+                return getString(R.string.missing_params);
+            case "C7":
+                return getString(R.string.pin_unset);
+            case "00":
+            case "C2":
+            case "FF":
+                return getString(R.string.invalid_command);
+            default:
+                return desc;
         }
     }
 }

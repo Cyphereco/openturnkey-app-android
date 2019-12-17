@@ -170,7 +170,7 @@
     <string name="full_pubkey_info_warning">完全な公開鍵情報は、OpenTurnKeyの信頼性を検証するためのものです。 本物のOpenTurnKeyを使用すると、ユーザーは外部ツールで検証できるレベル5の派生非強化キーを選択できます。 公開鍵自体を支払いの署名に使用したり、秘密鍵を導出したりすることはできませんが、この情報は安全な保管場所にのみ保管することをお勧めします。</string>
     <string name="reset_step_intro">リセットプロセスを完了するには、OpenTurnKeyの指紋センサーを8秒間押し続けます。</string>
     <string name="session_timeout">通信タイムアウト</string>
-    <string name="read_response_timeout">Read Response Timeout</string>
+    <string name="read_response_timeout">読み取り応答タイムアウト</string>
     <string name="cannot_reach_network">ネットワークと通信できません</string>
     <string name="data_copied">データをコピーされた</string>
     <string name="try_later">現在、取引は実行されません。しばらくしてからもう一度お試しください！</string>

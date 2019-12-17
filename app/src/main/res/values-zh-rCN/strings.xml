@@ -161,7 +161,7 @@
     <string name="failed_to_clear_history">清除交易记录失败</string>
     <string name="how_to_validate">如何验证?</string>
     <string name="master_public_key">主公钥:</string>
-    <string name="pin_unset_msg">PIN码未设定, 请先完成PIN码设定!</string>
+    <string name="pin_unset_msg">PIN码未设定, 请先使用指纹验证完成PIN码设定!</string>
     <string name="need_fp_preauth">PIN码未设定, 请先使用指纹认证完成PIN码设定!</string>
     <string name="wallet_import_format_key">钱包导入格式密钥</string>
     <string name="understood">我已了解!</string>
@@ -171,7 +171,7 @@
     <string name="full_pubkey_info_warning">完整公钥信息提供用户于验证OpenTurnKey真实性，一个真实的OpenTurnKey应该允许用户选取任一第五层非强化导出密钥并可以使用外部工具验证。公钥本身并不能用来签署交易或推导私钥，但仍建议您将此信息保存于安全的场所。</string>
     <string name="reset_step_intro">要完成重置请持续按住OpenTurnKey上的指纹传感器8秒钟。</string>
     <string name="session_timeout">通信逾时</string>
-    <string name="read_response_timeout">Read Response Timeout</string>
+    <string name="read_response_timeout">读取回应超时</string>
     <string name="cannot_reach_network">无法连接网络</string>
     <string name="try_later">目前无法完成交易,请稍后再试!</string>
     <string name="balance_insufficient">余额不足</string>

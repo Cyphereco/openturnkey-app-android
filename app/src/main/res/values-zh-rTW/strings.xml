@@ -161,7 +161,7 @@
     <string name="failed_to_clear_history">清除交易記錄失敗</string>
     <string name="how_to_validate">如何驗證?</string>
     <string name="master_public_key">主公鑰:</string>
-    <string name="pin_unset_msg">PIN碼未設定, 請先完成PIN碼設定!</string>
+    <string name="pin_unset_msg">PIN碼未設定, 請先使用指紋驗證完成PIN碼設定!</string>
     <string name="need_fp_preauth">PIN碼未設定, 請先使用指紋認證完成PIN碼設定!</string>
     <string name="wallet_import_format_key">錢包導入格式密鑰</string>
     <string name="understood">我已瞭解!</string>
@@ -171,14 +171,14 @@
     <string name="full_pubkey_info_warning">完整公鑰資訊提供用戶於驗證OpenTurnKey真實性。一個真實的OpenTurnKey應該允許用戶選取任一第五層非强化導出密鑰並可以使用外部工具驗證。公鑰本身并不能用來簽署交易或推導私鑰，但仍建議您將此資訊保存於安全的場所。</string>
     <string name="reset_step_intro">要完成重置請持續按住OpenTurnKey上的指紋傳感器8秒鐘。</string>
     <string name="session_timeout">通訊逾時</string>
-    <string name="read_response_timeout">Read Response Timeout</string>
+    <string name="read_response_timeout">讀取回應逾時</string>
     <string name="cannot_reach_network">無法連接到網路</string>
     <string name="try_later">目前無法完成交易,請稍後再試!</string>
     <string name="balance_insufficient">餘額不足</string>
     <string name="transaction_not_executed">交易未執行</string>
     <string name="pin_unset">PIN碼未設定</string>
     <string name="invalid_command">無效的指令</string>
-    <string name="auth_failed">Authentication Failed</string>
     <string name="invalid_params">無效的參數</string>
     <string name="missing_params">缺少參數</string>
+    <string name="auth_failed">認證失敗</string>
 </resources>
