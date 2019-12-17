@@ -286,6 +286,16 @@ public class FragmentPay extends Fragment {
             }
         });
 
+        // Use All Fund might be checked already, update amount field if it's editable
+        if (cb.isChecked()) {
+            mEtCc.setEnabled(false);
+            mEtLc.setEnabled(false);
+        }
+        else {
+            mEtCc.setEnabled(true);
+            mEtLc.setEnabled(true);
+        }
+
         return view;
     }
 
