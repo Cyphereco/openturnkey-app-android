@@ -64,7 +64,7 @@ public class OtkData implements Serializable {
         }
         else if (otkState.getFailureReason() != OtkState.FailureReason.NFC_REASON_INVALID) {
             mType = Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE;
-            mFailureReason = otkState.getFailureReason().getReasonString();
+            mFailureReason = otkState.getFailureReason().getValue();
         }
         else if (otkState.getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
             mType = Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS;
