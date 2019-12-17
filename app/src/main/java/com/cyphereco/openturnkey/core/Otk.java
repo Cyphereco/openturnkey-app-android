@@ -260,7 +260,7 @@ public class Otk {
                     int latestBlockHight = BlockChainInfo.getInstance(mCtx).getLatestBlochHight();
                     for (int i = 0; i < dataset.size(); i++) {
                         DBTransItem dbItem = dataset.get(i);
-                        if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt() && dbItem.getConfirmations() < 6000) {
+                        if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt() && dbItem.getConfirmations() < 6) {
                             int blockHight = BlockChainInfo.getInstance(mCtx).getTxBlockHight(dbItem.getHash());
                             int c = 0;
                             if (blockHight != -1) {
