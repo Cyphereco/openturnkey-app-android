@@ -161,8 +161,8 @@
     <string name="failed_to_clear_history">清除交易記錄失敗</string>
     <string name="how_to_validate">如何驗證?</string>
     <string name="master_public_key">主公鑰:</string>
-    <string name="pin_unset">PIN碼未設定, 請先完成PIN碼設定!</string>
-    <string name="need_fp_preauth">使用者必須在OpenTurnKey上使用指紋預先授權才可匯出WIF密鑰</string>
+    <string name="pin_unset_msg">PIN碼未設定, 請先完成PIN碼設定!</string>
+    <string name="need_fp_preauth">PIN碼未設定, 請先使用指紋認證完成PIN碼設定!</string>
     <string name="wallet_import_format_key">錢包導入格式密鑰</string>
     <string name="understood">我已瞭解!</string>
     <string name="reset_warning_message">重置OpenTurnKey將會擦除已登錄的指紋，清楚PIN碼設定，並重新選擇新的隨機密鑰。如果您沒有當前密鑰的備份，您將失去對當前資金的存取，請特別注意！</string>
@@ -174,6 +174,11 @@
     <string name="read_response_timeout">Read Response Timeout</string>
     <string name="cannot_reach_network">無法連接到網路</string>
     <string name="try_later">目前無法完成交易,請稍後再試!</string>
-    <string name="balance_insufficient">Balance Insufficient</string>
+    <string name="balance_insufficient">餘額不足</string>
     <string name="transaction_not_executed">交易未執行</string>
+    <string name="pin_unset">PIN碼未設定</string>
+    <string name="invalid_command">無效的指令</string>
+    <string name="auth_failed">Authentication Failed</string>
+    <string name="invalid_params">無效的參數</string>
+    <string name="missing_params">缺少參數</string>
 </resources>

@@ -180,7 +180,7 @@
     <string name="derivative_public_key">Derivative Public Key</string>
     <string name="derivative_key_paths">Derivative Path:</string>
     <string name="how_to_validate">How to Validate?</string>
-    <string name="pin_unset">PIN Code Is not set yet, please set PIN code first!</string>
+    <string name="pin_unset_msg">PIN Code Is not set yet. Please set PIN code first with fingerprint authentication.</string>
     <string name="need_fp_preauth">To export the WIF Key, user must pre-authorized OpenTurnKey with fingerprint authentication!</string>
     <string name="wallet_import_format_key">Wallet Import Format Key</string>
     <string name="understood">I Understood!</string>
@@ -194,5 +194,10 @@
     <string name="cannot_reach_network">Cannot  reach to the network</string>
     <string name="try_later">Transaction cannot be completed at the moment, please try again later!</string>
     <string name="balance_insufficient">Balance Insufficient</string>
+    <string name="pin_unset">PIN is Not Set</string>
+    <string name="invalid_command">Invalid Command</string>
+    <string name="auth_failed">Authentication Failed</string>
+    <string name="invalid_params">Invalid Parameters</string>
+    <string name="missing_params">Missing Parameters</string>
 
 </resources>

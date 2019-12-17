@@ -671,7 +671,7 @@ public class MainActivity extends AppCompatActivity
                     if (mSelectedFragment instanceof FragmentOtk) {
                         ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                     }
-                    showStatusDialog(getString(R.string.pin_unset), event.getFailureReason());
+                    showStatusDialog(getString(R.string.pin_unset), getString(R.string.pin_unset_msg));
                 }
                 else if ((type == OtkEvent.Type.RESET_SUCCESS) || (type == OtkEvent.Type.RESET_FAIL)) {
                     processOtkResetEvent(event);
