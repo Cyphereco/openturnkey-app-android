@@ -469,7 +469,9 @@ public class MainActivity extends AppCompatActivity
                     // Hide progress
                     hideProgressDialog();
                     // Show error in doalog
-                    dialogSentBtcFailed(parseFailureReason(event.getFailureReason()));
+                    String s = getString(R.string.try_later) + "\n\n" +
+                            "{" + event.getFailureReason() + "}";
+                    dialogSentBtcFailed(parseFailureReason(s));
 
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
@@ -499,7 +501,9 @@ public class MainActivity extends AppCompatActivity
                         else {
                             reason = parseFailureReason(event.getFailureReason());
                         }
-                        dialogSentBtcFailed(reason);
+                        String s = getString(R.string.try_later) + "\n\n" +
+                                "{" + reason + "}";
+                        dialogSentBtcFailed(s);
                     }
 
                 } else if (type == OtkEvent.Type.RECIPIENT_ADDRESS) {
