@@ -764,6 +764,20 @@ public class MainActivity extends AppCompatActivity
             mSwitchToPayFragment = false;
             bottomNav.setSelectedItemId(R.id.nav_menu_pay);
         }
+
+        // Update navigation button in case
+        if (mSelectedFragment instanceof FragmentOtk) {
+            bottomNav.setSelectedItemId(R.id.nav_menu_openturnkey);
+        }
+        else if (mSelectedFragment instanceof FragmentPay) {
+            bottomNav.setSelectedItemId(R.id.nav_menu_pay);
+        }
+        else if (mSelectedFragment instanceof FragmentAddrbook) {
+            bottomNav.setSelectedItemId(R.id.nav_menu_addresses);
+        }
+        else if (mSelectedFragment instanceof FragmentHistory) {
+            bottomNav.setSelectedItemId(R.id.nav_menu_history);
+        }
     }
 
     @Override
