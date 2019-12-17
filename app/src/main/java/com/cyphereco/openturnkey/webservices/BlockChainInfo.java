@@ -101,9 +101,9 @@ public class BlockChainInfo extends BtcBase {
          int ret = -1;
 
         logger.debug("getLatestBlochHight");
-        Response response  = webClient.target(URI).path(PATH_LATESTBLOCK)
-                .request().get();
         try {
+            Response response  = webClient.target(URI).path(PATH_LATESTBLOCK)
+                .request().get();
             JSONObject json = new JSONObject(response.readEntity(String.class));
             String hight = json.getString("height");
             return Integer.parseInt(hight);
@@ -118,9 +118,10 @@ public class BlockChainInfo extends BtcBase {
         int ret = -1;
 
         logger.debug("getTxBlockHight:{}", txHash);
-        Response response  = webClient.target(URI).path(PATH_RAWTX).path(txHash)
-                .request().get();
         try {
+
+            Response response  = webClient.target(URI).path(PATH_RAWTX).path(txHash)
+                .request().get();
             String body = response.readEntity(String.class);
             logger.debug("body:{}", body);
             JSONObject json = new JSONObject(body);
@@ -136,9 +137,10 @@ public class BlockChainInfo extends BtcBase {
     public String getRawTx(String txHash) {
          String raw = null;
          logger.debug("getRawTx:{}", txHash);
-         Response response  = webClient.target(URI).path(PATH_RAWTX).path(txHash).queryParam(PARAMETER_FORMAT, PARAMETER_VALUE_HEX)
-                .request().get();
          try {
+
+             Response response  = webClient.target(URI).path(PATH_RAWTX).path(txHash).queryParam(PARAMETER_FORMAT, PARAMETER_VALUE_HEX)
+                     .request().get();
              raw = response.readEntity(String.class);
              return raw;
          }
