@@ -259,12 +259,14 @@ public class Otk {
                     List<DBTransItem> dataset = mOtkDB.getAllTransaction();
                     int latestBlockHight = BlockChainInfo.getInstance(mCtx).getLatestBlochHight();
                     for (int i = 0; i < dataset.size(); i++) {
-                        logger.debug("size:{} now:{}", dataset.size(), i);
                         DBTransItem dbItem = dataset.get(i);
-                        if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt() && dbItem.getConfirmations() < 6) {
-                            logger.debug("getting tx:{} confirmation:{}", dbItem.getHash(), dbItem.getConfirmations());
+                        if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt() && dbItem.getConfirmations() < 6000) {
                             int blockHight = BlockChainInfo.getInstance(mCtx).getTxBlockHight(dbItem.getHash());
-                            int c = latestBlockHight - blockHight + 1;
+                            int c = 0;
+                            if (blockHight != -1) {
+                                c = latestBlockHight - blockHight + 1;
+                            }
+                            String raw = BlockChainInfo.getInstance(mCtx).getRawTx(dbItem.getHash());
                             if (c > 0) {
                                 // Update db
                                 dbItem.setConfrimations(c);
@@ -1109,10 +1111,16 @@ public class Otk {
                 synchronized (this) {
                     Tx tx = null;
                     try {
-                        tx = BlockCypher.getInstance(mCtx).completeSendBitcoin(publicKey, sigResult);
+                        tx = BlockCypher.getInstance(mCtx).completeSendBitcoin(publicKey, sigResult, mTo);
                         if (tx != null) {
                             if (tx.getStatus() == Tx.Status.STATUS_SUCCESS) {
                                 // Success
+                                tx.setFrom(mFrom);
+                                // Get raw tx
+                                String rawTx = BlockChainInfo.getInstance(mCtx).getRawTx(tx.getHash());
+                                if (rawTx != null) {
+                                    tx.setRaw(rawTx);
+                                }
                                 Message msg = new Message();
                                 msg.what = OTK_MSG_BITCOIN_SENT;
                                 msg.obj = tx;

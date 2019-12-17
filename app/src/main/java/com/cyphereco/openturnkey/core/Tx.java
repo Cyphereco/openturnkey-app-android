@@ -96,6 +96,7 @@ public class Tx {
     public Status getStatus() { return mStatus;}
     public void setFrom(String from) {mFrom = from;}
     public void setTo(String to) {mTo = to;}
+    public void setRaw(String raw) {mRaw = raw;}
     public void setAmount(double amount) {mAmount = amount;}
     public void setFee(double fee) {mFee = fee;}
     public void setDesc(String desc) { mDesc = desc;}

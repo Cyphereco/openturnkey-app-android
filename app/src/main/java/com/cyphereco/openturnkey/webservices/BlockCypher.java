@@ -48,8 +48,8 @@ public class BlockCypher extends BtcBase {
         }
         logger.info("newBlockCypherContext:{}", network);
         // Don't use the token for now.
-        //mBcCtx = new BlockCypherContext("v1", "btc", network, "7744d177ce1e4ef48c7431fcb55531b9");
-        mBcCtx = new BlockCypherContext("v1", "btc", network, "");
+        mBcCtx = new BlockCypherContext("v1", "btc", network, "7744d177ce1e4ef48c7431fcb55531b9");
+        //mBcCtx = new BlockCypherContext("v1", "btc", network, "");
     }
 
     private BlockCypher(Context ctx) {
@@ -205,7 +205,7 @@ public class BlockCypher extends BtcBase {
         return null;
     }
 
-    public Tx completeSendBitcoin(String publicKey, List<String> sigList) throws BlockCypherException, Exception {
+    public Tx completeSendBitcoin(String publicKey, List<String> sigList, String to) throws BlockCypherException, Exception {
         if (mCachedUnsignedTx == null) {
             logger.info("mCachedUnsignedTx is null");
             return null;
@@ -229,13 +229,13 @@ public class BlockCypher extends BtcBase {
         }
 
         Transaction trans = null;
-        logger.debug("Hash:{}", mCachedUnsignedTx.getTx().getHash());
 
         try {
             trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
             logger.info("TX Sent: " + trans.toString());
             mCachedUnsignedTx = null;
-            return new Tx(trans, Tx.Status.STATUS_SUCCESS, "");
+            Tx tx = new Tx("", to, trans, Tx.Status.STATUS_SUCCESS, "");
+            return tx;
         }
         catch (BlockCypherException e) {
             logger.info("e:" + e.toString());

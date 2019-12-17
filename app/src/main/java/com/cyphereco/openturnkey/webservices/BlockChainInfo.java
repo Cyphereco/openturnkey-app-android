@@ -2,21 +2,15 @@ package com.cyphereco.openturnkey.webservices;
 
 import android.content.Context;
 
-import com.blockcypher.model.address.Address;
-import com.blockcypher.utils.gson.GsonFactory;
 import com.cyphereco.openturnkey.core.Tx;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
-import com.google.gson.JsonObject;
 
-import org.glassfish.jersey.client.ClientConfig;
 import org.slf4j.Logger;
 
 import java.math.BigDecimal;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.*;
@@ -61,7 +55,8 @@ public class BlockChainInfo extends BtcBase {
     private String PARAMETER_ACTIVE = "active";
     private String PATH_RAWTX = "rawtx";
     private String PATH_LATESTBLOCK = "latestblock";
-    private String PARAMETER_RAWTX_HEX = "?format=hex";
+    private String PARAMETER_FORMAT = "format";
+    private String PARAMETER_VALUE_HEX = "hex";
 
     private class Address {
 
@@ -119,14 +114,16 @@ public class BlockChainInfo extends BtcBase {
         return ret;
     }
 
-    public int getTxBlockHight(String tx) {
+    public int getTxBlockHight(String txHash) {
         int ret = -1;
 
-        logger.debug("getTxBlockHight:{}", tx);
-        Response response  = webClient.target(URI).path(PATH_RAWTX).path(tx)
+        logger.debug("getTxBlockHight:{}", txHash);
+        Response response  = webClient.target(URI).path(PATH_RAWTX).path(txHash)
                 .request().get();
         try {
-            JSONObject json = new JSONObject(response.readEntity(String.class));
+            String body = response.readEntity(String.class);
+            logger.debug("body:{}", body);
+            JSONObject json = new JSONObject(body);
             String hight = json.getString("block_height");
             return Integer.parseInt(hight);
         }
@@ -134,6 +131,21 @@ public class BlockChainInfo extends BtcBase {
             logger.error("e:{}", e.toString());
         }
         return ret;
+    }
+
+    public String getRawTx(String txHash) {
+         String raw = null;
+         logger.debug("getRawTx:{}", txHash);
+         Response response  = webClient.target(URI).path(PATH_RAWTX).path(txHash).queryParam(PARAMETER_FORMAT, PARAMETER_VALUE_HEX)
+                .request().get();
+         try {
+             raw = response.readEntity(String.class);
+             return raw;
+         }
+         catch (Exception e ) {
+             logger.error("e:{}", e.toString());
+         }
+         return raw;
     }
 
     public int getConfirmations(String tx) {
