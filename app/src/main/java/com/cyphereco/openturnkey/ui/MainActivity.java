@@ -1401,11 +1401,18 @@ public class MainActivity extends AppCompatActivity
         // Fee:
         // Estimated time to be confirmed:
 
+        String estTime = "";
+        if (BtcUtils.getEstimatedTime(getApplicationContext(), utx.getFee()) > 60) {
+            estTime += "60+";
+        }
+        else {
+            estTime += BtcUtils.getEstimatedTime(getApplicationContext(), utx.getFee());
+        }
         String msg = getString(R.string.subject_sender) + utx.getFrom() + "\n" +
                 getString(R.string.subject_recipient) + utx.getTo() + "\n" +
                 getString(R.string.subject_amount) + String.format("%.8f", utx.getAmount()) + "\n" +
                 getString(R.string.subject_fees_in_satoshi) +  utx.getFee() + "\n" +
-                getString(R.string.subject_text_estimated_time) + BtcUtils.getEstimatedTime(getApplicationContext(), utx.getFee());
+                getString(R.string.subject_text_estimated_time) + estTime;
         mConfirmPaymentDialog = mConfirmPaymentDialogBuilder.setTitle(R.string.confirm_payment)
                 .setMessage(msg)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
