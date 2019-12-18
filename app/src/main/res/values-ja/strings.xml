@@ -181,4 +181,5 @@
     <string name="auth_failed">認証に失敗しました</string>
     <string name="invalid_params">無効なデータ</string>
     <string name="missing_params">データがありません</string>
+    <string name="communication_error">Communication Error</string>
 </resources>

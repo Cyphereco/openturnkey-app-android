@@ -34,7 +34,7 @@ public class OtkData implements Serializable {
     OtkState mOtkState;
     String mPublicKey;
     private SessionData mSessionData;
-    String mFailureReason;
+    String mFailureReason = "";
 
     public Type getType() {return mType;}
     public SessionData getSessionData() {return mSessionData;}

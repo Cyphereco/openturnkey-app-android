@@ -1676,6 +1676,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private String parseFailureReason(String desc) {
+        if (desc == null || desc.equals("")) {
+            return getString(R.string.communication_error);
+        }
         switch (desc) {
             case "C0":
                 return getString(R.string.session_timeout);

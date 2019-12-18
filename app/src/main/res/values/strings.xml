@@ -199,5 +199,6 @@
     <string name="auth_failed">Authentication Failed</string>
     <string name="invalid_params">Invalid Parameters</string>
     <string name="missing_params">Missing Parameters</string>
+    <string name="communication_error">Communication Error</string>
 
 </resources>

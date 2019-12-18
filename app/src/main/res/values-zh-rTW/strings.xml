@@ -181,4 +181,5 @@
     <string name="invalid_params">無效的參數</string>
     <string name="missing_params">缺少參數</string>
     <string name="auth_failed">認證失敗</string>
+    <string name="communication_error">Communication Error</string>
 </resources>
