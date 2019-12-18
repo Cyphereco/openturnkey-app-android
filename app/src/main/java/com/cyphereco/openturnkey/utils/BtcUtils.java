@@ -440,7 +440,9 @@ public class BtcUtils {
             // Faster than 1 hour
             return 60;
         }
-        return (fee / (txFee.getLow() * 200) * 60);
+
+        // Slower than one hour
+        return ((txFee.getLow() * 200) * 60 / fee);
     }
 
     static public long convertDateTimeStringToLong(String dateTime) {

@@ -1405,7 +1405,7 @@ public class MainActivity extends AppCompatActivity
                 getString(R.string.subject_recipient) + utx.getTo() + "\n" +
                 getString(R.string.subject_amount) + String.format("%.8f", utx.getAmount()) + "\n" +
                 getString(R.string.subject_fees_in_satoshi) +  utx.getFee() + "\n" +
-                getString(R.string.subject_text_estimated_time) + BtcUtils.getEstimatedTime(getApplicationContext(), BtcUtils.btcToSatoshi(utx.getFee()));
+                getString(R.string.subject_text_estimated_time) + BtcUtils.getEstimatedTime(getApplicationContext(), utx.getFee());
         mConfirmPaymentDialog = mConfirmPaymentDialogBuilder.setTitle(R.string.confirm_payment)
                 .setMessage(msg)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
