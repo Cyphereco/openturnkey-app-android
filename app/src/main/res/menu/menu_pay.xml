@@ -13,7 +13,7 @@
             android:id="@+id/menu_pay_fee_included"
             android:checkable="true"
             android:checked="false"
-            android:title="@string/fee_included" />
+            android:title="@string/fees_included" />
         <item
             android:id="@+id/menu_pay_use_fix_address"
             android:checkable="true"

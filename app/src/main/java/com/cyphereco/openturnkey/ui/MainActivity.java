@@ -1149,12 +1149,12 @@ public class MainActivity extends AppCompatActivity
             return getString(R.string.customized_fees);
         }
         if (txFeeType == Configurations.TxFeeType.HIGH) {
-            return getString(R.string.high_fees);
+            return getString(R.string.fees_high);
         }
         if (txFeeType == Configurations.TxFeeType.MID) {
-            return getString(R.string.mid_fees);
+            return getString(R.string.fees_mid);
         }
-        return getString(R.string.low_fees);
+        return getString(R.string.fees_low);
     }
 
     public void updatePayConfig(Menu menu) {
@@ -1401,18 +1401,15 @@ public class MainActivity extends AppCompatActivity
         // Fee:
         // Estimated time to be confirmed:
 
-        String estTime = "";
-        if (BtcUtils.getEstimatedTime(getApplicationContext(), utx.getFee()) > 60) {
-            estTime += "60+";
-        }
-        else {
-            estTime += BtcUtils.getEstimatedTime(getApplicationContext(), utx.getFee());
-        }
-        String msg = getString(R.string.subject_sender) + utx.getFrom() + "\n" +
-                getString(R.string.subject_recipient) + utx.getTo() + "\n" +
-                getString(R.string.subject_amount) + String.format("%.8f", utx.getAmount()) + "\n" +
-                getString(R.string.subject_fees_in_satoshi) +  utx.getFee() + "\n" +
-                getString(R.string.subject_text_estimated_time) + estTime;
+        long estBlocks = BtcUtils.getEstimatedTime(getApplicationContext(), utx.getFee());
+        String estTime = (estBlocks == 1) ? "5~15" : ((estBlocks > 3) ? ">60" : "15~35");
+        String feeInc = (includeFee ? getString(R.string.fees_included) : getString(R.string.fees_excluded));
+
+        String msg = getString(R.string.subject_sender) + "\n" + utx.getFrom() + "\n" +
+                getString(R.string.subject_recipient) + "\n" + utx.getTo() + "\n\n" +
+                getString(R.string.subject_amount) + " " + String.format("%.8f", utx.getAmount()) + " (" + feeInc + "）\n" +
+                getString(R.string.subject_fees) + " " +  utx.getFee() + " (SAT)\n\n" +
+                getString(R.string.subject_text_estimated_time) + estTime; //BtcUtils.getEstimatedTime(getApplicationContext(), BtcUtils.btcToSatoshi(utx.getFee()));
         mConfirmPaymentDialog = mConfirmPaymentDialogBuilder.setTitle(R.string.confirm_payment)
                 .setMessage(msg)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

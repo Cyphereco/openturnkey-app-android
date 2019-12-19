@@ -226,8 +226,12 @@ public class BtcUtils {
             String in = readTextBuf.toString();
             JSONObject reader = new JSONObject(in);
             String low = reader.getString("hourFee");
-            String mid = reader.getString("halfHourFee");
+            //String mid = reader.getString("halfHourFee");
             String high = reader.getString("fastestFee");
+            /* Since min and high fees are often the same, we will take an
+             * average of hign and low fees.
+             */
+            String mid = "" + (Integer.parseInt(low) + Integer.parseInt(high)) / 2;
 
             txFee = new TxFee(Integer.parseInt(low), Integer.parseInt(mid), Integer.parseInt(high));
         } catch (MalformedURLException e) {
@@ -428,21 +432,17 @@ public class BtcUtils {
 
     static public long getEstimatedTime(Context ctx, long fee) {
         TxFee txFee = Preferences.getTxFee(ctx);
-        if (fee > txFee.getHigh() * 200) {
-            // Faster than 1 block
-            return 10;
+        if (fee >= txFee.getHigh() * 200) {
+            // within 1 block
+            return 1;
         }
-        if (fee > txFee.getMid() * 200) {
-            // Faster than half hour
-            return 30;
-        }
-        if (fee > txFee.getLow() * 200) {
-            // Faster than 1 hour
-            return 60;
+        if (fee >= txFee.getMid() * 200) {
+            // within 3 blocks
+            return 3;
         }
 
-        // Slower than one hour
-        return ((txFee.getLow() * 200) * 60 / fee);
+        // over 6 blocks
+        return 6;
     }
 
     static public long convertDateTimeStringToLong(String dateTime) {

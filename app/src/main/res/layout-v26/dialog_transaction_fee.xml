@@ -23,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/high_fees"
+            android:text="@string/fees_high"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <RadioButton
@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/mid_fees"
+            android:text="@string/fees_mid"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <RadioButton
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/low_fees"
+            android:text="@string/fees_low"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <RadioButton

@@ -2,7 +2,7 @@
 <resources>
     <string name="about">ついて</string>
     <string name="clear_history">歴史削除</string>
-    <string name="fee_included">手数料込み</string>
+    <string name="fees_included">手数料込み</string>
     <string name="history">支払歴史</string>
     <string name="local_currency">現地通貨</string>
     <string name="addresses">入金アドレス</string>
@@ -26,9 +26,9 @@
     <string name="full_pubkey_information">完全の公開鍵の情報</string>
     <string name="auth_with_pin">PINコード認証</string>
     <string name="tap_openturnkey">OpenTurnKey近づく</string>
-    <string name="high_fees">高 (10-20分)</string>
-    <string name="low_fees">低 (60分以上)</string>
-    <string name="mid_fees">中 (30-60分)</string>
+    <string name="fees_high">高 (5~15分)</string>
+    <string name="fees_low">低 (60分以上)</string>
+    <string name="fees_mid">中 (15~35分)</string>
     <string name="ok">はい</string>
     <string name="software_version">ソフトウェアバージョン</string>
     <string name="cancel">キャンセル</string>
@@ -74,7 +74,7 @@
     <string name="operation_timeout">操作タイムアウト</string>
     <string name="do_not_remove_otk">Openturnkeyに近づいてください.\nサイン完了する前にOpenTurnKey外さないでください</string>
     <string name="confirm_payment">支払いを確認する</string>
-    <string name="subject_text_estimated_time">推定所要時間(MIN):</string>
+    <string name="subject_text_estimated_time">推定所要時間(分):</string>
     <string name="subject_fees_in_satoshi">手数料(SAT):</string>
     <string name="unknown_reason">不明な理由</string>
     <string name="signing_transaction">トランザクションをサインする</string>
@@ -181,5 +181,6 @@
     <string name="auth_failed">認証に失敗しました</string>
     <string name="invalid_params">無効なデータ</string>
     <string name="missing_params">データがありません</string>
-    <string name="communication_error">Communication Error</string>
+    <string name="communication_error">コミュニケーションエラー</string>
+    <string name="fees_excluded">手数料を除く</string>
 </resources>

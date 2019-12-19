@@ -10,9 +10,9 @@
     <string name="read_nfc">Read NFC</string>
     <string name="select_from_address_book">Select From Address Book</string>
     <string name="paste_clipboard">Paste Clipboard</string>
-    <string name="low_fees">Low (60+ minutes)</string>
-    <string name="mid_fees">Mid (30-60 minutes)</string>
-    <string name="high_fees">High (10-20 minutes)</string>
+    <string name="fees_low">Low (>60 minutes)</string>
+    <string name="fees_mid">Mid (15~35 minutes)</string>
+    <string name="fees_high">High (5~15 minutes)</string>
     <string name="currency_cny">CNY (Chinese Yen)</string>
     <string name="currency_jpy">JPY (Japanese Yen)</string>
     <string name="currency_twd">TWD (Taiwan Dollar)</string>
@@ -30,7 +30,7 @@
     <string name="_cyphereco" translatable="false">CYPHERECO</string>
     <string name="local_currency">Local Currency</string>
     <string name="transaction_fee">Transaction Fee</string>
-    <string name="fee_included">Fee Included</string>
+    <string name="fees_included">Fees included</string>
     <string name="clear_history">Clear History</string>
     <string name="search">Search</string>
     <string name="auth_with_pin">Authorization with PIN Code</string>
@@ -92,7 +92,7 @@
     <string name="operation_timeout">Operation Timeout</string>
     <string name="do_not_remove_otk">Pleaes appraoch to OpenTurnKey to complete singing transaction.\nDo not remove OpenTurnKey until it\'s done.</string>
     <string name="confirm_payment">Confirm Payment</string>
-    <string name="subject_text_estimated_time">"Est. Time to Complete(MIN): "</string>
+    <string name="subject_text_estimated_time">"Est. Time to Complete (Min): "</string>
     <string name="subject_fees_in_satoshi">Fees(SAT):</string>
     <string name="unknown_reason">Unknown Reason</string>
     <string name="signing_transaction">Signing Transaction</string>
@@ -200,5 +200,6 @@
     <string name="invalid_params">Invalid Parameters</string>
     <string name="missing_params">Missing Parameters</string>
     <string name="communication_error">Communication Error</string>
+    <string name="fees_excluded">Fees excluded</string>
 
 </resources>

@@ -4,7 +4,7 @@
     <string name="addresses" translatable="false">常用地址</string>
     <string name="no_freq_addr">没有常用地址</string>
     <string name="clear_history">清除记录</string>
-    <string name="fee_included">包含手续费</string>
+    <string name="fees_included">包含手续费</string>
     <string name="full_pubkey_information">完整公钥信息</string>
     <string name="history" translatable="false">支付记录</string>
     <string name="local_currency">当地货币</string>
@@ -26,9 +26,9 @@
     <string name="transaction_fee">交易手续费</string>
     <string name="unlock">解锁</string>
     <string name="use_fix_addresss">使用固定收款地址</string>
-    <string name="high_fees">高 (10-20分钟)</string>
-    <string name="low_fees">低 (大於60分钟)</string>
-    <string name="mid_fees">中 (30-60分钟)</string>
+    <string name="fees_high">高 (5~15分钟)</string>
+    <string name="fees_low">低 (大於60分钟)</string>
+    <string name="fees_mid">中 (15~35分钟)</string>
     <string name="ok">确定</string>
     <string name="software_version">軟件版本</string>
     <string name="cancel">取消</string>
@@ -74,7 +74,7 @@
     <string name="operation_timeout">操作逾时</string>
     <string name="do_not_remove_otk">请靠近OpenTurnKey完成交易签署.\n完成前请勿移开OpenTurnKey.</string>
     <string name="confirm_payment">确认支付</string>
-    <string name="subject_text_estimated_time">預計交易完成時間(MIN):</string>
+    <string name="subject_text_estimated_time">預計交易完成時間(分钟):</string>
     <string name="subject_fees_in_satoshi">手续费(SAT):</string>
     <string name="unknown_reason">不明原因</string>
     <string name="signing_transaction">签署交易</string>
@@ -181,5 +181,6 @@
     <string name="auth_failed">认证失败</string>
     <string name="invalid_params">无效的参数</string>
     <string name="missing_params">缺少参数</string>
-    <string name="communication_error">Communication Error</string>
+    <string name="communication_error">通信错误</string>
+    <string name="fees_excluded">不含手續費</string>
 </resources>
