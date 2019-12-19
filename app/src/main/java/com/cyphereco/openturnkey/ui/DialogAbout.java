@@ -28,7 +28,7 @@ public class DialogAbout extends AppCompatDialogFragment {
 
     private void setVersion(View v) {
         TextView tvVersion = v.findViewById(R.id.version_number);
-        String ver = BuildConfig.VERSION_NAME + "." + String.valueOf(BuildConfig.VERSION_CODE);
+        String ver = BuildConfig.VERSION_NAME;
         tvVersion.setText(ver);
         if (Preferences.isTestnet(getContext())) {
             // Add postfix 't' to version number

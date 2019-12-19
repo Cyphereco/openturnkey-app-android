@@ -465,12 +465,20 @@ public class MainActivity extends AppCompatActivity
                     }
 
                 } else if ((type == OtkEvent.Type.SEND_BITCOIN_FAIL) ||
-                        (type == OtkEvent.Type.COMMAND_EXECUTION_FAILED)) {
+                        (type == OtkEvent.Type.COMMAND_EXECUTION_FAILED) ||
+                        (type == OtkEvent.Type.SESSION_ID_MISMATCH)) {
                     // Hide progress
                     hideProgressDialog();
                     // Show error in doalog
-                    String s = getString(R.string.try_later) + "\n\n" +
-                            "{" + event.getFailureReason() + "}";
+                    String s;
+                    if (type == OtkEvent.Type.SESSION_ID_MISMATCH) {
+                        s = getString(R.string.communication_error);
+                    }
+                    else {
+                        s = getString(R.string.try_later) + "\n\n" +
+                                "{" + event.getFailureReason() + "}";
+                    }
+
                     dialogSentBtcFailed(parseFailureReason(s));
 
                     mOp = Otk.Operation.OTK_OP_NONE;
@@ -1674,7 +1682,7 @@ public class MainActivity extends AppCompatActivity
 
     private String parseFailureReason(String desc) {
         if (desc == null || desc.equals("")) {
-            return getString(R.string.communication_error);
+            return getString(R.string.unknown_reason);
         }
         switch (desc) {
             case "C0":

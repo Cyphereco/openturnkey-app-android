@@ -543,7 +543,7 @@ public class Otk {
                     logger.error("It's already in processing.");
                     if (!mSessionId.equals(otkData.getSessionData().getSessionId())) {
                         // OTK must be restarted, consider failed.
-                        sendEvent(new OtkEvent(OtkEvent.Type.SEND_BITCOIN_FAIL));
+                        sendEvent(new OtkEvent(OtkEvent.Type.SESSION_ID_MISMATCH));
                         return OTK_RETURN_ERROR;
                     }
                     return OTK_RETURN_OK;
@@ -766,6 +766,7 @@ public class Otk {
             logger.error("It's already in processing.");
             if (!mSessionId.equals(otkData.getSessionData().getSessionId())) {
                 // OTK must be restarted, consider failed.
+                sendEvent(new OtkEvent(OtkEvent.Type.SESSION_ID_MISMATCH));
                 return OTK_RETURN_ERROR;
             }
             return OTK_RETURN_OK;
