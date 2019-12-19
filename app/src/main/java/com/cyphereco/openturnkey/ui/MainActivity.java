@@ -1411,11 +1411,20 @@ public class MainActivity extends AppCompatActivity
 
         long estBlocks = BtcUtils.getEstimatedTime(getApplicationContext(), utx.getFee());
         String estTime = (estBlocks == 1) ? "5~15" : ((estBlocks > 3) ? ">60" : "15~35");
-        String feeInc = (includeFee ? getString(R.string.fees_included) : getString(R.string.fees_excluded));
+        String feeInc;
+        double payAmount = utx.getAmount();
+        double txFees = (double)utx.getFee() / 100000000;
+        if (includeFee ) {
+            feeInc = getString(R.string.fees_included);
+            payAmount += txFees;
+        }
+        else {
+            feeInc = getString(R.string.fees_excluded);
+        }
 
         String msg = getString(R.string.subject_sender) + "\n" + utx.getFrom() + "\n" +
                 getString(R.string.subject_recipient) + "\n" + utx.getTo() + "\n\n" +
-                getString(R.string.subject_amount) + " " + String.format("%.8f", utx.getAmount()) + " (" + feeInc + "）\n" +
+                getString(R.string.subject_amount) + " " + String.format("%.8f", payAmount) + " (" + feeInc + "）\n" +
                 getString(R.string.subject_fees) + " " +  utx.getFee() + " (SAT)\n\n" +
                 getString(R.string.subject_text_estimated_time) + estTime; //BtcUtils.getEstimatedTime(getApplicationContext(), BtcUtils.btcToSatoshi(utx.getFee()));
         mConfirmPaymentDialog = mConfirmPaymentDialogBuilder.setTitle(R.string.confirm_payment)
