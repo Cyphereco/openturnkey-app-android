@@ -18,6 +18,9 @@ public class Preferences {
     private static final String TX_FEE_HIGH = "TX_FEE_HIGH";
     private static final String CUSTOMIZED_TX_FEE = "CUSTOMIZED_TX_FEE";
     private static final String NETWORK = "NETWORK";
+    private static final String FEE_INCLUDED = "FEE_INCLUDED";
+    private static final String USE_FIX_ADDRESS_CHECKED = "USE_FIX_ADDRESS_CHECKED";
+    private static final String USE_FIX_ADDRESS_ADDR_STR = "USE_FIX_ADDRESS_ADDR_STR";
 
 
     static public LocalCurrency getLocalCurrency(Context ctx) {
@@ -115,5 +118,31 @@ public class Preferences {
     static public long getCustomizedTxFee(Context ctx) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
         return prefs.getLong(CUSTOMIZED_TX_FEE, 1000);
+    }
+
+    static public void setFeeIncluded(Context ctx, boolean isChecked) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        prefs.edit().putBoolean(FEE_INCLUDED, isChecked).commit();
+    }
+
+    static public boolean getFeeIncluded(Context ctx) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        return prefs.getBoolean(FEE_INCLUDED, false);
+    }
+
+    static public void setUseFixAddress(Context ctx, boolean isChecked, String address) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        prefs.edit().putBoolean(USE_FIX_ADDRESS_CHECKED, isChecked).commit();
+        prefs.edit().putString(USE_FIX_ADDRESS_ADDR_STR, address).commit();
+    }
+
+    static public boolean getUseFixAddressChecked(Context ctx) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        return prefs.getBoolean(USE_FIX_ADDRESS_CHECKED, false);
+    }
+
+    static public String getUseFixAddressAddrString(Context ctx) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        return prefs.getString(USE_FIX_ADDRESS_ADDR_STR, "");
     }
 }

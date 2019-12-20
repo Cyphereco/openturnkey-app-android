@@ -344,6 +344,7 @@ public class MainActivity extends AppCompatActivity
                             getMenuInflater().inflate(R.menu.menu_pay, menu);
                             updatePayConfig(menu);
                             // Restore cached data
+                            mFixedAddress = Preferences.getUseFixAddressAddrString(getApplicationContext());
                             if (useFixAddr && (!mFixedAddress.equals(mRecipientAddress))) {
                                 if (!mRecipientAddress.isEmpty()) {
                                     new AlertDialog.Builder(MainActivity.this)
@@ -831,6 +832,7 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.menu_pay_fee_included:
                 includeFee = item.setChecked(!item.isChecked()).isChecked();
+                Preferences.setFeeIncluded(getApplicationContext(), includeFee);
                 return true;
             case R.id.menu_pay_use_fix_address:
                 if (mSelectedFragment instanceof FragmentPay) {
@@ -842,6 +844,7 @@ public class MainActivity extends AppCompatActivity
                     else {
                         mFixedAddress = "";
                     }
+                    Preferences.setUseFixAddress(getApplicationContext(), useFixAddr, mFixedAddress);
                 }
                 return true;
             case R.id.menu_pay_user_guide:
@@ -1186,11 +1189,13 @@ public class MainActivity extends AppCompatActivity
         }
 
         menuItem = menu.findItem(R.id.menu_pay_fee_included);
+        includeFee = Preferences.getFeeIncluded(getApplication());
         if (menuItem != null) {
             menuItem.setChecked(includeFee);
         }
 
         menuItem = menu.findItem(R.id.menu_pay_use_fix_address);
+        useFixAddr = Preferences.getUseFixAddressChecked(getApplication());
         if (menuItem != null) {
             menuItem.setChecked(useFixAddr);
         }
