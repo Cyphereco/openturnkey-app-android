@@ -2,46 +2,28 @@ package com.cyphereco.openturnkey.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
-import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.core.Otk;
-import com.cyphereco.openturnkey.core.OtkData;
-import com.cyphereco.openturnkey.core.OtkEvent;
-import com.cyphereco.openturnkey.core.protocol.OtkState;
-import com.cyphereco.openturnkey.utils.BtcUtils;
-import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
-import com.cyphereco.openturnkey.utils.QRCodeUtils;
-import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
 
 import org.slf4j.Logger;
 
-import java.math.BigDecimal;
 
 public class ChooseKeyActivity extends AppCompatActivity {
     public static final String TAG = ChooseKeyActivity.class.getSimpleName();
@@ -89,53 +71,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // Handle successful scan
                 String contents = intent.getStringExtra(MainActivity.KEY_QR_CODE);
-                logger.debug("path:{}", contents);
-                // parse path
-                int prefixStart = contents.indexOf("m/");
-                if (prefixStart != 0) {
-                    Toast.makeText(this, getString(R.string.invalid_key_path) + ": " + contents, Toast.LENGTH_LONG).show();
-                    return;
-                }
-                int slash = contents.indexOf("/", prefixStart + 2);
-                String l1 = contents.substring(prefixStart + 2, slash);
-
-                int nextSlash = contents.indexOf("/", slash + 1);
-                String l2 = contents.substring(slash + 1, nextSlash);
-
-                slash = nextSlash;
-                nextSlash = contents.indexOf("/", slash + 1);
-                String l3 = contents.substring(slash + 1, nextSlash);
-
-                slash = nextSlash;
-                nextSlash = contents.indexOf("/", slash + 1);
-                String l4 = contents.substring(slash + 1, nextSlash);
-
-                slash = nextSlash;
-                String l5 = contents.substring(slash + 1);
-
-                // Check
-                try {
-                    Long.parseLong(l1);
-                    Long.parseLong(l2);
-                    Long.parseLong(l3);
-                    Long.parseLong(l4);
-                    Long.parseLong(l5);
-                }
-                catch (Exception e) {
-                    Toast.makeText(this, getString(R.string.invalid_key_path) + ": " + contents, Toast.LENGTH_LONG).show();
-                    return;
-                }
-                //Set to edit text
-                EditText etL1 = findViewById(R.id.editTextChooseKeyL1);
-                etL1.setText(l1);
-                EditText etL2 = findViewById(R.id.editTextChooseKeyL2);
-                etL2.setText(l2);
-                EditText etL3 = findViewById(R.id.editTextChooseKeyL3);
-                etL3.setText(l3);
-                EditText etL4 = findViewById(R.id.editTextChooseKeyL4);
-                etL4.setText(l4);
-                EditText etL5 = findViewById(R.id.editTextChooseKeyL5);
-                etL5.setText(l5);
+                updateKeyPathData(contents);
             }
             else if (resultCode == RESULT_CANCELED) {
                 //Handle cancel
@@ -159,6 +95,22 @@ public class ChooseKeyActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 launchQRcodeScanActivity(view);
+            }
+        });
+
+        iv = findViewById(R.id.imageChooseKeyPasteClipboard);
+        iv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (clipboard.hasPrimaryClip()) {
+                    android.content.ClipDescription description = clipboard.getPrimaryClipDescription();
+                    android.content.ClipData data = clipboard.getPrimaryClip();
+                    if (data != null && description != null) {
+                        String contents = data.getItemAt(0).getText().toString();
+                        updateKeyPathData(contents);
+                    }
+                }
             }
         });
 
@@ -277,4 +229,65 @@ public class ChooseKeyActivity extends AppCompatActivity {
         });
     }
 
+    private void showFmtErrorDialog(String contents) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.invalid_key_path)
+                .setMessage(contents)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
+    }
+
+    private void updateKeyPathData(String contents) {
+        logger.debug("path:{}", contents);
+        // parse path
+        int prefixStart = contents.indexOf("m/");
+        if (prefixStart != 0) {
+            showFmtErrorDialog(contents);
+            return;
+        }
+        int slash = contents.indexOf("/", prefixStart + 2);
+        String l1 = contents.substring(prefixStart + 2, slash);
+
+        int nextSlash = contents.indexOf("/", slash + 1);
+        String l2 = contents.substring(slash + 1, nextSlash);
+
+        slash = nextSlash;
+        nextSlash = contents.indexOf("/", slash + 1);
+        String l3 = contents.substring(slash + 1, nextSlash);
+
+        slash = nextSlash;
+        nextSlash = contents.indexOf("/", slash + 1);
+        String l4 = contents.substring(slash + 1, nextSlash);
+
+        slash = nextSlash;
+        String l5 = contents.substring(slash + 1);
+
+        // Check
+        try {
+            Long.parseLong(l1);
+            Long.parseLong(l2);
+            Long.parseLong(l3);
+            Long.parseLong(l4);
+            Long.parseLong(l5);
+        }
+        catch (Exception e) {
+            showFmtErrorDialog(contents);
+            return;
+        }
+        //Set to edit text
+        EditText etL1 = findViewById(R.id.editTextChooseKeyL1);
+        etL1.setText(l1);
+        EditText etL2 = findViewById(R.id.editTextChooseKeyL2);
+        etL2.setText(l2);
+        EditText etL3 = findViewById(R.id.editTextChooseKeyL3);
+        etL3.setText(l3);
+        EditText etL4 = findViewById(R.id.editTextChooseKeyL4);
+        etL4.setText(l4);
+        EditText etL5 = findViewById(R.id.editTextChooseKeyL5);
+        etL5.setText(l5);
+    }
 }
