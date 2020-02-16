@@ -42,7 +42,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
             return;
         }
 
-        final OtkData otkData = (OtkData)intent.getSerializableExtra(MainActivity.KEY_OTK_DATA);
+        final OtkData otkData = (OtkData) intent.getSerializableExtra(MainActivity.KEY_OTK_DATA);
         if (otkData == null) {
             logger.error("OtkData is NULL");
             return;
@@ -51,11 +51,11 @@ public class ActivityKeyInformation extends AppCompatActivity {
         updateInfo(otkData);
         setButtonListener();
 
-        TextView txt= (TextView) findViewById(R.id.how_to_validate);
+        TextView txt = (TextView) findViewById(R.id.how_to_validate);
         txt.setMovementMethod(LinkMovementMethod.getInstance());
         txt.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String url = "https://openturnkey.com/faq#validate_openturnkey";
+                String url = "https://openturnkey.com/faq#comp-k3vbamb6";
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 startActivity(browserIntent);
             }
