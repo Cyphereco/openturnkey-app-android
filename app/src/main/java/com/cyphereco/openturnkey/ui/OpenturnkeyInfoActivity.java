@@ -133,7 +133,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
 
         // Lock state
         ImageView iv = findViewById(R.id.lock_state);
-        if (OtkState.LockState.LOCKED == otkData.getOtkState().getLockState()) {
+        if (OtkState.LockState.UNLOCKED != otkData.getOtkState().getLockState()) {
             iv.setImageResource(R.drawable.ic_lock_outline_black_24dp);
             iv.setColorFilter(Color.argb(255, 0xf4, 0x43, 0x36));
         }
