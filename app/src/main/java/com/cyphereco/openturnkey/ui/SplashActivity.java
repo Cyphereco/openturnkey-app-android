@@ -7,13 +7,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
-import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
@@ -23,8 +20,6 @@ public class SplashActivity extends AppCompatActivity {
     public static final String TAG = SplashActivity.class.getSimpleName();
     Logger logger;
 
-    private static int SPLASH_TIMEOUT = 1000;
-    static int i = 0;
     private boolean isStarted = false;
     private static final int REQUEST_CODE = 0x11;
 
@@ -80,7 +75,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(final Intent intent) {
         super.onNewIntent(intent);
-        if (isStarted == false) {
+        if (!isStarted) {
             // Wait  few seconds and call onNewIntent again.
             final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -93,7 +88,8 @@ public class SplashActivity extends AppCompatActivity {
         }
 
         // No need to process MAIN action
-        if (intent.getAction().equals("android.intent.action.MAIN")) {
+        String action = intent.getAction();
+        if (action != null && action.equals("android.intent.action.MAIN")) {
             return;
         }
         // Should be NFC related intents
@@ -125,6 +121,7 @@ public class SplashActivity extends AppCompatActivity {
     private class SplashLauncher extends Thread {
         @Override
         public void run() {
+            int SPLASH_TIMEOUT = 1000;
             logger.info("Start MainActivity in {} seconds", SPLASH_TIMEOUT / 1000);
 
             try {
