@@ -38,7 +38,10 @@ import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 import com.cyphereco.openturnkey.utils.SignedMessage;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+
+import java.util.Objects;
 
 public class SignValidateMessageActivity extends AppCompatActivity {
     public static final String TAG = SignValidateMessageActivity.class.getSimpleName();
@@ -46,7 +49,6 @@ public class SignValidateMessageActivity extends AppCompatActivity {
 
     private NfcAdapter mNfcAdapter = null;
 
-    private TabLayout mTabs;
     private ViewPager mViewPager;
 
     private String mFormattedSignedMsg;
@@ -75,8 +77,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                 String contents = intent.getStringExtra(MainActivity.KEY_QR_CODE);
                 EditText etMsgToBeVerified = findViewById(R.id.editTextMessageToBeVerified);
                 etMsgToBeVerified.setText(contents);
-            }
-            else if (resultCode == RESULT_CANCELED) {
+            } else if (resultCode == RESULT_CANCELED) {
                 //Handle cancel
                 Toast.makeText(this, getString(R.string.qr_code_scan_cancelled), Toast.LENGTH_LONG).show();
             }
@@ -91,15 +92,16 @@ public class SignValidateMessageActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar_sign_verify_message);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
 
-        mTabs = findViewById(R.id.tabLayoutSignVerify);
+        TabLayout mTabs = findViewById(R.id.tabLayoutSignVerify);
+        mTabs.bringToFront();
 
-        mViewPager = (ViewPager) findViewById(R.id.viewPagerSignVerify);
+        mViewPager = findViewById(R.id.viewPagerSignVerify);
         mViewPager.setAdapter(new SignVerifyPagerAdapter());
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabs));
 
-        mTabs.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        mTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 mViewPager.setCurrentItem(tab.getPosition());
@@ -121,12 +123,12 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             return;
         }
 
-        final OtkData otkData = (OtkData)intent.getSerializableExtra(MainActivity.KEY_OTK_DATA);
+        final OtkData otkData = (OtkData) intent.getSerializableExtra(MainActivity.KEY_OTK_DATA);
         if (otkData == null) {
             return;
         }
 
-        mMsgToSign = (String)intent.getSerializableExtra(MainActivity.KEY_MESSAGE_TO_SIGN);
+        mMsgToSign = (String) intent.getSerializableExtra(MainActivity.KEY_MESSAGE_TO_SIGN);
         mUsingMasterKey = intent.getBooleanExtra(MainActivity.KEY_USING_MASTER_KEY, false);
         String pubKey = otkData.getSessionData().getPublicKey();
         logger.info("message to sign:{} pubKey:{} signature:{}", mMsgToSign, pubKey, otkData.getSessionData().getRequestSigList().get(0));
@@ -138,8 +140,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             String publicAddress = BtcUtils.keyToAddress(pubKey);
             SignedMessage sm = new SignedMessage(publicAddress, signedMsg, mMsgToSign);
             mFormattedSignedMsg = sm.getFormattedMessage();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             // Failed to process signed message
             Toast.makeText(getApplicationContext(), R.string.sign_message_fail, Toast.LENGTH_LONG).show();
         }
@@ -149,14 +150,13 @@ public class SignValidateMessageActivity extends AppCompatActivity {
     }
 
     class SignVerifyPagerAdapter extends PagerAdapter {
-        private int pageCount = 2;
         @Override
         public int getCount() {
-            return pageCount;
+            return 2;
         }
 
         @Override
-        public boolean isViewFromObject(View view, Object obj) {
+        public boolean isViewFromObject(@NotNull View view, @NotNull Object obj) {
             return obj == view;
         }
 
@@ -165,8 +165,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             if (msgToSign.length() > 0) {
                 btn.setEnabled(true);
                 btn.setAlpha(1.0f);
-            }
-            else {
+            } else {
                 btn.setEnabled(false);
                 btn.setAlpha(.5f);
             }
@@ -177,8 +176,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             if (msgToSign.length() > 0) {
                 btn.setEnabled(true);
                 btn.setAlpha(1.0f);
-            }
-            else {
+            } else {
                 btn.setEnabled(false);
                 btn.setAlpha(.5f);
             }
@@ -195,8 +193,8 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                         ImageView image = new ImageView(getApplicationContext());
                         DisplayMetrics displayMetrics = new DisplayMetrics();
                         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                        int width = displayMetrics.widthPixels * 7 / 10 ;
-                        Bitmap bitmap = QRCodeUtils.encodeAsBitmap(mFormattedSignedMsg, width, width);
+                        int size = displayMetrics.widthPixels * 7 / 10;
+                        Bitmap bitmap = QRCodeUtils.encodeAsBitmap(mFormattedSignedMsg, size, size);
                         image.setImageBitmap(bitmap);
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(SignValidateMessageActivity.this)
@@ -209,14 +207,16 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                 ivCopy.setEnabled(true);
                 ivCopy.setVisibility(View.VISIBLE);
                 ivCopy.setOnClickListener(new View.OnClickListener() {
-                      @Override
-                      public void onClick(View view) {
-                          ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                          ClipData clip = ClipData.newPlainText("Signed message", mFormattedSignedMsg);
-                          clipboard.setPrimaryClip(clip);
-                          Toast.makeText(getApplicationContext(), R.string.data_copied, Toast.LENGTH_LONG).show();
-                      }
-                  });
+                    @Override
+                    public void onClick(View view) {
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("Signed message", mFormattedSignedMsg);
+                        if (clipboard != null) {
+                            clipboard.setPrimaryClip(clip);
+                        }
+                        Toast.makeText(getApplicationContext(), R.string.data_copied, Toast.LENGTH_LONG).show();
+                    }
+                });
                 EditText etSignedMsg = view.findViewById(R.id.editTextSignedMessage);
                 etSignedMsg.setEnabled(true);
                 etSignedMsg.setVisibility(View.VISIBLE);
@@ -224,8 +224,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                 TextView tvSignedMsg = view.findViewById(R.id.textViewSignedMessage);
                 tvSignedMsg.setEnabled(true);
                 tvSignedMsg.setVisibility(View.VISIBLE);
-            }
-            else {
+            } else {
                 ImageView ivQr = view.findViewById(R.id.signMessageGenerateQRcode);
                 ivQr.setEnabled(false);
                 ivQr.setVisibility(View.INVISIBLE);
@@ -294,11 +293,15 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = clipboard.getPrimaryClip();
-                    try {
-                        etMsgToBeVerified.setText(clip.getItemAt(0).getText());
+                    ClipData clip = null;
+                    if (clipboard != null) {
+                        clip = clipboard.getPrimaryClip();
                     }
-                    catch (Exception e) {
+                    try {
+                        if (clip != null) {
+                            etMsgToBeVerified.setText(clip.getItemAt(0).getText());
+                        }
+                    } catch (Exception e) {
                         // Nothing to be pasted
                     }
                 }
@@ -338,15 +341,14 @@ public class SignValidateMessageActivity extends AppCompatActivity {
 
                     if (sm != null) {
                         boolean isVerified = BtcUtils.verifySignature(sm.getAddress(), sm.getMessage(), sm.getSignature());
-                        if (isVerified == true) {
+                        if (isVerified) {
                             ivGreen.setVisibility(View.VISIBLE);
                             ivFail.setVisibility(View.INVISIBLE);
                         } else {
                             ivGreen.setVisibility(View.INVISIBLE);
                             ivFail.setVisibility(View.VISIBLE);
                         }
-                    }
-                    else {
+                    } else {
                         ivGreen.setVisibility(View.INVISIBLE);
                         ivFail.setVisibility(View.VISIBLE);
                     }
@@ -354,15 +356,15 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             });
         }
 
+        @NotNull
         @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            View view = null;
+        public Object instantiateItem(@NotNull ViewGroup container, int position) {
+            View view;
             if (position == 0) {
                 view = getLayoutInflater().inflate(R.layout.layout_sign_message, container, false);
                 container.addView(view);
                 initSignMessageTab(view);
-            }
-            else if (position == 1) {
+            } else {
                 view = getLayoutInflater().inflate(R.layout.layout_verify_message, container, false);
                 container.addView(view);
                 initVerifyMessageTab(view);
@@ -371,7 +373,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
         }
 
         @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
+        public void destroyItem(ViewGroup container, int position, @NotNull Object object) {
             container.removeView((View) object);
         }
     }

@@ -20,45 +20,24 @@
         android:logo="@mipmap/ic_cyphereco_color_logo_foreground"
         android:roundIcon="@mipmap/ic_cyphereco_color_logo_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity
-            android:name=".ui.ActivityKeyInformation"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".ui.ActivityTransactionInfo"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity
-            android:name=".ui.ChooseKeyActivity"
-            android:configChanges="orientation"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.SignValidateMessageActivity"
-            android:configChanges="orientation"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity
-            android:name=".ui.OpenturnkeyInfoActivity"
-            android:configChanges="orientation"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustNothing"/>
+        android:theme="@style/AppTheme"
+        android:fullBackupContent="@xml/backup_descriptor">
+
         <activity
             android:name=".ui.SplashActivity"
+            android:theme="@style/SplashTheme"
             android:configChanges="orientation"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing">
             <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data
                     android:host="ext"
                     android:pathPrefix="/com.cyphereco.openturnkey"
@@ -66,9 +45,7 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data
                     android:host="ext"
                     android:pathPrefix="/com.cyphereco.openturnkey"
@@ -76,9 +53,7 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.TECH_DISCOVERED" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data
                     android:host="ext"
                     android:pathPrefix="/com.cyphereco.openturnkey"
@@ -88,21 +63,48 @@
                 <action android:name="android.intent.action.ACTION_QR_CODE_RECEIVED" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.MainActivity"
+
+        <activity android:name=".ui.MainActivity"
             android:configChanges="orientation"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing"/>
-        <activity
-            android:name=".ui.QRcodeScanActivity"
-            android:label="@string/title_activity_qrcode_scan"
+
+        <activity android:name=".ui.OpenturnkeyInfoActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing"/>
-        <activity
-            android:name=".ui.ActivityAddressEditor"
+
+        <activity android:name=".ui.SignValidateMessageActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustNothing"/>
+
+        <activity android:name=".ui.QRcodeScanActivity"
+            android:label="@string/title_activity_qrcode_scan"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustNothing"/>
+
+        <activity android:name=".ui.ActivityAddressEditor"
             android:label="Add Contact"
             android:parentActivityName=".ui.MainActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing"/>
+
+        <activity android:name=".ui.ChooseKeyActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.ActivityKeyInformation"
+            android:windowSoftInputMode="adjustNothing"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.ActivityTransactionInfo"
+            android:windowSoftInputMode="adjustNothing"
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="preloaded_fonts"
