@@ -35,7 +35,7 @@ public class DialogClearHistory extends AppCompatDialogFragment {
                         if (otkDB.clearTransactionTable()) {
                             Toast.makeText(getContext(), getString(R.string.all_history_cleared), Toast.LENGTH_LONG).show();
                             if (null != mListener) {
-                                mListener.onClearHistorySuccess();
+                                mListener.onHistoryCleared();
                             }
                         }
                         else {
@@ -61,6 +61,6 @@ public class DialogClearHistory extends AppCompatDialogFragment {
     }
 
     public interface DialogClearHistoryListener {
-        void onClearHistorySuccess();
+        void onHistoryCleared();
     }
 }

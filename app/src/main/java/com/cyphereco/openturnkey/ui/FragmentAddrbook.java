@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -31,10 +30,6 @@ import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import static android.content.Context.CLIPBOARD_SERVICE;
-import static android.support.v4.content.ContextCompat.*;
-
 
 public class FragmentAddrbook extends Fragment {
     private final static String TAG = FragmentAddrbook.class.getSimpleName();
@@ -73,7 +68,7 @@ public class FragmentAddrbook extends Fragment {
             public void onPay(int position) {
                 Log.d(TAG, "onPay the position is: " + position);
                 DBAddrItem item = mAdapter.getAddressItemByPosition(position);
-                mListener.onAddressbookPayingButtonClick(item.getAddress());
+                mListener.onPayToAddress(item.getAddress());
             }
         });
     }
@@ -136,7 +131,9 @@ public class FragmentAddrbook extends Fragment {
                 Context context = view.getContext();
                 ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("address", address);
-                clipboard.setPrimaryClip(clip);
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
+                }
                 Toast.makeText(context, R.string.address_copied, Toast.LENGTH_SHORT).show();
             }
         });
@@ -231,7 +228,7 @@ public class FragmentAddrbook extends Fragment {
     }
 
     public interface FragmentAddrbookListener {
-        void onAddressbookPayingButtonClick(String address);
+        void onPayToAddress(String address);
     }
 
     public void refresh() {
