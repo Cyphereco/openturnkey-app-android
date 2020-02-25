@@ -25,6 +25,7 @@
 
         <activity
             android:name=".ui.SplashActivity"
+            android:theme="@style/SplashTheme"
             android:configChanges="orientation"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"

@@ -23,7 +23,7 @@ public class SplashActivity extends AppCompatActivity {
     public static final String TAG = SplashActivity.class.getSimpleName();
     Logger logger;
 
-    private static int SPLASH_TIMEOUT = 3000;
+    private static int SPLASH_TIMEOUT = 1000;
     static int i = 0;
     private boolean isStarted = false;
     private static final int REQUEST_CODE = 0x11;
@@ -60,7 +60,6 @@ public class SplashActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_splash);
 
         if (Configurations.writeLogToFile) {
             ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE); // without sdk version check
@@ -122,6 +121,7 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 
+    /* Idle thread for loading MainActivity after SPLASH_TIMEOUT */
     private class SplashLauncher extends Thread {
         @Override
         public void run() {
