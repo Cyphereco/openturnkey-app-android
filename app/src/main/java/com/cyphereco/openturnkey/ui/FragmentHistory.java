@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +16,9 @@ import android.widget.TextView;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
+
+import org.slf4j.Logger;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,6 +27,7 @@ import java.util.List;
 
 public class FragmentHistory extends Fragment {
     private final static String TAG = FragmentHistory.class.getSimpleName();
+    private static Logger logger = Log4jHelper.getLogger(TAG);
 
     private TextView mTVNoHistoryMessage;
     private RecyclerView mRVHistory;
@@ -51,7 +54,7 @@ public class FragmentHistory extends Fragment {
                     }
                 }
                 else {
-                    Log.e(TAG, "Cannot find transaction item. Position: " + position);
+                    logger.error("Cannot find transaction item. Position: " + position);
                 }
             }
         });
@@ -92,7 +95,7 @@ public class FragmentHistory extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView");
+        logger.debug("onCreateView");
         View view = inflater.inflate(R.layout.fragment_history, container, false);
 
         if (null == mOtkDB) {
@@ -116,24 +119,24 @@ public class FragmentHistory extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        Log.d(TAG, "onAttach");
+        logger.debug("onAttach");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d(TAG, "onDetach");
+        logger.debug("onDetach");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume");
+        logger.debug("onResume");
         updateTransactionDataset();
     }
 
     public void refresh() {
-        Log.d(TAG, "refresh()");
+        logger.debug("refresh()");
         updateTransactionDataset();
     }
 }

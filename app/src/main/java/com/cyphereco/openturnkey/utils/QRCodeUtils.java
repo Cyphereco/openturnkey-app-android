@@ -2,19 +2,23 @@ package com.cyphereco.openturnkey.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.util.Log;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
+import org.slf4j.Logger;
+
 public class QRCodeUtils {
     public static final String TAG = QRCodeUtils.class.getSimpleName();
-    private QRCodeUtils() {}
+    private static Logger logger = Log4jHelper.getLogger(TAG);
+
+    private QRCodeUtils() {
+    }
 
     public static Bitmap encodeAsBitmap(String source, int width, int height) {
-        Log.d(TAG, "source:" + source + " width:" + width + " height:" + height);
+        logger.debug("source:" + source + " width:" + width + " height:" + height);
         BitMatrix result;
 
         try {

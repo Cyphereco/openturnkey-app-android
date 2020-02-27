@@ -42,7 +42,7 @@ public class FragmentOtk extends Fragment {
     }
 
     private void updateOp(View view) {
-        logger.info("updateOp mOp:" + mOp.toString());
+        logger.debug("updateOp mOp:" + mOp.toString());
 
         final TextView tv;
         tv = view.findViewById(R.id.text_nfc_comm_type);

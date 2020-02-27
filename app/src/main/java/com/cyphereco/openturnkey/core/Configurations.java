@@ -26,6 +26,11 @@ public class Configurations {
     static public long txFeeHigh = 16;
     static public boolean writeLogToFile = true;
 
+    /* Background update task intervals, Unit = minute */
+    public static final int INTERVAL_EXCHANGE_RATE_UPDATE = 5;
+    public static final int INTERVAL_TX_FEE_UPDATE = 10;
+    public static final int INTERVAL_DB_UPDATE = 10;
+
 //    static public boolean isTestnet() {
 //        return (network == Network.TESTNET);
 //    }

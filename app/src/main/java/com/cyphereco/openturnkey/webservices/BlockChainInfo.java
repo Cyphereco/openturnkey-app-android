@@ -83,7 +83,7 @@ public class BlockChainInfo extends BtcBase {
      * @return
      */
      public BigDecimal getBalance(String address) {
-        logger.info("getBalance:{}", address);
+        logger.debug("getBalance:{}", address);
         try {
             Response response  = webClient.target(URI).path(PATH_ADDRESS_BALANCE).queryParam(PARAMETER_ACTIVE, address)
                     .request().get();
@@ -117,13 +117,13 @@ public class BlockChainInfo extends BtcBase {
     public int getTxBlockHight(String txHash) {
         int ret = -1;
 
-        logger.debug("getTxBlockHight:{}", txHash);
+        logger.info("getTxBlockHight:{}", txHash);
         try {
 
             Response response  = webClient.target(URI).path(PATH_RAWTX).path(txHash)
                 .request().get();
             String body = response.readEntity(String.class);
-            logger.debug("body:{}", body);
+            logger.info("body:{}", body);
             JSONObject json = new JSONObject(body);
             String hight = json.getString("block_height");
             return Integer.parseInt(hight);
@@ -136,7 +136,7 @@ public class BlockChainInfo extends BtcBase {
 
     public String getRawTx(String txHash) {
          String raw = null;
-         logger.debug("getRawTx:{}", txHash);
+         logger.info("getRawTx:{}", txHash);
          try {
 
              Response response  = webClient.target(URI).path(PATH_RAWTX).path(txHash).queryParam(PARAMETER_FORMAT, PARAMETER_VALUE_HEX)

@@ -66,7 +66,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        logger.info("onActivityResult:" + requestCode + " resultCode:" + resultCode);
+        logger.debug("onActivityResult:" + requestCode + " resultCode:" + resultCode);
         if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
             if (resultCode == RESULT_OK) {
                 // Handle successful scan
@@ -83,7 +83,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        logger.debug("onCreate");
+        logger.info("onCreate");
         setContentView(R.layout.activity_choose_key);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -214,7 +214,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
                 EditText etL5 = findViewById(R.id.editTextChooseKeyL5);
                 String l5 = etL5.getText().toString();
                 String path = l1 + "," + l2 + "," + l3 + "," + l4 + "," + l5;
-                logger.info("Choose key:{}", path);
+                logger.debug("Choose key:{}", path);
                 intent.putExtra(MainActivity.KEY_CHOOSE_KEY, path);
                 setResult(RESULT_OK, intent);
                 finish();
@@ -242,7 +242,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
     }
 
     private void updateKeyPathData(String contents) {
-        logger.debug("path:{}", contents);
+        logger.info("path:{}", contents);
         // parse path
         int prefixStart = contents.indexOf("m/");
         if (prefixStart != 0) {

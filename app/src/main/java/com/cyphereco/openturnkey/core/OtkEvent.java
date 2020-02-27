@@ -7,7 +7,9 @@ import java.math.BigDecimal;
 
 public class OtkEvent {
 
-    /** Event type enum */
+    /**
+     * Event type enum
+     */
     public enum Type {
         INVALID,
         GENERAL_INFORMATION,
@@ -62,49 +64,50 @@ public class OtkEvent {
     /**
      * Constructor for general info event
      */
-    public OtkEvent(Type eventType, OtkData data) {
+    OtkEvent(Type eventType, OtkData data) {
         mType = eventType;
         mData = data;
     }
 
-    public OtkEvent(Type eventType, OtkData data, String msgToSign, boolean usingMasterKey) {
+    OtkEvent(Type eventType, OtkData data, String msgToSign, boolean usingMasterKey) {
         mType = eventType;
         mData = data;
         mDesc = msgToSign;
         mUsingMasterKey = usingMasterKey;
     }
 
-    public OtkEvent(Type eventType, String desc) {
+    OtkEvent(Type eventType, String desc) {
         mType = eventType;
         mDesc = desc;
     }
 
-    public OtkEvent(Type eventType, String address, BigDecimal b, CurrencyExchangeRate rate) {
+    OtkEvent(Type eventType, String address, BigDecimal b, CurrencyExchangeRate rate) {
         mType = eventType;
         mBalance = b;
         mDesc = address;
         mCurrencyExRate = rate;
     }
 
-    public OtkEvent(Type eventType, Tx tx) {
+    OtkEvent(Type eventType, Tx tx) {
         mType = eventType;
         mTx = tx;
     }
 
-    public OtkEvent(UnsignedTx tx) {
+    OtkEvent(UnsignedTx tx) {
         mType = Type.UNSIGNED_TX;
         mUnsignedTx = tx;
     }
 
-    public OtkEvent(Type eventType) {
+    OtkEvent(Type eventType) {
         mType = eventType;
     }
-    public OtkEvent(Type eventType, CurrencyExchangeRate currencyExRate) {
+
+    OtkEvent(Type eventType, CurrencyExchangeRate currencyExRate) {
         mType = eventType;
         mCurrencyExRate = currencyExRate;
     }
 
-    public OtkEvent(Type eventType, TxFee txFee) {
+    OtkEvent(Type eventType, TxFee txFee) {
         mType = eventType;
         mTxFee = txFee;
     }
@@ -112,16 +115,49 @@ public class OtkEvent {
     public Type getType() {
         return mType;
     }
-    public String getRecipientAddress() { return mDesc;}
-    public String getAddress() { return mDesc;}
-    public String getFailureReason() { return mDesc;}
-    public String getMessageToSign() { return mDesc;}
-    public boolean getUsingMasterKey() { return mUsingMasterKey;}
-    public Tx getTx() { return mTx;}
-    public UnsignedTx getUnsignedTx() { return mUnsignedTx;}
-    public OtkData getData() {return mData;}
-    public CurrencyExchangeRate getCurrencyExRate() {return mCurrencyExRate;}
-    public BigDecimal getBalance() {return mBalance;}
-    public TxFee getTxFee() { return mTxFee;}
+
+    public String getRecipientAddress() {
+        return mDesc;
+    }
+
+    public String getAddress() {
+        return mDesc;
+    }
+
+    public String getFailureReason() {
+        return mDesc;
+    }
+
+    public String getMessageToSign() {
+        return mDesc;
+    }
+
+    public boolean getUsingMasterKey() {
+        return mUsingMasterKey;
+    }
+
+    public Tx getTx() {
+        return mTx;
+    }
+
+    public UnsignedTx getUnsignedTx() {
+        return mUnsignedTx;
+    }
+
+    public OtkData getData() {
+        return mData;
+    }
+
+    public CurrencyExchangeRate getCurrencyExRate() {
+        return mCurrencyExRate;
+    }
+
+    public BigDecimal getBalance() {
+        return mBalance;
+    }
+
+    public TxFee getTxFee() {
+        return mTxFee;
+    }
 
 }

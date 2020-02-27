@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,8 +23,11 @@ import android.widget.Toast;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBAddrItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
+
+import org.slf4j.Logger;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,6 +35,7 @@ import java.util.List;
 
 public class FragmentAddrbook extends Fragment {
     private final static String TAG = FragmentAddrbook.class.getSimpleName();
+    private static Logger logger = Log4jHelper.getLogger(TAG);
 
     private TextView mTVNoAddressMessage;
     private RecyclerView mRVAddressList;
@@ -48,25 +51,25 @@ public class FragmentAddrbook extends Fragment {
         mAdapter.setAdapterListener(new AddrbookViewAdapter.AdapterListener() {
             @Override
             public void onDeleteAddress(int position) {
-                Log.d(TAG, "onDelete the position is: " + position);
+                logger.debug("onDelete the position is: " + position);
                 processDeleteAddress(position);
             }
 
             @Override
             public void onEditAddress(int position) {
-                Log.d(TAG, "onEditAddress the position is: " + position);
+                logger.debug("onEditAddress the position is: " + position);
                 processEditAddress(position);
             }
 
             @Override
             public void onShowQRCode(int position) {
-                Log.d(TAG, "onShowQRCode the position is: " + position);
+                logger.debug("onShowQRCode the position is: " + position);
                 processShowQRCode(position);
             }
 
             @Override
             public void onPay(int position) {
-                Log.d(TAG, "onPay the position is: " + position);
+                logger.debug("onPay the position is: " + position);
                 DBAddrItem item = mAdapter.getAddressItemByPosition(position);
                 mListener.onPayToAddress(item.getAddress());
             }
@@ -179,7 +182,7 @@ public class FragmentAddrbook extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView");
+        logger.debug("onCreateView");
         View view = inflater.inflate(R.layout.fragment_addrbook, container, false);
 
         mTVNoAddressMessage = view.findViewById(R.id.text_no_address);
@@ -205,7 +208,7 @@ public class FragmentAddrbook extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        Log.d(TAG, "onAttach");
+        logger.debug("onAttach");
         if (context instanceof FragmentAddrbookListener) {
             mListener = (FragmentAddrbookListener) context;
         } else {
@@ -217,13 +220,13 @@ public class FragmentAddrbook extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d(TAG, "onDetach");
+        logger.debug("onDetach");
         mListener = null;
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult");
+        logger.debug("onActivityResult");
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -232,7 +235,7 @@ public class FragmentAddrbook extends Fragment {
     }
 
     public void refresh() {
-        Log.d(TAG, "refresh()");
+        logger.debug("refresh()");
         updateAddressDataset();
     }
 

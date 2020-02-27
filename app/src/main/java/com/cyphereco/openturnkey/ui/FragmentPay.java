@@ -36,6 +36,8 @@ import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
 
+import java.util.Locale;
+
 public class FragmentPay extends Fragment {
     public static final String TAG = FragmentPay.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
@@ -159,7 +161,7 @@ public class FragmentPay extends Fragment {
             }
             CheckBox cb = view.findViewById(R.id.checkBox_use_all_funds);
             boolean b = getArguments().getBoolean(ARG_USE_ALL_FUNDS);
-            logger.info("Checked:" + b);
+            logger.debug("Use all funds checked:" + b);
             cb.setChecked(b);
             updateCurrency();
         }
@@ -191,7 +193,7 @@ public class FragmentPay extends Fragment {
                 mIsAmountConverting = true;
                 try {
                     double cc = Double.parseDouble(mEtCc.getText().toString());
-                    mEtLc.setText(String.format("%.2f", Double.valueOf(getLocalCurrency(cc))));
+                    mEtLc.setText(String.format(Locale.ENGLISH, "%.2f", getLocalCurrency(cc)));
                     mBtc = cc;
                 }
                 catch (NumberFormatException e) {
@@ -245,21 +247,13 @@ public class FragmentPay extends Fragment {
                         return;
                     }
                     CheckBox cb = v.findViewById(R.id.checkBox_use_all_funds);
-                    if (cb.isChecked()) {
-                        if (mListener != null) {
-                            mListener.onSignPaymentButtonClick(mRecipientAddress, -1, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
-                        }
+                    if (!cb.isChecked() && mBtc <= 0) {
+                        Snackbar.make(view, getString(R.string.incorrect_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                        return;
                     }
-                    else {
-                        // Check amount
-                        if (mBtc <= 0) {
-                            Snackbar.make(view, getString(R.string.incorrect_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                            return;
-                        }
 
-                        if (mListener != null) {
-                            mListener.onSignPaymentButtonClick(mRecipientAddress, mBtc, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
-                        }
+                    if (mListener != null) {
+                        mListener.onSignPaymentButtonClick(mRecipientAddress, mBtc, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
                     }
                 }
                 catch (NullPointerException | NumberFormatException e) {
@@ -322,15 +316,15 @@ public class FragmentPay extends Fragment {
         }
         switch (mLocalCurrency) {
             case LOCAL_CURRENCY_TWD:
-                return Double.valueOf(mCurrencyExRate.getTWD() * cc);
+                return (mCurrencyExRate.getTWD() * cc);
             case LOCAL_CURRENCY_USD:
-                return Double.valueOf(mCurrencyExRate.getUSD() * cc);
+                return (mCurrencyExRate.getUSD() * cc);
             case LOCAL_CURRENCY_CNY:
-                return Double.valueOf(mCurrencyExRate.getCNY() * cc);
+                return (mCurrencyExRate.getCNY() * cc);
             case LOCAL_CURRENCY_EUR:
-                return Double.valueOf(mCurrencyExRate.getEUR() * cc);
+                return (mCurrencyExRate.getEUR() * cc);
             case LOCAL_CURRENCY_JPY:
-                return Double.valueOf(mCurrencyExRate.getJPY() * cc);
+                return (mCurrencyExRate.getJPY() * cc);
         }
         return 0;
     }
@@ -383,7 +377,7 @@ public class FragmentPay extends Fragment {
                 // update local currency
                 mIsAmountConverting = true;
                 try {
-                    mEtLc.setText(String.format("%.2f", Double.valueOf(getLocalCurrency(mBtc))));
+                    mEtLc.setText(String.format(Locale.ENGLISH, "%.2f", getLocalCurrency(mBtc)));
                 }
                 catch (NumberFormatException e) {
                     mEtLc.setText("");

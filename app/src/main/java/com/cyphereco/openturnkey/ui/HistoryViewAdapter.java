@@ -3,7 +3,6 @@ package com.cyphereco.openturnkey.ui;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +13,9 @@ import android.widget.TextView;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.utils.AddressUtils;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
+
+import org.slf4j.Logger;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.Locale;
 
 public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.ViewHolder> {
     private final static String TAG = HistoryViewAdapter.class.getSimpleName();
+    private static Logger logger = Log4jHelper.getLogger(TAG);
 
     private Context mContext;
     private List<DBTransItem> mTransDataset;
@@ -53,7 +56,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull HistoryViewAdapter.ViewHolder viewHolder, int position) {
-        Log.d(TAG, "onBindViewHolder position: " + position);
+        logger.debug("onBindViewHolder position: " + position);
         if (null == mTransDataset) {
             return;
         }
@@ -129,7 +132,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(TAG, "item on click");
+                    logger.debug("item on click");
                     if (null != mAdapterListener) {
                         mAdapterListener.onClickTransItem(getAdapterPosition());
                     }

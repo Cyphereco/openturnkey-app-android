@@ -2,12 +2,12 @@
 <resources>
     <string name="about">ついて</string>
     <string name="clear_history">歴史削除</string>
-    <string name="fees_included">手数料込み</string>
+    <string name="fees_included">手数料込</string>
     <string name="history">支払歴史</string>
     <string name="local_currency">現地通貨</string>
     <string name="addresses">入金アドレス</string>
     <string name="no_freq_addr">入金アドレスなし</string>
-    <string name="use_fix_addresss">固定入金アドレス使い</string>
+    <string name="use_fix_address">固定入金アドレス使い</string>
     <string name="unlock">ロック解除</string>
     <string name="transaction_fee">手数料</string>
     <string name="sign_payment">サイン支払い</string>
@@ -36,9 +36,9 @@
     <string name="read_general_information">一般情報を読む</string>
     <string name="customized_fees">限定手数料</string>
     <string name="suggested">おすすめ</string>
-    <string name="command_executed_successfuly">コマンドが正常に実行された</string>
+    <string name="command_executed_successfully">コマンドが正常に実行された</string>
     <string name="processing">トランザクション処理中</string>
-    <string name="transaction_reciept">取引領収書</string>
+    <string name="transaction_receipt">取引領収書</string>
     <string name="get_recipient_address">入金アドレスを取得</string>
     <string name="nfc_unavailable">NFCは利用できません</string>
     <string name="operation_cancelled">操作がキャンセルされました</string>
@@ -60,7 +60,7 @@
     <string name="sign_message">サインメッセージ</string>
     <string name="add">追加</string>
     <string name="subject_note">ノート:</string>
-    <string name="mint_inforamtion">ミント情報</string>
+    <string name="mint_information">ミント情報</string>
     <string name="lock_state">ロック状態</string>
     <string name="battery_state">バッテリー状態</string>
     <string name="btc_address">BTC アドレス</string>
@@ -68,7 +68,7 @@
     <string name="add_address">アドレスを追加</string>
     <string name="subject_account_balance">勘定残高</string>
     <string name="openturnkey_information">OpenTurnKey情報</string>
-    <string name="fetching">データ更新中...</string>
+    <string name="fetching">データ更新中…</string>
     <string name="address_copied">アドレスコピーしました</string>
     <string name="please_wait">OpenTurnKeyから離れることができます\nお少々待ちください</string>
     <string name="operation_timeout">操作タイムアウト</string>
@@ -80,7 +80,6 @@
     <string name="signing_transaction">トランザクションをサインする</string>
     <string name="seg_wit_address_is_not_supported">SigWitアドレスは現在サポートされていません</string>
     <string name="invalid_address">無効なアドレス</string>
-    <string name="success">成功</string>
     <string name="fail">矢敗</string>
     <string name="copy">コピー</string>
     <string name="alias">別称</string>
@@ -126,7 +125,7 @@
     <string name="title_set_pin">ピンコード設定</string>
     <string name="write_note">メモを書きます</string>
     <string name="currency_btc">BTC (ビットコイン)</string>
-    <string name="pin_confirmation_doesnt_match">ピンコードが一致しません</string>
+    <string name="pin_confirmation_not_match">ピンコードが一致しません</string>
     <string name="write_note_hint">メモ (64文字未満)</string>
     <string name="check_balance">残高の確認</string>
     <string name="set_pin_success">PINコードを設定しました</string>
@@ -182,5 +181,8 @@
     <string name="invalid_params">無効なデータ</string>
     <string name="missing_params">データがありません</string>
     <string name="communication_error">コミュニケーションエラー</string>
-    <string name="fees_excluded">手数料を除く</string>
+    <string name="fees_excluded">手数料抜</string>
+    <string name="not_openturnkey">有効なOpenTurnKeyではありません、読み取りが完了するまでOpenTurnKeyを離れないでください。</string>
+    <string name="confirmation">確認</string>
+    <string name="amount_fees_included">金額 (手数料込)</string>
 </resources>

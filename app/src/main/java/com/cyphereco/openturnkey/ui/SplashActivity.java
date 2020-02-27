@@ -12,7 +12,6 @@ import android.view.WindowManager;
 
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
-
 import org.slf4j.Logger;
 
 
@@ -33,10 +32,10 @@ public class SplashActivity extends AppCompatActivity {
             logger = Log4jHelper.getLogger(TAG);
 
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                logger.info("Permission granted");
+                logger.debug("Permission granted");
             }
             else {
-                logger.info("Permission is not granted");
+                logger.debug("Permission is not granted");
             }
 
             if (MainActivity.isRunning()) {
@@ -122,7 +121,7 @@ public class SplashActivity extends AppCompatActivity {
         @Override
         public void run() {
             int SPLASH_TIMEOUT = 1000;
-            logger.info("Start MainActivity in {} seconds", SPLASH_TIMEOUT / 1000);
+            logger.debug("Start MainActivity in {} seconds", SPLASH_TIMEOUT / 1000);
 
             try {
                 sleep(SPLASH_TIMEOUT);
@@ -132,7 +131,7 @@ public class SplashActivity extends AppCompatActivity {
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(intent);
             isStarted = true;
-            logger.info("MainActivity is starting...");
+            logger.debug("MainActivity is starting...");
         }
     }
 }

@@ -3,7 +3,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
+import org.slf4j.Logger;
 
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
@@ -11,6 +12,8 @@ import com.cyphereco.openturnkey.utils.TxFee;
 
 public class Preferences {
     public static final String TAG = Preferences.class.getSimpleName();
+    private static Logger logger = Log4jHelper.getLogger(TAG);
+
     private static final String LOCAL_CURRENCY = "LOCAL_CURRENCY";
     private static final String TX_FEE_TYPE = "TX_FEE_TYPE";
     private static final String TX_FEE_LOW = "TX_FEE_LOW";
@@ -95,7 +98,7 @@ public class Preferences {
 
     static public void setTxFee(Context ctx, TxFee txFee) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        Log.d(TAG, "low:" + txFee.getLow() + " mid:" + txFee.getMid() + " high:" + txFee.getHigh());
+        logger.debug("low:" + txFee.getLow() + " mid:" + txFee.getMid() + " high:" + txFee.getHigh());
         prefs.edit().putLong(TX_FEE_LOW, txFee.getLow()).commit();
         prefs.edit().putLong(TX_FEE_MID, txFee.getMid()).commit();
         prefs.edit().putLong(TX_FEE_HIGH, txFee.getHigh()).commit();

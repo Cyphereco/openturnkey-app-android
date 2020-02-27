@@ -18,7 +18,7 @@
             android:id="@+id/menu_pay_use_fix_address"
             android:checkable="true"
             android:checked="false"
-            android:title="@string/use_fix_addresss" />
+            android:title="@string/use_fix_address" />
     </group>
     <item
         android:id="@+id/menu_pay_user_guide"

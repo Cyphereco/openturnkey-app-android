@@ -3,15 +3,12 @@ package com.cyphereco.openturnkey.ui;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatDialogFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
@@ -46,7 +43,7 @@ public class DialogSetPIN extends AppCompatDialogFragment {
                     dismiss();
                 }
                 else {
-                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.pin_confirmation_doesnt_match), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.pin_confirmation_not_match), Toast.LENGTH_LONG).show();
                 }
             }
         });

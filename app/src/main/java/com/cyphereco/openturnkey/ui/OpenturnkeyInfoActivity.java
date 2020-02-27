@@ -17,7 +17,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -31,13 +30,18 @@ import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
+
+import org.slf4j.Logger;
 
 import java.math.BigDecimal;
 
 public class OpenturnkeyInfoActivity extends AppCompatActivity {
     public static final String TAG = OpenturnkeyInfoActivity.class.getSimpleName();
+    private static Logger logger = Log4jHelper.getLogger(TAG);
+
     private NfcAdapter mNfcAdapter = null;
     static private Otk mOtk = null;
     static Handler handler = null;
@@ -49,7 +53,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate");
+        logger.debug("onCreate");
         setContentView(R.layout.activity_openturnkey_info);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -77,7 +81,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
         handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                Log.d(TAG, "handle message:" + msg.what);
+                logger.debug("handle message:" + msg.what);
                 TextView tv = findViewById(R.id.text_balance_btc);
                 OtkEvent event = (OtkEvent) msg.obj;
                 BigDecimal b = event.getBalance();
@@ -176,7 +180,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
             public void onOtkEvent(OtkEvent event) {
                 if (event.getType() == OtkEvent.Type.BALANCE_UPDATE) {
                     if (!event.getAddress().equals(address)) {
-                        Log.d(TAG, "Address doesn't match." + event.getAddress() + " " + address);
+                        logger.debug("Address doesn't match." + event.getAddress() + " " + address);
                         return;
                     }
                     Message msg = new Message();
@@ -194,7 +198,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // Show dialog
                 AlertDialog.Builder builder = new AlertDialog.Builder(OpenturnkeyInfoActivity.this);
-                AlertDialog d = builder.setTitle(R.string.mint_inforamtion)
+                AlertDialog d = builder.setTitle(R.string.mint_information)
                         .setMessage(otkData.getMintInfo().toString())
                         .setPositiveButton(R.string.ok, null)
                         .setCancelable(false)
@@ -223,13 +227,13 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action) ||
                 NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
             if (mOtk == null) {
-                Log.d(TAG, "mOtk is null");
+                logger.debug("mOtk is null");
                 return;
             }
-            int ret = mOtk.processIntent(intent, new Otk.OtkEventListener() {
+            int ret = mOtk.processNfcIntent(intent, new Otk.OtkEventListener() {
                 @Override
                 public void onOtkEvent(OtkEvent event) {
-                    Log.d(TAG, "onOtkEvent");
+                    logger.debug("onOtkEvent");
                     if (event.getType() != OtkEvent.Type.GENERAL_INFORMATION) {
                         return;
                     }
@@ -238,7 +242,8 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
                 }
             });
             if (ret != Otk.OTK_RETURN_OK) {
-                Log.d(TAG, "process intent failed:" + ret);
+                logger.info("Not a valid OpenTurnKey");
+                Toast.makeText(this, getString(R.string.not_openturnkey), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -270,9 +275,9 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy");
+        logger.debug("onDestroy");
         if (mOtk == null) {
-            Log.d(TAG, "mOtk is null");
+            logger.debug("mOtk is null");
             return;
         }
         mOtk.setBalanceListener(null);

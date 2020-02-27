@@ -152,7 +152,7 @@ public class BtcUtils {
     }
 
     public static byte[] hexStringToBytes(String s) {
-        Log.d(TAG, "hexStringToBytes:" + s);
+        logger.debug("hexStringToBytes:" + s);
         int len = s.length();
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
@@ -376,15 +376,15 @@ public class BtcUtils {
         }
         switch (lc) {
             case LOCAL_CURRENCY_TWD:
-                return Double.valueOf(amount / rate.getTWD());
+                return amount / rate.getTWD();
             case LOCAL_CURRENCY_USD:
-                return Double.valueOf(amount / rate.getUSD());
+                return amount / rate.getUSD();
             case LOCAL_CURRENCY_CNY:
-                return Double.valueOf(amount / rate.getCNY());
+                return amount / rate.getCNY();
             case LOCAL_CURRENCY_EUR:
-                return Double.valueOf(amount / rate.getEUR());
+                return amount / rate.getEUR();
             case LOCAL_CURRENCY_JPY:
-                return Double.valueOf(amount / rate.getJPY());
+                return amount / rate.getJPY();
         }
         return 0;
     }
@@ -395,15 +395,15 @@ public class BtcUtils {
         }
         switch (lc) {
             case LOCAL_CURRENCY_TWD:
-                return Double.valueOf(rate.getTWD() * amount);
+                return rate.getTWD() * amount;
             case LOCAL_CURRENCY_USD:
-                return Double.valueOf(rate.getUSD() * amount);
+                return rate.getUSD() * amount;
             case LOCAL_CURRENCY_CNY:
-                return Double.valueOf(rate.getCNY() * amount);
+                return rate.getCNY() * amount;
             case LOCAL_CURRENCY_EUR:
-                return Double.valueOf(rate.getEUR() * amount);
+                return rate.getEUR() * amount;
             case LOCAL_CURRENCY_JPY:
-                return Double.valueOf(rate.getJPY() * amount);
+                return rate.getJPY() * amount;
         }
         return 0;
     }
@@ -485,7 +485,7 @@ public class BtcUtils {
     }
 
     static public boolean validateAddress(boolean isMainNet, String address) {
-        logger.debug("mainnet:{} address:", isMainNet, address);
+        logger.info("mainnet:{} address:", isMainNet, address);
         // check prefix
         try {
             char[] addr = address.toCharArray();
@@ -531,7 +531,7 @@ public class BtcUtils {
         if (s.compareTo(HALF_CURVE_ORDER) <= 0) {
             return s;
         }
-        logger.info("s > half curve order");
+        logger.debug("s > half curve order");
         return CURVE_ORDER.subtract(s);
     }
 }

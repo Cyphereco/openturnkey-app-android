@@ -140,7 +140,7 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginStart="8dp"
-        android:contentDescription="@string/mint_inforamtion"
+        android:contentDescription="@string/mint_information"
         app:layout_constraintStart_toEndOf="@+id/user_note_context"
         app:layout_constraintTop_toTopOf="@+id/user_note_context"
         app:srcCompat="@drawable/ic_info_outline_black_24dp" />

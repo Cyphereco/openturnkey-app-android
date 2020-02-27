@@ -1,5 +1,6 @@
 package com.cyphereco.openturnkey.core;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.nfc.NdefMessage;
@@ -10,10 +11,8 @@ import android.os.Message;
 import android.os.Parcelable;
 
 import com.blockcypher.exception.BlockCypherException;
-import com.blockcypher.model.transaction.Transaction;
-import com.blockcypher.model.transaction.intermediary.IntermediaryTransaction;
-import com.blockcypher.model.transaction.output.Output;
 import com.cyphereco.openturnkey.R;
+import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.db.DBTransItem;
@@ -40,7 +39,9 @@ public class Otk {
     public static final String TAG = Otk.class.getSimpleName();
     static Logger logger = Log4jHelper.getLogger(TAG);
 
-    /** Return value. */
+    /**
+     * Return value.
+     */
     public static final int OTK_RETURN_OK = 0;
     public static final int OTK_RETURN_ERROR = 1;
     public static final int OTK_RETURN_ERROR_OP_IN_PROCESSING = 2;
@@ -56,13 +57,13 @@ public class Otk {
     private static final int OTK_MSG_COMPLETE_PAYMENT_FAILED = 5;
     private static final int OTK_MSG_SESSION_TIMED_OUT = 6;
     private static final int OTK_MSG_READ_RESPONSE_TIMED_OUT = 7;
-    private static final int OTK_MSG_BALANCE_UPDATE = 8;
+    private static final int OTK_MSG_CHECK_BALANCE = 8;
 
 
     public enum Operation {
         OTK_OP_NONE("None"),
         OTK_OP_READ_GENERAL_INFO("Read General Info"),
-        OTK_OP_SIGN_PAYMENT("Sing Payment"),
+        OTK_OP_SIGN_PAYMENT("Sign Payment"),
         OTK_OP_GET_RECIPIENT_ADDRESS("Get Recipient Address"),
         OTK_OP_UNLOCK("Unlock"),
         OTK_OP_WRITE_NOTE("Write Note"),
@@ -74,19 +75,24 @@ public class Otk {
         OTK_OP_EXPORT_WIF_KEY("Export WIF Key");
 
         private final String value;
+
         private Operation(String s) {
             value = s;
         }
 
-        public String toString(){
+        public String toString() {
             return value;
         }
     }
 
-    /** The place holder for the single object. */
+    /**
+     * The place holder for the single object.
+     */
     private static Otk mOtk = null;
 
-    /** Event listener. */
+    /**
+     * Event listener.
+     */
     static OtkEventListener mEventListener = null;
     static BalanceUpdateListener mBalanceUpdateListener = null;
 
@@ -129,8 +135,9 @@ public class Otk {
      *
      * @return The singleton.
      */
+    @SuppressLint("HandlerLeak")
     public static synchronized Otk getInstance(Context ctx) {
-        logger.info("getInstance()");
+        logger.debug("getInstance()");
 
         mCtx = ctx;
 
@@ -139,12 +146,12 @@ public class Otk {
             mHandler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
-                    logger.info("handle message:" + msg.what);
                     OtkEvent event;
                     Tx tx;
                     Command cmd;
                     switch (msg.what) {
                         case OTK_MSG_GOT_UNSIGNED_TX:
+                            logger.debug("Received OTK_MSG_GOT_UNSIGNED_TX");
                             if (mOp != Operation.OTK_OP_SIGN_PAYMENT) {
                                 logger.warn("Got unsigned tx but operation is cancelled.");
                                 /* Op cancelled, ignore it */
@@ -152,7 +159,7 @@ public class Otk {
                             }
 
                             // Cache to sign list
-                            UnsignedTx unsigendTx = (UnsignedTx)msg.obj;
+                            UnsignedTx unsigendTx = (UnsignedTx) msg.obj;
                             List<String> toSignList = unsigendTx.getToSign();
                             mArgs.clear();
                             // Also clear cached signature
@@ -163,12 +170,16 @@ public class Otk {
                             sendEvent(new OtkEvent(unsigendTx));
                             break;
                         case OTK_MSG_SEND_BITCOIN_FAILED:
-                            event = new OtkEvent(OtkEvent.Type.SEND_BITCOIN_FAIL, (String)msg.obj);
+                            logger.debug("Received OTK_MSG_SEND_BITCOIN_FAILED");
+
+                            event = new OtkEvent(OtkEvent.Type.SEND_BITCOIN_FAIL, (String) msg.obj);
                             sendEvent(event);
                             clearOp();
                             break;
                         case OTK_MSG_COMPLETE_PAYMENT_FAILED:
-                            String desc = (String)msg.obj;
+                            logger.debug("Received OTK_MSG_COMPLETE_PAYMENT_FAILED");
+
+                            String desc = (String) msg.obj;
                             if (desc == null) {
                                 desc = mCtx.getString(R.string.unknown_reason);
                             }
@@ -177,38 +188,63 @@ public class Otk {
                             clearOp();
                             break;
                         case OTK_MSG_CURRENCY_EX_RATE_UPDATE:
-                            mCurrencyExRate  = (CurrencyExchangeRate) msg.obj;
+                            logger.debug("Received OTK_MSG_CURRENCY_EX_RATE_UPDATE");
+
+                            mCurrencyExRate = (CurrencyExchangeRate) msg.obj;
                             event = new OtkEvent(OtkEvent.Type.CURRENCY_EXCHANGE_RATE_UPDATE, mCurrencyExRate);
                             sendEvent(event);
                             break;
                         case OTK_MSG_TX_FEE_UPDATE:
+                            logger.debug("Received OTK_MSG_TX_FEE_UPDATE");
+
                             event = new OtkEvent(OtkEvent.Type.TX_FEE_UPDATE, (TxFee) msg.obj);
                             sendEvent(event);
                             break;
                         case OTK_MSG_BITCOIN_SENT:
-                            tx = (Tx)msg.obj;
+                            logger.debug("Received OTK_MSG_BITCOIN_SENT");
+
+                            tx = (Tx) msg.obj;
                             event = new OtkEvent(OtkEvent.Type.SEND_BITCOIN_SUCCESS, tx);
                             sendEvent(event);
                             clearOp();
                             break;
                         case OTK_MSG_SESSION_TIMED_OUT:
+                            logger.debug("Received OTK_MSG_SESSION_TIMED_OUT");
+
                             cmd = (Command) msg.obj;
                             sendEvent(new OtkEvent(OtkEvent.Type.SESSION_TIMED_OUT, cmd.toString()));
                             break;
                         case OTK_MSG_READ_RESPONSE_TIMED_OUT:
+                            logger.debug("Received OTK_MSG_READ_RESPONSE_TIMED_OUT");
+
                             cmd = (Command) msg.obj;
                             sendEvent(new OtkEvent(OtkEvent.Type.READ_RESPONSE_TIMED_OUT, cmd.toString()));
                             break;
-                        case OTK_MSG_BALANCE_UPDATE:
+                        case OTK_MSG_CHECK_BALANCE:
+                            logger.debug("Received OTK_MSG_CHECK_BALANCE");
+
                             if (mOp == Operation.OTK_OP_SIGN_PAYMENT) {
-                                BigDecimal b = (BigDecimal)msg.obj;
-                                logger.debug("balance:{}", b.doubleValue());
-                                if (BtcUtils.satoshiToBtc(b.longValue()) < mAmount) {
+                                BigDecimal b = (BigDecimal) msg.obj;
+                                double allFunds = BtcUtils.satoshiToBtc(b.longValue());
+                                double txFees = BtcUtils.satoshiToBtc(mTxFees);
+                                double sendAmount = mAmount;
+
+                                logger.info("OTK Balance:{}", allFunds);
+
+                                if (mAmount > 0 && mFeeIncluded) {
+                                    sendAmount = mAmount - txFees;
+                                }
+                                else if (mAmount < 0) {
+                                    sendAmount = allFunds - txFees;
+                                }
+
+                                if (allFunds < sendAmount + txFees || sendAmount < 0) {
                                     // Insufficient amount
                                     sendEvent(new OtkEvent(OtkEvent.Type.SEND_BITCOIN_FAIL, mCtx.getString(R.string.balance_insufficient)));
                                     break;
                                 }
                                 // Continue payment
+                                logger.debug("Pay amount=" + (allFunds - txFees) + ", Fees=" + BtcUtils.satoshiToBtc(mTxFees));
                                 sendBitcoin(mFrom, mTo, mAmount, mTxFees, mFeeIncluded);
                                 event = new OtkEvent(OtkEvent.Type.FIND_UTXO);
                                 sendEvent(event);
@@ -223,7 +259,7 @@ public class Otk {
 
             // Timer task which calling get current exchange api.
             TimerTask task = new TimerTask() {
-                public void run () {
+                public void run() {
                     CurrencyExchangeRate cer = BtcUtils.getCurrencyExchangeRate();
                     if (cer != null) {
                         // Send message
@@ -236,10 +272,10 @@ public class Otk {
                     }
                 }
             };
-            mTimerRate.schedule(task,100,1000 * 60);
+            mTimerRate.schedule(task, 100, 1000 * 60 * Configurations.INTERVAL_EXCHANGE_RATE_UPDATE);
             // Timer task which calling get current exchange api.
             TimerTask updateTxFeeTask = new TimerTask() {
-                public void run () {
+                public void run() {
                     TxFee txFee = BtcUtils.getTxFee();
                     if (txFee != null) {
                         // Send message
@@ -250,41 +286,33 @@ public class Otk {
                     }
                 }
             };
-            mTimerTxFee.schedule(updateTxFeeTask,100,1000 * 60 * 60);
+            mTimerTxFee.schedule(updateTxFeeTask, 100, 1000 * 60 * Configurations.INTERVAL_TX_FEE_UPDATE);
 
             // Timer task which calling get current exchange api.
             TimerTask updateConfirmationTask = new TimerTask() {
-                public void run () {
+                public void run() {
                     OpenturnkeyDB mOtkDB = new OpenturnkeyDB(mCtx);
                     List<DBTransItem> dataset = mOtkDB.getAllTransaction();
-                    int latestBlockHight = BlockChainInfo.getInstance(mCtx).getLatestBlochHight();
                     for (int i = 0; i < dataset.size(); i++) {
                         DBTransItem dbItem = dataset.get(i);
-                        if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt() && dbItem.getConfirmations() < 6) {
-                            int blockHight = BlockChainInfo.getInstance(mCtx).getTxBlockHight(dbItem.getHash());
-                            int c = 0;
-                            if (blockHight != -1) {
-                                c = latestBlockHight - blockHight + 1;
-                            }
-                            String raw = BlockChainInfo.getInstance(mCtx).getRawTx(dbItem.getHash());
-                            if (c > 0) {
-                                // Update db
-                                dbItem.setConfrimations(c);
-                                mOtkDB.updateTransaction(dbItem);
-                                logger.debug("Got tx:{} confirmation:{}", dbItem.getHash(), dbItem.getConfirmations());
-                            }
+                        if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt()){// && dbItem.getConfirmations() < 144) {
+                            int confirmations = BlockChainInfo.getInstance(mCtx).getConfirmations(dbItem.getHash());
+                            // Update db
+                            dbItem.setConfrimations(confirmations);
+                            mOtkDB.updateTransaction(dbItem);
+                            logger.info("Got tx:{} confirmation:{}", dbItem.getHash(), dbItem.getConfirmations());
                         }
                     }
                 }
             };
             // 30 minutes timer
-            mTimerUpdateConfirmation.schedule(updateConfirmationTask, 5000,1000 * 60 * 30);
+            mTimerUpdateConfirmation.schedule(updateConfirmationTask, 5000, 1000 * 60 * Configurations.INTERVAL_DB_UPDATE);
         }
         return mOtk;
     }
 
     static void writeSignCommand(String pin, boolean usingMasterKey) {
-        logger.info("writeSignCommand:{} usingMasterKey:{}", pin, usingMasterKey);
+        logger.debug("writeSignCommand:{} usingMasterKey:{}", pin, usingMasterKey);
         OtkEvent event;
         // Try to wirte maximum size we can
         List<String> args = new ArrayList<String>();
@@ -305,24 +333,21 @@ public class Otk {
                 sendEvent(event);
                 // Start read response timer
                 startReadResponseTimer(Command.SIGN);
-            }
-            else {
+            } else {
                 if (otkData.getType() != OtkData.Type.OTK_DATA_TYPE_SIGNATURE) {
-                    logger.info("Expect signature but got " + otkData.getType().toString());
+                    logger.debug("Expect signature but got " + otkData.getType().toString());
                     event = new OtkEvent(OtkEvent.Type.SIGN_FAILED);
                     sendEvent(event);
                     return;
                 }
                 if (mOp == Operation.OTK_OP_SIGN_PAYMENT) {
                     processSignature(otkData);
-                }
-                else {
+                } else {
                     // Must be sign message
                     sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_SUCCESS, otkData, mMessageToSign, mUsingMasterKey));
                 }
             }
-        }
-        else {
+        } else {
             // OTK is not connected, cache command
             mCommandToWrite = Command.SIGN;
             mPin = pin;
@@ -331,8 +356,8 @@ public class Otk {
         }
     }
 
-    static int  writeUnlockCommand(String pin) {
-        logger.info("writeUnlockCommand:" + pin);
+    static int writeUnlockCommand(String pin) {
+        logger.debug("writeUnlockCommand:" + pin);
         OtkEvent event;
         List<String> args = new ArrayList<String>();
         if (OTK_RETURN_OK == Nfc.writeCommand(mTag, Command.UNLOCK, mSessionId, pin, args, false, false)) {
@@ -345,8 +370,7 @@ public class Otk {
             sendEvent(event);
             // Start read response timer
             startReadResponseTimer(Command.UNLOCK);
-        }
-        else {
+        } else {
             // OTK is not connected, cache command
             mCommandToWrite = Command.UNLOCK;
             mPin = pin;
@@ -358,7 +382,7 @@ public class Otk {
     }
 
     static int writeOtkCommand(Command cmd, String pin, List<String> args, boolean isMore, boolean usingMasterKey) {
-        logger.info("writeOtkCommand:{} {} {} {} {}", cmd, pin, args, isMore, usingMasterKey);
+        logger.debug("writeOtkCommand: cmd={} pin={} data={} more={} useMaster={}", cmd, pin, args, isMore, usingMasterKey);
         OtkEvent event;
         if (OTK_RETURN_OK == Nfc.writeCommand(mTag, cmd, mSessionId, pin, args, isMore, usingMasterKey)) {
             processCommandWritten();
@@ -375,30 +399,24 @@ public class Otk {
                     startReadResponseTimer(cmd);
                 }
                 return OTK_RETURN_OK;
-            }
-            else {
+            } else {
                 if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
                     if (cmd == Command.UNLOCK) {
                         sendEvent(new OtkEvent(OtkEvent.Type.UNLOCK_SUCCESS, otkData));
-                    }
-                    else if (cmd == Command.SET_NOTE) {
+                    } else if (cmd == Command.SET_NOTE) {
                         sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_SUCCESS, otkData));
-                    }
-                    else if (cmd == Command.SET_PIN) {
+                    } else if (cmd == Command.SET_PIN) {
                         sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_SUCCESS, otkData));
-                    }
-                    else if (cmd == Command.SET_KEY) {
+                    } else if (cmd == Command.SET_KEY) {
                         sendEvent(new OtkEvent(OtkEvent.Type.CHOOSE_KEY_SUCCESS, otkData));
-                    }
-                    else {
+                    } else {
                         logger.error("Not supported yet!");
                     }
                     clearOp();
                     return OTK_RETURN_OK;
-                }
-                else {
+                } else {
                     // Fail case
-                    logger.info("Expect exec success but got " + otkData.getType().toString());
+                    logger.debug("Expect exec success but got " + otkData.getType().toString());
                     if (cmd == Command.UNLOCK) {
                         sendEvent(new OtkEvent(OtkEvent.Type.UNLOCK_FAIL, otkData));
 
@@ -415,8 +433,7 @@ public class Otk {
                 return OTK_RETURN_OK;
 
             }
-        }
-        else {
+        } else {
             // OTK is not connected, cache command
             mCommandToWrite = cmd;
             mPin = pin;
@@ -429,15 +446,14 @@ public class Otk {
     /**
      * Method to process all NFC intents
      */
-    public int processIntent(Intent intent, OtkEventListener listener) {
-        logger.info("process intent");
+    public int processNfcIntent(Intent intent, OtkEventListener listener) {
+        logger.debug("Process NFC intent");
 
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
         if (tag != null) {
             if (mCommandToWrite != Command.INVALID) {
                 mTag = tag;
-                writeCommand(mPin);
-                return OTK_RETURN_OK;
+                return writeCommand(mPin);
             }
             OtkData data = Nfc.read(tag);
             mTag = tag;
@@ -456,11 +472,13 @@ public class Otk {
             return processOtkData(data, listener);
         }
 
+        logger.info("Could not parse NFC intent");
         return OTK_RETURN_ERROR;
     }
 
     /**
      * Send event to listener.
+     *
      * @param event
      * @return
      */
@@ -483,8 +501,7 @@ public class Otk {
         List<String> sigs = otkData.getSessionData().getRequestSigList();
         if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
             mIsAuthorized = false;
-        }
-        else {
+        } else {
             // OTK is authorized. Get address, session id and generate transaction
             mIsAuthorized = true;
             mPin = "";
@@ -497,11 +514,10 @@ public class Otk {
             mSignatures.add(sigs.get(i));
         }
         if (mArgs.size() > 0) {
-            logger.info("We have more hash to sign. " + mArgs.size());
+            logger.debug("We have more hash to sign. " + mArgs.size());
             // write remain hashs
             writeSignCommand(mPin, false);
-        }
-        else {
+        } else {
             // Got all signature(s), complete tx
             completePayment(pubKey, mSignatures);
         }
@@ -514,11 +530,11 @@ public class Otk {
         if (otkData == null) {
             return OTK_RETURN_ERROR;
         }
-        logger.info("processOtkData() mOp:{}", mOp);
+        logger.debug("processOtkData() mOp:{}", mOp);
 
         /* Process special error event */
         if ((otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) &&
-                (otkData.getOtkState().getFailureReason() == OtkState.FailureReason.NFC_REASON_PIN_UNSET )) {
+                (otkData.getOtkState().getFailureReason() == OtkState.FailureReason.NFC_REASON_PIN_UNSET)) {
             logger.error("OTK_DATA_TYPE_COMMAND_EXEC_FAILURE NFC_REASON_PIN_UNSET");
             processResponseRead();
             OtkEvent event = new OtkEvent(OtkEvent.Type.OTK_PIN_UNSET);
@@ -552,33 +568,30 @@ public class Otk {
                 // Check if OTK is authorized
                 if (!otkData.getOtkState().getLockState().equals(OtkState.LockState.AUTHORIZED)) {
                     mIsAuthorized = false;
-                }
-                else {
+                } else {
                     // OTK is authorized. Get address, session id and generate transaction
                     mIsAuthorized = true;
                 }
                 mFrom = otkData.getSessionData().getAddress();
                 mSessionId = otkData.getSessionData().getSessionId();
-                if (mAmount > 0) {
-                    // Check balance
-                    getBalance(mFrom);
-                    OtkEvent event = new OtkEvent(OtkEvent.Type.CHECKING_BALANCE_FOR_PAYMENT);
-                    sendEvent(event);
-                }
-                else {
-                    sendBitcoin(mFrom, mTo, mAmount, mTxFees, mFeeIncluded);
-                    OtkEvent event = new OtkEvent(OtkEvent.Type.FIND_UTXO);
-                    sendEvent(event);
-                }
-            }
-            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_SIGNATURE) {
+//                if (mAmount > 0) {
+                // Check balance
+                getBalance(mFrom);
+                OtkEvent event = new OtkEvent(OtkEvent.Type.CHECKING_BALANCE_FOR_PAYMENT);
+                sendEvent(event);
+//                }
+//                else {
+//                    sendBitcoin(mFrom, mTo, mAmount, mTxFees, mFeeIncluded);
+//                    OtkEvent event = new OtkEvent(OtkEvent.Type.FIND_UTXO);
+//                    sendEvent(event);
+//                }
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_SIGNATURE) {
                 processResponseRead();
                 // Got signature(s), process them
                 OtkEvent event = new OtkEvent(OtkEvent.Type.OPERATION_IN_PROCESSING);
                 sendEvent(event);
                 processSignature(otkData);
-            }
-            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
                 processResponseRead();
                 OtkEvent event = new OtkEvent(OtkEvent.Type.COMMAND_EXECUTION_FAILED, otkData.getFailureReason());
                 sendEvent(event);
@@ -607,12 +620,12 @@ public class Otk {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.UNLOCK_SUCCESS, otkData));
             } else {
-                logger.info("Unexpected data type:%s", otkData.getType());
+                logger.debug("Unexpected data type:%s", otkData.getType());
             }
             return OTK_RETURN_OK;
         }
         if (mOp == Operation.OTK_OP_WRITE_NOTE) {
-            logger.debug("otkData:{}", otkData.getType());
+            logger.info("otkData:{}", otkData.getType());
             if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
                 if (OTK_RETURN_ERROR == processGeneralInfoForCommand(otkData, Command.SET_NOTE)) {
                     sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_FAIL));
@@ -625,11 +638,11 @@ public class Otk {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.WRITE_NOTE_SUCCESS, otkData));
             } else {
-                logger.info("Unexpected data type:%s", otkData.getType());
+                logger.debug("Unexpected data type:%s", otkData.getType());
             }
         }
         if (mOp == Operation.OTK_OP_SET_PIN_CODE) {
-            logger.debug("otkData:{}", otkData.getType());
+            logger.info("otkData:{}", otkData.getType());
             if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
                 if (OTK_RETURN_ERROR == processGeneralInfoForCommand(otkData, Command.SET_PIN)) {
                     sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_FAIL));
@@ -642,11 +655,11 @@ public class Otk {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.SET_PIN_SUCCESS, otkData));
             } else {
-                logger.info("Unexpected data type:%s", otkData.getType());
+                logger.debug("Unexpected data type:%s", otkData.getType());
             }
         }
         if (mOp == Operation.OTK_OP_CHOOSE_KEY) {
-            logger.debug("otkData:{}", otkData.getType());
+            logger.info("otkData:{}", otkData.getType());
             if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
                 if (OTK_RETURN_ERROR == processGeneralInfoForCommand(otkData, Command.SET_KEY)) {
                     sendEvent(new OtkEvent(OtkEvent.Type.CHOOSE_KEY_FAIL));
@@ -659,7 +672,7 @@ public class Otk {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.CHOOSE_KEY_SUCCESS, otkData));
             } else {
-                logger.info("Unexpected data type:%s", otkData.getType());
+                logger.debug("Unexpected data type:%s", otkData.getType());
             }
         }
         if (mOp == Operation.OTK_OP_GET_KEY) {
@@ -668,25 +681,21 @@ public class Otk {
                     sendEvent(new OtkEvent(OtkEvent.Type.GET_KEY_FAIL));
                     return OTK_RETURN_ERROR;
                 }
-            }
-            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_KEY_INFO) {
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_KEY_INFO) {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.GET_KEY_SUCCESS, otkData));
-            }
-            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.GET_KEY_FAIL, otkData.getFailureReason()));
-            }
-            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.GET_KEY_SUCCESS, otkData));
-            }
-            else {
-                logger.info("Unexpected data type:%s", otkData.getType());
+            } else {
+                logger.debug("Unexpected data type:%s", otkData.getType());
             }
         }
         if (mOp == Operation.OTK_OP_SIGN_MESSAGE) {
-            logger.debug("otkData:{} msgToSign:{}", otkData.getType(), mArgs.get(0));
+            logger.info("otkData:{} msgToSign:{}", otkData.getType(), mArgs.get(0));
             if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_GENERAL_INFO) {
                 if (OTK_RETURN_ERROR == processGeneralInfoForCommand(otkData, Command.SIGN)) {
                     sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_FAIL));
@@ -702,7 +711,7 @@ public class Otk {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.SIGN_MESSAGE_SUCCESS, otkData, mMessageToSign, mUsingMasterKey));
             } else {
-                logger.info("Unexpected data type:%s", otkData.getType());
+                logger.debug("Unexpected data type:%s", otkData.getType());
             }
         }
 
@@ -714,17 +723,14 @@ public class Otk {
                 }
                 // Alywas send success after command is written
                 sendEvent(new OtkEvent(OtkEvent.Type.RESET_SUCCESS));
-            }
-            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.RESET_FAIL, otkData.getFailureReason()));
-            }
-            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.RESET_SUCCESS, otkData));
-            }
-            else {
-                logger.info("Unexpected data type:%s", otkData.getType());
+            } else {
+                logger.debug("Unexpected data type:%s", otkData.getType());
             }
         }
         if (mOp == Operation.OTK_OP_EXPORT_WIF_KEY) {
@@ -733,17 +739,14 @@ public class Otk {
                     sendEvent(new OtkEvent(OtkEvent.Type.EXPORT_WIF_KEY_FAIL));
                     return OTK_RETURN_ERROR;
                 }
-            }
-            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE) {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.EXPORT_WIF_KEY_FAIL, otkData.getFailureReason()));
-            }
-            else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
+            } else if (otkData.getType() == OtkData.Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS) {
                 processResponseRead();
                 sendEvent(new OtkEvent(OtkEvent.Type.EXPORT_WIF_KEY_SUCCESS, otkData));
-            }
-            else {
-                logger.info("Unexpected data type:%s", otkData.getType());
+            } else {
+                logger.debug("Unexpected data type:%s", otkData.getType());
             }
         }
         return OTK_RETURN_OK;
@@ -781,7 +784,7 @@ public class Otk {
                 return OTK_RETURN_OK;
             }
         }
-        if (cmdToWrite == Command.SIGN){
+        if (cmdToWrite == Command.SIGN) {
             // Must be sign message
             mMessageToSign = mArgs.get(0);
             // Encode message
@@ -795,7 +798,7 @@ public class Otk {
         // Start 15s timer
         // Timer task which calling get current exchange api.
         TimerTask task = new TimerTask() {
-            public void run () {
+            public void run() {
                 // Send message
                 Message msg = new Message();
                 msg.what = OTK_MSG_SESSION_TIMED_OUT;
@@ -805,7 +808,7 @@ public class Otk {
         };
         mTimerWriteCommand = new Timer();
 
-        mTimerWriteCommand.schedule(task,1000 * 15);
+        mTimerWriteCommand.schedule(task, 1000 * 15);
 
         // RESET doesn't care if it's authorized
         if (cmdToWrite == Command.RESET) {
@@ -819,26 +822,26 @@ public class Otk {
                 // Return OK so that caller won't send failed event again.
                 return OTK_RETURN_OK;
             }
-            // Send unauthorized event.
-            sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
-            // clear cached command so that it won't write command without pin
-            mCommandToWrite = Command.INVALID;
-        } else {
-            // Clear cached pin
-            mPin = "";
-            // Authorized. Write command
-            if (cmdToWrite == Command.UNLOCK) {
-                return writeUnlockCommand(mPin);
-            }
-            else {
-                return writeOtkCommand(cmdToWrite, mPin, mArgs, false, mUsingMasterKey);
-            }
         }
-        return OTK_RETURN_OK;
+//            // Send unauthorized event.
+//            sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
+//            // clear cached command so that it won't write command without pin
+//            mCommandToWrite = Command.INVALID;
+//        } else {
+        // Clear cached pin
+        mPin = "";
+        // Authorized. Write command
+        if (cmdToWrite == Command.UNLOCK) {
+            return writeUnlockCommand(mPin);
+        } else {
+            return writeOtkCommand(cmdToWrite, mPin, mArgs, false, mUsingMasterKey);
+        }
+//        }
+//        return OTK_RETURN_OK;
     }
 
     static private int clearOp() {
-        logger.info("clearOp");
+        logger.debug("clearOp");
         mOp = Operation.OTK_OP_NONE;
         // Clear cached data
         mTo = "";
@@ -859,7 +862,7 @@ public class Otk {
 
     static private void startReadResponseTimer(final Command cmd) {
         TimerTask task = new TimerTask() {
-            public void run () {
+            public void run() {
                 // Send message
                 Message msg = new Message();
                 msg.what = OTK_MSG_READ_RESPONSE_TIMED_OUT;
@@ -868,7 +871,7 @@ public class Otk {
             }
         };
         mTimerReadResponse = new Timer();
-        mTimerReadResponse.schedule(task,1000 * 15);
+        mTimerReadResponse.schedule(task, 1000 * 15);
     }
 
     /**
@@ -908,7 +911,7 @@ public class Otk {
              */
             return OTK_RETURN_ERROR_OP_IN_PROCESSING;
         }
-        logger.info("Set op to:" + op.name());
+        logger.debug("Set op to:" + op.name());
         mOp = op;
         return OTK_RETURN_OK;
     }
@@ -923,7 +926,7 @@ public class Otk {
              */
             return OTK_RETURN_ERROR_OP_IN_PROCESSING;
         }
-        logger.info("Set op to:{} arg:{}", op.name(), arg);
+        logger.debug("Set op to:{} arg:{}", op.name(), arg);
         mOp = op;
         mArgs.clear();
         mArgs.add(arg);
@@ -940,7 +943,7 @@ public class Otk {
              */
             return OTK_RETURN_ERROR_OP_IN_PROCESSING;
         }
-        logger.info("Set op to:{} arg:{} usingMasterKey:{}", op.name(), arg, usingMasterKey);
+        logger.debug("Set op to:{} arg:{} usingMasterKey:{}", op.name(), arg, usingMasterKey);
         mOp = op;
         mArgs.clear();
         mArgs.add(arg);
@@ -955,7 +958,7 @@ public class Otk {
              */
             return OTK_RETURN_ERROR_OP_IN_PROCESSING;
         }
-        logger.info("Set note:" + note);
+        logger.debug("Set note:" + note);
         mOp = Operation.OTK_OP_WRITE_NOTE;
         mArgs.clear();
         mArgs.add(note);
@@ -970,7 +973,7 @@ public class Otk {
             return OTK_RETURN_ERROR_OP_IN_PROCESSING;
         }
         // don't log pin
-        logger.info("Set pin:xxxx");
+        logger.debug("Set pin:xxxx");
         mOp = Operation.OTK_OP_SET_PIN_CODE;
         mArgs.clear();
         mArgs.add(pin);
@@ -992,7 +995,7 @@ public class Otk {
             return OTK_RETURN_ERROR_INVALID_OP;
         }
 
-        logger.info("Set op to:{} to:{} amount:{} fee:{} feeIncluded:{}", op.name(), to, amount, txFees, feeIncluded);
+        logger.debug("Set op to:{} to:{} amount:{} fee:{} feeIncluded:{}", op.name(), to, amount, txFees, feeIncluded);
         mOp = op;
         // Cache data
         mTo = to;
@@ -1005,17 +1008,18 @@ public class Otk {
 
     /**
      * Cancel operation.
+     *
      * @return
      */
     public int cancelOperation() {
-        logger.info("cancelOperation");
+        logger.debug("cancelOperation");
         clearOp();
         return OTK_RETURN_OK;
     }
 
     private int writeCommand(String pin) {
         if (mCommandToWrite == Command.INVALID) {
-            logger.info("Command is INVALID");
+            logger.debug("Command is INVALID");
             clearOp();
             return OTK_RETURN_ERROR;
         }
@@ -1030,9 +1034,7 @@ public class Otk {
         }
 
         // Other commands
-        writeOtkCommand(mCommandToWrite, pin, mArgs, false, false);
-
-        return OTK_RETURN_OK;
+        return writeOtkCommand(mCommandToWrite, pin, mArgs, false, false);
     }
 
     public int setPinForOperation(String pin) {
@@ -1064,8 +1066,8 @@ public class Otk {
             logger.error("Operation {} is not implemented yet.", mOp.toString());
             return OTK_RETURN_ERROR;
         }
-        writeCommand(pin);
-        return OTK_RETURN_OK;
+
+        return writeCommand(pin);
     }
 
     private static void sendBitcoin(final String from, final String to, final double amount, final long txFees, final boolean feeIncluded) {
@@ -1080,8 +1082,7 @@ public class Otk {
                         msg.what = OTK_MSG_GOT_UNSIGNED_TX;
                         msg.obj = unsigendTx;
                         mHandler.sendMessage(msg);
-                    }
-                    catch (BlockCypherException e) {
+                    } catch (BlockCypherException e) {
                         // Failed
                         Message msg = new Message();
                         msg.what = OTK_MSG_SEND_BITCOIN_FAILED;
@@ -1089,8 +1090,7 @@ public class Otk {
                         String reason = BlockCypher.parseError(e.getBlockCypherError().getErrors().get(0).toString());
                         msg.obj = reason;
                         mHandler.sendMessage(msg);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         // Failed
                         Message msg = new Message();
                         msg.what = OTK_MSG_SEND_BITCOIN_FAILED;
@@ -1104,7 +1104,7 @@ public class Otk {
     }
 
     static private int completePayment(final String publicKey, final List<String> sigResult) {
-        logger.info("completePayment");
+        logger.debug("completePayment");
 
         Thread t = new Thread() {
             @Override
@@ -1126,8 +1126,7 @@ public class Otk {
                                 msg.what = OTK_MSG_BITCOIN_SENT;
                                 msg.obj = tx;
                                 mHandler.sendMessage(msg);
-                            }
-                            else {
+                            } else {
                                 tx.setFrom(mFrom);
                                 tx.setTo(mTo);
                                 tx.setAmount(mAmount);
@@ -1137,30 +1136,26 @@ public class Otk {
                                 msg.obj = tx;
                                 mHandler.sendMessage(msg);
                             }
-                        }
-                        else {
+                        } else {
                             // failed
                             Message msg = new Message();
                             msg.what = OTK_MSG_COMPLETE_PAYMENT_FAILED;
                             msg.obj = null;
                             mHandler.sendMessage(msg);
                         }
-                    }
-                    catch (BlockCypherException e) {
+                    } catch (BlockCypherException e) {
                         // parse error
                         String reason = "";
                         if (e != null && e.getBlockCypherError() != null && e.getBlockCypherError().getErrors() != null) {
                             reason = BlockCypher.parseError(e.getBlockCypherError().getErrors().get(0).toString());
-                        }
-                        else if (e.getMessage() != null) {
-                             reason = e.getMessage();
+                        } else if (e.getMessage() != null) {
+                            reason = e.getMessage();
                         }
                         Message msg = new Message();
                         msg.what = OTK_MSG_COMPLETE_PAYMENT_FAILED;
                         msg.obj = reason;
                         mHandler.sendMessage(msg);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         Message msg = new Message();
                         msg.what = OTK_MSG_COMPLETE_PAYMENT_FAILED;
                         msg.obj = null;
@@ -1181,11 +1176,10 @@ public class Otk {
                     BigDecimal b = BlockChainInfo.getInstance(mCtx).getBalance(address);
                     if (mOp == Operation.OTK_OP_SIGN_PAYMENT) {
                         Message msg = new Message();
-                        msg.what = OTK_MSG_BALANCE_UPDATE;
+                        msg.what = OTK_MSG_CHECK_BALANCE;
                         msg.obj = b;
                         mHandler.sendMessage(msg);
-                    }
-                    else {
+                    } else {
                         OtkEvent event = new OtkEvent(OtkEvent.Type.BALANCE_UPDATE, address, b, mCurrencyExRate);
                         sendEvent(event);
                     }
@@ -1197,7 +1191,7 @@ public class Otk {
     }
 
     public void confirmPayment() {
-        logger.info("confirm payment");
+        logger.debug("confirm payment");
         // Make sure op
         if (mOp != Operation.OTK_OP_SIGN_PAYMENT) {
             logger.warn("Confirm payment but operation is cancelled.");
@@ -1205,17 +1199,17 @@ public class Otk {
             return;
         }
         // Check if it's authorized
-        if (mIsAuthorized == false) {
-            // Send unauthorized event.
-            sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
-            // clear cached command so that it won't write command without pin
-            mCommandToWrite = Command.INVALID;
-        }
-        else {
-            // Clear cached pin
-            mPin = "";
-            // Authorized. Write command
-            writeSignCommand(mPin, false);
-        }
+//        if (mIsAuthorized == false) {
+//            // Send unauthorized event.
+//            sendEvent(new OtkEvent(OtkEvent.Type.OTK_UNAUTHORIZED));
+//            // clear cached command so that it won't write command without pin
+//            mCommandToWrite = Command.INVALID;
+//        }
+//        else {
+        // Clear cached pin
+        mPin = "";
+        // Authorized. Write command
+        writeSignCommand(mPin, false);
+//        }
     }
 }

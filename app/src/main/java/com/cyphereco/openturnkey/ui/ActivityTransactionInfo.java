@@ -12,7 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import org.slf4j.Logger;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -31,10 +32,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class ActivityTransactionInfo extends AppCompatActivity {
     private final static String TAG = ActivityTransactionInfo.class.getSimpleName();
+    private static Logger logger = Log4jHelper.getLogger(TAG);
+
 
     private ImageView mBtnResend;
     private ImageView mBtnDelete;
@@ -153,7 +155,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     }
 
     private void processResendBtnClick() {
-        Log.d(TAG, "processResendBtnClick");
+        logger.debug("processResendBtnClick");
         DBTransItem item = mTransactionDataSet.get(mCurrentPosition);
         Intent intent = new Intent();
         intent.putExtra("REPAY_ADDRESS", item.getPayeeAddr());
@@ -163,7 +165,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     }
 
     private void processDeleteBtnClick() {
-        Log.d(TAG, "processDeleteBtnClick");
+        logger.debug("processDeleteBtnClick");
         new AlertDialog.Builder(this)
                 .setMessage(getString(R.string.delete_this_transaction_record))
                 .setNegativeButton(R.string.cancel,
@@ -231,7 +233,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     }
 
     private void processViewOnLineBtnClick() {
-        Log.d(TAG, "processViewOnLineBtnClick");
+        logger.debug("processViewOnLineBtnClick");
         Intent browserIntent;
         String uriString;
         DBTransItem item = mTransactionDataSet.get(mCurrentPosition);
@@ -289,7 +291,9 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                                         (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
                                 ClipData clip = ClipData.newPlainText("rawdata",
                                         item.getRawData());
-                                clipboard.setPrimaryClip(clip);
+                                if (clipboard != null) {
+                                    clipboard.setPrimaryClip(clip);
+                                }
                             }
                         })
                 .show();
@@ -316,22 +320,24 @@ public class ActivityTransactionInfo extends AppCompatActivity {
 
         if (0 == item.getStatus()) {
             // Transaction status is successful
-            ivHelpIcon.setVisibility(View.INVISIBLE);
-            ivResultIcon.setImageResource(R.drawable.ic_success_24dp);
             mBtnViewOnline.setVisibility(View.VISIBLE);
             // append confirmation number
             int confirmations = item.getConfirmations();
             String c;
-            if (confirmations < 0) {
-                c = "(?)";
-            }
-            else if (confirmations < 6){
-                c = "(" + confirmations + ")";
+            if (confirmations < 1) {
+                c = "0 " + getString(R.string.confirmation);
             }
             else {
-                c = "(>=6)";
+                ivHelpIcon.setVisibility(View.INVISIBLE);
+                ivResultIcon.setImageResource(R.drawable.ic_success_24dp);
+                c = confirmations + " " + getString(R.string.confirmation);
+
+                if (confirmations > 6){
+                    c = "> 144 " + getString(R.string.confirmation);
+                }
             }
-            tvResult.setText(getString(R.string.success) + c);
+
+            tvResult.setText(c);
             tvTransactionId.setText(item.getHash());
         }
         else {

@@ -1,11 +1,15 @@
 package com.cyphereco.openturnkey.core.protocol;
 
-import android.util.Log;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
 
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 import java.io.Serializable;
+import java.util.Locale;
 
 public class OtkState implements Serializable {
     public static final String TAG = OtkState.class.getSimpleName();
+    private static Logger logger = Log4jHelper.getLogger(TAG);
 
     public enum LockState {
         INVALID("-1"),
@@ -14,9 +18,10 @@ public class OtkState implements Serializable {
         AUTHORIZED("02");
 
         private final String value;
-        private LockState(String s) {
+        LockState(String s) {
             value = s;
         }
+        @NotNull
         public String toString() {
             return value;
         }
@@ -27,35 +32,35 @@ public class OtkState implements Serializable {
         NFC_CMD_EXEC_SUCCESS("01"),        /* 1, Command executed successfully. */
         NFC_CMD_EXEC_FAIL("02");           /* 2, Command executed failed. */
         private final String value;
-        private ExecutionState(String s) {
+        ExecutionState(String s) {
             value = s;
         }
+        @NotNull
         public String toString() {
             return value;
         }
     }
 
     public enum FailureReason {
-        NFC_REASON_INVALID("00", "Invalid"),  /*   0 / 0x00, Invalid,  For check purpose. */
-        NFC_REASON_TIMEOUT("C0", "Timeout"),  /* 192 / 0xC0, Enroll fingerpint on OTK. */
-        NFC_REASON_AUTH_FAILED("C1", "Authorization Failed"),     /* 193 / 0xC1, Erase enrolled fingerprint and reset secure PIN to default, OTK (pre)authorization is required. */
-        NFC_REASON_CMD_INVALID("C2", "Invalid Command"),     /* 194 / 0xC2, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
-        NFC_REASON_PARAM_INVALID("C3", "Invalid Parameters"),   /* 195 / 0xC3, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
-        NFC_REASON_PARAM_MISSING("C4", "Missing Parameters"),   /* 196 / 0xC4, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
-        NFC_REASON_PIN_UNSET("C7", "PIN code is not set yet"),   /* 197 / 0xC7, PIN code is not set yet. */
-        NFC_REASON_LAST("FF", "");
+        NFC_REASON_INVALID("00"),  /*   0 / 0x00, Invalid,  For check purpose. */
+        NFC_REASON_TIMEOUT("C0"),  /* 192 / 0xC0, Enroll fingerprint on OTK. */
+        NFC_REASON_AUTH_FAILED("C1"),     /* 193 / 0xC1, Erase enrolled fingerprint and reset secure PIN to default, OTK (pre)authorization is required. */
+        NFC_REASON_CMD_INVALID("C2"),     /* 194 / 0xC2, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
+        NFC_REASON_PARAM_INVALID("C3"),   /* 195 / 0xC3, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
+        NFC_REASON_PARAM_MISSING("C4"),   /* 196 / 0xC4, Present master/derivative extend keys and derivative path and secure PIN code, OTK (pre)authorization is required. */
+        NFC_REASON_PIN_UNSET("C7");       /* 197 / 0xC7, PIN code is not set yet. */
+//        NFC_REASON_LAST("FF");
         private final String value;
-        private final String reason;
-        private FailureReason(String v, String r) {
+
+        FailureReason(String v) {
             value = v;
-            reason = r;
         }
         public String getValue() {
             return value;
         }
-        public String getReasonString() {
-            return reason;
-        }
+//        public String getReasonString() {
+//            return reason;
+//        }
     }
 
     public OtkState(String stateStr) {
@@ -72,7 +77,7 @@ public class OtkState implements Serializable {
         }
         else {
             /* Should not be here. */
-            Log.d(TAG, "Lock state is invalid.");
+            logger.debug("Lock state is invalid.");
             mLockState = LockState.INVALID;
         }
 
@@ -89,12 +94,12 @@ public class OtkState implements Serializable {
         }
         else {
             /* Should not be here. */
-            Log.d(TAG, "Exec state is invalid.");
+            logger.debug("Exec state is invalid.");
             mNfcCmdExecSate = ExecutionState.NFC_CMD_EXEC_NA;
         }
 
         // request command
-        code = String.format("%d", Integer.parseInt(stateStr.substring(4, 6),16));
+        code = String.format(Locale.getDefault(), "%d", Integer.parseInt(stateStr.substring(4, 6),16));
         if (code.equalsIgnoreCase(Command.LOCK.toString())) {
             mCommand = Command.LOCK;
         }
@@ -163,8 +168,8 @@ public class OtkState implements Serializable {
     public LockState getLockState() {return mLockState;}
     public FailureReason getFailureReason() {return mFailureReason;}
     public ExecutionState getExecutionState() {return mNfcCmdExecSate;}
+    @NotNull
     public String toString() {
-        String s = "\n\tLock state:" + mLockState.name() + "\n\tExec state:" + mNfcCmdExecSate.name() + "\n\tCommand:" + mCommand.name() + "\n\tFailure reason:" + mFailureReason.name();
-        return s;
+        return "\n\tLock state:" + mLockState.name() + "\n\tExec state:" + mNfcCmdExecSate.name() + "\n\tCommand:" + mCommand.name() + "\n\tFailure reason:" + mFailureReason.name();
     }
 }

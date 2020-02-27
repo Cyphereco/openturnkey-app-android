@@ -20,7 +20,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -32,11 +31,15 @@ import com.cyphereco.openturnkey.db.DBAddrItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.AddressUtils;
 import com.cyphereco.openturnkey.utils.BtcUtils;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
+
+import org.slf4j.Logger;
 
 import java.util.Objects;
 
 public class ActivityAddressEditor extends AppCompatActivity {
     private final static String TAG = ActivityAddressEditor.class.getSimpleName();
+    private static Logger logger = Log4jHelper.getLogger(TAG);
 
     private final static int ZXING_CAMERA_PERMISSION = 1;
     private static final String BEGIN_BITCOIN_SIGNED_MESSAGE = "-----BEGIN BITCOIN SIGNED MESSAGE-----";
@@ -83,7 +86,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
 
         Intent intent = this.getIntent();
         mAddrDBId = intent.getLongExtra(KEY_EDITOR_CONTACT_DB_ID, 0);
-        Log.d(TAG, "mAddrDBId: " + mAddrDBId);
+        logger.debug("mAddrDBId: " + mAddrDBId);
         if (null != intent.getStringExtra(KEY_EDITOR_CONTACT_ALIAS)) {
             mInputAlias.setText(intent.getStringExtra(KEY_EDITOR_CONTACT_ALIAS));
         }
@@ -202,13 +205,13 @@ public class ActivityAddressEditor extends AppCompatActivity {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        Log.d(TAG, "onActivityResult:" + requestCode + " resultCode:" + resultCode);
+        logger.debug("onActivityResult:" + requestCode + " resultCode:" + resultCode);
         if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
             if (resultCode == RESULT_OK) {
                 // Handle successful scan
                 String contents = intent.getStringExtra(KEY_QR_CODE);
                 if (contents.contains(BEGIN_BITCOIN_SIGNED_MESSAGE)) {
-                    Log.d(TAG, "Contents contains BEGIN_BITCOIN_SIGNED_MESSAGE");
+                    logger.debug("Contents contains BEGIN_BITCOIN_SIGNED_MESSAGE");
                     // TODO
                     // updateFormattedSignedMessage(contents);
                 }
@@ -235,7 +238,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
                         }
                         else {
                             // incorrect uri format
-                            Log.d(TAG, "Incorrect URI format");
+                            logger.debug("Incorrect URI format");
                         }
                     }
 
@@ -261,7 +264,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
                         }
                         else {
                             // incorrect uri
-                            Log.d(TAG, "Incorrect URI format");
+                            logger.debug("Incorrect URI format");
                         }
                     }
                     else {
@@ -320,7 +323,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
                 // Update database
                 item.setDbId(mAddrDBId);
                 if (!mOtkDB.updateAddressbook(item)) {
-                    Log.e(TAG, "Update address failed");
+                    logger.error("Update address failed");
                 }
             }
             else {
@@ -330,7 +333,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
                     return;
                 }
                 if (!mOtkDB.addAddress(item)) {
-                    Log.e(TAG, "Add address failed");
+                    logger.error("Add address failed");
                 }
             }
         }

@@ -4,7 +4,7 @@
     <string name="addresses" translatable="false">常用地址</string>
     <string name="no_freq_addr">没有常用地址</string>
     <string name="clear_history">清除记录</string>
-    <string name="fees_included">包含手续费</string>
+    <string name="fees_included">手续费内含</string>
     <string name="full_pubkey_information">完整公钥信息</string>
     <string name="history" translatable="false">支付记录</string>
     <string name="local_currency">当地货币</string>
@@ -25,7 +25,7 @@
     <string name="sign_payment">签名支付</string>
     <string name="transaction_fee">交易手续费</string>
     <string name="unlock">解锁</string>
-    <string name="use_fix_addresss">使用固定收款地址</string>
+    <string name="use_fix_address">使用固定收款地址</string>
     <string name="fees_high">高 (5~15分钟)</string>
     <string name="fees_low">低 (大於60分钟)</string>
     <string name="fees_mid">中 (15~35分钟)</string>
@@ -36,12 +36,12 @@
     <string name="read_general_information">读取一般信息</string>
     <string name="customized_fees">自订手续费</string>
     <string name="suggested">推荐</string>
-    <string name="command_executed_successfuly">命令成功执行</string>
+    <string name="command_executed_successfully">命令成功执行</string>
     <string name="processing">交易处理中</string>
     <string name="operation_cancelled">操作取消</string>
     <string name="qr_code_scan_cancelled">取消二维码扫描</string>
     <string name="subject_reason">原因:</string>
-    <string name="transaction_reciept">交易收据</string>
+    <string name="transaction_receipt">交易收据</string>
     <string name="get_recipient_address">获取收款地址</string>
     <string name="nfc_unavailable">无法使用NFC</string>
     <string name="title_activity_qrcode_scan">掃描二維碼</string>
@@ -60,7 +60,7 @@
     <string name="sign_message">签署信息</string>
     <string name="add">新增</string>
     <string name="subject_note">注记:</string>
-    <string name="mint_inforamtion">铸造信息</string>
+    <string name="mint_information">铸造信息</string>
     <string name="lock_state">锁定状态</string>
     <string name="battery_state">电池状态</string>
     <string name="btc_address">BTC地址</string>
@@ -80,7 +80,6 @@
     <string name="signing_transaction">签署交易</string>
     <string name="seg_wit_address_is_not_supported">暂不支持SegWit格式地址</string>
     <string name="invalid_address">无效的地址</string>
-    <string name="success">成功</string>
     <string name="fail">失败</string>
     <string name="copy">复制</string>
     <string name="alias">別名</string>
@@ -120,7 +119,7 @@
     <string name="otk_is_unlocked">OpenTurnKey已解锁</string>
     <string name="title_set_pin">设定PIN码</string>
     <string name="pin_length_incorrect">PIN码須为八位数字</string>
-    <string name="pin_confirmation_doesnt_match">输入的PIN码不一致</string>
+    <string name="pin_confirmation_not_match">输入的PIN码不一致</string>
     <string name="enter_pin_code">请输入八位数数字</string>
     <string name="write_note_success">写入备注成功</string>
     <string name="write_note_fail">写入备注失败</string>
@@ -182,5 +181,8 @@
     <string name="invalid_params">无效的参数</string>
     <string name="missing_params">缺少参数</string>
     <string name="communication_error">通信错误</string>
-    <string name="fees_excluded">不含手續費</string>
+    <string name="fees_excluded">手續費外加</string>
+    <string name="not_openturnkey">不是有效的OpenTurnKey，读取完成前请勿移开OpenTurnKey.</string>
+    <string name="confirmation">确认</string>
+    <string name="amount_fees_included">金额 (包含手续费)</string>
 </resources>

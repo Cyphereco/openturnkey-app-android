@@ -50,7 +50,7 @@ public class OtkData implements Serializable {
      * @param sd
      */
     public OtkData(String mintInfo, OtkState otkState, String pubKey, SessionData sd) {
-        Log.d(TAG, "mintInfo:" + mintInfo + "\notkState:" + otkState.toString() + "\nSessionData:" + sd.toString());
+        logger.debug("\nMintInfo:\n" + mintInfo + "\notkState:" + otkState.toString() + "\nSessionData:" + sd.toString());
         mMintInfo = new MintInfo(mintInfo);
         mOtkState = otkState;
         mSessionData = sd;

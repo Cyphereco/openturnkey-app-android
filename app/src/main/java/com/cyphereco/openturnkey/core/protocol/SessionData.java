@@ -1,13 +1,14 @@
 package com.cyphereco.openturnkey.core.protocol;
 
-import android.util.Log;
-
+import com.cyphereco.openturnkey.utils.Log4jHelper;
+import org.slf4j.Logger;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SessionData implements Serializable {
     private static final String TAG = SessionData.class.getSimpleName();
+    private static Logger logger = Log4jHelper.getLogger(TAG);
 
     private static final String CRLF = "\r\n";
     private static final String OTK_LABEL_BITCOIN_ADDR = "<BTC_Addr>\r\n";
@@ -57,7 +58,7 @@ public class SessionData implements Serializable {
             int crlf = sessData.indexOf(CRLF, reqSigStart);
             String requestSig = sessData.substring(reqSigStart, crlf);
             while (true) {
-                Log.d(TAG, "requestSig:" + requestSig);
+                logger.debug("requestSig:" + requestSig);
                 // Find delim that separate signatures
                 int delim = requestSig.indexOf(OTK_REQUEST_SIGNATURE_DELIM);
                 String sig = null;
@@ -68,10 +69,10 @@ public class SessionData implements Serializable {
                 }
                 // Double check if the sig size if correct.
                 if (sig.length() != 128) {
-                    Log.d(TAG, "Invalid signature:" + sig);
+                    logger.debug("Invalid signature:" + sig);
                     break;
                 }
-                Log.d(TAG, "sig:" + sig);
+                logger.debug("sig:" + sig);
                 sigList.add(sig);
                 if (delim < 0) {
                     break;

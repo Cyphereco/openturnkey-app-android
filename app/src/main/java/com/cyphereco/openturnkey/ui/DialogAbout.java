@@ -62,7 +62,7 @@ public class DialogAbout extends AppCompatDialogFragment {
         tvVersion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logger.info("onClick:{}", ++clickCount);
+                logger.debug("onClick:{}", ++clickCount);
                 if (clickCount >= 3) {
                     // toggle mode
                     if (Preferences.isTestnet(getContext())) {

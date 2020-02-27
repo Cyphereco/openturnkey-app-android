@@ -70,7 +70,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        logger.info("onActivityResult:" + requestCode + " resultCode:" + resultCode);
+        logger.debug("onActivityResult:" + requestCode + " resultCode:" + resultCode);
         if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
             if (resultCode == RESULT_OK) {
                 // Handle successful scan
@@ -87,7 +87,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        logger.debug("onCreate");
+        logger.info("onCreate");
         setContentView(R.layout.activity_sign_validate_message);
 
         Toolbar toolbar = findViewById(R.id.toolbar_sign_verify_message);
@@ -131,7 +131,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
         mMsgToSign = (String) intent.getSerializableExtra(MainActivity.KEY_MESSAGE_TO_SIGN);
         mUsingMasterKey = intent.getBooleanExtra(MainActivity.KEY_USING_MASTER_KEY, false);
         String pubKey = otkData.getSessionData().getPublicKey();
-        logger.info("message to sign:{} pubKey:{} signature:{}", mMsgToSign, pubKey, otkData.getSessionData().getRequestSigList().get(0));
+        logger.debug("message to sign:{} pubKey:{} signature:{}", mMsgToSign, pubKey, otkData.getSessionData().getRequestSigList().get(0));
         try {
             String signedMsg = BtcUtils.processSignedMessage(
                     BtcUtils.generateMessageToSign(mMsgToSign),
@@ -270,7 +270,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                     CheckBox cbUsingMasterKey = view.findViewById(R.id.checkBoxUsingMasterKey);
                     EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
                     String msgToSign = etMsgToSign.getText().toString();
-                    logger.debug("Message to sign:{}, using master key:{}", msgToSign, cbUsingMasterKey.isChecked());
+                    logger.info("Message to sign:{}, using master key:{}", msgToSign, cbUsingMasterKey.isChecked());
                     Intent intent = new Intent();
                     intent.putExtra(MainActivity.KEY_SIGN_VALIDATE_MESSAGE, msgToSign);
                     intent.putExtra(MainActivity.KEY_USING_MASTER_KEY, cbUsingMasterKey.isChecked());
