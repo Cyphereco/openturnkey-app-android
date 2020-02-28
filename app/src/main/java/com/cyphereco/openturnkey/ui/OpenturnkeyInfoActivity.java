@@ -224,8 +224,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         String action = intent.getAction();
 
-        if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action) ||
-                NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
             if (mOtk == null) {
                 logger.debug("mOtk is null");
                 return;
@@ -252,10 +251,8 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         IntentFilter ndefDetected = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
-        IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
-        IntentFilter[] nfcIntentFilter = new IntentFilter[]{techDetected, tagDetected, ndefDetected};
+        IntentFilter[] nfcIntentFilter = new IntentFilter[]{ndefDetected};
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
