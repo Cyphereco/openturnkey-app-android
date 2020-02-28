@@ -2,15 +2,12 @@ package com.cyphereco.openturnkey.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -46,8 +43,6 @@ import java.util.Objects;
 public class SignValidateMessageActivity extends AppCompatActivity {
     public static final String TAG = SignValidateMessageActivity.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
-
-    private NfcAdapter mNfcAdapter = null;
 
     private ViewPager mViewPager;
 
@@ -144,9 +139,6 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             // Failed to process signed message
             Toast.makeText(getApplicationContext(), R.string.sign_message_fail, Toast.LENGTH_LONG).show();
         }
-
-        /* init NFC. */
-        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
     }
 
     class SignVerifyPagerAdapter extends PagerAdapter {
@@ -376,29 +368,5 @@ public class SignValidateMessageActivity extends AppCompatActivity {
         public void destroyItem(ViewGroup container, int position, @NotNull Object object) {
             container.removeView((View) object);
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
-        IntentFilter ndefDetected = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
-        IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
-        IntentFilter[] nfcIntentFilter = new IntentFilter[]{techDetected, tagDetected, ndefDetected};
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-
-        if (mNfcAdapter != null) {
-            mNfcAdapter.enableForegroundDispatch(this, pendingIntent, nfcIntentFilter, null);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mNfcAdapter != null)
-            mNfcAdapter.disableForegroundDispatch(this);
     }
 }

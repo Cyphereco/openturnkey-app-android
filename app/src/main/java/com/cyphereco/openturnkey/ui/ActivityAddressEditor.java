@@ -2,15 +2,12 @@ package com.cyphereco.openturnkey.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
@@ -59,7 +56,6 @@ public class ActivityAddressEditor extends AppCompatActivity {
     private ImageView mReadNFCBtn;
     private Button mSaveBtn;
 
-    private NfcAdapter mNfcAdapter = null;
     private long mAddrDBId = DEFAULT_DB_ID;
 
 
@@ -99,37 +95,8 @@ public class ActivityAddressEditor extends AppCompatActivity {
         }
 
         setUIListener();
-
-        /* init NFC. */
-        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
-        IntentFilter ndefDetected = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
-        IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
-        IntentFilter[] nfcIntentFilter =
-                new IntentFilter[] {techDetected, tagDetected, ndefDetected};
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this, 0, new Intent(this, getClass()).addFlags(
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-
-        if (mNfcAdapter != null) {
-            mNfcAdapter.enableForegroundDispatch(this, pendingIntent,
-                    nfcIntentFilter, null);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mNfcAdapter != null)
-            mNfcAdapter.disableForegroundDispatch(this);
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -155,7 +122,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
             public void onClick(View v) {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(
                         Context.CLIPBOARD_SERVICE);
-                if (clipboard.hasPrimaryClip()) {
+                if (clipboard != null && clipboard.hasPrimaryClip()) {
                     android.content.ClipDescription description =
                             clipboard.getPrimaryClipDescription();
                     android.content.ClipData data = clipboard.getPrimaryClip();
@@ -170,7 +137,6 @@ public class ActivityAddressEditor extends AppCompatActivity {
         mReadNFCBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Waiting NFC scan and process it.
                 finishActivityToLaunchNFCReader();
             }
         });
@@ -288,15 +254,15 @@ public class ActivityAddressEditor extends AppCompatActivity {
 
         try {
             // Check if address is valid
-            if (address == null || address.length() == 0) {
+            if (address.length() == 0) {
                 Snackbar.make(v, getString(R.string.recipient_is_empty), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 return;
             }
-            if (true == BtcUtils.isSegWitAddress(!Preferences.isTestnet(getApplicationContext()), address)) {
+            if (BtcUtils.isSegWitAddress(!Preferences.isTestnet(getApplicationContext()), address)) {
                 Snackbar.make(v, getString(R.string.seg_wit_address_is_not_supported), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 return;
             }
-            if (false == BtcUtils.validateAddress(!Preferences.isTestnet(getApplicationContext()), address)) {
+            if (!BtcUtils.validateAddress(!Preferences.isTestnet(getApplicationContext()), address)) {
                 Snackbar.make(v, getString(R.string.invalid_address), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 return;
             }
@@ -311,7 +277,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
             mInputAlias.setText(alias);
         }
 
-        if ((!alias.isEmpty()) && (!address.isEmpty())) {
+        if (!alias.isEmpty()) {
             DBAddrItem item = new DBAddrItem(address, alias);
             DBAddrItem existItem = mOtkDB.getAddressItemByAlias(alias);
             if (mAddrDBId > 0) {

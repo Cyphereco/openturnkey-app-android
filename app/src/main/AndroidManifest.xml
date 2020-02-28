@@ -36,23 +36,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.nfc.action.TAG_DISCOVERED" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data
-                    android:host="ext"
-                    android:pathPrefix="/com.cyphereco.openturnkey"
-                    android:scheme="vnd.android.nfc" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data
-                    android:host="ext"
-                    android:pathPrefix="/com.cyphereco.openturnkey"
-                    android:scheme="vnd.android.nfc" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.nfc.action.TECH_DISCOVERED" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data
                     android:host="ext"
