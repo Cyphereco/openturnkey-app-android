@@ -1,22 +1,17 @@
 package com.cyphereco.openturnkey.ui;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.text.Editable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +23,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
@@ -37,12 +31,11 @@ import com.cyphereco.openturnkey.utils.Log4jHelper;
 import org.slf4j.Logger;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public class FragmentPay extends Fragment {
     public static final String TAG = FragmentPay.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
-
-    private static final int ZXING_CAMERA_PERMISSION = 1;
 
     private FragmentPayListener mListener;
     private String mRecipientAddress;
@@ -74,29 +67,21 @@ public class FragmentPay extends Fragment {
         return fragment;
     }
 
-    public void launchQRcodeScanActivity(View v) {
+    public void launchQRcodeScanActivity() {
         if (mUseFixAddress) {
             showFixAddressDialog();
-        }
-        else {
-            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.CAMERA}, ZXING_CAMERA_PERMISSION);
-            } else {
-                Intent intent = new Intent(getContext(), QRcodeScanActivity.class);
-                getActivity().startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
-            }
+        } else {
+            Intent intent = new Intent(getContext(), QRcodeScanActivity.class);
+            Objects.requireNonNull(getActivity()).startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
         }
     }
 
-    public void pasteAddressFromClipboard(View v) {
+    public void pasteAddressFromClipboard() {
         if (mUseFixAddress) {
             showFixAddressDialog();
-        }
-        else {
-            ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-            if (clipboard.hasPrimaryClip()) {
+        } else {
+            ClipboardManager clipboard = (ClipboardManager) Objects.requireNonNull(getActivity()).getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null && clipboard.hasPrimaryClip()) {
                 android.content.ClipDescription description = clipboard.getPrimaryClipDescription();
                 android.content.ClipData data = clipboard.getPrimaryClip();
                 if (data != null && description != null) {
@@ -117,10 +102,10 @@ public class FragmentPay extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_pay, container, false);
         // Set not focusable for recipient address so that the hint is shown correctly
-        TextInputEditText inputReceipientAddress = view.findViewById(R.id.input_recipient_address);
-        inputReceipientAddress.setFocusable(false);
+        TextInputEditText inputRecipientAddress = view.findViewById(R.id.input_recipient_address);
+        inputRecipientAddress.setFocusable(false);
 
-        mLocalCurrency = Preferences.getLocalCurrency(getActivity().getApplicationContext());
+        mLocalCurrency = Preferences.getLocalCurrency(Objects.requireNonNull(getActivity()).getApplicationContext());
 
         updateCurrencyName(view);
         updateCurrency();
@@ -130,7 +115,7 @@ public class FragmentPay extends Fragment {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                launchQRcodeScanActivity(view);
+                launchQRcodeScanActivity();
             }
         });
 
@@ -138,7 +123,7 @@ public class FragmentPay extends Fragment {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                pasteAddressFromClipboard(view);
+                pasteAddressFromClipboard();
             }
         });
 
@@ -150,8 +135,7 @@ public class FragmentPay extends Fragment {
             mEtCc.setText(getArguments().getString(ARG_BTC));
             try {
                 mBtc = Double.parseDouble(mEtCc.getText().toString());
-            }
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 mEtCc.setText("");
             }
             mEtLc.setText(getArguments().getString(ARG_LC));
@@ -171,10 +155,9 @@ public class FragmentPay extends Fragment {
             public void onClick(View view) {
                 if (mUseFixAddress) {
                     showFixAddressDialog();
-                }
-                else {
+                } else {
                     if (mListener != null) {
-                        CheckBox cb = getView().findViewById(R.id.checkBox_use_all_funds);
+                        CheckBox cb = Objects.requireNonNull(getView()).findViewById(R.id.checkBox_use_all_funds);
                         mListener.onGetRecipientAddressByReadNfcButtonClick(mRecipientAddress, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
                     }
                 }
@@ -184,7 +167,7 @@ public class FragmentPay extends Fragment {
         mEtCc.addTextChangedListener(new CurrencyTextWatcher(mEtCc) {
             @Override
             public void afterTextChanged(Editable editable) {
-                if (mIsAmountConverting == true || !mEtCc.isFocused()) {
+                if (mIsAmountConverting || !mEtCc.isFocused()) {
                     // It's updated by changing of lc
                     return;
                 }
@@ -195,8 +178,7 @@ public class FragmentPay extends Fragment {
                     double cc = Double.parseDouble(mEtCc.getText().toString());
                     mEtLc.setText(String.format(Locale.ENGLISH, "%.2f", getLocalCurrency(cc)));
                     mBtc = cc;
-                }
-                catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     mEtLc.setText("");
                 }
                 mIsAmountConverting = false;
@@ -206,7 +188,7 @@ public class FragmentPay extends Fragment {
         mEtLc.addTextChangedListener(new CurrencyTextWatcher(mEtLc) {
             @Override
             public void afterTextChanged(Editable editable) {
-                if (mIsAmountConverting == true || !mEtLc.isFocused()) {
+                if (mIsAmountConverting || !mEtLc.isFocused()) {
                     // It's updated by changing of cc or back to this fragment from somewhere
                     return;
                 }
@@ -215,8 +197,8 @@ public class FragmentPay extends Fragment {
                 mIsAmountConverting = true;
                 try {
                     double lc = Double.parseDouble(mEtLc.getText().toString());
-                    mBtc = Double.valueOf(getCryptoCurrency(lc));
-                    mEtCc.setText(String.format("%.8f", mBtc));
+                    mBtc = getCryptoCurrency(lc);
+                    mEtCc.setText(String.format(Locale.ENGLISH, "%.8f", mBtc));
 
                 } catch (NumberFormatException e) {
                     mEtCc.setText("");
@@ -238,28 +220,31 @@ public class FragmentPay extends Fragment {
                         Snackbar.make(view, getString(R.string.recipient_is_empty), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                         return;
                     }
-                    if (true == BtcUtils.isSegWitAddress(!Preferences.isTestnet(getContext()), mRecipientAddress)) {
+                    if (BtcUtils.isSegWitAddress(!Preferences.isTestnet(getContext()), mRecipientAddress)) {
                         Snackbar.make(view, getString(R.string.seg_wit_address_is_not_supported), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                         return;
                     }
-                    if (false == BtcUtils.validateAddress(!Preferences.isTestnet(getContext()), mRecipientAddress)) {
+                    if (!BtcUtils.validateAddress(!Preferences.isTestnet(getContext()), mRecipientAddress)) {
                         Snackbar.make(view, getString(R.string.invalid_address), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                         return;
                     }
-                    CheckBox cb = v.findViewById(R.id.checkBox_use_all_funds);
-                    if (!cb.isChecked() && mBtc <= 0) {
+                    CheckBox cb = null;
+                    if (v != null) {
+                        cb = v.findViewById(R.id.checkBox_use_all_funds);
+                    }
+                    if (cb != null && !cb.isChecked() && mBtc <= 0) {
                         Snackbar.make(view, getString(R.string.incorrect_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                         return;
                     }
 
                     if (mListener != null) {
-                        mListener.onSignPaymentButtonClick(mRecipientAddress, mBtc, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
+                        if (cb != null) {
+                            mListener.onSignPaymentButtonClick(mRecipientAddress, mBtc, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
+                        }
                     }
-                }
-                catch (NullPointerException | NumberFormatException e) {
+                } catch (NullPointerException | NumberFormatException e) {
                     e.printStackTrace();
                     Snackbar.make(view, getString(R.string.incorrect_recipient_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                    return;
                 }
 
             }
@@ -268,12 +253,11 @@ public class FragmentPay extends Fragment {
         CheckBox cb = view.findViewById(R.id.checkBox_use_all_funds);
         cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     mEtCc.setEnabled(false);
                     mEtLc.setEnabled(false);
-                }
-                else {
+                } else {
                     mEtCc.setEnabled(true);
                     mEtLc.setEnabled(true);
                 }
@@ -284,8 +268,7 @@ public class FragmentPay extends Fragment {
         if (cb.isChecked()) {
             mEtCc.setEnabled(false);
             mEtLc.setEnabled(false);
-        }
-        else {
+        } else {
             mEtCc.setEnabled(true);
             mEtLc.setEnabled(true);
         }
@@ -344,8 +327,13 @@ public class FragmentPay extends Fragment {
 
     public void updateAmount(String amount) {
         View view = getView();
-        TextView tv = view.findViewById(R.id.input_crypto_currency);
-        tv.setText(amount);
+        TextView tv = null;
+        if (view != null) {
+            tv = view.findViewById(R.id.input_crypto_currency);
+        }
+        if (tv != null) {
+            tv.setText(amount);
+        }
     }
 
     private double getCryptoCurrency(double lc) {
@@ -354,22 +342,22 @@ public class FragmentPay extends Fragment {
         }
         switch (mLocalCurrency) {
             case LOCAL_CURRENCY_TWD:
-                return Double.valueOf(lc / mCurrencyExRate.getTWD());
+                return lc / mCurrencyExRate.getTWD();
             case LOCAL_CURRENCY_USD:
-                return Double.valueOf(lc / mCurrencyExRate.getUSD());
+                return lc / mCurrencyExRate.getUSD();
             case LOCAL_CURRENCY_CNY:
-                return Double.valueOf(lc / mCurrencyExRate.getCNY());
+                return lc / mCurrencyExRate.getCNY();
             case LOCAL_CURRENCY_EUR:
-                return Double.valueOf(lc / mCurrencyExRate.getEUR());
+                return lc / mCurrencyExRate.getEUR();
             case LOCAL_CURRENCY_JPY:
-                return Double.valueOf(lc / mCurrencyExRate.getJPY());
+                return lc / mCurrencyExRate.getJPY();
         }
         return 0;
     }
 
     private void updateCurrency() {
         try {
-            if (mIsCryptoCurrencySet == true) {
+            if (mIsCryptoCurrencySet) {
                 if (mBtc == 0.0) {
                     // No need to update if amount is 0.
                     return;
@@ -378,29 +366,24 @@ public class FragmentPay extends Fragment {
                 mIsAmountConverting = true;
                 try {
                     mEtLc.setText(String.format(Locale.ENGLISH, "%.2f", getLocalCurrency(mBtc)));
-                }
-                catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     mEtLc.setText("");
                 }
                 mIsAmountConverting = false;
-            }
-            else {
+            } else {
                 mIsAmountConverting = true;
                 try {
                     double lc = Double.parseDouble(mEtLc.getText().toString());
-                    mBtc = Double.valueOf(getCryptoCurrency(lc));
-                    mEtCc.setText(String.format("%.8f", mBtc));
-                }
-                catch (NumberFormatException e) {
+                    mBtc = getCryptoCurrency(lc);
+                    mEtCc.setText(String.format(Locale.ENGLISH, "%.8f", mBtc));
+                } catch (NumberFormatException e) {
                     mEtCc.setText("");
                 }
                 mIsAmountConverting = false;
             }
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             // do nothing e.printStackTrace();
-        }
-        catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             // Do nothing
         }
     }
@@ -410,15 +393,14 @@ public class FragmentPay extends Fragment {
         if (mCurrencyExRate == null) {
             mCurrencyExRate = rate;
             updateCurrency();
-        }
-        else {
+        } else {
             mCurrencyExRate = rate;
         }
     }
 
     public void updateLocalCurrency(LocalCurrency localCurrency) {
         mLocalCurrency = localCurrency;
-        updateCurrencyName(getView());
+        updateCurrencyName(Objects.requireNonNull(getView()));
         boolean cache = mIsCryptoCurrencySet;
         mIsCryptoCurrencySet = true;
         updateCurrency();
@@ -426,8 +408,9 @@ public class FragmentPay extends Fragment {
     }
 
     public interface FragmentPayListener {
-        void onGetRecipientAddressByReadNfcButtonClick(String to, String  btc, String lc, boolean isAllFundChecked);
-        void onSignPaymentButtonClick(String to, double amount, String  btc, String lc, boolean isAllFundChecked);
+        void onGetRecipientAddressByReadNfcButtonClick(String to, String btc, String lc, boolean isAllFundChecked);
+
+        void onSignPaymentButtonClick(String to, double amount, String btc, String lc, boolean isAllFundChecked);
     }
 
     public boolean processFixAddressClick(boolean isChecked) {
@@ -463,12 +446,9 @@ public class FragmentPay extends Fragment {
 
     private void showFixAddressDialog() {
         new AlertDialog.Builder(getActivity())
-                .setMessage("Please disable using fix address first")
-                .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                })
+                .setTitle(R.string.cannot_change_addr)
+                .setMessage(R.string.disable_fix_addr_first)
+                .setNegativeButton(R.string.ok, null)
                 .show();
     }
 }

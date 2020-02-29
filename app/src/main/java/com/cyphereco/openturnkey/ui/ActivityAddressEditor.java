@@ -1,18 +1,14 @@
 package com.cyphereco.openturnkey.ui;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -38,7 +34,6 @@ public class ActivityAddressEditor extends AppCompatActivity {
     private final static String TAG = ActivityAddressEditor.class.getSimpleName();
     private static Logger logger = Log4jHelper.getLogger(TAG);
 
-    private final static int ZXING_CAMERA_PERMISSION = 1;
     private static final String BEGIN_BITCOIN_SIGNED_MESSAGE = "-----BEGIN BITCOIN SIGNED MESSAGE-----";
     private static final String AMOUNT_EQUAL_TO = "amount=";
 
@@ -103,8 +98,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
         if (android.R.id.home == item.getItemId()) {
             onBackPressed();
             return true;
-        }
-        else {
+        } else {
             return super.onOptionsItemSelected(item);
         }
     }
@@ -162,8 +156,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
                 if ((null != mInputAddress.getText()) &&
                         (!mInputAddress.getText().toString().isEmpty())) {
                     mSaveBtn.setEnabled(true);
-                }
-                else {
+                } else {
                     mSaveBtn.setEnabled(false);
                 }
             }
@@ -180,8 +173,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
                     logger.debug("Contents contains BEGIN_BITCOIN_SIGNED_MESSAGE");
                     // TODO
                     // updateFormattedSignedMessage(contents);
-                }
-                else {
+                } else {
                     String addr = "";
                     boolean notBTC = false;
 
@@ -193,16 +185,14 @@ public class ActivityAddressEditor extends AppCompatActivity {
                             if (uriArray[0].contentEquals("bitcoin")) {
                                 contents = uriArray[1];
                                 addr = contents;
-                            }
-                            else {
+                            } else {
                                 notBTC = true;
                                 Toast.makeText(this, uriArray[0] +
-                                        getString(R.string.not_supported),
+                                                getString(R.string.not_supported),
                                         Toast.LENGTH_LONG).show();
                                 contents = "";
                             }
-                        }
-                        else {
+                        } else {
                             // incorrect uri format
                             logger.debug("Incorrect URI format");
                         }
@@ -222,18 +212,16 @@ public class ActivityAddressEditor extends AppCompatActivity {
                                     String[] amountArray = s.split("=");
                                     if (amountArray.length > 1) {
                                         Toast.makeText(this,
-                                                getString(R.string.subject_amount)+ amountArray[1],
+                                                getString(R.string.subject_amount) + amountArray[1],
                                                 Toast.LENGTH_LONG).show();
                                     }
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             // incorrect uri
                             logger.debug("Incorrect URI format");
                         }
-                    }
-                    else {
+                    } else {
                         addr = contents;
                     }
 
@@ -266,8 +254,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
                 Snackbar.make(v, getString(R.string.invalid_address), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 return;
             }
-        }
-        catch (NullPointerException | NumberFormatException e) {
+        } catch (NullPointerException | NumberFormatException e) {
             e.printStackTrace();
             return;
         }
@@ -291,8 +278,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
                 if (!mOtkDB.updateAddressbook(item)) {
                     logger.error("Update address failed");
                 }
-            }
-            else {
+            } else {
                 if (existItem != null) {
                     // Show dialog
                     showAliasDuplicateDialog();
@@ -317,16 +303,14 @@ public class ActivityAddressEditor extends AppCompatActivity {
         Intent intent = new Intent();
         if (null == mInputAlias.getText()) {
             intent.putExtra(MainActivity.KEY_ADDRESS_EDITOR_TEMP_ALIAS, "");
-        }
-        else {
+        } else {
             intent.putExtra(MainActivity.KEY_ADDRESS_EDITOR_TEMP_ALIAS,
                     mInputAlias.getText().toString());
         }
 
         if (null == mInputAddress.getText()) {
             intent.putExtra(MainActivity.KEY_ADDRESS_EDITOR_TEMP_ADDR, "");
-        }
-        else {
+        } else {
             intent.putExtra(MainActivity.KEY_ADDRESS_EDITOR_TEMP_ADDR,
                     mInputAddress.getText().toString());
         }
@@ -336,15 +320,9 @@ public class ActivityAddressEditor extends AppCompatActivity {
     }
 
     private void launchQRcodeScanActivity() {
-        if (ContextCompat.checkSelfPermission(ActivityAddressEditor.this,
-                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CAMERA}, ZXING_CAMERA_PERMISSION);
-        } else {
-            Intent intent = new Intent();
-            intent.setClass(ActivityAddressEditor.this, QRcodeScanActivity.class);
-            this.startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
-        }
+        Intent intent = new Intent();
+        intent.setClass(ActivityAddressEditor.this, QRcodeScanActivity.class);
+        this.startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
     }
 
     private void showAliasDuplicateDialog() {
