@@ -12,6 +12,7 @@ import android.view.WindowManager;
 
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
+
 import org.slf4j.Logger;
 
 
@@ -33,8 +34,7 @@ public class SplashActivity extends AppCompatActivity {
 
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 logger.debug("Permission granted");
-            }
-            else {
+            } else {
                 logger.debug("Permission is not granted");
             }
 
@@ -48,7 +48,7 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 
-   @Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -57,9 +57,7 @@ public class SplashActivity extends AppCompatActivity {
 
         if (Configurations.writeLogToFile) {
             ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE); // without sdk version check
-
-        }
-        else {
+        } else {
             logger = Log4jHelper.getLogger(TAG);
             if (MainActivity.isRunning()) {
                 Intent intent = new Intent(SplashActivity.this, MainActivity.class);
@@ -83,22 +81,6 @@ public class SplashActivity extends AppCompatActivity {
                     onNewIntent(intent);
                 }
             }, 1000);
-            return;
-        }
-
-        // No need to process MAIN action
-        String action = intent.getAction();
-        if (action != null && action.equals("android.intent.action.MAIN")) {
-            return;
-        }
-        // Should be NFC related intents
-        if (OpenturnkeyInfoActivity.isActive()) {
-            intent.setClass(SplashActivity.this, OpenturnkeyInfoActivity.class);
-            startActivity(intent);
-        }
-        else {
-            intent.setClass(SplashActivity.this, MainActivity.class);
-            startActivity(intent);
         }
     }
 

@@ -32,23 +32,30 @@ import android.widget.Toast;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.Otk;
+import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.Tx;
 import com.cyphereco.openturnkey.core.UnsignedTx;
+import com.cyphereco.openturnkey.core.protocol.OtkCommand;
+import com.cyphereco.openturnkey.core.protocol.OtkRequest;
+import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
+import com.cyphereco.openturnkey.utils.NfcHandler;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 
 import org.slf4j.Logger;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity
@@ -86,6 +93,7 @@ public class MainActivity extends AppCompatActivity
 
     private Menu toolbarMenu = null;
 
+    private Queue<OtkRequest> otkRequestQueue = new LinkedList<OtkRequest>();
     private boolean includeFee = false;
     private boolean useFixAddr = false;
     private String mFixedAddress = "";
@@ -107,7 +115,6 @@ public class MainActivity extends AppCompatActivity
 
     private Otk.Operation mOp = Otk.Operation.OTK_OP_NONE;
     private boolean mIsOpInProcessing = false;
-    // Cached pay fragment data
     private String mRecipientAddress = "";
     private String mBtcAmount = "";
     private String mLcAmount = "";
@@ -120,10 +127,13 @@ public class MainActivity extends AppCompatActivity
     private long mAddressEditorDBId = 0;
     private boolean mSwitchToAddressBookFragment = false;
     private boolean mSwitchToPayFragment = false;
+    private boolean mNfcListening = false;
 
     DialogAuthByPin mDialogAuthByPin;
 
-    /* declarations */
+    /*
+     Declaration for bottom navigation bar.
+     */
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -187,11 +197,7 @@ public class MainActivity extends AppCompatActivity
                                 if (!mRecipientAddress.isEmpty()) {
                                     new AlertDialog.Builder(MainActivity.this)
                                             .setMessage("Fix address is enabled.")
-                                            .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                }
-                                            })
+                                            .setNegativeButton(R.string.ok, null)
                                             .show();
                                 }
                                 mSelectedFragment = FragmentPay.newInstance(mFixedAddress, mBtcAmount,
@@ -688,16 +694,134 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onNewIntent(Intent intent) {
+        /*
+        For the incoming intents, we only care about NFC event,
+        specifically, the NDEF message event which is used by OpenTurnKey.
+        We will ignore other intents since this app is designed to deal with
+        OpenTurnKey only.
+         */
         super.onNewIntent(intent);
-        logger.debug("onNewIntent");
         String action = intent.getAction();
 
-        if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action) ||
-                NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
-            if (Otk.OTK_RETURN_OK != mOtk.processNfcIntent(intent, null)) {
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            logger.info("Found NFC tag!!");
+            OtkData otkData = NfcHandler.parseIntent(intent);
+
+            if (otkData != null) {
+                logger.debug("Found OpenTurnKey:\nSession#{} : {}{}",
+                        otkData.getSessionData().getSessionId(),
+                        otkData.getSessionData().getAddress(),
+                        otkData.getOtkState().toString()
+                );
+
+                /*
+                 If the otkRequestQueue is not empty, there is a request pending.
+                 Check if public key and session id matched current session.
+                 */
+                if (otkRequestQueue.size() > 0 ) {
+                    OtkRequest request = otkRequestQueue.peek();
+
+                    /*
+                     If a request has a session Id and otk address, the request
+                     must have been delivered to an openturnkey and expecting a request result.
+                     */
+                    if (request.getSessionId().length() > 0) {
+                        logger.info("Waiting for request result");
+
+                        // Sanity check on the otkData
+                        if (otkData.getSessionData().getSessionId().equals(request.getSessionId()) &&
+                                otkData.getSessionData().getAddress().equals(request.getOtkAddress())) {
+                            /*
+                             Request has been delivered, intent should contain request result.
+                             Either success or fail, the request is made, remove it from the
+                             otkRequestQueue.
+                             */
+                            otkRequestQueue.poll();
+                        }
+                        else {
+                            /*
+                             Sanity check failed, error occurs, should quit request to avoid
+                             suspicious hack.
+                             */
+                            logger.error("Invalid request result.");
+                            otkData = null;
+                            // handleRequestResult(request, otkData)
+
+                            Toast.makeText(this, getString(R.string.not_openturnkey), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    else {
+                        // Pending request has not been delivered, prepare to send.
+
+                        // Check if OpenTurnKey is locked to accept authentication.
+                        if (otkData.getOtkState().getLockState() == OtkState.LockState.UNLOCKED) {
+                            // OpenTurnKey is not locked, request cannot be made
+                            Toast.makeText(this, R.string.pin_unset_msg, Toast.LENGTH_LONG).show();
+                            otkRequestQueue.poll();
+                            return;
+                        }
+                        else if (otkData.getOtkState().getLockState() != OtkState.LockState.AUTHORIZED &&
+                        request.getPin().length() != 8) {
+                            dialogAuthByPin();
+                            return;
+                        }
+
+                        /*
+                         Set the session Id and otk address with the otkData we just parsed.
+                         */
+                        request.setSessionId(otkData.getSessionData().getSessionId());
+                        request.setOtkAddress(otkData.getSessionData().getAddress());
+                        String sessId = NfcHandler.sendRequest(intent, request);
+
+                        if (!otkData.getSessionData().getSessionId().equals(sessId)) {
+                            /*
+                             Send request failed, most likely a communication error occurs.
+                             Remove the session id and otk address and keep the request as a fresh one.
+                             */
+                            request.setSessionId("");
+                            request.setOtkAddress("");
+                            logger.info("Something wrong, request is not sent.");
+                        }
+                        else {
+                            /*
+                             Request delivered, the current otkData is not useful result.
+                             Set otkData to null and waiting for process request result in
+                             the next intent.
+                             */
+                            otkData = null;
+                        }
+                    }
+                }
+
+                // process valid OpenTurnKey data
+                if (otkData != null) {
+                    logger.info(otkData.toString());
+
+                    if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
+                        logger.debug("OTK general information read");
+                    }
+                    else {
+                        logger.debug("OTK request response read");
+                    }
+
+                    if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_FAIL) {
+                        Toast.makeText(this, "Failed: "+otkData.getOtkState().getFailureReason().getValue(), Toast.LENGTH_LONG).show();
+                    }
+                    Intent nextIntent = new Intent(getApplicationContext(), OpenturnkeyInfoActivity.class);
+                    nextIntent.putExtra(KEY_OTK_DATA, otkData);
+                    startActivity(nextIntent);
+                }
+                /*
+                 Do nothing if no valid otkData present, must be waiting for
+                 the request result.
+                 */
+            }
+            else {
                 logger.info("Not a valid OpenTurnKey");
                 Toast.makeText(this, getString(R.string.not_openturnkey), Toast.LENGTH_LONG).show();
             }
+
+//            mOtk.processNfcIntent(intent, null);
         }
     }
 
@@ -713,8 +837,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
+        int optionId = item.getItemId();
 
-        if (mIsOpInProcessing && (item.getItemId() != R.id.menu_openturnkey_advance)) {
+        if (mIsOpInProcessing && (optionId != R.id.menu_openturnkey_advance)) {
             if (dialogConfirmOperationAndWaitResult(getString(R.string.terminate_op),
                     String.format(getString(R.string.confirm_terminate_op), mOp.toString()),
                     getString(R.string.terminate))) {
@@ -724,7 +849,8 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
         }
-        switch (item.getItemId()) {
+
+        switch (optionId) {
             case R.id.menu_history_clear_history:
                 dialogClearHistory();
                 return true;
@@ -760,6 +886,7 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.menu_addresses_add:
                 intent = new Intent(this, ActivityAddressEditor.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
                 return true;
             case R.id.menu_openturnkey_unlock:
@@ -769,7 +896,6 @@ public class MainActivity extends AppCompatActivity
                 ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                 return true;
             case R.id.menu_openturnkey_set_note:
-                // show add note dialog
                 dialogAddNote();
                 return true;
             case R.id.menu_openturnkey_set_pin:
@@ -802,6 +928,7 @@ public class MainActivity extends AppCompatActivity
                 }
             case R.id.menu_openturnkey_sign_message:
                 intent = new Intent(this, SignValidateMessageActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
                 startActivityForResult(intent, MainActivity.REQUEST_CODE_SIGN_MESSAGE);
                 return true;
             case R.id.menu_openturnkey_get_key:
@@ -811,9 +938,11 @@ public class MainActivity extends AppCompatActivity
                     mIsOpInProcessing = true;
                     if (mSelectedFragment instanceof FragmentOtk) {
                         ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
-                    if (item.getItemId() == R.id.menu_openturnkey_get_key) {
-                        getKey();
+                        otkRequestQueue.add(new OtkRequest(menuOption2OtkCommand(optionId)));
+                        mOp = Otk.Operation.OTK_OP_GET_KEY;
+                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
+
+//                        getKey();
                     }
                     return true;
                 } else {
@@ -862,26 +991,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        if (mNfcAdapter != null)
-            mNfcAdapter.disableForegroundDispatch(this);
+        pauseNfcDispatch();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        logger.debug("onResume");
-        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
-        IntentFilter ndefDetected = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
-        IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
-        IntentFilter[] nfcIntentFilter = new IntentFilter[]{techDetected, tagDetected, ndefDetected};
-//        IntentFilter[] nfcIntentFilter = new IntentFilter[]{tagDetected};
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-
-        if (mNfcAdapter != null) {
-            mNfcAdapter.enableForegroundDispatch(this, pendingIntent, nfcIntentFilter, null);
-        }
+        startNfcDispatch();
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         if (mSwitchToOTKFragment) {
@@ -970,6 +1087,8 @@ public class MainActivity extends AppCompatActivity
     public void authByPin(String pin) {
         logger.debug("pin:" + pin);
         mOtk.setPinForOperation(pin);
+        OtkRequest req = otkRequestQueue.peek();
+        req.setPin(pin);
     }
 
     public void cancelAuthByPin() {
@@ -1676,6 +1795,53 @@ public class MainActivity extends AppCompatActivity
                 return getString(R.string.invalid_command);
             default:
                 return desc;
+        }
+    }
+
+    private void startNfcDispatch() {
+        if (!mNfcListening){
+            IntentFilter ndefDetected = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
+            IntentFilter[] nfcIntentFilter = new IntentFilter[]{ndefDetected};
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+
+            if (mNfcAdapter != null) {
+                logger.debug("Start NFC tag dispatch.");
+                mNfcAdapter.enableForegroundDispatch(this, pendingIntent, nfcIntentFilter, null);
+                mNfcListening = true;
+            }
+        }
+    }
+
+    private void pauseNfcDispatch() {
+        if (mNfcListening && mNfcAdapter != null) {
+            logger.debug("Pause NFC tag dispatch.");
+            mNfcAdapter.disableForegroundDispatch(this);
+            mNfcListening = false;
+        }
+    }
+
+    private String menuOption2OtkCommand(int opt) {
+        switch (opt) {
+            case R.id.menu_openturnkey_unlock:
+                return OtkCommand.CMD_UNLOCK;
+            case R.id.menu_openturnkey_set_note:
+                return OtkCommand.CMD_SETNOTE;
+            case R.id.menu_openturnkey_set_pin:
+                return OtkCommand.CMD_SETPIN;
+            case R.id.menu_openturnkey_choose_key:
+                return OtkCommand.CMD_SETKEY;
+            case R.id.menu_openturnkey_sign_message:
+                return OtkCommand.CMD_SIGN;
+            case R.id.menu_openturnkey_get_key:
+                return OtkCommand.CMD_GETKEY;
+            case R.id.menu_openturnkey_export_wif_key:
+                return OtkCommand.CMD_EXPORTWIF;
+            case R.id.menu_openturnkey_reset:
+                return OtkCommand.CMD_RESET;
+            default:
+                return null;
         }
     }
 }

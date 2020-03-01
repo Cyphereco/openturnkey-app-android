@@ -1,7 +1,10 @@
 package com.cyphereco.openturnkey.core.protocol;
 
 import com.cyphereco.openturnkey.utils.Log4jHelper;
+
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +24,6 @@ public class SessionData implements Serializable {
     private static final String OTK_LABEL_DERIVATIVE_PATH = "<Derivative_Path>\r\n";
     private static final String OTK_LABEL_SECURE_PIN = "<Secure_Pin>\r\n";
     private static final String OTK_LABEL_WIF_KEY = "<WIF_Key>\r\n";
-    private static final String OTK_REQUEST_DATA_DELIM = "\n";
     private static final String OTK_REQUEST_SIGNATURE_DELIM = "\n";
 
 
@@ -31,10 +33,9 @@ public class SessionData implements Serializable {
     private String masterExtKey = null;
     private String derivativeExtKey = null;
     private String derivativePath = null;
-    private String securePIN = null;
     private String publicKey = null;
     private String wifKey = null;
-    List<String> sigList = new ArrayList<String>();
+    private List<String> sigList = new ArrayList<>();
 
     public SessionData(String sessData) {
         // Session id
@@ -61,7 +62,7 @@ public class SessionData implements Serializable {
                 logger.debug("requestSig:" + requestSig);
                 // Find delim that separate signatures
                 int delim = requestSig.indexOf(OTK_REQUEST_SIGNATURE_DELIM);
-                String sig = null;
+                String sig;
                 if (delim > 0) {
                     sig = requestSig.substring(0, delim);
                 } else {
@@ -127,7 +128,6 @@ public class SessionData implements Serializable {
         if (lablePINStart != -1) {
             int pinStart = lablePINStart + OTK_LABEL_SECURE_PIN.length();
             int crlf = sessData.indexOf(CRLF, pinStart);
-            securePIN = sessData.substring(pinStart, crlf);
         }
 
         // WIF_Key
@@ -158,16 +158,13 @@ public class SessionData implements Serializable {
     public String getPublicKey() {
         return publicKey;
     }
+
     public String getDerivativeExtKey() {
         return derivativeExtKey;
     }
 
     public String getDerivativePath() {
         return derivativePath;
-    }
-
-    public String getSecurePIN() {
-        return securePIN;
     }
 
     public String getWIFKey() {
@@ -178,12 +175,19 @@ public class SessionData implements Serializable {
         return sigList;
     }
 
+    @NotNull
+    @Override
     public String toString() {
-        String s = "\n\tSession id:" + sessionId + "\n\tBTC addr:" + address;
-        if (requestId != null) {
-            s += "\n\tRequest id:" + requestId;
-        }
-        return s;
+        return "SessionData{" +
+                "sessionId='" + sessionId + '\'' +
+                ", address='" + address + '\'' +
+                ", requestId='" + requestId + '\'' +
+                ", masterExtKey='" + masterExtKey + '\'' +
+                ", derivativeExtKey='" + derivativeExtKey + '\'' +
+                ", derivativePath='" + derivativePath + '\'' +
+                ", publicKey='" + publicKey + '\'' +
+                ", wifKey='" + wifKey + '\'' +
+                '}';
     }
 }
 

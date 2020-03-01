@@ -295,12 +295,12 @@ public class Otk {
                     List<DBTransItem> dataset = mOtkDB.getAllTransaction();
                     for (int i = 0; i < dataset.size(); i++) {
                         DBTransItem dbItem = dataset.get(i);
-                        if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt()){// && dbItem.getConfirmations() < 144) {
+                        if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt() && dbItem.getConfirmations() < 144) {
                             int confirmations = BlockChainInfo.getInstance(mCtx).getConfirmations(dbItem.getHash());
                             // Update db
                             dbItem.setConfrimations(confirmations);
                             mOtkDB.updateTransaction(dbItem);
-                            logger.info("Got tx:{} confirmation:{}", dbItem.getHash(), dbItem.getConfirmations());
+//                            logger.debug("Got tx:{} confirmation:{}", dbItem.getHash().substring(0,12) + "...", dbItem.getConfirmations());
                         }
                     }
                 }
@@ -386,6 +386,7 @@ public class Otk {
         OtkEvent event;
         if (OTK_RETURN_OK == Nfc.writeCommand(mTag, cmd, mSessionId, pin, args, isMore, usingMasterKey)) {
             processCommandWritten();
+
             // Try to read tag
             OtkData otkData = Nfc.read(mTag);
             if (otkData == null) {
@@ -431,16 +432,17 @@ public class Otk {
                     }
                 }
                 return OTK_RETURN_OK;
-
             }
-        } else {
-            // OTK is not connected, cache command
-            mCommandToWrite = cmd;
-            mPin = pin;
-            event = new OtkEvent(OtkEvent.Type.APPROACH_OTK);
-            sendEvent(event);
-            return OTK_RETURN_ERROR;
         }
+//        } else {
+//            // OTK is not connected, cache command
+//            mCommandToWrite = cmd;
+//            mPin = pin;
+//            event = new OtkEvent(OtkEvent.Type.APPROACH_OTK);
+//            sendEvent(event);
+//            return OTK_RETURN_ERROR;
+//        }
+        return OTK_RETURN_ERROR;
     }
 
     /**

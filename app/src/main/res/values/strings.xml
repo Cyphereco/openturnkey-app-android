@@ -203,5 +203,9 @@
     <string name="not_openturnkey">Not a valid OpenTurnKey! Do not remove OpenTurnKey until reading completed.</string>
     <string name="confirmation">confirmation</string>
     <string name="amount_fees_included">Amount (Transaction Fees Included)</string>
+    <string name="disable_fix_addr_first">Please disable using fix address first.</string>
+    <string name="cannot_change_addr">Cannot Change Address</string>
+    <string name="no_transaction">There is no transaction.</string>
+    <string name="fail_reason">Fail Reason</string>
 
 </resources>

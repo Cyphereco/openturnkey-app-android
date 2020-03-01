@@ -7,7 +7,6 @@ import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 
 import com.cyphereco.openturnkey.utils.Log4jHelper;
-
 import org.slf4j.Logger;
 
 import com.cyphereco.openturnkey.bitcoin.ECException;
@@ -175,10 +174,12 @@ public class Nfc {
     }
 
     static int writeCommand(Tag tag, Command cmd, String sessId, String pin, List<String> args, boolean isMore, boolean usingMasterKey) {
-        logger.debug("NFC writeCommand (" + cmd.toString() + ")");
+        logger.debug("NFC write command ({})", cmd);
+
         if (tag != null) {
             Ndef ndef = Ndef.get(tag);
             if (ndef != null) {
+
                 NdefRecord[] record = new NdefRecord[NUM_OF_REQUET_RECORDS];
 
                 Random r = new Random();
@@ -215,6 +216,7 @@ public class Nfc {
                     ndef.writeNdefMessage(new NdefMessage(record));
                     ndef.close();
 
+                    logger.debug("OTK request sent.");
                     return Otk.OTK_RETURN_OK;
                 } catch (IOException | FormatException | IllegalStateException e) {
                     logger.error("Write command exception:" + e);
@@ -222,6 +224,7 @@ public class Nfc {
                 }
             }
         }
+        logger.warn("Passed null tag");
         return Otk.OTK_RETURN_ERROR;
     }
 }

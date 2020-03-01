@@ -50,7 +50,7 @@ public class OtkData implements Serializable {
      * @param sd
      */
     public OtkData(String mintInfo, OtkState otkState, String pubKey, SessionData sd) {
-        logger.debug("\nMintInfo:\n" + mintInfo + "\notkState:" + otkState.toString() + "\nSessionData:" + sd.toString());
+//        logger.debug("\nMintInfo:\n" + mintInfo + "\notkState:" + otkState.toString() + "\nSessionData:" + sd.toString());
         mMintInfo = new MintInfo(mintInfo);
         mOtkState = otkState;
         mSessionData = sd;
@@ -72,5 +72,18 @@ public class OtkData implements Serializable {
         else {
             mType = Type.OTK_DATA_TYPE_GENERAL_INFO;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "OtkData{" +
+                "mType=" + mType +
+                ", mAppUri='" + mAppUri + '\'' +
+                ", mMintInfo=" + mMintInfo +
+                ", mOtkState=" + mOtkState +
+                ", mPublicKey='" + mPublicKey + '\'' +
+                ", mSessionData=" + mSessionData +
+                ", mFailureReason='" + mFailureReason + '\'' +
+                '}';
     }
 }

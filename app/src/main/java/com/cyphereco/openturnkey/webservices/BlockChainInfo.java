@@ -123,9 +123,9 @@ public class BlockChainInfo extends BtcBase {
             Response response  = webClient.target(URI).path(PATH_RAWTX).path(txHash)
                 .request().get();
             String body = response.readEntity(String.class);
-            logger.info("Latest block:\n{\n{}",
-                    body.substring(body.indexOf("block_height")-1,
-                            body.indexOf("block_height")+64) + "......");
+//            logger.info("Latest block:\n{\n{}",
+//                    body.substring(body.indexOf("block_height")-1,
+//                            body.indexOf("block_height")+64) + "......");
             JSONObject json = new JSONObject(body);
             String hight = json.getString("block_height");
             return Integer.parseInt(hight);

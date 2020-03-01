@@ -185,4 +185,7 @@
     <string name="not_openturnkey">有効なOpenTurnKeyではありません、読み取りが完了するまでOpenTurnKeyを離れないでください。</string>
     <string name="confirmation">確認</string>
     <string name="amount_fees_included">金額 (手数料込)</string>
+    <string name="disable_fix_addr_first">固定アドレスをオフにしてください</string>
+    <string name="cannot_change_addr">アドレスを変更できません</string>
+    <string name="no_transaction">There is no transaction.</string>
 </resources>

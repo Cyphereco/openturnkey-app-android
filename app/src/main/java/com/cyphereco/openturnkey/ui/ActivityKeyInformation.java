@@ -23,7 +23,6 @@ import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.core.protocol.SessionData;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
-import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
 
 import org.slf4j.Logger;
 
@@ -51,7 +50,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
         updateInfo(otkData);
         setButtonListener();
 
-        TextView txt = (TextView) findViewById(R.id.how_to_validate);
+        TextView txt = findViewById(R.id.how_to_validate);
         txt.setMovementMethod(LinkMovementMethod.getInstance());
         txt.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -63,19 +62,19 @@ public class ActivityKeyInformation extends AppCompatActivity {
     }
 
     private void updateInfo(final OtkData otkData) {
-        SessionData otkSessData;
+        SessionData sessionData;
         TextView tv;
         EditText et;
 
-        otkSessData = otkData.getSessionData();
+        sessionData = otkData.getSessionData();
         /* Set master public key */
         tv = findViewById(R.id.ki_tv_master_pk_content);
-        tv.setText(otkSessData.getMasterExtKey());
+        tv.setText(sessionData.getMasterExtKey());
         /* Set derivative public key */
         tv = findViewById(R.id.ki_tv_derivative_pk_content);
-        tv.setText(otkSessData.getDerivativeExtKey());
+        tv.setText(sessionData.getDerivativeExtKey());
         /* Get key path */
-        String[] keyPath = otkSessData.getDerivativePath().split("/");
+        String[] keyPath = sessionData.getDerivativePath().split("/");
         et = findViewById(R.id.ki_tx_derivative_key_path_l1);
         et.setText(keyPath[1]);
         et = findViewById(R.id.ki_tx_derivative_key_path_l2);
@@ -183,7 +182,9 @@ public class ActivityKeyInformation extends AppCompatActivity {
         }
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
-        clipboard.setPrimaryClip(clip);
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(clip);
+        }
         Toast.makeText(getApplicationContext(), label + " is copied", Toast.LENGTH_SHORT).show();
     }
 

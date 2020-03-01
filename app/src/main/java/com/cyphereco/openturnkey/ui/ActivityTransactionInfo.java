@@ -247,7 +247,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
 
     private void showEmptyTransactionDialog() {
         new AlertDialog.Builder(this)
-                .setMessage("There is no transaction")
+                .setMessage(R.string.no_transaction)
                 .setPositiveButton(R.string.ok,
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -260,7 +260,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
 
     private void showFailReasonDialog(String reason) {
         new AlertDialog.Builder(this)
-                .setTitle("FAIL Reason")
+                .setTitle(R.string.fail_reason)
                 .setMessage(reason)
                 .setPositiveButton(R.string.ok,
                         new DialogInterface.OnClickListener() {

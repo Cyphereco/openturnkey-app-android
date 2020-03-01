@@ -170,6 +170,6 @@ public class OtkState implements Serializable {
     public ExecutionState getExecutionState() {return mNfcCmdExecSate;}
     @NotNull
     public String toString() {
-        return "\n\tLock state:" + mLockState.name() + "\n\tExec state:" + mNfcCmdExecSate.name() + "\n\tCommand:" + mCommand.name() + "\n\tFailure reason:" + mFailureReason.name();
+        return "\n\tLock state:" + mLockState.name() + "\n\tCommand:" + mCommand.name() + "\n\tExec state:" + mNfcCmdExecSate.name() + "\n\tFailure reason:" + mFailureReason.name();
     }
 }
