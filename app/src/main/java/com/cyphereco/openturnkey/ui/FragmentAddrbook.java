@@ -255,6 +255,7 @@ public class FragmentAddrbook extends FragmentExtOtkData {
         super.onCreateOptionsMenu(menu, inflater);
         menu.clear();
         inflater.inflate(R.menu.menu_addresses, menu);
+        setAddressSearchView(menu);
     }
 
     @Override
