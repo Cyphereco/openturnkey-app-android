@@ -63,7 +63,7 @@ public class DialogAuthByPin extends AppCompatDialogFragment {
             listener = (DialogAuthByPinListener) context;
         } catch (Exception e) {
             throw new ClassCastException(context.toString() +
-                    "must implement DialogLocalCurrecyListener");
+                    "must implement DialogAuthByPinListener");
         }
 
     }

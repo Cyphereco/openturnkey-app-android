@@ -165,6 +165,7 @@ public class OtkState implements Serializable {
     private Command mCommand;
     private FailureReason mFailureReason;
 
+    public Command getCommand() {return mCommand;}
     public LockState getLockState() {return mLockState;}
     public FailureReason getFailureReason() {return mFailureReason;}
     public ExecutionState getExecutionState() {return mNfcCmdExecSate;}

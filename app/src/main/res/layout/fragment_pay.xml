@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,8 +7,8 @@
 
     <ImageView
         android:id="@+id/icon_scan_qrcode"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:clickable="true"
@@ -22,10 +21,10 @@
 
     <ImageView
         android:id="@+id/icon_read_nfc"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="10dp"
         android:clickable="true"
         android:contentDescription="@string/read_nfc"
         android:focusable="true"
@@ -36,10 +35,10 @@
 
     <ImageView
         android:id="@+id/icon_paste_clipboard"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="6dp"
+        android:layout_marginEnd="8dp"
         android:clickable="true"
         android:contentDescription="@string/paste_clipboard"
         android:focusable="true"
@@ -80,7 +79,8 @@
         android:inputType="numberDecimal"
         android:textAlignment="viewEnd"
         app:layout_constraintEnd_toStartOf="@+id/input_local_currency"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" tools:targetApi="o" />
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
+        tools:targetApi="o" />
 
     <EditText
         android:id="@+id/input_local_currency"
@@ -93,7 +93,8 @@
         android:inputType="numberDecimal"
         android:textAlignment="viewEnd"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/input_crypto_currency" tools:targetApi="o" />
+        app:layout_constraintTop_toTopOf="@+id/input_crypto_currency"
+        tools:targetApi="o" />
 
     <TextView
         android:id="@+id/text_cyrpto_currency"
@@ -154,8 +155,16 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
+        android:background="@drawable/custom_toast_alert_round"
+        android:backgroundTint="#90CAF9"
         android:drawableStart="@drawable/ic_fingerprint_black_24dp"
+        android:paddingLeft="20dp"
+        android:paddingTop="5dp"
+        android:paddingRight="20dp"
+        android:paddingBottom="5dp"
         android:text="@string/sign_payment"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

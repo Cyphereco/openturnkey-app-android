@@ -1,4 +1,4 @@
-package com.cyphereco.openturnkey.utils;
+package com.cyphereco.openturnkey.core;
 
 import android.content.Intent;
 import android.nfc.FormatException;
@@ -11,11 +11,11 @@ import android.os.Parcelable;
 
 import com.cyphereco.openturnkey.bitcoin.ECException;
 import com.cyphereco.openturnkey.bitcoin.ECKey;
-import com.cyphereco.openturnkey.core.Nfc;
-import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.core.protocol.OtkRequest;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.core.protocol.SessionData;
+import com.cyphereco.openturnkey.utils.BtcUtils;
+import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
 
@@ -26,7 +26,6 @@ public class NfcHandler {
     private static Logger logger = Log4jHelper.getLogger(TAG);
 
     private static final String OTK_NFC_DATA_APP_PKG_URI = "com.cyphereco.openturnkey";
-    private static final String OTK_REQUEST_DATA_DELIM = "\n";
 
     private static final int RECORD_TYPE_APP_URI = 0;
     private static final int RECORD_TYPE_MINT_INFO = 1;

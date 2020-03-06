@@ -12,13 +12,12 @@ import android.os.Parcelable;
 
 import com.blockcypher.exception.BlockCypherException;
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.BtcUtils;
-import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
+import com.cyphereco.openturnkey.utils.ExchangeRate;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.TxFee;
 import com.cyphereco.openturnkey.webservices.BlockChainInfo;
@@ -115,7 +114,7 @@ public class Otk {
     static long mTxFees;
     static List<String> mArgs = new ArrayList<String>();
     static List<String> mSignatures = new ArrayList<String>();
-    static CurrencyExchangeRate mCurrencyExRate;
+    static ExchangeRate mCurrencyExRate;
     static Tag mTag;
     static boolean mIsAuthorized;
     static boolean mUsingMasterKey;
@@ -190,7 +189,7 @@ public class Otk {
                         case OTK_MSG_CURRENCY_EX_RATE_UPDATE:
                             logger.debug("Received OTK_MSG_CURRENCY_EX_RATE_UPDATE");
 
-                            mCurrencyExRate = (CurrencyExchangeRate) msg.obj;
+                            mCurrencyExRate = (ExchangeRate) msg.obj;
                             event = new OtkEvent(OtkEvent.Type.CURRENCY_EXCHANGE_RATE_UPDATE, mCurrencyExRate);
                             sendEvent(event);
                             break;
@@ -260,7 +259,7 @@ public class Otk {
             // Timer task which calling get current exchange api.
             TimerTask task = new TimerTask() {
                 public void run() {
-                    CurrencyExchangeRate cer = BtcUtils.getCurrencyExchangeRate();
+                    ExchangeRate cer = BtcUtils.getCurrencyExchangeRate();
                     if (cer != null) {
                         // Send message
                         Message msg = new Message();

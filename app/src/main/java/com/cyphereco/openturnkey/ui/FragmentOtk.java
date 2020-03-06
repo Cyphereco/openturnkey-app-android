@@ -1,12 +1,15 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -14,6 +17,10 @@ import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Otk;
+import com.cyphereco.openturnkey.core.OtkData;
+import com.cyphereco.openturnkey.core.protocol.Command;
+import com.cyphereco.openturnkey.core.protocol.OtkState;
+import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
@@ -21,10 +28,12 @@ import org.slf4j.Logger;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public class FragmentOtk extends Fragment {
+import static com.cyphereco.openturnkey.ui.MainActivity.KEY_OTK_DATA;
 
+public class FragmentOtk extends FragmentExtOtkData {
     public static final String TAG = FragmentOtk.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
+
     // Cancel timeout for pay
     private final int AUTO_DISMISS_MILLIS = 30 * 1000;
 
@@ -42,8 +51,6 @@ public class FragmentOtk extends Fragment {
     }
 
     private void updateOp(View view) {
-        logger.debug("updateOp mOp:" + mOp.toString());
-
         final TextView tv;
         tv = view.findViewById(R.id.text_nfc_comm_type);
         // Cancel button
@@ -75,45 +82,35 @@ public class FragmentOtk extends Fragment {
                     }
                 }
             });
-        }
-        else if (mOp == Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS) {
+        } else if (mOp == Otk.Operation.OTK_OP_GET_RECIPIENT_ADDRESS) {
             tv.setText(R.string.get_recipient_address);
             btn.setVisibility(View.VISIBLE);
 
-        }
-        else if (mOp == Otk.Operation.OTK_OP_GET_KEY) {
+        } else if (mOp == Otk.Operation.OTK_OP_GET_KEY) {
             tv.setText(R.string.full_pubkey_information);
             btn.setVisibility(View.VISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_SET_PIN_CODE) {
+        } else if (mOp == Otk.Operation.OTK_OP_SET_PIN_CODE) {
             tv.setText(R.string.set_pin_code);
             btn.setVisibility(View.VISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE) {
+        } else if (mOp == Otk.Operation.OTK_OP_WRITE_NOTE) {
             tv.setText(R.string.write_note);
             btn.setVisibility(View.VISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_UNLOCK) {
+        } else if (mOp == Otk.Operation.OTK_OP_UNLOCK) {
             tv.setText(R.string.unlock);
             btn.setVisibility(View.VISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_SIGN_MESSAGE) {
+        } else if (mOp == Otk.Operation.OTK_OP_SIGN_MESSAGE) {
             tv.setText(R.string.sign_message);
             btn.setVisibility(View.VISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_CHOOSE_KEY) {
+        } else if (mOp == Otk.Operation.OTK_OP_CHOOSE_KEY) {
             tv.setText(R.string.set_key);
             btn.setVisibility(View.VISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_RESET) {
+        } else if (mOp == Otk.Operation.OTK_OP_RESET) {
             tv.setText(R.string.reset);
             btn.setVisibility(View.VISIBLE);
-        }
-        else if (mOp == Otk.Operation.OTK_OP_EXPORT_WIF_KEY) {
+        } else if (mOp == Otk.Operation.OTK_OP_EXPORT_WIF_KEY) {
             tv.setText(R.string.export_private_key);
             btn.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             btn.setVisibility(View.INVISIBLE);
             // Default is read general info
             tv.setText(R.string.read_general_information);
@@ -135,6 +132,7 @@ public class FragmentOtk extends Fragment {
                             TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) + 1 //add one so it never displays zero
                     ));
                 }
+
                 public void onFinish() {
                     if (mListener != null) {
                         mListener.onCancelTimeout();
@@ -151,6 +149,8 @@ public class FragmentOtk extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
         if (getArguments() != null) {
             mOp = (Otk.Operation) getArguments().getSerializable(ARG_OPERATION);
         }
@@ -163,12 +163,24 @@ public class FragmentOtk extends Fragment {
 
         updateOp(view);
 
+        Button btnNfcRead = view.findViewById(R.id.btn_nfc_read);
+
+        btnNfcRead.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity.readOtk();
+//                DialogReadOtk dialogReadOtk = new DialogReadOtk();
+//                dialogReadOtk.show(getFragmentManager(), "ReadOtk");
+            }
+        });
         return view;
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        logger.info("FragmentOtk attached");
+        logger.info("TAG={}", TAG);
         if (context instanceof FragmentOtkListener) {
             mListener = (FragmentOtkListener) context;
         } else {
@@ -180,6 +192,8 @@ public class FragmentOtk extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        logger.info("FragmentOtk detached");
+
         mListener = null;
         if (mCancelTimer != null) {
             mCancelTimer.cancel();
@@ -201,6 +215,84 @@ public class FragmentOtk extends Fragment {
 
     public interface FragmentOtkListener {
         void onCancelButtonClick();
+
         void onCancelTimeout();
+    }
+
+    @Override
+    public void postOtkData(OtkData otkData) {
+        super.postOtkData(otkData);
+
+        // process received otk data
+        if (otkData != null) {
+            Intent intent = null;
+
+            if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
+                // read OTK general information, must be getting the OTK address
+                intent = new Intent(getContext(), ActivityOpenturnkeyInfo.class);
+            }
+            else {
+                // otkData contains request result, process the result according to the reqeust
+                Command cmd = otkData.getOtkState().getCommand();
+
+                if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
+                    if (cmd == Command.SHOW_KEY) {
+                        intent = new Intent(getContext(), ActivityKeyInformation.class);
+                    }
+                    else if (cmd == Command.EXPORT_WIF_KEY) {
+
+                    }
+                    else {
+                        String msg;
+                        switch (cmd) {
+                            case UNLOCK:
+                                msg = getString(R.string.unlock_success);
+                                break;
+                            case SET_KEY:
+                                msg = getString(R.string.choose_key_success);
+                                break;
+                            case SET_PIN:
+                                msg = getString(R.string.set_pin_success);
+                                break;
+                            case SET_NOTE:
+                                msg = getString(R.string.write_note_success);
+                                break;
+                            case CANCEL:
+                                msg = getString(R.string.operation_cancelled);
+                                break;
+                            case RESET:
+                                msg = getString(R.string.reset_success);
+                                break;
+                            default:
+                                msg = "Request completed.";
+                        }
+                        AlertPrompt.info(getContext(), msg);
+                    }
+                }
+                else {
+                    AlertPrompt.alert(getContext(),"Request failed.\nReason:\n" + otkData.getFailureReason());
+                }
+            }
+
+            if (intent != null) {
+                intent.putExtra(KEY_OTK_DATA, otkData);
+                startActivity(intent);
+            }
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        menu.clear();
+        inflater.inflate(R.menu.menu_openturnkey, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int optionId = item.getItemId();
+        logger.debug("opt: {}", optionId);
+        return super.onOptionsItemSelected(item);
     }
 }

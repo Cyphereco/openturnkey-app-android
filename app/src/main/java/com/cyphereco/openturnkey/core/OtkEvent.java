@@ -1,6 +1,6 @@
 package com.cyphereco.openturnkey.core;
 
-import com.cyphereco.openturnkey.utils.CurrencyExchangeRate;
+import com.cyphereco.openturnkey.utils.ExchangeRate;
 import com.cyphereco.openturnkey.utils.TxFee;
 
 import java.math.BigDecimal;
@@ -54,7 +54,7 @@ public class OtkEvent {
     private Type mType;
     private OtkData mData;
     private String mDesc;
-    private CurrencyExchangeRate mCurrencyExRate = null;
+    private ExchangeRate mCurrencyExRate = null;
     private Tx mTx;
     private UnsignedTx mUnsignedTx;
     private BigDecimal mBalance;
@@ -81,7 +81,7 @@ public class OtkEvent {
         mDesc = desc;
     }
 
-    OtkEvent(Type eventType, String address, BigDecimal b, CurrencyExchangeRate rate) {
+    OtkEvent(Type eventType, String address, BigDecimal b, ExchangeRate rate) {
         mType = eventType;
         mBalance = b;
         mDesc = address;
@@ -102,7 +102,7 @@ public class OtkEvent {
         mType = eventType;
     }
 
-    OtkEvent(Type eventType, CurrencyExchangeRate currencyExRate) {
+    OtkEvent(Type eventType, ExchangeRate currencyExRate) {
         mType = eventType;
         mCurrencyExRate = currencyExRate;
     }
@@ -148,7 +148,7 @@ public class OtkEvent {
         return mData;
     }
 
-    public CurrencyExchangeRate getCurrencyExRate() {
+    public ExchangeRate getCurrencyExRate() {
         return mCurrencyExRate;
     }
 

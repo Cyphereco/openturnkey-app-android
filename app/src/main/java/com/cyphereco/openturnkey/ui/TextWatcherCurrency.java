@@ -6,10 +6,10 @@ import android.widget.EditText;
 
 import java.lang.ref.WeakReference;
 
-public class CurrencyTextWatcher implements TextWatcher {
+public class TextWatcherCurrency implements TextWatcher {
     private final WeakReference<EditText> editTextWeakReference;
     private String current;
-    public CurrencyTextWatcher(EditText editText) {
+    public TextWatcherCurrency(EditText editText) {
         editTextWeakReference = new WeakReference<EditText>(editText);
     }
 

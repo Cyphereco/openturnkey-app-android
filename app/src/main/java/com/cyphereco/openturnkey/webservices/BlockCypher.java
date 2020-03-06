@@ -40,7 +40,7 @@ public class BlockCypher extends BtcBase {
 
     private void newBlockCypherContext(Context ctx) {
         String network;
-        if (Preferences.isTestnet(ctx)) {
+        if (Preferences.isTestnet()) {
             network = "test3";
         }
         else {
@@ -78,7 +78,6 @@ public class BlockCypher extends BtcBase {
         }
         // only renew BlockCypherContext
         newBlockCypherContext(mCtx);
-        return;
     }
 
     public BigDecimal getBalance(String address) {
@@ -86,8 +85,7 @@ public class BlockCypher extends BtcBase {
         try {
             Address a = mBcCtx.getAddressService().getAddress(address);
             logger.debug("address:" + address + " balance:" + a.getBalance() + " final:" + a.getFinalBalance());
-            BigDecimal d = a.getFinalBalance();
-            return d;
+            return a.getFinalBalance();
         } catch (Exception e) {
             logger.error("e:" + e.toString());
         }
@@ -98,11 +96,7 @@ public class BlockCypher extends BtcBase {
         Transaction tx = null;
         try {
             tx = mBcCtx.getTransactionService().getTransaction(hash, includeHex);
-        }
-        catch (BlockCypherException e) {
-            logger.error("e:" + e.toString());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("e:" + e.toString());
         }
         return tx;
@@ -129,11 +123,11 @@ public class BlockCypher extends BtcBase {
             if (txFees == 0) {
                 // set "prefrence":"zero"
                 unsignedTx = mBcCtx.getTransactionService().newTransaction(
-                        new ArrayList<String>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, "zero");
+                        new ArrayList<>(Arrays.asList(from)), new ArrayList<>(Arrays.asList(to)), amount, "zero");
             }
             else {
                 unsignedTx = mBcCtx.getTransactionService().newTransaction(
-                        new ArrayList<String>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, txFees);
+                        new ArrayList<>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, txFees);
             }
             if ((unsignedTx == null) || unsignedTx.getTosign().size() == 0) {
                 logger.debug("unsignedTx is null or toSign is empty");

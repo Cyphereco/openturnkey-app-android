@@ -21,7 +21,7 @@
         app:distanceInBetween="6dp"
         app:fillerColor="@color/colorPrimary"
         app:fillerRadius="2dp"
-        app:highlightColor="@color/colorAccent"
+        app:highlightColor="@color/inactivePinFieldColor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

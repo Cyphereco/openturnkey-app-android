@@ -12,8 +12,14 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
+        android:background="@drawable/custom_toast_info_round"
+        android:backgroundTint="#90CAF9"
         android:drawableStart="@drawable/ic_verify_in_black_24dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:text="@string/verify_signature"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

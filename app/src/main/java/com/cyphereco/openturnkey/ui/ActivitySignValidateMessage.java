@@ -26,10 +26,10 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.OtkData;
+import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
@@ -40,10 +40,11 @@ import org.slf4j.Logger;
 
 import java.util.Objects;
 
-public class SignValidateMessageActivity extends AppCompatActivity {
-    public static final String TAG = SignValidateMessageActivity.class.getSimpleName();
+public class ActivitySignValidateMessage extends AppCompatActivity {
+    public static final String TAG = ActivitySignValidateMessage.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
 
+    private static OtkData otkData;
     private ViewPager mViewPager;
 
     private String mFormattedSignedMsg;
@@ -59,8 +60,8 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA}, ZXING_CAMERA_PERMISSION);
         } else {
-            Intent intent = new Intent(getApplicationContext(), QRcodeScanActivity.class);
-            startActivityForResult(intent, SignValidateMessageActivity.REQUEST_CODE_QR_CODE);
+            Intent intent = new Intent(getApplicationContext(), ActivityQRcodeScan.class);
+            startActivityForResult(intent, ActivitySignValidateMessage.REQUEST_CODE_QR_CODE);
         }
     }
 
@@ -72,9 +73,6 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                 String contents = intent.getStringExtra(MainActivity.KEY_QR_CODE);
                 EditText etMsgToBeVerified = findViewById(R.id.editTextMessageToBeVerified);
                 etMsgToBeVerified.setText(contents);
-            } else if (resultCode == RESULT_CANCELED) {
-                //Handle cancel
-                Toast.makeText(this, getString(R.string.qr_code_scan_cancelled), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -137,7 +135,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
             mFormattedSignedMsg = sm.getFormattedMessage();
         } catch (Exception e) {
             // Failed to process signed message
-            Toast.makeText(getApplicationContext(), R.string.sign_message_fail, Toast.LENGTH_LONG).show();
+            AlertPrompt.alert(getApplicationContext(), getString(R.string.sign_message_fail));
         }
     }
 
@@ -189,7 +187,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                         Bitmap bitmap = QRCodeUtils.encodeAsBitmap(mFormattedSignedMsg, size, size);
                         image.setImageBitmap(bitmap);
 
-                        AlertDialog.Builder builder = new AlertDialog.Builder(SignValidateMessageActivity.this)
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ActivitySignValidateMessage.this)
                                 .setCancelable(true)
                                 .setView(image);
                         builder.create().show();
@@ -206,7 +204,7 @@ public class SignValidateMessageActivity extends AppCompatActivity {
                         if (clipboard != null) {
                             clipboard.setPrimaryClip(clip);
                         }
-                        Toast.makeText(getApplicationContext(), R.string.data_copied, Toast.LENGTH_LONG).show();
+                        AlertPrompt.info(getApplicationContext(), getString(R.string.data_copied));
                     }
                 });
                 EditText etSignedMsg = view.findViewById(R.id.editTextSignedMessage);
@@ -368,5 +366,9 @@ public class SignValidateMessageActivity extends AppCompatActivity {
         public void destroyItem(ViewGroup container, int position, @NotNull Object object) {
             container.removeView((View) object);
         }
+    }
+
+    public static void setOtkData(OtkData inOtkData) {
+        otkData = inOtkData;
     }
 }

@@ -188,4 +188,5 @@
     <string name="disable_fix_addr_first">请先停用固定地址功能。</string>
     <string name="cannot_change_addr">无法变更地址</string>
     <string name="no_transaction">There is no transaction.</string>
+    <string name="alias_existed">Alias existed alread, please enter a new alias.</string>
 </resources>

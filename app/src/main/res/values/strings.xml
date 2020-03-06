@@ -207,5 +207,6 @@
     <string name="cannot_change_addr">Cannot Change Address</string>
     <string name="no_transaction">There is no transaction.</string>
     <string name="fail_reason">Fail Reason</string>
+    <string name="alias_existed">Alias existed alread, please enter a new alias.</string>
 
 </resources>

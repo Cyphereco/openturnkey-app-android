@@ -19,13 +19,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
+import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
@@ -38,8 +38,8 @@ import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.Objects;
 
-public class OpenturnkeyInfoActivity extends AppCompatActivity {
-    public static final String TAG = OpenturnkeyInfoActivity.class.getSimpleName();
+public class ActivityOpenturnkeyInfo extends AppCompatActivity {
+    public static final String TAG = ActivityOpenturnkeyInfo.class.getSimpleName();
     private static Logger logger = Log4jHelper.getLogger(TAG);
 
     static private Otk mOtk = null;
@@ -67,7 +67,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
 
         mOtk = Otk.getInstance(getApplicationContext());
 
-        final LocalCurrency lc = Preferences.getLocalCurrency(getApplicationContext());
+        final LocalCurrency lc = Preferences.getLocalCurrency();
         TextView tv = findViewById(R.id.label_fiat);
 
         tv.setText(lc.toString());
@@ -107,7 +107,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
     }
 
     private void updateInfo(final OtkData otkData) {
-        final LocalCurrency lc = Preferences.getLocalCurrency(getApplicationContext());
+        final LocalCurrency lc = Preferences.getLocalCurrency();
         TextView tv = findViewById(R.id.label_fiat);
 
         tv.setText(lc.toString());
@@ -180,7 +180,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Show dialog
-                AlertDialog.Builder builder = new AlertDialog.Builder(OpenturnkeyInfoActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ActivityOpenturnkeyInfo.this);
                 builder.setTitle(R.string.mint_information)
                         .setMessage(otkData.getMintInfo().toString())
                         .setPositiveButton(R.string.ok, null)
@@ -199,7 +199,7 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
                 if (clipboard != null) {
                     clipboard.setPrimaryClip(clip);
                 }
-                Toast.makeText(getApplicationContext(), R.string.address_copied, Toast.LENGTH_SHORT).show();
+                AlertPrompt.info(getApplicationContext(), getString(R.string.address_copied));
             }
         });
     }
@@ -223,5 +223,11 @@ public class OpenturnkeyInfoActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MainActivity.setCurrentActivity(getClass().getName());
     }
 }

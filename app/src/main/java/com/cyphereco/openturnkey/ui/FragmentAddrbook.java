@@ -10,16 +10,17 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBAddrItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
@@ -33,7 +34,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class FragmentAddrbook extends Fragment {
+public class FragmentAddrbook extends FragmentExtOtkData {
     private final static String TAG = FragmentAddrbook.class.getSimpleName();
     private static Logger logger = Log4jHelper.getLogger(TAG);
 
@@ -41,14 +42,14 @@ public class FragmentAddrbook extends Fragment {
     private RecyclerView mRVAddressList;
 
     private OpenturnkeyDB mOtkDB = null;
-    private AddrbookViewAdapter mAdapter;
-    private FragmentAddrbookListener mListener;
+    private ViewAdapterAddrbook mAdapter;
+//    private FragmentAddrbookListener mListener;
 
     private void setAdapterListener() {
         if (null == mAdapter) {
             return;
         }
-        mAdapter.setAdapterListener(new AddrbookViewAdapter.AdapterListener() {
+        mAdapter.setAdapterListener(new ViewAdapterAddrbook.AdapterListener() {
             @Override
             public void onDeleteAddress(int position) {
                 logger.debug("onDelete the position is: " + position);
@@ -71,7 +72,8 @@ public class FragmentAddrbook extends Fragment {
             public void onPay(int position) {
                 logger.debug("onPay the position is: " + position);
                 DBAddrItem item = mAdapter.getAddressItemByPosition(position);
-                mListener.onPayToAddress(item.getAddress());
+                MainActivity.setPayToAddress(item.getAddress());
+                MainActivity.navToFragment(MainActivity.FRAGMENT_PAY);
             }
         });
     }
@@ -104,7 +106,7 @@ public class FragmentAddrbook extends Fragment {
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ALIAS, item.getName());
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ADDR, item.getAddress());
         if (null != getActivity()) {
-            getActivity().startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
+            getActivity().startActivity(intent);
         }
     }
 
@@ -153,6 +155,8 @@ public class FragmentAddrbook extends Fragment {
     }
 
     private void updateAddressDataset() {
+        if (mOtkDB == null) return;
+
         List<DBAddrItem> addrDataset = mOtkDB.getAllAddressbook();
 
         // Sort by alias
@@ -178,9 +182,16 @@ public class FragmentAddrbook extends Fragment {
         }
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         logger.debug("onCreateView");
         View view = inflater.inflate(R.layout.fragment_addrbook, container, false);
@@ -192,7 +203,7 @@ public class FragmentAddrbook extends Fragment {
             mOtkDB = new OpenturnkeyDB(getContext());
         }
 
-        mAdapter = new AddrbookViewAdapter(getContext());
+        mAdapter = new ViewAdapterAddrbook(getContext());
         this.setAdapterListener();
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -206,40 +217,42 @@ public class FragmentAddrbook extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        logger.debug("onAttach");
-        if (context instanceof FragmentAddrbookListener) {
-            mListener = (FragmentAddrbookListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        logger.debug("onDetach");
-        mListener = null;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        logger.debug("onActivityResult");
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    public interface FragmentAddrbookListener {
-        void onPayToAddress(String address);
-    }
-
-    public void refresh() {
-        logger.debug("refresh()");
+    public void onResume() {
+        super.onResume();
+        logger.debug("Refresh Addresses List");
         updateAddressDataset();
     }
 
+
     public void showAddressFilter(String searchString) {
         mAdapter.getFilter().filter(searchString);
+    }
+
+    private void setAddressSearchView(Menu menu) {
+        SearchView searchView = (SearchView) menu.findItem(R.id.menu_addresses_search).getActionView();
+        if (null != searchView) {
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    logger.info("SearchView onQueryTextSubmit: " + query);
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    logger.info("Filter Addresses contains ({})", newText);
+                    showAddressFilter(newText);
+                    return false;
+                }
+            });
+        }
+    }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.menu_addresses, menu);
     }
 }

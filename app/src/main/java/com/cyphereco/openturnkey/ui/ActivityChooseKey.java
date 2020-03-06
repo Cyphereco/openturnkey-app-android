@@ -17,7 +17,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
@@ -25,8 +24,8 @@ import com.cyphereco.openturnkey.utils.Log4jHelper;
 import org.slf4j.Logger;
 
 
-public class ChooseKeyActivity extends AppCompatActivity {
-    public static final String TAG = ChooseKeyActivity.class.getSimpleName();
+public class ActivityChooseKey extends AppCompatActivity {
+    public static final String TAG = ActivityChooseKey.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
 
     private static final int ZXING_CAMERA_PERMISSION = 1;
@@ -60,8 +59,8 @@ public class ChooseKeyActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA}, ZXING_CAMERA_PERMISSION);
         } else {
-            Intent intent = new Intent(getApplicationContext(), QRcodeScanActivity.class);
-            startActivityForResult(intent, ChooseKeyActivity.REQUEST_CODE_QR_CODE);
+            Intent intent = new Intent(getApplicationContext(), ActivityQRcodeScan.class);
+            startActivityForResult(intent, ActivityChooseKey.REQUEST_CODE_QR_CODE);
         }
     }
 
@@ -72,10 +71,6 @@ public class ChooseKeyActivity extends AppCompatActivity {
                 // Handle successful scan
                 String contents = intent.getStringExtra(MainActivity.KEY_QR_CODE);
                 updateKeyPathData(contents);
-            }
-            else if (resultCode == RESULT_CANCELED) {
-                //Handle cancel
-                Toast.makeText(this, getString(R.string.qr_code_scan_cancelled), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -115,7 +110,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
         });
 
         EditText etL1 = findViewById(R.id.editTextChooseKeyL1);
-        etL1.addTextChangedListener(new KeyPathTextWatcher(etL1) {
+        etL1.addTextChangedListener(new TextWatcherKeyPath(etL1) {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
@@ -131,7 +126,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
         });
 
         EditText etL2 = findViewById(R.id.editTextChooseKeyL2);
-        etL2.addTextChangedListener(new KeyPathTextWatcher(etL2) {
+        etL2.addTextChangedListener(new TextWatcherKeyPath(etL2) {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
@@ -147,7 +142,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
         });
 
         EditText etL3 = findViewById(R.id.editTextChooseKeyL3);
-        etL3.addTextChangedListener(new KeyPathTextWatcher(etL3) {
+        etL3.addTextChangedListener(new TextWatcherKeyPath(etL3) {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
@@ -163,7 +158,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
         });
 
         EditText etL4 = findViewById(R.id.editTextChooseKeyL4);
-        etL4.addTextChangedListener(new KeyPathTextWatcher(etL4) {
+        etL4.addTextChangedListener(new TextWatcherKeyPath(etL4) {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
@@ -179,7 +174,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
         });
 
         EditText etL5 = findViewById(R.id.editTextChooseKeyL5);
-        etL5.addTextChangedListener(new KeyPathTextWatcher(etL5) {
+        etL5.addTextChangedListener(new TextWatcherKeyPath(etL5) {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
@@ -289,5 +284,11 @@ public class ChooseKeyActivity extends AppCompatActivity {
         etL4.setText(l4);
         EditText etL5 = findViewById(R.id.editTextChooseKeyL5);
         etL5.setText(l5);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MainActivity.setCurrentActivity(getClass().getName());
     }
 }

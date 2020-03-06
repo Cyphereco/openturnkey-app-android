@@ -49,7 +49,7 @@ public class DialogAddNote extends AppCompatDialogFragment {
             listener = (DialogAddNoteListener) context;
         } catch (Exception e) {
             throw new ClassCastException(context.toString() +
-                    "must implement DialogLocalCurrecyListener");
+                    "must implement DialogAddNoteListener");
         }
 
     }

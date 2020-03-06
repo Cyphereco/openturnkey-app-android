@@ -7,11 +7,11 @@ import android.widget.EditText;
 
 import java.lang.ref.WeakReference;
 
-public class KeyPathTextWatcher implements TextWatcher {
+public class TextWatcherKeyPath implements TextWatcher {
     private final WeakReference<EditText> editTextWeakReference;
     private String current;
     private boolean isValid = false;
-    public KeyPathTextWatcher(EditText editText) {
+    public TextWatcherKeyPath(EditText editText) {
         editTextWeakReference = new WeakReference<EditText>(editText);
     }
 

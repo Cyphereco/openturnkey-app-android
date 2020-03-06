@@ -29,7 +29,8 @@ public class DialogLocalCurrency extends AppCompatDialogFragment {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        listener.setLocalCurrency(rgLocalCurrencies.getCheckedRadioButtonId());
+                        if (listener != null)
+                            listener.setLocalCurrency(rgLocalCurrencies.getCheckedRadioButtonId());
                     }
                 });
 
@@ -47,13 +48,16 @@ public class DialogLocalCurrency extends AppCompatDialogFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
+        if (listener != null) return;
+
         try {
             listener = (DialogLocalCurrecyListener) context;
-        } catch (Exception e) {
-            throw new ClassCastException(context.toString() +
-                    "must implement DialogLocalCurrecyListener");
-        }
+        } catch (Exception ignored) { }
 
+    }
+
+    public void setDialogLocalCurrecyListener(DialogLocalCurrecyListener listener) {
+        this.listener = listener;
     }
 
     public interface DialogLocalCurrecyListener {

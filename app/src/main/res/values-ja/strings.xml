@@ -188,4 +188,5 @@
     <string name="disable_fix_addr_first">固定アドレスをオフにしてください</string>
     <string name="cannot_change_addr">アドレスを変更できません</string>
     <string name="no_transaction">There is no transaction.</string>
+    <string name="alias_existed">Alias existed alread, please enter a new alias.</string>
 </resources>

@@ -67,7 +67,7 @@ public class DialogSetPIN extends AppCompatDialogFragment {
             listener = (DialogSetPINListener) context;
         } catch (Exception e) {
             throw new ClassCastException(context.toString() +
-                    "must implement DialogLocalCurrecyListener");
+                    "must implement DialogSetPINListener");
         }
 
     }

@@ -19,19 +19,20 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-
-public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapter.ViewHolder> implements Filterable {
-//    private final static String TAG = AddrbookViewAdapter.class.getSimpleName();
+public class ViewAdapterAddrbook extends RecyclerView.Adapter<ViewAdapterAddrbook.ViewHolder> implements Filterable {
 
     private Context mContext;
     private AdapterListener mAdapterListener = null;
-    private List<DBAddrItem> mAddressbookDataset;
+    private List<DBAddrItem> mAddressbookDataset = new ArrayList<>();
     private AddressFilter mAddressFilter;
 
     public interface AdapterListener {
         void onDeleteAddress(int position);
+
         void onEditAddress(int position);
+
         void onShowQRCode(int position);
+
         void onPay(int position);
     }
 
@@ -43,20 +44,19 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
         notifyDataSetChanged();
     }
 
-    AddrbookViewAdapter(Context context) {
-        this.mContext = context;
-        mAddressbookDataset = new ArrayList<>();
+    ViewAdapterAddrbook(Context context) {
+        mContext = context;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(mContext).inflate(
-                R.layout.listitem_address , parent ,false);
-        return (new ViewHolder(v));
+                R.layout.listitem_address, parent, false);
+        return (new ViewAdapterAddrbook.ViewHolder(v));
     }
 
-   @Override
+    @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
         if (null == mAddressbookDataset) {
             return;
@@ -108,7 +108,16 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
                 }
             });
 
-            ivEditBtn.setOnClickListener(new View.OnClickListener() {
+            mTVAlias.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (null != mAdapterListener) {
+                        mAdapterListener.onEditAddress(getAdapterPosition());
+                    }
+                }
+            });
+
+            mTVAddress.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (null != mAdapterListener) {
@@ -147,11 +156,11 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
 
     private static class AddressFilter extends Filter {
 
-        private final AddrbookViewAdapter mAdapter;
+        private final ViewAdapterAddrbook mAdapter;
         private final List<DBAddrItem> mOriginalList;
         private final List<DBAddrItem> mFilteredList;
 
-        private AddressFilter(AddrbookViewAdapter adapter, List<DBAddrItem> originalList) {
+        private AddressFilter(ViewAdapterAddrbook adapter, List<DBAddrItem> originalList) {
             super();
             this.mAdapter = adapter;
             this.mOriginalList = new LinkedList<>(originalList);
@@ -165,8 +174,7 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
 
             if (0 == constraint.length()) {
                 mFilteredList.addAll(mOriginalList);
-            }
-            else {
+            } else {
                 final String filterPattern = constraint.toString().toLowerCase().trim();
                 for (DBAddrItem item : mOriginalList) {
                     if (item.getName().toLowerCase().contains(filterPattern)) {

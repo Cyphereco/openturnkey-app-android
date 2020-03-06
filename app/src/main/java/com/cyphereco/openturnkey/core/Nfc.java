@@ -47,57 +47,6 @@ public class Nfc {
     private static final int NUM_OF_REQUET_RECORDS = 5;
 
 
-    static OtkData makeRequest(Tag tag, Command cmd, String pin, List<String> args, boolean hasMore, boolean useMaster) {
-        logger.debug("NFC make reqeust");
-        OtkData otkData = null;
-
-        if (tag != null) {
-            Ndef ndef = Ndef.get(tag);
-            if (ndef != null) {
-                try {
-                    ndef.connect();
-                    NdefMessage ndefMessage = ndef.getNdefMessage();
-                    otkData = parseOtkData(ndefMessage);
-
-                    if (otkData == null) {
-                        logger.info("Not a valid OpenTurnKey");
-                        return null;
-                    }
-
-                    OtkState otkState = otkData.getOtkState();
-                    String sessionId = otkData.getSessionData().getSessionId();
-                    String requestId = otkData.getSessionData().getRequestId();
-
-                    if (otkState.getExecutionState() != OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
-                        logger.debug("Received a execution response, run sanity check.");
-
-                        if (Integer.parseInt(sessionId) != mSessionId) {
-                            logger.info("");
-                        }
-
-                        mRequestId = 0;
-                        mSessionId = 0;
-                        return otkData;
-                    }
-                    int command = Integer.parseInt(cmd.toString());
-                    if (command < 161 || command > 169) {
-                        logger.debug("No request command, return read data.");
-                        return otkData;
-                    }
-
-
-
-                    ndef.close();
-                } catch (IOException | FormatException | NullPointerException | IllegalStateException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        }
-
-        return null;
-    }
-
     static OtkData read(Tag tag) {
         logger.debug("NFC read tag");
         if (tag != null) {

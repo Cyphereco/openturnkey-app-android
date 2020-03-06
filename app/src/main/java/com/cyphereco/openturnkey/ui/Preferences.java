@@ -1,18 +1,19 @@
 package com.cyphereco.openturnkey.ui;
+
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
-import org.slf4j.Logger;
-
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.TxFee;
+import org.slf4j.Logger;
 
 public class Preferences {
     public static final String TAG = Preferences.class.getSimpleName();
     private static Logger logger = Log4jHelper.getLogger(TAG);
+
+    private static SharedPreferences prefs;
 
     private static final String LOCAL_CURRENCY = "LOCAL_CURRENCY";
     private static final String TX_FEE_TYPE = "TX_FEE_TYPE";
@@ -25,9 +26,16 @@ public class Preferences {
     private static final String USE_FIX_ADDRESS_CHECKED = "USE_FIX_ADDRESS_CHECKED";
     private static final String USE_FIX_ADDRESS_ADDR_STR = "USE_FIX_ADDRESS_ADDR_STR";
 
+    Preferences(Context ctx) {
+        prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+    }
 
-    static public LocalCurrency getLocalCurrency(Context ctx) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+    static void setLocalCurrency(LocalCurrency lc) {
+        prefs.edit().putString(LOCAL_CURRENCY, lc.name()).apply();
+
+    }
+
+    static LocalCurrency getLocalCurrency() {
         String s = prefs.getString(LOCAL_CURRENCY, "");
         if (s.equals(LocalCurrency.LOCAL_CURRENCY_CNY.name())) {
             return LocalCurrency.LOCAL_CURRENCY_CNY;
@@ -48,43 +56,74 @@ public class Preferences {
         return LocalCurrency.LOCAL_CURRENCY_USD;
     }
 
-    static public void setLocalCurrency(Context ctx, LocalCurrency lc) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        prefs.edit().putString(LOCAL_CURRENCY, lc.name()).commit();
+    static void setTxFeeType(Configurations.TxFeeType txFeeType) {
+        prefs.edit().putString(TX_FEE_TYPE, txFeeType.name()).apply();
     }
 
-    static public void setTxFeeType(Context ctx, Configurations.TxFeeType txFeeType) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        prefs.edit().putString(TX_FEE_TYPE, txFeeType.name()).commit();
-    }
-
-    static public Configurations.TxFeeType getTxFeeType(Context ctx) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+    public static Configurations.TxFeeType getTxFeeType() {
         String s = prefs.getString(TX_FEE_TYPE, "");
         if (s.equals(Configurations.TxFeeType.HIGH.name())) {
             return Configurations.TxFeeType.HIGH;
-        }
-        else if (s.equals(Configurations.TxFeeType.MID.name())) {
+        } else if (s.equals(Configurations.TxFeeType.MID.name())) {
             return Configurations.TxFeeType.MID;
-        }
-        else if (s.equals(Configurations.TxFeeType.LOW.name())) {
+        } else if (s.equals(Configurations.TxFeeType.LOW.name())) {
             return Configurations.TxFeeType.LOW;
-        }
-        else if (s.equals(Configurations.TxFeeType.CUSTOMIZED.name())) {
+        } else if (s.equals(Configurations.TxFeeType.CUSTOMIZED.name())) {
             return Configurations.TxFeeType.CUSTOMIZED;
         }
         // Default
         return Configurations.TxFeeType.LOW;
     }
-    static public void setNetwork(Context ctx, Configurations.Network network) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        prefs.edit().putString(NETWORK, network.name()).commit();
+
+    static void setTxFee(TxFee txFee) {
+        logger.debug("low:" + txFee.getLow() + " mid:" + txFee.getMid() + " high:" + txFee.getHigh());
+        prefs.edit().putLong(TX_FEE_LOW, txFee.getLow()).apply();
+        prefs.edit().putLong(TX_FEE_MID, txFee.getMid()).apply();
+        prefs.edit().putLong(TX_FEE_HIGH, txFee.getHigh()).apply();
+    }
+
+    public static TxFee getTxFee() {
+        return new TxFee(prefs.getLong(TX_FEE_LOW, Configurations.txFeeLow),
+                prefs.getLong(TX_FEE_MID, Configurations.txFeeMid),
+                prefs.getLong(TX_FEE_HIGH, Configurations.txFeeHigh));
+    }
+
+    static void setCustomizedTxFee(long satoshi) {
+        prefs.edit().putLong(CUSTOMIZED_TX_FEE, satoshi).apply();
+    }
+
+    public static long getCustomizedTxFee() {
+        return prefs.getLong(CUSTOMIZED_TX_FEE, 1000);
+    }
+
+    static void setFeeIncluded(boolean isChecked) {
+        prefs.edit().putBoolean(FEE_INCLUDED, isChecked).apply();
+    }
+
+    static boolean getFeeIncluded() {
+        return prefs.getBoolean(FEE_INCLUDED, false);
+    }
+
+    static void setUseFixAddress(boolean isChecked, String address) {
+        prefs.edit().putBoolean(USE_FIX_ADDRESS_CHECKED, isChecked).apply();
+        prefs.edit().putString(USE_FIX_ADDRESS_ADDR_STR, address).apply();
+    }
+
+    static boolean getUseFixAddressChecked() {
+        return prefs.getBoolean(USE_FIX_ADDRESS_CHECKED, false);
+    }
+
+    static String getUseFixAddressAddrString() {
+        return prefs.getString(USE_FIX_ADDRESS_ADDR_STR, "");
+    }
+
+    static void setNetwork(Configurations.Network network) {
+        prefs.edit().putString(NETWORK, network.name()).apply();
         // Update configuration
         Configurations.setNetwork(network);
     }
 
-    static public Configurations.Network getNetwork(Context ctx) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+    private static Configurations.Network getNetwork() {
         String s = prefs.getString(NETWORK, Configurations.network.name());
         if (s.equals(Configurations.Network.MAINNET.name())) {
             return Configurations.Network.MAINNET;
@@ -92,60 +131,11 @@ public class Preferences {
         return Configurations.Network.TESTNET;
     }
 
-    static public boolean isTestnet(Context ctx) {
-        return (getNetwork(ctx) == Configurations.Network.TESTNET);
+    public static boolean isTestnet() {
+        return (getNetwork() == Configurations.Network.TESTNET);
     }
 
-    static public void setTxFee(Context ctx, TxFee txFee) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        logger.debug("low:" + txFee.getLow() + " mid:" + txFee.getMid() + " high:" + txFee.getHigh());
-        prefs.edit().putLong(TX_FEE_LOW, txFee.getLow()).commit();
-        prefs.edit().putLong(TX_FEE_MID, txFee.getMid()).commit();
-        prefs.edit().putLong(TX_FEE_HIGH, txFee.getHigh()).commit();
-    }
-
-    static public TxFee getTxFee(Context ctx) {
-        Configurations.TxFeeType type = getTxFeeType(ctx);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        TxFee txFee = new TxFee(prefs.getLong(TX_FEE_LOW, Configurations.txFeeLow),
-                prefs.getLong(TX_FEE_MID, Configurations.txFeeMid),
-                prefs.getLong(TX_FEE_HIGH, Configurations.txFeeHigh));
-        return txFee;
-    }
-
-    static public void setCustomizedTxFee(Context ctx, long satoshi) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        prefs.edit().putLong(CUSTOMIZED_TX_FEE, satoshi).commit();
-    }
-
-    static public long getCustomizedTxFee(Context ctx) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        return prefs.getLong(CUSTOMIZED_TX_FEE, 1000);
-    }
-
-    static public void setFeeIncluded(Context ctx, boolean isChecked) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        prefs.edit().putBoolean(FEE_INCLUDED, isChecked).commit();
-    }
-
-    static public boolean getFeeIncluded(Context ctx) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        return prefs.getBoolean(FEE_INCLUDED, false);
-    }
-
-    static public void setUseFixAddress(Context ctx, boolean isChecked, String address) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        prefs.edit().putBoolean(USE_FIX_ADDRESS_CHECKED, isChecked).commit();
-        prefs.edit().putString(USE_FIX_ADDRESS_ADDR_STR, address).commit();
-    }
-
-    static public boolean getUseFixAddressChecked(Context ctx) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        return prefs.getBoolean(USE_FIX_ADDRESS_CHECKED, false);
-    }
-
-    static public String getUseFixAddressAddrString(Context ctx) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        return prefs.getString(USE_FIX_ADDRESS_ADDR_STR, "");
+    public interface PreferenceInterce {
+        void onPreferenceChanged();
     }
 }

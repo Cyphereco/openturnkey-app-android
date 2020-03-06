@@ -21,9 +21,11 @@ import android.widget.Toast;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.core.protocol.SessionData;
+import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 
+import org.apache.log4j.chainsaw.Main;
 import org.slf4j.Logger;
 
 public class ActivityKeyInformation extends AppCompatActivity {
@@ -185,7 +187,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
         if (clipboard != null) {
             clipboard.setPrimaryClip(clip);
         }
-        Toast.makeText(getApplicationContext(), label + " is copied", Toast.LENGTH_SHORT).show();
+        AlertPrompt.info(getApplicationContext(), label + " is copied");
     }
 
     private void showQRCode(String dialogTitle, String text) {
@@ -207,5 +209,11 @@ public class ActivityKeyInformation extends AppCompatActivity {
                     }
                 })
                 .show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MainActivity.setCurrentActivity(getClass().getName());
     }
 }

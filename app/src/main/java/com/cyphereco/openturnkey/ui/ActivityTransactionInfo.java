@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
+import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import java.text.SimpleDateFormat;
@@ -88,8 +89,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         }
 
         if (null == item) {
-            Toast.makeText(this, getString(R.string.transaction_not_found),
-                    Toast.LENGTH_LONG).show();
+            AlertPrompt.alert(this, getString(R.string.transaction_not_found));
             finishActivity();
         }
         else {
@@ -190,9 +190,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                                 }
 
                                 if (!mOtkDB.deleteTransactionById(oriItem.getId())) {
-                                    Toast.makeText(getApplicationContext(),
-                                            getString(R.string.failed_to_delete),
-                                            Toast.LENGTH_LONG).show();
+                                    AlertPrompt.alert(getApplicationContext(), getString(R.string.failed_to_delete));
                                     return;
                                 }
 
@@ -419,5 +417,11 @@ public class ActivityTransactionInfo extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MainActivity.setCurrentActivity(getClass().getName());
     }
 }

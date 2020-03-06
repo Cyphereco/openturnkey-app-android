@@ -35,6 +35,7 @@ public class DialogTransactionFee extends AppCompatDialogFragment {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        if (listener == null) return;;
                         View v = getView();
                         int selected = rgTransactionFee.getCheckedRadioButtonId();
                         try {
@@ -71,13 +72,15 @@ public class DialogTransactionFee extends AppCompatDialogFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
+        if (listener != null) return;
+
         try {
             listener = (DialogTransactionFeeListener) context;
-        } catch (Exception e) {
-            throw new ClassCastException(context.toString() +
-                    "must implement DialogTransactionFeeListener");
-        }
+        } catch (Exception ignored) { }
+    }
 
+    public void setDialogTransactionFeeListener(DialogTransactionFeeListener listener) {
+        this.listener = listener;
     }
 
     public interface DialogTransactionFeeListener {

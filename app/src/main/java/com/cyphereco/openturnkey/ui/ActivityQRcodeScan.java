@@ -19,7 +19,7 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 import com.cyphereco.openturnkey.R;
 
-public class QRcodeScanActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler {
+public class ActivityQRcodeScan extends AppCompatActivity implements ZXingScannerView.ResultHandler {
 
     private static final int ZXING_CAMERA_PERMISSION = 1;
 

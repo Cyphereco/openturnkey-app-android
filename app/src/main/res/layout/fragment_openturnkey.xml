@@ -10,16 +10,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="32dp"
         android:contentDescription="@string/read_nfc"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.4"
-        app:srcCompat="@drawable/ic_read_nfc_foreground" />
+        app:layout_constraintVertical_bias="0.35000002"
+        app:srcCompat="@mipmap/ic_cyphereco_logo_foreground" />
 
     <TextView
         android:id="@+id/text_tap_otk"
@@ -28,7 +28,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:text="@string/tap_openturnkey"
+        android:text="@string/_openturnkey"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -63,42 +63,6 @@
         app:layout_constraintStart_toEndOf="@+id/text_nfc_comm_type"
         app:layout_constraintTop_toTopOf="@+id/text_nfc_comm_type" />
 
-    <TextView
-        android:id="@+id/count_down_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="15"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display3"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_nfc_comm_type" />
-
-    <ImageView
-        android:id="@+id/icon_success"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="32dp"
-        android:contentDescription="@string/command_executed_successfully"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_nfc_comm_type"
-        app:srcCompat="@drawable/ic_check_circle_green_24dp" />
-
-    <TextView
-        android:id="@+id/nfc_write_result"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/command_executed_successfully"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/icon_success" />
-
     <Button
         android:id="@+id/button_otk_cancel"
         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -110,6 +74,22 @@
         android:text="@string/cancel"
         android:textSize="16sp"
         android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_nfc_comm_type" />
+
+    <Button
+        android:id="@+id/btn_nfc_read"
+        android:layout_width="320dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/custom_toast_info_round"
+        android:backgroundTint="#90CAF9"
+        android:text="Make Request"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_nfc_comm_type" />

@@ -8,6 +8,7 @@
     <uses-permission android:name="android.hardware.camera.autofocus" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <uses-feature
         android:name="android.hardware.nfc"
@@ -15,34 +16,35 @@
 
     <application
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_cyphereco_color_logo"
         android:label="@string/_app_name"
         android:logo="@mipmap/ic_cyphereco_color_logo_foreground"
         android:roundIcon="@mipmap/ic_cyphereco_color_logo_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:fullBackupContent="@xml/backup_descriptor">
+        android:theme="@style/AppTheme">
 
         <activity
-            android:name=".ui.SplashActivity"
+            android:name=".ui.ActivitySplash"
+            android:configChanges="orientation"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
             android:theme="@style/SplashTheme"
+            android:windowSoftInputMode="adjustNothing">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.MainActivity"
             android:configChanges="orientation"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".ui.MainActivity"
-            android:configChanges="orientation"
-            android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustNothing">
-            <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data
@@ -55,40 +57,51 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.OpenturnkeyInfoActivity"
+        <activity
+            android:name=".ui.ActivityOpenturnkeyInfo"
             android:configChanges="orientation"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustNothing"/>
+            android:windowSoftInputMode="adjustNothing" />
 
-        <activity android:name=".ui.SignValidateMessageActivity"
+        <activity
+            android:name=".ui.ActivitySignValidateMessage"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
             android:launchMode="singleInstance"
-            android:windowSoftInputMode="adjustNothing"/>
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustNothing" />
 
-        <activity android:name=".ui.QRcodeScanActivity"
+        <activity
+            android:name=".ui.ActivityQRcodeScan"
             android:label="@string/title_activity_qrcode_scan"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustNothing"/>
-
-        <activity android:name=".ui.ActivityAddressEditor"
-            android:label="Add Contact"
-            android:screenOrientation="portrait"
             android:launchMode="singleInstance"
-            android:windowSoftInputMode="adjustNothing"/>
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustNothing" />
 
-        <activity android:name=".ui.ChooseKeyActivity"
+        <activity
+            android:name=".ui.ActivityAddressEditor"
+            android:label="Add Contact"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustNothing" />
+
+        <activity
+            android:name=".ui.ActivityChooseKey"
             android:configChanges="orientation"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.ActivityKeyInformation"
-            android:windowSoftInputMode="adjustNothing"
-            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.ActivityKeyInformation"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustNothing" />
 
-        <activity android:name=".ui.ActivityTransactionInfo"
-            android:windowSoftInputMode="adjustNothing"
-            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.ActivityTransactionInfo"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustNothing" />
 
         <meta-data
             android:name="preloaded_fonts"
