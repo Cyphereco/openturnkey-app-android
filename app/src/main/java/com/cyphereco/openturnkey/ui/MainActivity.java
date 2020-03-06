@@ -57,15 +57,11 @@ import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity
         implements
-//        DialogLocalCurrency.DialogLocalCurrecyListener,
-//        DialogTransactionFee.DialogTransactionFeeListener,
         DialogAuthByPin.DialogAuthByPinListener,
         DialogAddNote.DialogAddNoteListener,
         DialogSetPIN.DialogSetPINListener,
-        DialogClearHistory.DialogClearHistoryListener,
         FragmentPay.FragmentPayListener,
         FragmentOtk.FragmentOtkListener {
-//        FragmentAddrbook.FragmentAddrbookListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
     static Logger logger = Log4jHelper.getLogger(TAG);
@@ -126,17 +122,11 @@ public class MainActivity extends AppCompatActivity
     private Otk.Operation mOp = Otk.Operation.OTK_OP_NONE;
     private boolean mIsOpInProcessing = false;
     private String mRecipientAddress = "";
-//    private String mBtcAmount = "";
-//    private String mLcAmount = "";
-//    private boolean mIsUseAllFundsChecked = false;
 
-//    private boolean mSwitchToOTKFragment = false;
     private boolean mWaitingAddressFromAddrEditor = false;
     private String mAddressEditorTempAlias = "";
     private String mAddressEditorTempAddress = "";
     private long mAddressEditorDBId = 0;
-//    private boolean mSwitchToAddressBookFragment = false;
-//    private boolean mSwitchToPayFragment = false;
     private static boolean mEnableReadOtk = false;
 
     public static final int FRAGMENT_PAY = R.id.nav_menu_pay;
@@ -190,79 +180,22 @@ public class MainActivity extends AppCompatActivity
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                        // mSelectedFragment null for the first show
-//                    if (bottomNav.getSelectedItemId() == menuItem.getItemId() && mSelectedFragment != null) {
-//                        return true;
-//                    }
-
-//                    if (mIsOpInProcessing) {
-//                        // Cache selected item
-//                        if (dialogConfirmOperationAndWaitResult(getString(R.string.terminate_op),
-//                                String.format(getString(R.string.confirm_terminate_op), mOp.toString()),
-//                                getString(R.string.terminate))) {
-//                            logger.debug("Termination confirmed.");
-//                        } else {
-//                            logger.debug("Termination cancelled!");
-//                            return false;
-//                        }
-//                    }
-
                         Toolbar toolbar = findViewById(R.id.toolbar);
                         Menu menu = toolbar.getMenu();
                         menu.clear();
 
                         switch (menuItem.getItemId()) {
                             case FRAGMENT_HISTORY:
-//                                Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.history));
-//                                getMenuInflater().inflate(R.menu.menu_history, menu);
                                 mSelectedFragment = mFragmentHistory;
-//                            clearCachedPayFragmentData();
-//                            mOp = Otk.Operation.OTK_OP_NONE;
                                 break;
                             case FRAGMENT_ADDRBOOK:
-//                                Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.addresses));
-//                                getMenuInflater().inflate(R.menu.menu_addresses, menu);
-//                                setAddressSearchView(menu);
                                 mSelectedFragment = mFragmentAddrbook;
-//                            clearCachedPayFragmentData();
-//                            mOp = Otk.Operation.OTK_OP_NONE;
                                 break;
                             case FRAGMENT_OTK:
-//                                Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string._openturnkey));
-//                                getMenuInflater().inflate(R.menu.menu_openturnkey, menu);
-//                            if (mOp == Otk.Operation.OTK_OP_NONE) {
-//                                mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                            }
-//                            mSelectedFragment = FragmentOtk.newInstance(mOp);
                                 mSelectedFragment = mFragmentOtk;
-//                            mOtk.setOperation(mOp);
-//                            clearCachedPayFragmentData();
                                 break;
                             default:
-                                // Pay fragment
-//                                Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.pay));
-//                                getMenuInflater().inflate(R.menu.menu_pay, menu);
-//                                updatePayConfig(menu);
-                                // Restore cached data
-//                                mFixedAddress = Preferences.getUseFixAddressAddrString();
-//                                if (useFixAddr && (!mFixedAddress.equals(mRecipientAddress))) {
-//                                    if (!mRecipientAddress.isEmpty()) {
-//                                        new AlertDialog.Builder(MainActivity.this)
-//                                                .setMessage("Fix address is enabled.")
-//                                                .setNegativeButton(R.string.ok, null)
-//                                                .show();
-//                                    }
-//                                    mSelectedFragment = mFragmentPay;
-////                                mSelectedFragment = FragmentPay.newInstance(mFixedAddress, mBtcAmount,
-////                                        mLcAmount, mIsUseAllFundsChecked);
-//                                } else {
-//                                mSelectedFragment = FragmentPay.newInstance(mRecipientAddress, mBtcAmount,
-//                                        mLcAmount, mIsUseAllFundsChecked);
-                                    mSelectedFragment = mFragmentPay;
-//                                }
-//                                ((FragmentPay) mSelectedFragment).updateUseFixAddress(useFixAddr);
-//                                ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
-//                                mOp = Otk.Operation.OTK_OP_NONE;
+                                mSelectedFragment = mFragmentPay;
                                 break;
                         }
 
@@ -300,7 +233,8 @@ public class MainActivity extends AppCompatActivity
                         // Update rate
                         ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
                     }
-                } else if (type == OtkEvent.Type.TX_FEE_UPDATE) {
+                }
+                else if (type == OtkEvent.Type.TX_FEE_UPDATE) {
                     // Store to preference
                     Preferences.setTxFee(event.getTxFee());
                 } else if (type == OtkEvent.Type.APPROACH_OTK) {
@@ -722,20 +656,9 @@ public class MainActivity extends AppCompatActivity
                     // Notify the DialogReadOtk of the parsing result and close the dialog.
                     DialogReadOtk.updateReadOtkStatus(DialogReadOtk.READ_SUCCESS);
 
-//                    if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
-//                        logger.debug("OTK general information read");
-//                    }
-//                    else {
-//                        logger.debug("OTK request response read");
-//                    }
-//
-//                    if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_FAIL) {
-//                        AlertPrompt.alert(this, parseFailureReason(otkData.getOtkState().getFailureReason().getValue()));
-//                    }
-
-                /* There is an otk show result delay in DialogReadOtk,
-                    to start to a new activity, wait until the dialog closed.
-                 */
+                    /* There is an otk show result delay in DialogReadOtk,
+                        to start to a new activity, wait until the dialog closed.
+                     */
                     final OtkData _otkData = otkData;
                     new CountDownTimer(DialogReadOtk.SHOW_RESULT_DELAY +
                             DialogReadOtk.DISMISS_ANIMATION_TIME, 1000) {
@@ -755,8 +678,6 @@ public class MainActivity extends AppCompatActivity
                 DialogReadOtk.updateReadOtkStatus(DialogReadOtk.NOT_OPENTURNKEY);
                 AlertPrompt.info(this, getString(R.string.not_openturnkey));
             }
-
-//            mOtk.processNfcIntent(intent, null);
         }
     }
 
@@ -765,62 +686,8 @@ public class MainActivity extends AppCompatActivity
         Intent intent;
         int optionId = item.getItemId();
 
-//        if (mIsOpInProcessing && (optionId != R.id.menu_openturnkey_advance)) {
-//            if (dialogConfirmOperationAndWaitResult(getString(R.string.terminate_op),
-//                    String.format(getString(R.string.confirm_terminate_op), mOp.toString()),
-//                    getString(R.string.terminate))) {
-//                mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                mOtk.cancelOperation();
-//            } else {
-//                return false;
-//            }
-//        }
-
         switch (optionId) {
-            case R.id.menu_history_clear_history:
-                dialogClearHistory();
-                return true;
-//            case R.id.menu_pay_local_curreny:
-//                dialogLocalCurrency();
-//                return true;
-//            case R.id.menu_pay_transaction_fee:
-//                dialogTransactionFee();
-//                return true;
-//            case R.id.menu_pay_fee_included:
-//                includeFee = item.setChecked(!item.isChecked()).isChecked();
-//                Preferences.setFeeIncluded(includeFee);
-//                return true;
-//            case R.id.menu_pay_use_fix_address:
-//                if (mSelectedFragment instanceof FragmentPay) {
-//                    useFixAddr = ((FragmentPay) mSelectedFragment).processFixAddressClick(!item.isChecked());
-//                    item.setChecked(useFixAddr);
-//                    if (useFixAddr) {
-//                        mFixedAddress = ((FragmentPay) mSelectedFragment).getRecipientAddress();
-//                    } else {
-//                        mFixedAddress = "";
-//                    }
-//                    Preferences.setUseFixAddress(useFixAddr, mFixedAddress);
-//                }
-//                return true;
-//            case R.id.menu_pay_user_guide:
-//                String url = "https://openturnkey.com/guide";
-//                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-//                startActivity(browserIntent);
-//                return true;
-//            case R.id.menu_pay_about:
-//                dialogAbout();
-//                return true;
-            case R.id.menu_addresses_add:
-                intent = new Intent(this, ActivityAddressEditor.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                startActivity(intent);
-//                startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
-                return true;
             case R.id.menu_openturnkey_unlock:
-//                mOp = Otk.Operation.OTK_OP_UNLOCK;
-//                mOtk.setOperation(mOp);
-//                mIsOpInProcessing = true;
-//                ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
                 pushRequest(new OtkRequest(menuOptionToOtkCommand(optionId)));
                 dialogAuthByPin();
                 return true;
@@ -837,12 +704,6 @@ public class MainActivity extends AppCompatActivity
                     dialogSetPIN();
                     return true;
                 }
-//                else {
-//                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-//                    logger.debug("Choose key confirmation cancelled!");
-//                    return false;
-//                }
             case R.id.menu_openturnkey_choose_key:
                 // show confirm dialog
                 if (dialogConfirmOperationAndWaitResult(getString(R.string.warning),
@@ -855,12 +716,6 @@ public class MainActivity extends AppCompatActivity
                     startActivityForResult(intent, MainActivity.REQUEST_CODE_CHOOSE_KEY);
                     return true;
                 }
-//                else {
-//                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-//                    logger.debug("Choose key confirmation cancelled!");
-//                    return false;
-//                }
             case R.id.menu_openturnkey_sign_message:
                 intent = new Intent(this, ActivitySignValidateMessage.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -873,16 +728,6 @@ public class MainActivity extends AppCompatActivity
                         getString(R.string.understood))) {
                     pushRequest(new OtkRequest(menuOptionToOtkCommand(optionId)));
                     dialogAuthByPin();
-
-//                    readOtk();
-//                    mIsOpInProcessing = true;
-//                    if (mSelectedFragment instanceof FragmentOtk) {
-//                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-//                        mOp = Otk.Operation.OTK_OP_GET_KEY;
-//                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-
-//                        getKey();
-//                    }
                     return true;
                 } else {
                     mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
@@ -900,12 +745,6 @@ public class MainActivity extends AppCompatActivity
 //                    exportWifKey();
                     return true;
                 }
-//                else {
-//                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-//                    logger.debug("Choose key confirmation cancelled!");
-//                    return false;
-//                }
             case R.id.menu_openturnkey_reset:
                 if (dialogConfirmOperationAndWaitResult(getString(R.string.warning),
                         getString(R.string.reset_warning_message),
@@ -916,12 +755,6 @@ public class MainActivity extends AppCompatActivity
 //                    resetOtk();
                     return true;
                 }
-//                else {
-//                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-//                    logger.debug("Choose key confirmation cancelled!");
-//                    return false;
-//                }
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -956,48 +789,6 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
-    /* Implement DialogClearHistory callback */
-    @Override
-    public void onHistoryCleared() {
-        navToFragment(FRAGMENT_ADDRBOOK);
-        navToFragment(FRAGMENT_HISTORY);
-//            ((FragmentHistory) mSelectedFragment).refresh();
-    }
-
-//    /* Implement FragmentAddrbook callback */
-//    @Override
-//    public void onPayToAddress(String address) {
-//        mRecipientAddress = address;
-//        FragmentPay.setRecipientAddress(address);
-//        navToFragment(FRAGMENT_PAY);
-//    }
-
-//    public void setLocalCurrency(int localCurrency) {
-//        LocalCurrency lc = currencyToLocalCurrency(localCurrency);
-//        Preferences.setLocalCurrency(lc);
-//        if (mSelectedFragment instanceof FragmentPay) {
-//            // Update local currency
-//            ((FragmentPay) mSelectedFragment).updateLocalCurrency(lc);
-//        }
-//        // Update currency in option menu
-//        updatePayConfig(toolbarMenu);
-//    }
-
-//    public LocalCurrency currencyToLocalCurrency(int currency) {
-//        switch (currency) {
-//            case R.id.radio_cny:
-//                return LocalCurrency.LOCAL_CURRENCY_CNY;
-//            case R.id.radio_eur:
-//                return LocalCurrency.LOCAL_CURRENCY_EUR;
-//            case R.id.radio_jpy:
-//                return LocalCurrency.LOCAL_CURRENCY_JPY;
-//            case R.id.radio_twd:
-//                return LocalCurrency.LOCAL_CURRENCY_TWD;
-//            default:
-//                return LocalCurrency.LOCAL_CURRENCY_USD;
-//        }
-//    }
-
 
     public void addNote(String note) {
         logger.debug("note:" + note);
@@ -1007,10 +798,6 @@ public class MainActivity extends AppCompatActivity
             request.setData(note);
             dialogAuthByPin();
         }
-//        mOp = Otk.Operation.OTK_OP_WRITE_NOTE;
-//        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-//        mIsOpInProcessing = true;
-//        mOtk.setNote(note);
     }
 
     public void cancelAddNote() {
@@ -1027,10 +814,6 @@ public class MainActivity extends AppCompatActivity
             request.setData(pin);
             dialogAuthByPin();
         }
-//        mOp = Otk.Operation.OTK_OP_SET_PIN_CODE;
-//        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-//        mOtk.setPIN(pin);
-//        mIsOpInProcessing = true;
     }
 
     public void cancelSetPIN() {
@@ -1058,79 +841,6 @@ public class MainActivity extends AppCompatActivity
         navToFragment(FRAGMENT_PAY);
     }
 
-//    Configurations.TxFeeType toTxFee(int transactionFee) {
-//        switch (transactionFee) {
-//            case R.id.radio_custom:
-//                return Configurations.TxFeeType.CUSTOMIZED;
-//            case R.id.radio_high:
-//                return Configurations.TxFeeType.HIGH;
-//            case R.id.radio_mid:
-//                return Configurations.TxFeeType.MID;
-//            default:
-//                return Configurations.TxFeeType.LOW;
-//        }
-//    }
-
-//    public void setTransactionFee(int transactionFee) {
-//        // Store to preference
-//        Preferences.setTxFeeType(toTxFee(transactionFee));
-//        updatePayConfig(toolbarMenu);
-//    }
-
-//    public void setCustomizedTxFee(double txFee) {
-//        // Store to preference
-//        logger.debug("Customized fee:" + txFee);
-//        Preferences.setCustomizedTxFee(BtcUtils.btcToSatoshi(txFee));
-//        updatePayConfig(toolbarMenu);
-//    }
-
-
-//    public String transactionFeeToString(Configurations.TxFeeType txFeeType) {
-//        if (txFeeType == Configurations.TxFeeType.CUSTOMIZED) {
-//            return getString(R.string.customized_fees);
-//        }
-//        if (txFeeType == Configurations.TxFeeType.HIGH) {
-//            return getString(R.string.fees_high);
-//        }
-//        if (txFeeType == Configurations.TxFeeType.MID) {
-//            return getString(R.string.fees_mid);
-//        }
-//        return getString(R.string.fees_low);
-//    }
-
-//    public void updatePayConfig(Menu menu) {
-//        String str;
-//        MenuItem menuItem;
-//
-//        menuItem = menu.findItem(R.id.menu_pay_local_curreny);
-//        LocalCurrency lc = Preferences.getLocalCurrency();
-//        if (menuItem != null) {
-//            str = getString(R.string.local_currency) +
-//                    " (" + lc.toString() + ")";
-//            menuItem.setTitle(str);
-//        }
-//
-//        menuItem = menu.findItem(R.id.menu_pay_transaction_fee);
-//        Configurations.TxFeeType txFeeType = Preferences.getTxFeeType();
-//        if (menuItem != null) {
-//            str = getString(R.string.transaction_fee) +
-//                    " (" + transactionFeeToString(txFeeType) + ")";
-//            menuItem.setTitle(str);
-//        }
-//
-//        menuItem = menu.findItem(R.id.menu_pay_fee_included);
-//        includeFee = Preferences.getFeeIncluded();
-//        if (menuItem != null) {
-//            menuItem.setChecked(includeFee);
-//        }
-//
-//        menuItem = menu.findItem(R.id.menu_pay_use_fix_address);
-//        useFixAddr = Preferences.getUseFixAddressChecked();
-//        if (menuItem != null) {
-//            menuItem.setChecked(useFixAddr);
-//        }
-//    }
-
     public void onSignPaymentButtonClick(String to, double amount, String btcAmount, String lcAmount, boolean isAllFundsChecked) {
         logger.debug("Make payment:\nTo: " + to +
                 "\nBTC = " + btcAmount + "\nLocal currency = " + lcAmount +
@@ -1148,18 +858,10 @@ public class MainActivity extends AppCompatActivity
 
         // Cache recipient address and amount
         mRecipientAddress = to;
-//        mBtcAmount = btcAmount;
-//        mLcAmount = lcAmount;
-//        mIsUseAllFundsChecked = isAllFundsChecked;
     }
 
     public static void navToFragment(int fragmentId) {
         bottomNav.setSelectedItemId(fragmentId);
-
-//        // Update rate in case it's not updated
-//        if (mSelectedFragment instanceof FragmentPay) {
-//            ((FragmentPay) mSelectedFragment).updateCurrencyExchangeRate(mCurrencyExRate);
-//        }
     }
 
     public void onCancelButtonClick() {
@@ -1198,9 +900,6 @@ public class MainActivity extends AppCompatActivity
 
     private void clearCachedPayFragmentData() {
         mRecipientAddress = "";
-//        mBtcAmount = "";
-//        mLcAmount = "";
-//        mIsUseAllFundsChecked = false;
     }
 
     private void addTxToDb(Tx tx) {
@@ -1234,38 +933,7 @@ public class MainActivity extends AppCompatActivity
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ALIAS, alias);
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ADDR, address);
         startActivity(intent);
-//        startActivityForResult(intent, MainActivity.REQUEST_CODE_ADDRESS_EDIT);
     }
-
-//    private void setAddressSearchView(Menu menu) {
-//        SearchView searchView = (SearchView) menu.findItem(R.id.menu_addresses_search).getActionView();
-//        if (null != searchView) {
-//            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//                @Override
-//                public boolean onQueryTextSubmit(String query) {
-//                    logger.info("SearchView onQueryTextSubmit: " + query);
-//                    return false;
-//                }
-//
-//                @Override
-//                public boolean onQueryTextChange(String newText) {
-//                    logger.info("Filter Addresses contains ({})", newText);
-//                    if (mSelectedFragment instanceof FragmentAddrbook) {
-//                        ((FragmentAddrbook) mSelectedFragment).showAddressFilter(newText);
-//                    }
-//                    return false;
-//                }
-//            });
-//        }
-//    }
-
-//    private void getKey() {
-//        mOp = Otk.Operation.OTK_OP_GET_KEY;
-//        if (mSelectedFragment instanceof FragmentOtk) {
-//            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-//        }
-//        mOtk.setOperation(mOp);
-//    }
 
     private void processGetKeyEvent(OtkEvent event) {
         Intent intent;
@@ -1388,51 +1056,6 @@ public class MainActivity extends AppCompatActivity
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
-    /* Local functions */
-//    public void dialogLocalCurrency() {
-//        DialogLocalCurrency dialog = new DialogLocalCurrency();
-//        int localCurrencyId;
-//
-//        LocalCurrency lc = Preferences.getLocalCurrency();
-//        if (lc == LocalCurrency.LOCAL_CURRENCY_CNY) {
-//            localCurrencyId = R.id.radio_cny;
-//        } else if (lc == LocalCurrency.LOCAL_CURRENCY_EUR) {
-//            localCurrencyId = R.id.radio_eur;
-//        } else if (lc == LocalCurrency.LOCAL_CURRENCY_JPY) {
-//            localCurrencyId = R.id.radio_jpy;
-//        } else if (lc == LocalCurrency.LOCAL_CURRENCY_USD) {
-//            localCurrencyId = R.id.radio_usd;
-//        } else {
-//            localCurrencyId = R.id.radio_twd;
-//        }
-//        Bundle bundle = new Bundle();
-//        bundle.putInt("localCurrency", localCurrencyId);
-//        dialog.setArguments(bundle);
-//        dialog.show(getSupportFragmentManager(), "dialog");
-//    }
-
-//    public void dialogTransactionFee() {
-//        DialogTransactionFee dialog = new DialogTransactionFee();
-//
-//        Configurations.TxFeeType txFeeType = Preferences.getTxFeeType();
-//        int transactionFeeId;
-//        if (txFeeType == Configurations.TxFeeType.CUSTOMIZED) {
-//            transactionFeeId = R.id.radio_custom;
-//        } else if (txFeeType == Configurations.TxFeeType.HIGH) {
-//            transactionFeeId = R.id.radio_high;
-//        } else if (txFeeType == Configurations.TxFeeType.MID) {
-//            transactionFeeId = R.id.radio_mid;
-//        } else {
-//            transactionFeeId = R.id.radio_low;
-//        }
-//
-//        Bundle bundle = new Bundle();
-//        bundle.putInt("transactionFee", transactionFeeId);
-//        bundle.putLong("customizedFee", Preferences.getCustomizedTxFee());
-//        dialog.setArguments(bundle);
-//        dialog.show(getSupportFragmentManager(), "dialog");
-//    }
-
     public void dialogAuthByPin() {
         mDialogAuthByPin = new DialogAuthByPin();
         mDialogAuthByPin.setCancelable(false);
@@ -1444,11 +1067,6 @@ public class MainActivity extends AppCompatActivity
             mDialogAuthByPin.dismiss();
         }
     }
-
-//    public void dialogAbout() {
-//        DialogAbout dialog = new DialogAbout();
-//        dialog.show(getSupportFragmentManager(), "dialog");
-//    }
 
     private void showProgressDialog(String title) {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
@@ -1626,11 +1244,6 @@ public class MainActivity extends AppCompatActivity
          */
         //bundle.putString("failureReason", getString(R.string.try_later));
         dialog.setArguments(bundle);
-        dialog.show(getSupportFragmentManager(), "dialog");
-    }
-
-    public void dialogClearHistory() {
-        DialogClearHistory dialog = new DialogClearHistory();
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 

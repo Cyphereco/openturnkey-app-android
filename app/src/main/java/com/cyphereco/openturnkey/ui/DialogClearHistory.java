@@ -51,13 +51,16 @@ public class DialogClearHistory extends AppCompatDialogFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
+        if (mListener != null) return;
+
         try {
             mListener = (DialogClearHistoryListener) context;
-        } catch (Exception e) {
-            throw new ClassCastException(context.toString() +
-                    "must implement DialogClearHistoryListener");
-        }
+        } catch (Exception ignored) { }
 
+    }
+
+    public void setDialogClearHistoryListener(DialogClearHistoryListener listener) {
+        this.mListener = listener;
     }
 
     public interface DialogClearHistoryListener {

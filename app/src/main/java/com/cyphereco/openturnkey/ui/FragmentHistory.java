@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -128,5 +129,21 @@ public class FragmentHistory extends FragmentExtOtkData {
         super.onCreateOptionsMenu(menu, inflater);
         menu.clear();
         inflater.inflate(R.menu.menu_history, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.menu_history_clear_history) {
+            DialogClearHistory dialog = new DialogClearHistory();
+            dialog.setDialogClearHistoryListener(new DialogClearHistory.DialogClearHistoryListener() {
+                @Override
+                public void onHistoryCleared() {
+                    updateTransactionDataset();
+                }
+            });
+            dialog.show(getFragmentManager(), "dialog");
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
