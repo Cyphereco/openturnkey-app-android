@@ -57,14 +57,11 @@ public class NfcHandler {
                 records[RECORD_REQUET_TYPE_COMMAND] = NdefRecord.createTextRecord("en", request.getCommand());
                 records[RECORD_REQUET_TYPE_DATA] = NdefRecord.createTextRecord("en", request.getData());
                 records[RECORD_REQUET_TYPE_OPTION] = NdefRecord.createTextRecord("en", request.getOption());
-//                for (int i = 0; i < NUM_OF_REQUET_RECORDS; i++) {
-//                    logger.debug("Request Record[" + i + "]:\n" + new String(records[i].getPayload()).substring(3));
-//                }
+
                 try {
                     ndef.connect();
                     ndef.writeNdefMessage(new NdefMessage(records));
                     ndef.close();
-
                     logger.debug("OTK request sent.");
                     return request.getSessionId();
                 } catch (IOException | FormatException | IllegalStateException e) {

@@ -740,7 +740,6 @@ public class MainActivity extends AppCompatActivity
                         getString(R.string.export_wif_warning_message),
                         getString(R.string.understood))) {
                     pushRequest(new OtkRequest(menuOptionToOtkCommand(optionId)));
-                    dialogAuthByPin();
 
 //                    exportWifKey();
                     return true;
@@ -750,7 +749,6 @@ public class MainActivity extends AppCompatActivity
                         getString(R.string.reset_warning_message),
                         getString(R.string.understood))) {
                     pushRequest(new OtkRequest(menuOptionToOtkCommand(optionId)));
-                    dialogAuthByPin();
 
 //                    resetOtk();
                     return true;
@@ -823,15 +821,14 @@ public class MainActivity extends AppCompatActivity
         ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
     }
 
+    public static void clearRequest() {
+        while (otkRequestQueue.size() > 0) otkRequestQueue.poll();
+    }
+
     public void authByPin(String pin) {
         logger.debug("pin:" + pin);
         OtkRequest request = peekRequest();
         if (request != null) request.setPin(pin);
-        mOtk.setPinForOperation(pin);
-        OtkRequest req = otkRequestQueue.peek();
-        if (req != null) {
-            req.setPin(pin);
-        }
     }
 
     public void cancelAuthByPin() {
@@ -1255,13 +1252,19 @@ public class MainActivity extends AppCompatActivity
             }
         }
         else if (requestCode == MainActivity.REQUEST_CODE_CHOOSE_KEY) {
+            if (intent == null) return;
             String keyPath = intent.getStringExtra(KEY_CHOOSE_KEY);
-            logger.debug("Set Key Path: {}", keyPath);
-            OtkRequest request = otkRequestQueue.peek();
+            if (keyPath != null && keyPath.length() > 0) {
+                String[] strList = keyPath.split(",");
+                if (strList.length == 5) {
+                    logger.debug("Set Key Path: {}", keyPath);
+                    OtkRequest request = otkRequestQueue.peek();
 
-            if (request != null && request.getCommand().equals(Command.SET_KEY.toString())) {
-                request.setData(keyPath);
-                dialogAuthByPin();
+                    if (request != null && request.getCommand().equals(Command.SET_KEY.toString())) {
+                        request.setData(keyPath);
+                        dialogAuthByPin();
+                    }
+                }
             }
         }
     }
@@ -1378,6 +1381,7 @@ public class MainActivity extends AppCompatActivity
     }
     
     public static void pushRequest(OtkRequest request) {
+        clearRequest();
         otkRequestQueue.add(request);
         logger.debug("Push a request({}) of {} requests", request.getCommand(), otkRequestQueue.size());
     }
