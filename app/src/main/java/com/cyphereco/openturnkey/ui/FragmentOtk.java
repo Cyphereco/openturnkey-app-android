@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.OtkData;
+import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkCommand;
 import com.cyphereco.openturnkey.core.protocol.OtkRequest;
@@ -73,9 +74,10 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        if (hasRequest() && peekRequest().getCommand().equals(Command.RESET.toString())) {
+        if (hasRequest() && peekRequest().getCommand().equals(Command.RESET.toString()) &&
+        peekRequest().getSessionId().length() > 0) {
             DialogReadOtk.updateReadOtkStatus(DialogReadOtk.READ_SUCCESS);
-
+            showStatusDialog(getString(R.string.reset_success), getString(R.string.reset_step_intro));
         }
     }
 
@@ -159,8 +161,8 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                         AlertPrompt.info(getContext(), msg);
                     }
                 } else {
-                    AlertPrompt.alert(getContext(), "Request failed." +
-                            "\n" + "Reason" + ":\n" +
+                    AlertPrompt.alert(getContext(), getString(R.string.request_fail) +
+                            "\n" + getString(R.string.reason) + ": " +
                             parseFailureReason(otkData.getFailureReason()));
                 }
             }
@@ -305,5 +307,15 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
             default:
                 return desc;
         }
+    }
+
+    private void showStatusDialog(String title, String message) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+
+        alertDialogBuilder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(R.string.ok, null)
+                .setCancelable(false)
+                .show();
     }
 }

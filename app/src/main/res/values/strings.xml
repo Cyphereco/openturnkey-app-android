@@ -213,5 +213,7 @@
     <string name="approach_openturnkey_to_the_nfc_reader">Approach OpenTurnKey to the NFC reader.</string>
     <string name="request_sent">Request has been sent.</string>
     <string name="not_valid_openturnkey">Not a valid OpenTurnKey! Do not remove OpenTurnKey until reading completed.</string>
+    <string name="request_fail">Request Fail</string>
+    <string name="reason">Reason</string>
 
 </resources>

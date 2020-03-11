@@ -30,7 +30,8 @@ public class AlertPrompt {
         Toast toast = Toast.makeText(context, msg, Toast.LENGTH_LONG);
         TextView tv = toast.getView().findViewById(android.R.id.message);
         tv.setTextColor(Color.BLACK);
-        tv.setTextSize(25);
+        tv.setTextSize(22);
+        tv.setMinWidth(200);
         tv.setTypeface(tv.getTypeface(), Typeface.BOLD);
         toast.getView().setBackgroundResource(decor);
         toast.show();

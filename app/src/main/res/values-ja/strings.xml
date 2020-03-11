@@ -195,4 +195,6 @@
     <string name="approach_openturnkey_to_the_nfc_reader">OpenTurnKeyをNFCリーダーに近づけます</string>
     <string name="not_valid_openturnkey">有効なOpenTurnKeyではありません</string>
     <string name="request_sent">リクエストが送信されました</string>
+    <string name="request_fail">リクエスト失敗</string>
+    <string name="reason">理由</string>
 </resources>

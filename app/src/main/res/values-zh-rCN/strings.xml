@@ -195,4 +195,6 @@
     <string name="approach_openturnkey_to_the_nfc_reader">将OpenTurnKey靠近NFC读写器</string>
     <string name="not_valid_openturnkey">不是有效的OpenTurnKey</string>
     <string name="request_sent">请求已发送</string>
+    <string name="request_fail">请求失败</string>
+    <string name="reason">原因</string>
 </resources>
