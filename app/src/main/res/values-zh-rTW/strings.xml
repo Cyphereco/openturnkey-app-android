@@ -164,7 +164,7 @@
     <string name="need_fp_preauth">PIN碼未設定, 請先使用指紋認證完成PIN碼設定!</string>
     <string name="wallet_import_format_key">錢包導入格式密鑰</string>
     <string name="understood">我已瞭解!</string>
-    <string name="reset_warning_message">重置OpenTurnKey將會擦除已登錄的指紋，清楚PIN碼設定，並重新選擇新的隨機密鑰。如果您沒有當前密鑰的備份，您將失去對當前資金的存取，請特別注意！</string>
+    <string name="reset_warning_message">重置OpenTurnKey將會擦除已登錄的指紋，清除PIN碼設定，並重新選擇新的隨機密鑰，如果您沒有當前密鑰的備份，您將失去對當前資金的存取，請特別注意！</string>
     <string name="export_wif_warning_message">如非必要，請不要匯出WIF密鑰！  WIF密鑰是擁有存取當前資金完整權限的密鑰。如果您將密鑰匯出，請確保您的密鑰保管於安全的場所，否則您可能會丟失您的資金。</string>
     <string name="pin_code_warning_message">設置PIN碼可以保障您的OpenTurnKey在指紋驗證功能發生問題時，仍然保有一個存取密鑰的備援方法，但多數情況下，如果指紋驗證功能正常，建議您優先使用指紋認證，如要使用PIN碼認證，請僅在信任的安全設備上使用。</string>
     <string name="full_pubkey_info_warning">完整公鑰資訊提供用戶於驗證OpenTurnKey真實性。一個真實的OpenTurnKey應該允許用戶選取任一第五層非强化導出密鑰並可以使用外部工具驗證。公鑰本身并不能用來簽署交易或推導私鑰，但仍建議您將此資訊保存於安全的場所。</string>

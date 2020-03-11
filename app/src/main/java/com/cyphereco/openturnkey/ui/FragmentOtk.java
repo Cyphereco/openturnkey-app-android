@@ -1,6 +1,8 @@
 package com.cyphereco.openturnkey.ui;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -9,6 +11,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -18,10 +23,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
+import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.protocol.Command;
@@ -31,13 +38,17 @@ import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 
+import java.util.Objects;
+
 import static com.cyphereco.openturnkey.ui.MainActivity.KEY_OTK_DATA;
+import static com.cyphereco.openturnkey.ui.MainActivity.readOtk;
 
 public class FragmentOtk extends FragmentExtendOtkViewPage {
 
     private final int AUTO_DISMISS_MILLIS = 30 * 1000;
     private static CountDownTimer timerRequestDismiss = null;
     private static TextView tvRequestDesc;
+    private static CheckBox cbUsePin;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,11 +63,36 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
 
         Button btnNfcRead = view.findViewById(R.id.btn_nfc_read);
         tvRequestDesc = view.findViewById(R.id.text_request_desc);
+        cbUsePin = view.findViewById(R.id.checkbox_use_pin);
 
         btnNfcRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dismissTimer();
+                if (hasRequest()) {
+                    final OtkRequest request = peekRequest();
+                    if ((cbUsePin.getVisibility() == View.VISIBLE && cbUsePin.isChecked())
+                            || request.getCommand().equals(Command.UNLOCK.toString())) {
+                        DialogAuthByPin dialogAuthByPin = new DialogAuthByPin();
+                        dialogAuthByPin.setListener(new DialogAuthByPin.DialogAuthByPinListener() {
+                            @Override
+                            public void setPin(String pin) {
+                                request.setPin(pin);
+                                DialogReadOtk dialogReadOtk = new DialogReadOtk();
+                                dialogReadOtk.setOnCanelListener(new DialogReadOtk.dialogReadOtkListener() {
+                                    @Override
+                                    public void onCancel() {
+                                        clearRequest();
+                                    }
+                                });
+                                dialogReadOtk.show(getFragmentManager(), "ReadOtk");
+                            }
+                        });
+                        dialogAuthByPin.show(getFragmentManager(), "AuthByPin");
+                        return;
+                    }
+                }
+
                 DialogReadOtk dialogReadOtk = new DialogReadOtk();
                 dialogReadOtk.setOnCanelListener(new DialogReadOtk.dialogReadOtkListener() {
                     @Override
@@ -74,10 +110,16 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        if (hasRequest() && peekRequest().getCommand().equals(Command.RESET.toString()) &&
-        peekRequest().getSessionId().length() > 0) {
-            DialogReadOtk.updateReadOtkStatus(DialogReadOtk.READ_SUCCESS);
-            showStatusDialog(getString(R.string.reset_success), getString(R.string.reset_step_intro));
+        if (hasRequest()) {
+            OtkRequest request = peekRequest();
+            if (peekRequest().getSessionId().length() > 0) {
+                // the request has been sent
+                if (request.getCommand().equals(Command.RESET.toString())) {
+                    // a reset command needs no response, when it's sent, the request is completed
+                    DialogReadOtk.updateReadOtkStatus(DialogReadOtk.READ_SUCCESS);
+                    showStatusDialog(getString(R.string.reset_success), getString(R.string.reset_step_intro));
+                }
+            }
         }
     }
 
@@ -128,11 +170,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                         new AlertDialog.Builder(getContext())
                                 .setTitle(getString(R.string.export_private_key))
                                 .setView(v)
-                                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                    }
-                                })
+                                .setPositiveButton(R.string.ok, null)
                                 .show();
                     } else {
                         String msg;
@@ -184,47 +222,109 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
         int optionId = item.getItemId();
         clearRequest();
 
+        cbUsePin.setVisibility(View.INVISIBLE);
+        cbUsePin.setChecked(false);
+
+        DialogConfirmationRequest dialog = new DialogConfirmationRequest(
+                Objects.requireNonNull(getContext()),
+                getString(R.string.warning),
+                "",
+                true);
+
         switch (optionId) {
             case R.id.menu_openturnkey_set_pin:
-//                dialogSetPinReminder();
-//                dialogSetPIN();
-                tvRequestDesc.setText(R.string.set_pin_code);
-                pushRequest(new OtkRequest(Command.SET_PIN.toString(), "99999999"));
+                dialog.setMessage(getString(R.string.pin_code_warning_message));
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                    @Override
+                    public void onConfirmed() {
+                        DialogSetPIN dialog = new DialogSetPIN();
+                        dialog.setListener(new DialogSetPIN.DialogSetPINListener() {
+                            @Override
+                            public void setPin(String pin) {
+                                cbUsePin.setVisibility(View.VISIBLE);
+                                tvRequestDesc.setText(R.string.set_pin_code);
+                                pushRequest(new OtkRequest(Command.SET_PIN.toString(), pin));
+                            }
+                        });
+                        dialog.show(getActivity().getSupportFragmentManager(), "dialog");
+                    }
+                });
+                dialog.show();
                 break;
             case R.id.menu_openturnkey_get_key:
-//                dialogShowPublicKeyReminder();
-                tvRequestDesc.setText(R.string.full_pubkey_information);
-                pushRequest(new OtkRequest(Command.SHOW_KEY.toString()));
+                dialog.setMessage(getString(R.string.full_pubkey_info_warning));
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                    @Override
+                    public void onConfirmed() {
+                        cbUsePin.setVisibility(View.VISIBLE);
+                        tvRequestDesc.setText(R.string.full_pubkey_information);
+                        pushRequest(new OtkRequest(Command.SHOW_KEY.toString()));
+                    }
+                });
+                dialog.show();
                 break;
             case R.id.menu_openturnkey_set_note:
-                // dialogSetNote();
-                tvRequestDesc.setText(R.string.write_note);
-                pushRequest(new OtkRequest(Command.SET_NOTE.toString(), "Hello"));
+                DialogAddNote dialogAddNote = new DialogAddNote();
+                dialogAddNote.setListener(new DialogAddNote.DialogAddNoteListener() {
+                    @Override
+                    public void addNote(String note) {
+                        cbUsePin.setVisibility(View.VISIBLE);
+                        tvRequestDesc.setText(R.string.write_note);
+                        pushRequest(new OtkRequest(Command.SET_NOTE.toString(), note));
+                    }
+                });
+                dialogAddNote.show(getActivity().getSupportFragmentManager(), "dialog");
                 break;
             case R.id.menu_openturnkey_sign_message:
-                Intent intent = new Intent(getContext(), ActivitySignValidateMessage.class);
+                intent = new Intent(getContext(), ActivitySignValidateMessage.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 break;
             case R.id.menu_openturnkey_choose_key:
+                dialog.setMessage(getString(R.string.choose_key_warning_message));
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                    @Override
+                    public void onConfirmed() {
+                        Intent intent = new Intent(getContext(), ActivityChooseKey.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(intent);
 
-                tvRequestDesc.setText(R.string.choose_key);
-                pushRequest(new OtkRequest(Command.SET_PIN.toString(), "2,4,6,8,10"));
+                        cbUsePin.setVisibility(View.VISIBLE);
+                        tvRequestDesc.setText(R.string.choose_key);
+                        pushRequest(new OtkRequest(Command.SET_PIN.toString(), "2,4,6,8,10"));
+                    }
+                });
+                dialog.show();
                 break;
             case R.id.menu_openturnkey_unlock:
                 tvRequestDesc.setText(R.string.unlock);
                 pushRequest(new OtkRequest(Command.UNLOCK.toString()));
                 break;
             case R.id.menu_openturnkey_reset:
-                tvRequestDesc.setText(R.string.reset);
-                pushRequest(new OtkRequest(Command.RESET.toString()));
+                dialog.setMessage(getString(R.string.reset_warning_message));
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                    @Override
+                    public void onConfirmed() {
+                        tvRequestDesc.setText(R.string.reset);
+                        pushRequest(new OtkRequest(Command.RESET.toString()));
+                    }
+                });
+                dialog.show();
                 break;
             case R.id.menu_openturnkey_export_wif_key:
-                tvRequestDesc.setText(R.string.export_private_key);
-                pushRequest(new OtkRequest(Command.EXPORT_WIF_KEY.toString()));
+                dialog.setMessage(getString(R.string.export_wif_warning_message));
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                    @Override
+                    public void onConfirmed() {
+                        tvRequestDesc.setText(R.string.export_private_key);
+                        pushRequest(new OtkRequest(Command.EXPORT_WIF_KEY.toString()));
+                    }
+                });
+                dialog.show();
                 break;
             default:
                 tvRequestDesc.setText(R.string.read_general_information);
@@ -256,6 +356,8 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
     @Override
     protected void clearRequest() {
         super.clearRequest();
+        cbUsePin.setVisibility(View.INVISIBLE);
+        cbUsePin.setChecked(false);
         tvRequestDesc.setText(R.string.read_general_information);
     }
 
@@ -273,16 +375,6 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
             }
         };
         timerRequestDismiss.start();
-    }
-
-    private void dialogAddNote() {
-        DialogAddNote dialog = new DialogAddNote();
-        dialog.show(getActivity().getSupportFragmentManager(), "dialog");
-    }
-
-    private void dialogSetPIN() {
-        DialogSetPIN dialog = new DialogSetPIN();
-        dialog.show(getActivity().getSupportFragmentManager(), "dialog");
     }
 
     public String parseFailureReason(String desc) {
@@ -317,5 +409,13 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 .setPositiveButton(R.string.ok, null)
                 .setCancelable(false)
                 .show();
+    }
+
+    AlertDialog.Builder confirmationDialogBuilder(String title, String message) {
+        return new AlertDialog.Builder(getContext())
+                .setTitle(title)
+                .setMessage(message)
+                .setNegativeButton(R.string.cancel, null)
+                .setCancelable(true);
     }
 }
