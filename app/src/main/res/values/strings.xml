@@ -35,7 +35,7 @@
     <string name="search">Search</string>
     <string name="auth_with_pin">Authorization with PIN Code</string>
     <string name="set_pin_code">Set PIN Code</string>
-    <string name="full_pubkey_information">Full Public Key Information</string>
+    <string name="full_pubkey_information">Show Full Public Key Information</string>
     <string name="about">About</string>
     <string name="use_fix_address">Use Fix Address</string>
     <string name="set_key">Choose Key</string>
@@ -205,8 +205,13 @@
     <string name="amount_fees_included">Amount (Transaction Fees Included)</string>
     <string name="disable_fix_addr_first">Please disable using fix address first.</string>
     <string name="cannot_change_addr">Cannot Change Address</string>
-    <string name="no_transaction">There is no transaction.</string>
     <string name="fail_reason">Fail Reason</string>
-    <string name="alias_existed">Alias existed alread, please enter a new alias.</string>
+    <string name="alias_exists">Alias exists already, please enter different alias.</string>
+    <string name="make_request">Make Request</string>
+    <string name="processing_request">Processing Request...\nDo Not Move OpenTurnKey!</string>
+    <string name="read_openturnkey">Read OpenTurnKey</string>
+    <string name="approach_openturnkey_to_the_nfc_reader">Approach OpenTurnKey to the NFC reader.</string>
+    <string name="request_sent">Request has been sent.</string>
+    <string name="not_valid_openturnkey">Not a valid OpenTurnKey! Do not remove OpenTurnKey until reading completed.</string>
 
 </resources>

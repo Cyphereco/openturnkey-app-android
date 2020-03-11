@@ -56,7 +56,10 @@ public class DialogSetPIN extends AppCompatDialogFragment {
                 dismiss();
             }
         });
-        return builder.create();
+        Dialog dialog =  builder.create();
+        dialog.setCanceledOnTouchOutside(false);
+
+        return dialog;
     }
 
     @Override
@@ -67,7 +70,7 @@ public class DialogSetPIN extends AppCompatDialogFragment {
             listener = (DialogSetPINListener) context;
         } catch (Exception e) {
             throw new ClassCastException(context.toString() +
-                    "must implement DialogSetPINListener");
+                    "must implement DialogLocalCurrecyListener");
         }
 
     }

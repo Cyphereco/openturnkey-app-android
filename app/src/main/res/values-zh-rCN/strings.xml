@@ -5,7 +5,7 @@
     <string name="no_freq_addr">没有常用地址</string>
     <string name="clear_history">清除记录</string>
     <string name="fees_included">手续费内含</string>
-    <string name="full_pubkey_information">完整公钥信息</string>
+    <string name="full_pubkey_information">显示完整公钥信息</string>
     <string name="history" translatable="false">支付记录</string>
     <string name="local_currency">当地货币</string>
     <string name="no_payment_records">没有支付记录</string>
@@ -187,6 +187,12 @@
     <string name="amount_fees_included">金额 (包含手续费)</string>
     <string name="disable_fix_addr_first">请先停用固定地址功能。</string>
     <string name="cannot_change_addr">无法变更地址</string>
-    <string name="no_transaction">There is no transaction.</string>
-    <string name="alias_existed">Alias existed alread, please enter a new alias.</string>
+    <string name="alias_exists">此别名已使用，请输入不同别名。</string>
+    <string name="make_request">发送请求</string>
+    <string name="processing_request">请求处理中...\\n请勿移动OpenTurnKey.</string>
+    <string name="fail_reason">失败原因</string>
+    <string name="read_openturnkey">读取OpenTurnKey</string>
+    <string name="approach_openturnkey_to_the_nfc_reader">将OpenTurnKey靠近NFC读写器</string>
+    <string name="not_valid_openturnkey">不是有效的OpenTurnKey</string>
+    <string name="request_sent">请求已发送</string>
 </resources>

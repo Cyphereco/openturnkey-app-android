@@ -27,7 +27,7 @@ public class Log4jHelper {
     private static void configureLogbackDirectly() {
         // reset the default context (which may already have been initialized)
         // since we want to reconfigure it
-        LoggerContext lc = (LoggerContext)LoggerFactory.getILoggerFactory();
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         lc.stop();
 

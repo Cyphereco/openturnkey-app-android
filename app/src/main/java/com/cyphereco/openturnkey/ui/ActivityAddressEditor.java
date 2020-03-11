@@ -5,11 +5,8 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -26,13 +23,12 @@ import com.cyphereco.openturnkey.utils.AddressUtils;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
-import com.cyphereco.openturnkey.core.NfcHandler;
 
 import org.slf4j.Logger;
 
 import java.util.Objects;
 
-public class ActivityAddressEditor extends AppCompatActivity {
+public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
     private final static String TAG = ActivityAddressEditor.class.getSimpleName();
     private static Logger logger = Log4jHelper.getLogger(TAG);
 
@@ -42,11 +38,9 @@ public class ActivityAddressEditor extends AppCompatActivity {
     public static final String KEY_EDITOR_CONTACT_ADDR = "KEY_EDITOR_CONTACT_ADDR";
     public static final long DEFAULT_DB_ID = 0; // If this is selected, this editor is for add
 
-    private static OtkData mOtkData;
     private static String mAlias;
     private static String mAddress;
 
-    private OpenturnkeyDB mOtkDB;
     private TextInputEditText mInputAlias;
     private TextInputEditText mInputAddress;
     private ImageView mQRCodeScanBtn;
@@ -75,12 +69,12 @@ public class ActivityAddressEditor extends AppCompatActivity {
         mReadNFCBtn = findViewById(R.id.icon_read_nfc_edit_addr);
         mSaveBtn = findViewById(R.id.button_save_edit_addr);
 
-        mOtkDB = new OpenturnkeyDB(getApplicationContext());
-
         Intent intent = this.getIntent();
-        mAddrDBId = intent.getLongExtra(KEY_EDITOR_CONTACT_DB_ID, 0);
-        logger.debug("mAddrDBId: " + mAddrDBId);
 
+        // retrieve passed in parameter when editing address
+        if (null != intent.getStringExtra(KEY_EDITOR_CONTACT_DB_ID)) {
+            mAddrDBId = intent.getLongExtra(KEY_EDITOR_CONTACT_DB_ID, 0);
+        }
         if (null != intent.getStringExtra(KEY_EDITOR_CONTACT_ALIAS)) {
             mInputAlias.setText(intent.getStringExtra(KEY_EDITOR_CONTACT_ALIAS));
         }
@@ -88,6 +82,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
             mInputAddress.setText(intent.getStringExtra(KEY_EDITOR_CONTACT_ADDR));
         }
 
+        // enable/disable 'save' button according to whether address field is empty
         if ((null != mInputAddress.getText()) && (!mInputAddress.getText().toString().isEmpty())) {
             mSaveBtn.setEnabled(true);
         }
@@ -95,15 +90,59 @@ public class ActivityAddressEditor extends AppCompatActivity {
         setUIListener();
     }
 
+    @Override
+    public void onOtkDataPosted(OtkData data) {
+        super.onOtkDataPosted(data);
+        if (data != null) {
+            String addr = data.getSessionData().getAddress();
+
+            if (MainActivity.isAddressValid(addr)) {
+                mAddress = addr;
+                mInputAddress.setText(mAddress);
+            } else {
+                AlertPrompt.alert(this, getString(R.string.invalid_address));
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // set current activity in MainActivity property
+        MainActivity.setCurrentActivity(getClass().getName());
+
+        // try to restore previous stored inputs
+        if (mAlias != null) mInputAlias.setText(mAlias);
+        if (mAddress != null) mInputAddress.setText(mAddress);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // store inputs in activity's properties
+        mAlias = Objects.requireNonNull(mInputAlias.getText()).toString();
+        mAddress = Objects.requireNonNull(mInputAddress.getText()).toString();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // reset activity's properties
+        mAlias = null;
+        mAddress = null;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (android.R.id.home == item.getItemId()) {
             onBackPressed();
             return true;
-        } else {
-            return super.onOptionsItemSelected(item);
         }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void setUIListener() {
@@ -142,8 +181,8 @@ public class ActivityAddressEditor extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 DialogReadOtk dialogReadOtk = new DialogReadOtk();
-                FragmentManager fm = getSupportFragmentManager();
-                dialogReadOtk.show(fm, "Get Address for Address Editor");
+                dialogReadOtk.show(getSupportFragmentManager(),
+                        "Get Address for Address Editor");
             }
         });
 
@@ -222,7 +261,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
 
         if (!alias.isEmpty()) {
             DBAddrItem item = new DBAddrItem(address, alias);
-            DBAddrItem existItem = mOtkDB.getAddressItemByAlias(alias);
+            DBAddrItem existItem = OpenturnkeyDB.getAddressItemByAlias(alias);
             if (mAddrDBId > 0) {
                 if ((existItem != null) && (existItem.getDbId() != mAddrDBId)) {
                     // Show dialog
@@ -231,7 +270,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
                 }
                 // Update database
                 item.setDbId(mAddrDBId);
-                if (!mOtkDB.updateAddressbook(item)) {
+                if (!OpenturnkeyDB.updateAddressbook(item)) {
                     logger.error("Update address failed");
                 }
             } else {
@@ -240,7 +279,7 @@ public class ActivityAddressEditor extends AppCompatActivity {
                     showAliasDuplicateDialog();
                     return;
                 }
-                if (!mOtkDB.addAddress(item)) {
+                if (!OpenturnkeyDB.addAddress(item)) {
                     logger.error("Add address failed");
                 }
             }
@@ -255,70 +294,12 @@ public class ActivityAddressEditor extends AppCompatActivity {
 
     private void showAliasDuplicateDialog() {
         new AlertDialog.Builder(this)
-                .setMessage(R.string.alias_existed)
+                .setMessage(R.string.alias_exists)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 })
                 .show();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // set current activity in MainActivity property
-        MainActivity.setCurrentActivity(getClass().getName());
-
-        // try to restore previous stored inputs
-        if (mAlias != null) mInputAlias.setText(mAlias);
-        if (mAddress != null) mInputAddress.setText(mAddress);
-        if (mOtkData != null) {
-            String addr = mOtkData.getSessionData().getAddress();
-            mOtkData = null;
-
-            if (MainActivity.isAddressValid(addr)) {
-                mAddress = addr;
-                mInputAddress.setText(mAddress);
-            } else {
-                AlertPrompt.alert(this, getString(R.string.invalid_address));
-            }
-        }
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())) {
-            OtkData otkData = NfcHandler.parseIntent(intent);
-
-            if (otkData != null) {
-                mOtkData = otkData;
-                DialogReadOtk.updateReadOtkStatus(DialogReadOtk.READ_SUCCESS);
-            } else {
-                DialogReadOtk.updateReadOtkStatus(DialogReadOtk.NOT_OPENTURNKEY);
-            }
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        // store inputs in activity's properties
-        mAlias = Objects.requireNonNull(mInputAlias.getText()).toString();
-        mAddress = Objects.requireNonNull(mInputAddress.getText()).toString();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        // reset activity's properties
-        mAlias = null;
-        mAddress = null;
-        mOtkData = null;
     }
 }

@@ -17,7 +17,7 @@
     <string name="about">關於</string>
     <string name="clear_history">清除記錄</string>
     <string name="fees_included">手續費内含</string>
-    <string name="full_pubkey_information">完整公鑰資訊</string>
+    <string name="full_pubkey_information">顯示完整公鑰資訊</string>
     <string name="local_currency">本地貨幣</string>
     <string name="auth_with_pin">使用PIN碼授權</string>
     <string name="search">查詢</string>
@@ -187,6 +187,12 @@
     <string name="amount_fees_included">金額 (包含手續費)</string>
     <string name="disable_fix_addr_first">請先停用固定地址功能。</string>
     <string name="cannot_change_addr">無法變更地址</string>
-    <string name="no_transaction">There is no transaction.</string>
-    <string name="alias_existed">Alias existed alread, please enter a new alias.</string>
+    <string name="alias_exists">此別名已使用，請輸入不同的別名。</string>
+    <string name="make_request">發送請求</string>
+    <string name="processing_request">請求處理中...\n請勿移動OpenTurnKey.</string>
+    <string name="fail_reason">失敗原因</string>
+    <string name="read_openturnkey">讀取OpenTurnKey</string>
+    <string name="approach_openturnkey_to_the_nfc_reader">將OpenTurnKey靠近NFC讀寫器</string>
+    <string name="not_valid_openturnkey">不是有效的OpenTurnKey</string>
+    <string name="request_sent">請求已發送</string>
 </resources>

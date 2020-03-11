@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class BlockCypher extends BtcBase {
+public class BlockCypher {
     public static final String TAG = BlockCypher.class.getSimpleName();
     static Logger logger = Log4jHelper.getLogger(TAG);
 
@@ -42,8 +42,7 @@ public class BlockCypher extends BtcBase {
         String network;
         if (Preferences.isTestnet()) {
             network = "test3";
-        }
-        else {
+        } else {
             network = "main";
         }
         logger.debug("newBlockCypherContext:{}", network);
@@ -104,9 +103,10 @@ public class BlockCypher extends BtcBase {
 
     /**
      * Send bitcoin.
-     * @param from From address
-     * @param to To address
-     * @param amount Amount to send in satoshis
+     *
+     * @param from        From address
+     * @param to          To address
+     * @param amount      Amount to send in satoshis
      * @param feeIncluded
      * @param txFees
      * @return List of unsigned tx
@@ -124,8 +124,7 @@ public class BlockCypher extends BtcBase {
                 // set "prefrence":"zero"
                 unsignedTx = mBcCtx.getTransactionService().newTransaction(
                         new ArrayList<>(Arrays.asList(from)), new ArrayList<>(Arrays.asList(to)), amount, "zero");
-            }
-            else {
+            } else {
                 unsignedTx = mBcCtx.getTransactionService().newTransaction(
                         new ArrayList<>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, txFees);
             }
@@ -153,12 +152,10 @@ public class BlockCypher extends BtcBase {
             }
             UnsignedTx utx = new UnsignedTx(from, to, a, txFees, unsignedTx.getTosign());
             return utx;
-        }
-        catch (BlockCypherException e) {
+        } catch (BlockCypherException e) {
             logger.error("e:" + e.toString());
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("e:" + e.toString());
             throw e;
         }
@@ -214,8 +211,8 @@ public class BlockCypher extends BtcBase {
             String sig = sigList.get(i);
             // Pushing Pub key for input
             mCachedUnsignedTx.addPubKeys(publicKey);
-            BigInteger r = new BigInteger(sig.substring(0, 64),16);
-            BigInteger s = new BigInteger(sig.substring(64, 128),16);
+            BigInteger r = new BigInteger(sig.substring(0, 64), 16);
+            BigInteger s = new BigInteger(sig.substring(64, 128), 16);
             // To ensure low S values for BIP 62
             s = BtcUtils.lowSValue(s);
             String signedString = bytesToHexString(toDER(r, s));
@@ -230,15 +227,13 @@ public class BlockCypher extends BtcBase {
             mCachedUnsignedTx = null;
             Tx tx = new Tx("", to, trans, Tx.Status.STATUS_SUCCESS, "");
             return tx;
-        }
-        catch (BlockCypherException e) {
+        } catch (BlockCypherException e) {
             logger.debug("e:" + e.toString());
             Tx tx = new Tx(Tx.Status.STATUS_UNKNOWN_FAILURE, mCachedUnsignedTx.getTx().getHash(), "");
             mCachedUnsignedTx = null;
             return tx;
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.debug("e:" + e.toString());
             Tx tx = new Tx(Tx.Status.STATUS_UNKNOWN_FAILURE, mCachedUnsignedTx.getTx().getHash(), "");
             mCachedUnsignedTx = null;

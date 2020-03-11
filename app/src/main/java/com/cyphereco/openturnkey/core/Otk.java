@@ -14,8 +14,6 @@ import com.blockcypher.exception.BlockCypherException;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
-import com.cyphereco.openturnkey.db.DBTransItem;
-import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.ExchangeRate;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
@@ -121,7 +119,6 @@ public class Otk {
     static String mPin;
     // Periodic Timer
     static Timer mTimerRate = new Timer();
-    static Timer mTimerUpdateConfirmation = new Timer();
     static Timer mTimerTxFee = new Timer();
     static Timer mTimerWriteCommand = null;
     static Timer mTimerReadResponse = null;
@@ -288,24 +285,6 @@ public class Otk {
             mTimerTxFee.schedule(updateTxFeeTask, 100, 1000 * 60 * Configurations.INTERVAL_TX_FEE_UPDATE);
 
             // Timer task which calling get current exchange api.
-            TimerTask updateConfirmationTask = new TimerTask() {
-                public void run() {
-                    OpenturnkeyDB mOtkDB = new OpenturnkeyDB(mCtx);
-                    List<DBTransItem> dataset = mOtkDB.getAllTransaction();
-                    for (int i = 0; i < dataset.size(); i++) {
-                        DBTransItem dbItem = dataset.get(i);
-                        if (dbItem.getStatus() == Tx.Status.STATUS_SUCCESS.toInt() && dbItem.getConfirmations() < 144) {
-                            int confirmations = BlockChainInfo.getInstance(mCtx).getConfirmations(dbItem.getHash());
-                            // Update db
-                            dbItem.setConfrimations(confirmations);
-                            mOtkDB.updateTransaction(dbItem);
-//                            logger.debug("Got tx:{} confirmation:{}", dbItem.getHash().substring(0,12) + "...", dbItem.getConfirmations());
-                        }
-                    }
-                }
-            };
-            // 30 minutes timer
-            mTimerUpdateConfirmation.schedule(updateConfirmationTask, 5000, 1000 * 60 * Configurations.INTERVAL_DB_UPDATE);
         }
         return mOtk;
     }
@@ -1119,7 +1098,7 @@ public class Otk {
                                 // Success
                                 tx.setFrom(mFrom);
                                 // Get raw tx
-                                String rawTx = BlockChainInfo.getInstance(mCtx).getRawTx(tx.getHash());
+                                String rawTx = BlockChainInfo.getRawTx(tx.getHash());
                                 if (rawTx != null) {
                                     tx.setRaw(rawTx);
                                 }
@@ -1174,7 +1153,7 @@ public class Otk {
             @Override
             public void run() {
                 synchronized (this) {
-                    BigDecimal b = BlockChainInfo.getInstance(mCtx).getBalance(address);
+                    BigDecimal b = BlockChainInfo.getBalance(address);
                     if (mOp == Operation.OTK_OP_SIGN_PAYMENT) {
                         Message msg = new Message();
                         msg.what = OTK_MSG_CHECK_BALANCE;

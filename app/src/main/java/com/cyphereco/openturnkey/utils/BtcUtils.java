@@ -421,6 +421,7 @@ public class BtcUtils {
     }
 
     static public long convertDateTimeStringToLong(String dateTime) {
+        if (dateTime == null) return 0;
         try {
             //2019-09-15T16:49:49.584902078Z
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'");

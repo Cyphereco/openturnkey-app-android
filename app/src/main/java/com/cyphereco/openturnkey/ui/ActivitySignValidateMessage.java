@@ -14,7 +14,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -29,6 +28,8 @@ import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.OtkData;
+import com.cyphereco.openturnkey.core.protocol.Command;
+import com.cyphereco.openturnkey.core.protocol.OtkRequest;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
@@ -40,7 +41,7 @@ import org.slf4j.Logger;
 
 import java.util.Objects;
 
-public class ActivitySignValidateMessage extends AppCompatActivity {
+public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
     public static final String TAG = ActivitySignValidateMessage.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
 
@@ -137,6 +138,18 @@ public class ActivitySignValidateMessage extends AppCompatActivity {
             // Failed to process signed message
             AlertPrompt.alert(getApplicationContext(), getString(R.string.sign_message_fail));
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MainActivity.setCurrentActivity(getClass().getName());
+    }
+
+    @Override
+    public void onOtkDataPosted(OtkData data) {
+        super.onOtkDataPosted(data);
+        logger.debug("otkData: {}", data.toString());
     }
 
     class SignVerifyPagerAdapter extends PagerAdapter {
@@ -252,6 +265,7 @@ public class ActivitySignValidateMessage extends AppCompatActivity {
                 }
             });
 
+
             Button btnSignMsg = view.findViewById(R.id.buttonSignMessage);
             btnSignMsg.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -260,12 +274,13 @@ public class ActivitySignValidateMessage extends AppCompatActivity {
                     CheckBox cbUsingMasterKey = view.findViewById(R.id.checkBoxUsingMasterKey);
                     EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
                     String msgToSign = etMsgToSign.getText().toString();
-                    logger.info("Message to sign:{}, using master key:{}", msgToSign, cbUsingMasterKey.isChecked());
-                    Intent intent = new Intent();
-                    intent.putExtra(MainActivity.KEY_SIGN_VALIDATE_MESSAGE, msgToSign);
-                    intent.putExtra(MainActivity.KEY_USING_MASTER_KEY, cbUsingMasterKey.isChecked());
-                    setResult(RESULT_OK, intent);
-                    finish();
+                    OtkRequest request = new OtkRequest(Command.SIGN.toString());
+                    request.setData(msgToSign);
+                    if (cbUsingMasterKey.isChecked()) request.setMasterKey();
+                    MainActivity.pushRequest(request);
+
+                    DialogReadOtk dialogReadOtk = new DialogReadOtk();
+                    dialogReadOtk.show(getSupportFragmentManager(),"SIGN_MESSAGE");
                 }
             });
         }

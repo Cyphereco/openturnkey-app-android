@@ -113,7 +113,7 @@ public class OtkRequest implements Serializable {
         setOption(getOption() + ",more=1");
     }
 
-    public void setPublicKey() {
+    public void setMasterKey() {
         setOption(getOption() + ",key=1");
     }
 

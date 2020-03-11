@@ -22,7 +22,7 @@
         app:srcCompat="@mipmap/ic_cyphereco_logo_foreground" />
 
     <TextView
-        android:id="@+id/text_tap_otk"
+        android:id="@+id/text_openturnkey"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -35,7 +35,7 @@
         app:layout_constraintTop_toBottomOf="@+id/icon_read_nfc" />
 
     <TextView
-        android:id="@+id/text_nfc_comm_type"
+        android:id="@+id/text_request_desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -45,38 +45,23 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_tap_otk" />
+        app:layout_constraintTop_toBottomOf="@+id/text_openturnkey" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/_left_bracket"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintEnd_toStartOf="@+id/text_nfc_comm_type"
-        app:layout_constraintTop_toTopOf="@+id/text_nfc_comm_type" />
+        app:layout_constraintEnd_toStartOf="@+id/text_request_desc"
+        app:layout_constraintTop_toTopOf="@+id/text_request_desc" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/_right_bracket"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintStart_toEndOf="@+id/text_nfc_comm_type"
-        app:layout_constraintTop_toTopOf="@+id/text_nfc_comm_type" />
-
-    <Button
-        android:id="@+id/button_otk_cancel"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/cancel"
-        android:textSize="16sp"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_nfc_comm_type" />
+        app:layout_constraintStart_toEndOf="@+id/text_request_desc"
+        app:layout_constraintTop_toTopOf="@+id/text_request_desc" />
 
     <Button
         android:id="@+id/btn_nfc_read"
@@ -86,12 +71,12 @@
         android:layout_marginBottom="32dp"
         android:background="@drawable/custom_toast_info_round"
         android:backgroundTint="#90CAF9"
-        android:text="Make Request"
+        android:text="@string/make_request"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_nfc_comm_type" />
+        app:layout_constraintTop_toBottomOf="@+id/text_request_desc" />
 
 </android.support.constraint.ConstraintLayout>

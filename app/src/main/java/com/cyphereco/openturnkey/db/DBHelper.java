@@ -47,7 +47,6 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + OpenturnkeyDB.ADDR_BOOK_TABLE_NAME);
         // Create new version tables
         onCreate(db);
-
     }
 
     static SQLiteDatabase getDatabase(Context context) {

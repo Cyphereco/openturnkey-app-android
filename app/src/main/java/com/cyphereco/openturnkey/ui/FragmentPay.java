@@ -32,19 +32,13 @@ import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.ExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
-import com.cyphereco.openturnkey.utils.Log4jHelper;
-
-import org.slf4j.Logger;
 
 import java.util.Locale;
 import java.util.Objects;
 
-public class FragmentPay extends FragmentExtOtkData {
-    public static final String TAG = FragmentPay.class.getSimpleName();
-    Logger logger = Log4jHelper.getLogger(TAG);
+public class FragmentPay extends FragmentExtendOtkViewPage {
 
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
-
     private FragmentPayListener mListener;
 //    private String mRecipientAddress;
 
@@ -296,8 +290,8 @@ public class FragmentPay extends FragmentExtOtkData {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onPageSelected() {
+        super.onPageSelected();
 
         if (Preferences.getUseFixAddressChecked()) {
             tvAddress.setText(Preferences.getUseFixAddressAddrString());
@@ -561,7 +555,6 @@ public class FragmentPay extends FragmentExtOtkData {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
         int optionId = item.getItemId();
 
         switch (optionId) {
@@ -631,8 +624,8 @@ public class FragmentPay extends FragmentExtOtkData {
     }
 
     @Override
-    public void postOtkData(OtkData otkData) {
-        super.postOtkData(otkData);
+    public void onOtkDataPosted(OtkData otkData) {
+        super.onOtkDataPosted(otkData);
 
         // process received otk data
         if (otkData != null) {

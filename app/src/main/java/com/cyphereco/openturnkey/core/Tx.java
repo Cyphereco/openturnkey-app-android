@@ -100,6 +100,7 @@ public class Tx {
     public void setAmount(double amount) {mAmount = amount;}
     public void setFee(double fee) {mFee = fee;}
     public void setDesc(String desc) { mDesc = desc;}
+    public void setTime(String time) { mTime = time;}
     public int getConfirmations() { return mConfirmations;}
     public String toString() {
         return "Raw:" + mRaw +

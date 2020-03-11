@@ -2,29 +2,24 @@ package com.cyphereco.openturnkey.ui;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.nfc.NfcAdapter;
 import android.os.CountDownTimer;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
-import android.view.Menu;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.SearchView;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Otk;
@@ -33,7 +28,6 @@ import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.Tx;
 import com.cyphereco.openturnkey.core.UnsignedTx;
 import com.cyphereco.openturnkey.core.protocol.Command;
-import com.cyphereco.openturnkey.core.protocol.OtkCommand;
 import com.cyphereco.openturnkey.core.protocol.OtkRequest;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.db.DBTransItem;
@@ -44,7 +38,6 @@ import com.cyphereco.openturnkey.utils.ExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.core.NfcHandler;
-import com.cyphereco.openturnkey.utils.QRCodeUtils;
 
 import org.slf4j.Logger;
 
@@ -55,13 +48,7 @@ import java.util.Locale;
 import java.util.Queue;
 import java.util.TimeZone;
 
-public class MainActivity extends AppCompatActivity
-        implements
-        DialogAuthByPin.DialogAuthByPinListener,
-        DialogAddNote.DialogAddNoteListener,
-        DialogSetPIN.DialogSetPINListener,
-        FragmentPay.FragmentPayListener,
-        FragmentOtk.FragmentOtkListener {
+public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
     static Logger logger = Log4jHelper.getLogger(TAG);
@@ -74,24 +61,17 @@ public class MainActivity extends AppCompatActivity
 
     public static final int REQUEST_CODE_QR_CODE = 0;
     public static final int REQUEST_CODE_CHOOSE_KEY = 3;
-    public static final int REQUEST_CODE_ADDRESS_EDIT = 4;
     public static final int REQUEST_CODE_TRANSACTION_INFO = 5;
-    public static final int REQUEST_CODE_SIGN_MESSAGE = 6;
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
     public static final String KEY_CHOOSE_KEY = "KEY_CHOOSE_KEY";
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
     public static final String KEY_MESSAGE_TO_SIGN = "KEY_MESSAGE_TO_SIGN";
     public static final String KEY_SIGN_VALIDATE_MESSAGE = "KEY_SIGN_VALIDATE_MESSAGE";
     public static final String KEY_USING_MASTER_KEY = "KEY_USING_MASTER_KEY";
-    public static final String KEY_ADDRESS_EDITOR_TEMP_ALIAS = "KEY_ADDRESS_EDITOR_TEMP_ALIAS";
-    public static final String KEY_ADDRESS_EDITOR_TEMP_ADDR = "KEY_ADDRESS_EDITOR_TEMP_ADDR";
     public static final int REQUEST_RESULT_CODE_REPAY = 1000;
-    public static final int REQUEST_RESULT_CODE_READ_NFC = 1001;
 
     private static final String BEGIN_BITCOIN_SIGNED_MESSAGE = "-----BEGIN BITCOIN SIGNED MESSAGE-----";
     private static final String AMOUNT_EQUAL_TO = "amount=";
-
-    private Menu toolbarMenu = null;
 
     private static Queue<OtkRequest> otkRequestQueue = new LinkedList<>();
     private boolean includeFee = false;
@@ -99,11 +79,7 @@ public class MainActivity extends AppCompatActivity
     private String mFixedAddress = "";
     static private Otk mOtk = null;
 
-    private FragmentExtOtkData mFragmentPay = null;
-    private FragmentExtOtkData mFragmentOtk = null;
-    private FragmentExtOtkData mFragmentHistory = null;
-    private FragmentExtOtkData mFragmentAddrbook = null;
-    private static FragmentExtOtkData mSelectedFragment = null;
+    private static FragmentExtendOtkViewPage mSelectedFragment = null;
 
 
     private ExchangeRate mCurrencyExRate;
@@ -156,17 +132,51 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Initialize Database
+        OpenturnkeyDB.init(getApplicationContext());
+
+        Tx tx = new Tx(Tx.Status.STATUS_SUCCESS, "5dc7bee70b2d4d486d2e9ca997354e6909769049b2d971dc4034e2c03df909c7", "");
+        tx.setFrom("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
+        tx.setTo("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
+        tx.setAmount(0.00191967);
+        tx.setTime("2020-01-11T23:00:09.584902078Z");
+        tx.setRaw("01000000030781f8fa7f6a30621c29ac47a2d5bb81bef88973839680f8f5de0d879c6417f9000000006a47304402204688a19b3ebe5bb05ff3fa05177f6f4889016c29a12ee9abdf325c5e1f32fe1e02205be7f1afa0df30c8165e4de6743f1b034d9de2cf7571f9500d7ce81c2bd9a55d01210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229fffffffff585248874c9b15176863d579379a5cc2c01453926395973da9264022ec3ed39010000006b483045022100baa9783aedc0b9860e0f486c09bdfbad92f71a5d383019cfcac35ea8ed59f282022030bde9f23990d434e1544e5e1bf227c66a0a2c1aed39e55bb8129385f127e70501210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229fffffffff585248874c9b15176863d579379a5cc2c01453926395973da9264022ec3ed39000000006a47304402201d6aa95358825ef7319c4a5f1ee89c864c3b71b45926610a9fc95574ca39bff20220459a21b1321687237bc9f37a17df6a0290a0920979882108e816cbd246ac679f01210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229ffffffff01dfed0200000000001976a914fee5819b32e8618699ad07a17b3df5a77346261788ac00000000");
+        addTxToDb(tx);
+
         pref = new Preferences(getApplication());
 
         fm = getSupportFragmentManager();
         
         setContentView(R.layout.activity_main);
 
-        mFragmentPay = new FragmentPay();
-        mFragmentOtk = new FragmentOtk();
-        mFragmentHistory = new FragmentHistory();
-        mFragmentAddrbook = new FragmentAddrbook();
-        mSelectedFragment = mFragmentPay;
+        final ViewPager viewPager = findViewById(R.id.view_pager_main);
+        final PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(pagerAdapter);
+        
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i1) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+                bottomNav.setSelectedItemId(navItems[i]);
+                if (mSelectedFragment == null) {
+                    mSelectedFragment = (FragmentExtendOtkViewPage) pagerAdapter.getItem(i);
+                }
+                else {
+                    mSelectedFragment.onPageUnselected();
+                    mSelectedFragment = (FragmentExtendOtkViewPage) pagerAdapter.getItem(i);
+                }
+                mSelectedFragment.onPageSelected();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -180,33 +190,44 @@ public class MainActivity extends AppCompatActivity
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                        Toolbar toolbar = findViewById(R.id.toolbar);
-                        Menu menu = toolbar.getMenu();
-                        menu.clear();
-
+                        int page;
                         switch (menuItem.getItemId()) {
-                            case FRAGMENT_HISTORY:
-                                mSelectedFragment = mFragmentHistory;
-                                break;
                             case FRAGMENT_ADDRBOOK:
-                                mSelectedFragment = mFragmentAddrbook;
+                                getSupportActionBar().setTitle(getString(R.string.addresses));
+                                page = PagerAdapter.PAGE_ADDRBOOK;
+                                break;
+                            case FRAGMENT_HISTORY:
+                                getSupportActionBar().setTitle(getString(R.string.history));
+                                page = PagerAdapter.PAGE_HISTORY;
                                 break;
                             case FRAGMENT_OTK:
-                                mSelectedFragment = mFragmentOtk;
+                                getSupportActionBar().setTitle(getString(R.string._openturnkey));
+                                page = PagerAdapter.PAGE_OTK;
                                 break;
                             default:
-                                mSelectedFragment = mFragmentPay;
+                                getSupportActionBar().setTitle(getString(R.string.pay));
+                                page = PagerAdapter.PAGE_PAY;
                                 break;
                         }
 
-                        getSupportFragmentManager().beginTransaction().replace(
-                                R.id.frame_main, mSelectedFragment).commit();
+                        // navigate to page if triggered by navigation bar,
+                        // call viewPager to scroll the page, otherwise (triggered by scroll page)
+                        // do nothing
+                        if (navItems[viewPager.getCurrentItem()] != menuItem.getItemId()) {
+                            viewPager.setCurrentItem(page, true);
+                        }
+
+                        // if soft-keyboard is opened, close it!
+                        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                        if(imm.isAcceptingText()) { // verify if the soft keyboard is open
+                            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                        }
+
                         return true;
                     }
                 };
 
         bottomNav.setOnNavigationItemSelectedListener(navListener);
-        navToFragment(FRAGMENT_PAY);
 
         /* init NFC. */
         NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -239,16 +260,7 @@ public class MainActivity extends AppCompatActivity
                     Preferences.setTxFee(event.getTxFee());
                 } else if (type == OtkEvent.Type.APPROACH_OTK) {
                     hideProgressDialog();
-                    // Stop cancel timer
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).stopCancelTimer();
-                    }
                 } else if (type == OtkEvent.Type.FIND_UTXO || type == OtkEvent.Type.CHECKING_BALANCE_FOR_PAYMENT) {
-                    // Stop cancel timer
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        // Update rate
-                        ((FragmentOtk) mSelectedFragment).stopCancelTimer();
-                    }
                     // Hide status dialog
                     hideStatusDialog();
                     // Show progress spin circle
@@ -349,9 +361,6 @@ public class MainActivity extends AppCompatActivity
                     hideStatusDialog();
                     showCommandResultDialog(getString(R.string.unlock_failed), getString(R.string.otk_is_not_locked));
                     mOp = Otk.Operation.OTK_OP_NONE;
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
                     Intent intent = new Intent(getApplicationContext(), ActivityOpenturnkeyInfo.class);
@@ -364,9 +373,6 @@ public class MainActivity extends AppCompatActivity
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                     Intent intent = new Intent(getApplicationContext(), ActivityOpenturnkeyInfo.class);
                     intent.putExtra(KEY_OTK_DATA, event.getData());
                     startActivity(intent);
@@ -376,18 +382,12 @@ public class MainActivity extends AppCompatActivity
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
                     showStatusDialog(getString(R.string.unlock_failed), parseFailureReason(event.getFailureReason()));
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                 } else if (type == OtkEvent.Type.WRITE_NOTE_SUCCESS) {
                     hideStatusDialog();
                     showCommandResultDialog(getString(R.string.write_note), getString(R.string.write_note_success));
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                     Intent intent = new Intent(getApplicationContext(), ActivityOpenturnkeyInfo.class);
                     intent.putExtra(KEY_OTK_DATA, event.getData());
                     startActivity(intent);
@@ -396,9 +396,6 @@ public class MainActivity extends AppCompatActivity
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                     showStatusDialog(getString(R.string.write_note_fail), parseFailureReason(event.getFailureReason()));
                 } else if (type == OtkEvent.Type.SET_PIN_SUCCESS) {
                     hideStatusDialog();
@@ -406,9 +403,6 @@ public class MainActivity extends AppCompatActivity
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                     Intent intent = new Intent(getApplicationContext(), ActivityOpenturnkeyInfo.class);
                     intent.putExtra(KEY_OTK_DATA, event.getData());
                     startActivity(intent);
@@ -417,9 +411,6 @@ public class MainActivity extends AppCompatActivity
                     mOp = Otk.Operation.OTK_OP_NONE;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                     showStatusDialog(getString(R.string.set_pin_fail), parseFailureReason(event.getFailureReason()));
                 } else if (type == OtkEvent.Type.CHOOSE_KEY_SUCCESS) {
                     hideStatusDialog();
@@ -427,17 +418,11 @@ public class MainActivity extends AppCompatActivity
                     mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                 } else if (type == OtkEvent.Type.CHOOSE_KEY_FAIL) {
                     hideStatusDialog();
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
                     mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                     showStatusDialog(getString(R.string.choose_key_fail), parseFailureReason(event.getFailureReason()));
                 } else if ((type == OtkEvent.Type.GET_KEY_SUCCESS) || (type == OtkEvent.Type.GET_KEY_FAIL)) {
                     processGetKeyEvent(event);
@@ -446,9 +431,6 @@ public class MainActivity extends AppCompatActivity
                     mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                     Intent intent = new Intent(getApplicationContext(), ActivitySignValidateMessage.class);
                     intent.putExtra(KEY_OTK_DATA, event.getData());
                     intent.putExtra(KEY_MESSAGE_TO_SIGN, event.getMessageToSign());
@@ -460,9 +442,6 @@ public class MainActivity extends AppCompatActivity
                     mIsOpInProcessing = false;
                     mOtk.cancelOperation();
                     mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                     showStatusDialog(getString(R.string.sign_message_fail), parseFailureReason(event.getFailureReason()));
                 } else if (type == OtkEvent.Type.OTK_PIN_UNSET) {
                     /* Clear current OTK op */
@@ -470,17 +449,17 @@ public class MainActivity extends AppCompatActivity
                     mOtk.cancelOperation();
                     /* Go to set PIN page */
                     mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                     showStatusDialog(getString(R.string.pin_unset), getString(R.string.pin_unset_msg));
-                } else if ((type == OtkEvent.Type.RESET_SUCCESS) || (type == OtkEvent.Type.RESET_FAIL)) {
-                    processResetOtkEvent(event);
-                } else if ((type == OtkEvent.Type.EXPORT_WIF_KEY_SUCCESS) ||
-                        (type == OtkEvent.Type.EXPORT_WIF_KEY_FAIL)) {
-                    processExportWifKeyEvent(event);
+                }
+//                else if ((type == OtkEvent.Type.RESET_SUCCESS) || (type == OtkEvent.Type.RESET_FAIL)) {
+//                    processResetOtkEvent(event);
+//                }
+//                else if ((type == OtkEvent.Type.EXPORT_WIF_KEY_SUCCESS) ||
+//                        (type == OtkEvent.Type.EXPORT_WIF_KEY_FAIL)) {
+//                    processExportWifKeyEvent(event);
                     /* Show Private key WIF format */
-                } else if ((type == OtkEvent.Type.SESSION_TIMED_OUT) ||
+//                }
+                else if ((type == OtkEvent.Type.SESSION_TIMED_OUT) ||
                         (type == OtkEvent.Type.READ_RESPONSE_TIMED_OUT)) {
                     // Dismiss dialogs
                     hideProgressDialog();
@@ -499,9 +478,6 @@ public class MainActivity extends AppCompatActivity
                     mOtk.cancelOperation();
                     /* Go to set PIN page */
                     mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-                    if (mSelectedFragment instanceof FragmentOtk) {
-                        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    }
                 } else {
                     logger.debug("Unhandled event:{}", type.name());
                 }
@@ -512,22 +488,32 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        /*  For the incoming intents, we only care about NFC event,
-            specifically, the NDEF message event which is used by OpenTurnKey.
-            We will ignore other intents since this app is designed to deal with
-            OpenTurnKey only.
+        logger.debug("new intent");
+        /*
+         For the incoming intents, we only care about NFC event, (at the moment)
+         specifically, NDEF message event, which is used by OpenTurnKey. We will
+         ignore other intents since this app is designed to deal with OpenTurnKey only.
          */
 
         /*
-         1. If this is not the currentActivity, dispatch the intent to the currentActivity
-         2. Keep NFC read result processed in each activity to avoid cross-activity operations
-            and data passing.
+         All the NFC new intent will be post here as the entry point, then dispatch
+         to its activiy or fragment.
+
+         Note:
+            The foreground dispatch system does not work as said in the manual.
+            None of the activities except the registered one  will receive NFC intent.
+            So we make our own customized dispatch implementation instead.
          */
-        /* Note:
-            The foreground dispatch system does not work and the other activities will not
-            receive NFC intent as expected, so we implement this instaed.
-         */
-        if (!getClass().getName().equals(currentActivity)) {
+
+
+        if (getClass().getName().equals(currentActivity)) {
+            if (mEnableReadOtk) {
+                // MainAcitivy is the current activty, dispatch intent to current fragment.
+                mSelectedFragment.onNewIntent(intent);
+            }
+        }
+        else {
+            // MainActivy is not the current activity, dispatch intent to the current activity.
             Class cls = null;
 
             try {
@@ -541,221 +527,135 @@ public class MainActivity extends AppCompatActivity
 
                 if (mEnableReadOtk) {
                     newIntent.setAction(intent.getAction())
-                        .putExtra(NfcAdapter.EXTRA_TAG,
-                                intent.getParcelableExtra(NfcAdapter.EXTRA_TAG))
-                        .putExtra(NfcAdapter.EXTRA_NDEF_MESSAGES,
-                                intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES))
-                        .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                            .putExtra(NfcAdapter.EXTRA_TAG,
+                                    intent.getParcelableExtra(NfcAdapter.EXTRA_TAG))
+                            .putExtra(NfcAdapter.EXTRA_NDEF_MESSAGES,
+                                    intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES))
+                            .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 }
                 startActivity(newIntent);
             }
         }
 
-        if (!mEnableReadOtk || !getClass().getName().equals(currentActivity)) {
-            return;
-        }
-
-        String action = intent.getAction();
-
-        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
-            logger.info("Found NFC tag!!");
-            OtkData otkData = NfcHandler.parseIntent(intent);
-
-            if (otkData != null) {
-                logger.debug("Found OpenTurnKey:\nSession#{} : {}{}",
-                        otkData.getSessionData().getSessionId(),
-                        otkData.getSessionData().getAddress(),
-                        otkData.getOtkState().toString()
-                );
-
-                // disableReadOtk to avoid new intent breaking unfinished processing
-                disableReadOtk();
-
-                /*
-                 If the otkRequestQueue is not empty, there is a request pending.
-                 Check if public key and session id matched current session.
-                 */
-                if (hasRequest()) {
-                    OtkRequest request = peekRequest();
-
-                    /*
-                     If a request has a session Id and otk address, the request
-                     must have been delivered to an openturnkey and expecting a request result.
-                     */
-                    if (request.getSessionId().length() > 0) {
-                        logger.info("Waiting for request result");
-
-                        // Sanity check on the otkData
-                        if (otkData.getSessionData().getSessionId().equals(request.getSessionId()) &&
-                                otkData.getSessionData().getAddress().equals(request.getOtkAddress())) {
-                            /*
-                             Request has been delivered, intent should contain request result.
-                             Either success or fail, the request is made, remove it from the
-                             otkRequestQueue.
-                             */
-                        }
-                        else {
-                            /*
-                             Sanity check failed, error occurs, should quit request to avoid
-                             suspicious hack.
-                             */
-                            logger.error("Invalid request result.");
-                            otkData = null;
-                            // handleRequestResult(request, otkData)
-
-                            AlertPrompt.info(this, getString(R.string.not_openturnkey));
-                        }
-                    }
-                    else {
-                        // Pending request has not been delivered, prepare to send.
-
-                        // Check if OpenTurnKey is locked to accept authentication.
-                        if (otkData.getOtkState().getLockState() == OtkState.LockState.UNLOCKED) {
-                            // OpenTurnKey is not locked, request cannot be made
-                            AlertPrompt.info(this, getString(R.string.otk_is_unlocked));
-                            return;
-                        }
-//                        else if (otkData.getOtkState().getLockState() != OtkState.LockState.AUTHORIZED &&
-//                        request.getPin().length() != 8) {
-//                            dialogAuthByPin();
+//        String action = intent.getAction();
+//
+//        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+//            logger.info("Found NFC tag!!");
+//            OtkData otkData = NfcHandler.parseIntent(intent);
+//
+//            if (otkData != null) {
+//                logger.debug("Found OpenTurnKey:\nSession#{} : {}{}",
+//                        otkData.getSessionData().getSessionId(),
+//                        otkData.getSessionData().getAddress(),
+//                        otkData.getOtkState().toString()
+//                );
+//
+//                // disableReadOtk to avoid new intent breaking unfinished processing
+//                disableReadOtk();
+//
+//                /*
+//                 If the otkRequestQueue is not empty, there is a request pending.
+//                 Check if public key and session id matched current session.
+//                 */
+//                if (hasRequest()) {
+//                    OtkRequest request = peekRequest();
+//
+//                    /*
+//                     If a request has a session Id and otk address, the request
+//                     must have been delivered to an openturnkey and expecting a request result.
+//                     */
+//                    if (request.getSessionId().length() > 0) {
+//                        logger.info("Waiting for request result");
+//
+//                        // Sanity check on the otkData
+//                        if (otkData.getSessionData().getSessionId().equals(request.getSessionId()) &&
+//                                otkData.getSessionData().getAddress().equals(request.getOtkAddress())) {
+//                            /*
+//                             Request has been delivered, intent should contain request result.
+//                             Either success or fail, the request is made, remove it from the
+//                             otkRequestQueue.
+//                             */
+//                        }
+//                        else {
+//                            /*
+//                             Sanity check failed, error occurs, should quit request to avoid
+//                             suspicious hack.
+//                             */
+//                            logger.error("Invalid request result.");
+//                            otkData = null;
+//                            // handleRequestResult(request, otkData)
+//
+//                            AlertPrompt.info(this, getString(R.string.not_openturnkey));
+//                        }
+//                    }
+//                    else {
+//                        // Pending request has not been delivered, prepare to send.
+//
+//                        // Check if OpenTurnKey is locked to accept authentication.
+//                        if (otkData.getOtkState().getLockState() == OtkState.LockState.UNLOCKED) {
+//                            // OpenTurnKey is not locked, request cannot be made
+//                            AlertPrompt.info(this, getString(R.string.otk_is_unlocked));
 //                            return;
 //                        }
-
-                        /*
-                         Set the session Id and otk address with the otkData we just parsed.
-                         */
-                        request.setSessionId(otkData.getSessionData().getSessionId());
-                        request.setOtkAddress(otkData.getSessionData().getAddress());
-                        String sessId = NfcHandler.sendRequest(intent, request);
-
-                        if (!otkData.getSessionData().getSessionId().equals(sessId)) {
-                            /*
-                             Send request failed, most likely a communication error occurs.
-                             Remove the session id and otk address and keep the request as a fresh one.
-                             */
-                            request.setSessionId("");
-                            request.setOtkAddress("");
-                            logger.info("Something wrong, request is not sent.");
-                        }
-                        else {
-                            /*
-                             Request delivered, the current otkData is not useful result.
-                             Set otkData to null and waiting for process request result in
-                             the next intent.
-                             */
-                            otkData = null;
-                            enableReadOtk();
-                        }
-                    }
-                }
-
-                // process valid OpenTurnKey data
-                if (otkData != null) {
-                    logger.info(otkData.toString());
-
-                    // Notify the DialogReadOtk of the parsing result and close the dialog.
-                    DialogReadOtk.updateReadOtkStatus(DialogReadOtk.READ_SUCCESS);
-
-                    /* There is an otk show result delay in DialogReadOtk,
-                        to start to a new activity, wait until the dialog closed.
-                     */
-                    final OtkData _otkData = otkData;
-                    new CountDownTimer(DialogReadOtk.SHOW_RESULT_DELAY +
-                            DialogReadOtk.DISMISS_ANIMATION_TIME, 1000) {
-                        public void onTick(long millisUntilFinished) {
-                        }
-
-                        public void onFinish() {
-                            // show otkData in ActivityOpenturnkeyInfo
-                            mSelectedFragment.postOtkData(_otkData);
-                        }
-                    }.start();
-                }
-            }
-            else {
-                logger.info("Not a valid OpenTurnKey");
-                // Notify the DialogReadOtk of the parsing result and close the dialog.
-                DialogReadOtk.updateReadOtkStatus(DialogReadOtk.NOT_OPENTURNKEY);
-                AlertPrompt.info(this, getString(R.string.not_openturnkey));
-            }
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
-        int optionId = item.getItemId();
-
-        switch (optionId) {
-            case R.id.menu_openturnkey_unlock:
-                pushRequest(new OtkRequest(menuOptionToOtkCommand(optionId)));
-                dialogAuthByPin();
-                return true;
-            case R.id.menu_openturnkey_set_note:
-                pushRequest(new OtkRequest(menuOptionToOtkCommand(optionId)));
-                dialogAddNote();
-                return true;
-            case R.id.menu_openturnkey_set_pin:
-                if (dialogConfirmOperationAndWaitResult(getString(R.string.warning),
-                        getString(R.string.pin_code_warning_message),
-                        getString(R.string.understood))) {
-                    // show set pin dialog
-                    pushRequest(new OtkRequest(menuOptionToOtkCommand(optionId)));
-                    dialogSetPIN();
-                    return true;
-                }
-            case R.id.menu_openturnkey_choose_key:
-                // show confirm dialog
-                if (dialogConfirmOperationAndWaitResult(getString(R.string.warning),
-                        getString(R.string.choose_key_warning_message),
-                        getString(R.string.understood))) {
-                    logger.debug("Choose key Confirmed.");
-                    pushRequest(new OtkRequest(menuOptionToOtkCommand(optionId)));
-                    intent = new Intent(this, ActivityChooseKey.class);
-//                    startActivity(intent);
-                    startActivityForResult(intent, MainActivity.REQUEST_CODE_CHOOSE_KEY);
-                    return true;
-                }
-            case R.id.menu_openturnkey_sign_message:
-                intent = new Intent(this, ActivitySignValidateMessage.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                startActivity(intent);
-//                startActivityForResult(intent, MainActivity.REQUEST_CODE_SIGN_MESSAGE);
-                return true;
-            case R.id.menu_openturnkey_get_key:
-                if (dialogConfirmOperationAndWaitResult(getString(R.string.warning),
-                        getString(R.string.full_pubkey_info_warning),
-                        getString(R.string.understood))) {
-                    pushRequest(new OtkRequest(menuOptionToOtkCommand(optionId)));
-                    dialogAuthByPin();
-                    return true;
-                } else {
-                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                    logger.debug("Get key information cancelled!");
-                    return false;
-                }
-            case R.id.menu_openturnkey_export_wif_key:
-                if (dialogConfirmOperationAndWaitResult(getString(R.string.warning),
-                        getString(R.string.export_wif_warning_message),
-                        getString(R.string.understood))) {
-                    pushRequest(new OtkRequest(menuOptionToOtkCommand(optionId)));
-
-//                    exportWifKey();
-                    return true;
-                }
-            case R.id.menu_openturnkey_reset:
-                if (dialogConfirmOperationAndWaitResult(getString(R.string.warning),
-                        getString(R.string.reset_warning_message),
-                        getString(R.string.understood))) {
-                    pushRequest(new OtkRequest(menuOptionToOtkCommand(optionId)));
-
-//                    resetOtk();
-                    return true;
-                }
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+//
+//                        /*
+//                         Set the session Id and otk address with the otkData we just parsed.
+//                         */
+//                        request.setSessionId(otkData.getSessionData().getSessionId());
+//                        request.setOtkAddress(otkData.getSessionData().getAddress());
+//                        String sessId = NfcHandler.sendRequest(intent, request);
+//
+//                        if (!otkData.getSessionData().getSessionId().equals(sessId)) {
+//                            /*
+//                             Send request failed, most likely a communication error occurs.
+//                             Remove the session id and otk address and keep the request as a fresh one.
+//                             */
+//                            request.setSessionId("");
+//                            request.setOtkAddress("");
+//                            logger.info("Something wrong, request is not sent.");
+//                        }
+//                        else {
+//                            /*
+//                             Request delivered, the current otkData is not useful result.
+//                             Set otkData to null and waiting for process request result in
+//                             the next intent.
+//                             */
+//                            otkData = null;
+//                            enableReadOtk();
+//                        }
+//                    }
+//                }
+//
+//                // process valid OpenTurnKey data
+//                if (otkData != null) {
+//                    logger.info(otkData.toString());
+//
+//                    // Notify the DialogReadOtk of the parsing result and close the dialog.
+//                    DialogReadOtk.updateReadOtkStatus(DialogReadOtk.READ_SUCCESS);
+//
+//                    /* There is an otk show result delay in DialogReadOtk,
+//                        to start to a new activity, wait until the dialog closed.
+//                     */
+//                    final OtkData _otkData = otkData;
+//                    new CountDownTimer(DialogReadOtk.SHOW_RESULT_DELAY +
+//                            DialogReadOtk.DISMISS_ANIMATION_TIME, 1000) {
+//                        public void onTick(long millisUntilFinished) {
+//                        }
+//
+//                        public void onFinish() {
+//                            // show otkData in ActivityOpenturnkeyInfo
+//                            mSelectedFragment.postOtkData(_otkData);
+//                        }
+//                    }.start();
+//                }
+//            }
+//            else {
+//                logger.info("Not a valid OpenTurnKey");
+//                // Notify the DialogReadOtk of the parsing result and close the dialog.
+//                DialogReadOtk.updateReadOtkStatus(DialogReadOtk.NOT_OPENTURNKEY);
+//                AlertPrompt.info(this, getString(R.string.not_openturnkey));
+//            }
+//        }
     }
 
     @Override
@@ -771,22 +671,7 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         setCurrentActivity(getClass().getName());
-
-        logger.debug("Current Fragment={}", getNavIndex(bottomNav.getSelectedItemId()));
-
-        // Synchronize navigation bar with with fragment
-        navToFragment(bottomNav.getSelectedItemId());
-
-        // Refresh current fragment
-        getSupportFragmentManager().beginTransaction().replace(
-                R.id.frame_main, mSelectedFragment).commit();
-
-        getSupportFragmentManager().beginTransaction()
-                .detach(mSelectedFragment)
-                .attach(mSelectedFragment)
-                .commit();
     }
-
 
     public void addNote(String note) {
         logger.debug("note:" + note);
@@ -798,13 +683,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void cancelAddNote() {
-        mOtk.cancelOperation();
-        mOp = Otk.Operation.OTK_OP_NONE;
-        mIsOpInProcessing = false;
-        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-    }
-
     public void setPIN(String pin) {
         logger.info("pin:" + pin);
         OtkRequest request = otkRequestQueue.peek();
@@ -812,17 +690,6 @@ public class MainActivity extends AppCompatActivity
             request.setData(pin);
             dialogAuthByPin();
         }
-    }
-
-    public void cancelSetPIN() {
-        mOtk.cancelOperation();
-        mOp = Otk.Operation.OTK_OP_NONE;
-        mIsOpInProcessing = false;
-        ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-    }
-
-    public static void clearRequest() {
-        while (otkRequestQueue.size() > 0) otkRequestQueue.poll();
     }
 
     public void authByPin(String pin) {
@@ -863,15 +730,6 @@ public class MainActivity extends AppCompatActivity
 
     public void onCancelButtonClick() {
         AlertPrompt.info(this, getString(R.string.operation_cancelled));
-        if (mOp != Otk.Operation.OTK_OP_SIGN_PAYMENT) {
-            mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-            mIsOpInProcessing = false;
-            if (mSelectedFragment instanceof FragmentOtk) {
-                ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-            }
-            mOtk.cancelOperation();
-            return;
-        }
 
         // For sign payment
         hideConfirmPaymentDialog();
@@ -916,9 +774,8 @@ public class MainActivity extends AppCompatActivity
                 BtcUtils.convertDateTimeStringToLong(tx.getTime()) + mGMTOffset,
                 tx.getHash(), tx.getFrom(), tx.getTo(), tx.getAmount(), tx.getFee(),
                 tx.getStatus().toInt(), tx.getDesc(), tx.getRaw(), tx.getConfirmations());
-        OpenturnkeyDB otkDB = new OpenturnkeyDB(getApplicationContext());
-        otkDB.addTransaction(dbTrans);
-        logger.info("DB tx count:{}", otkDB.getTransactionCount());
+        OpenturnkeyDB.addTransaction(dbTrans);
+        logger.info("DB tx count:{}", OpenturnkeyDB.getTransactionCount());
     }
 
     private void backToAddressEditorActivity(String alias, String address) {
@@ -940,9 +797,6 @@ public class MainActivity extends AppCompatActivity
         mIsOpInProcessing = false;
         mOtk.cancelOperation();
         mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-        if (mSelectedFragment instanceof FragmentOtk) {
-            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-        }
 
         if (OtkEvent.Type.GET_KEY_SUCCESS == event.getType()) {
             intent = new Intent(this, ActivityKeyInformation.class);
@@ -951,106 +805,6 @@ public class MainActivity extends AppCompatActivity
         } else if (OtkEvent.Type.GET_KEY_FAIL == event.getType()) {
             showStatusDialog(getString(R.string.get_key_fail), parseFailureReason(event.getFailureReason()));
         }
-    }
-
-    private void resetOtk() {
-        logger.info("Reset OTK");
-        mOp = Otk.Operation.OTK_OP_RESET;
-        if (mSelectedFragment instanceof FragmentOtk) {
-            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-        }
-        mIsOpInProcessing = true;
-        mOtk.setOperation(mOp);
-    }
-
-    private void processResetOtkEvent(OtkEvent event) {
-        logger.info("processResetOtkEvent");
-        hideStatusDialog();
-        mIsOpInProcessing = false;
-        mOtk.cancelOperation();
-        mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-        if (mSelectedFragment instanceof FragmentOtk) {
-            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-        }
-
-        if (OtkEvent.Type.RESET_FAIL == event.getType()) {
-            showStatusDialog(getString(R.string.reset_fail), parseFailureReason(event.getFailureReason()));
-        } else if (OtkEvent.Type.RESET_SUCCESS == event.getType()) {
-            showStatusDialog(getString(R.string.reset_success), getString(R.string.reset_step_intro));
-        }
-    }
-
-    private void exportWifKey() {
-        logger.info("exportWifKey");
-        mOp = Otk.Operation.OTK_OP_EXPORT_WIF_KEY;
-        mIsOpInProcessing = true;
-        if (mSelectedFragment instanceof FragmentOtk) {
-            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-        }
-        mOtk.setOperation(mOp);
-    }
-
-    private void processExportWifKeyEvent(OtkEvent event) {
-        logger.info("processExportWifKeyEvent");
-        hideStatusDialog();
-        mIsOpInProcessing = false;
-        mOtk.cancelOperation();
-        mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-        if (mSelectedFragment instanceof FragmentOtk) {
-            ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-        }
-
-        if (OtkEvent.Type.EXPORT_WIF_KEY_FAIL == event.getType()) {
-            showStatusDialog(getString(R.string.export_private_key_wif_fail), getString(R.string.need_fp_preauth));
-        } else if (OtkEvent.Type.EXPORT_WIF_KEY_SUCCESS == event.getType()) {
-            /* Show Private key which is WIF format */
-            final String keyInfo = event.getData().getSessionData().getWIFKey();
-            final View v = View.inflate(this, R.layout.dialog_private_key_wif, null);
-            TextView tvKeyString = v.findViewById(R.id.textView_export_key_string);
-            ImageView ivQRCode = v.findViewById(R.id.imageView_export_key_qrcode);
-
-            logger.info("Show private key in dialog. key: {}", keyInfo);
-
-            tvKeyString.setText(keyInfo);
-            Bitmap bitmap = QRCodeUtils.encodeAsBitmap(keyInfo,
-                    ivQRCode.getDrawable().getIntrinsicWidth(),
-                    ivQRCode.getDrawable().getIntrinsicHeight());
-            ivQRCode.setImageBitmap(bitmap);
-            // copy button
-            ImageView copy = v.findViewById(R.id.wif_key_copy);
-            copy.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Context context = view.getContext();
-                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("wif_key", keyInfo);
-                    if (clipboard != null) {
-                        clipboard.setPrimaryClip(clip);
-                    }
-                    AlertPrompt.info(context, getString(R.string.copy));
-                }
-            });
-
-            new AlertDialog.Builder(MainActivity.this)
-                    .setTitle(getString(R.string.export_private_key))
-                    .setView(v)
-                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    })
-                    .show();
-        }
-    }
-
-    private void dialogAddNote() {
-        DialogAddNote dialog = new DialogAddNote();
-        dialog.show(getSupportFragmentManager(), "dialog");
-    }
-
-    private void dialogSetPIN() {
-        DialogSetPIN dialog = new DialogSetPIN();
-        dialog.show(getSupportFragmentManager(), "dialog");
     }
 
     public void dialogAuthByPin() {
@@ -1305,9 +1059,6 @@ public class MainActivity extends AppCompatActivity
                 mWaitingAddressFromAddrEditor = false;
                 clearCachedPayFragmentData();
                 mOp = Otk.Operation.OTK_OP_NONE;
-                if (mSelectedFragment instanceof FragmentOtk) {
-                    ((FragmentOtk) mSelectedFragment).updateOperation(mOp);
-                }
                 handler.sendMessage(handler.obtainMessage());
             }
         });
@@ -1327,11 +1078,6 @@ public class MainActivity extends AppCompatActivity
             mConfirmOpDialog.dismiss();
         }
     }
-
-//    /* Returning MainActivity running state for ActivitySplash to check */
-//    static public boolean isRunning() {
-//        return (mOtk != null);
-//    }
 
     public String parseFailureReason(String desc) {
         if (desc == null || desc.equals("")) {
@@ -1357,35 +1103,16 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private String menuOptionToOtkCommand(int opt) {
-        switch (opt) {
-            case R.id.menu_openturnkey_unlock:
-                return OtkCommand.CMD_UNLOCK;
-            case R.id.menu_openturnkey_set_note:
-                return OtkCommand.CMD_SETNOTE;
-            case R.id.menu_openturnkey_set_pin:
-                return OtkCommand.CMD_SETPIN;
-            case R.id.menu_openturnkey_choose_key:
-                return OtkCommand.CMD_SETKEY;
-            case R.id.menu_openturnkey_sign_message:
-                return OtkCommand.CMD_SIGN;
-            case R.id.menu_openturnkey_get_key:
-                return OtkCommand.CMD_GETKEY;
-            case R.id.menu_openturnkey_export_wif_key:
-                return OtkCommand.CMD_EXPORTWIF;
-            case R.id.menu_openturnkey_reset:
-                return OtkCommand.CMD_RESET;
-            default:
-                return null;
-        }
+    public static void clearRequest() {
+        while (otkRequestQueue.size() > 0) otkRequestQueue.poll();
     }
-    
+
     public static void pushRequest(OtkRequest request) {
         clearRequest();
         otkRequestQueue.add(request);
         logger.debug("Push a request({}) of {} requests", request.getCommand(), otkRequestQueue.size());
     }
-    
+
     public static OtkRequest pollRequest() {
         OtkRequest request = otkRequestQueue.poll();
         if (request != null) {
@@ -1393,84 +1120,13 @@ public class MainActivity extends AppCompatActivity
         }
         return request;
     }
-    
+
     public static OtkRequest peekRequest() {
         return otkRequestQueue.peek();
     }
-    
+
     public static boolean hasRequest() {
         return otkRequestQueue.size() > 0;
-    }
-
-    public static Queue<OtkRequest> makeRequest(String command, String[] signatures,
-                    String data, String pin, String options, boolean more, boolean masterKey) {
-        Queue<OtkRequest> requests = new LinkedList<>();
-
-        if (signatures.length > 0) {
-            StringBuilder sigStr = new StringBuilder();
-            int sigCount = 0;
-
-            for (int i = 0; i < signatures.length; i++) {
-                sigStr.append(signatures[i]);
-                if (i + 1  < signatures.length) {
-                    sigStr.append(",");
-                }
-                sigCount++;
-
-                if (sigCount == 10) {
-                    OtkRequest request = new OtkRequest(command);
-                    request.setOption(sigStr.toString());
-
-                    if (options.length() > 0)
-                        request.setOption(options);
-
-                    request.setPin(pin);
-
-                    if (more) request.setMore();
-
-                    if (masterKey) request.setPublicKey();
-
-                    requests.add(request);
-
-                    sigStr = new StringBuilder();
-                    sigCount = 0;
-                }
-            }
-
-            if (sigCount > 0) {
-                OtkRequest request = new OtkRequest(command);
-                request.setOption(sigStr.toString());
-
-                if (options.length() > 0)
-                    request.setOption(options);
-
-                request.setPin(pin);
-
-                if (more) request.setMore();
-
-                if (masterKey) request.setPublicKey();
-
-                requests.add(request);
-            }
-        }
-        else {
-            OtkRequest request = new OtkRequest(command);
-            if (data.length() > 0)
-                request.setData(data);
-
-            if (options.length() > 0)
-                request.setOption(options);
-
-            request.setPin(pin);
-
-            if (more) request.setMore();
-
-            if (masterKey) request.setPublicKey();
-
-            requests.add(request);
-        }
-
-        return requests;
     }
 
     public static void enableReadOtk() {
@@ -1481,36 +1137,7 @@ public class MainActivity extends AppCompatActivity
         mEnableReadOtk = false;
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        logger.info("touched");
-        switch(event.getAction())
-        {
-            case MotionEvent.ACTION_DOWN:
-                x1 = event.getX();
-                break;
-            case MotionEvent.ACTION_UP:
-                float x2 = event.getX();
-                float deltaX = x2 - x1;
-                if (Math.abs(deltaX) > MIN_DISTANCE)
-                {
-                    int leftItem = getNavIndex(bottomNav.getSelectedItemId()) - 1;
-                    leftItem = leftItem < 0 ? 0 : leftItem;
-                    int rightItem = getNavIndex(bottomNav.getSelectedItemId()) + 1;
-                    rightItem = rightItem > navItems.length - 1 ? navItems.length - 1 : rightItem;
-                    if (x2 > x1) {
-                        navToFragment(navItems[leftItem]);
-                    }
-                    else {
-                        navToFragment(navItems[rightItem]);
-                    }
-                }
-                break;
-        }
-        return super.onTouchEvent(event);
-    }
-
-    private int getNavIndex(int resourceId) {
+    private int getNavItemId(int resourceId) {
         for (int i = 0; i < navItems.length; i++) {
             if (navItems[i] == resourceId) return i;
         }
@@ -1561,6 +1188,19 @@ public class MainActivity extends AppCompatActivity
 
         dialogReadOtk.setOnCanelListener(listener);
         dialogReadOtk.show(fm, "ReadOtk");
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            SearchView v = findViewById(R.id.menu_addresses_search);
+            if (v != null && v.hasFocus()) {
+                v.clearFocus();
+                v.onActionViewCollapsed();
+                return false;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }
 

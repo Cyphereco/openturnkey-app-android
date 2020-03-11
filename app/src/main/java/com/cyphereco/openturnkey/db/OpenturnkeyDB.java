@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,9 +73,9 @@ public class OpenturnkeyDB {
             ");";
 
     // Database object
-    private SQLiteDatabase otkDB;
+    private static SQLiteDatabase otkDB;
 
-    private DBTransItem generateTransItemByQueryResult(Cursor cursor) {
+    private static DBTransItem generateTransItemByQueryResult(Cursor cursor) {
         DBTransItem item = new DBTransItem();
 
         item.setId(cursor.getLong(0));
@@ -96,7 +95,7 @@ public class OpenturnkeyDB {
         return item;
     }
 
-    private DBAddrItem generateAddrbookItemByQueryResult(Cursor cursor) {
+    private static DBAddrItem generateAddrbookItemByQueryResult(Cursor cursor) {
         DBAddrItem item = new DBAddrItem();
 
         item.setDbId(cursor.getLong(0));
@@ -106,12 +105,13 @@ public class OpenturnkeyDB {
         return item;
     }
 
-    public OpenturnkeyDB(Context context) {
-        otkDB = DBHelper.getDatabase(context);
-
+    public static void init(Context context) {
+        if (otkDB == null) {
+            otkDB = DBHelper.getDatabase(context);
+        }
     }
 
-    public int getTransactionCount() {
+    public static int getTransactionCount() {
         int ret = 0;
 
         try (Cursor cursor = otkDB.rawQuery(
@@ -125,7 +125,7 @@ public class OpenturnkeyDB {
         return ret;
     }
 
-    public DBTransItem addTransaction(DBTransItem item) {
+    public static DBTransItem addTransaction(DBTransItem item) {
         ContentValues cv = new ContentValues();
 
         cv.put(TRANS_DATETIME_COL, item.getDatetime());
@@ -147,7 +147,7 @@ public class OpenturnkeyDB {
         return item;
     }
 
-    public boolean updateTransaction(DBTransItem item) {
+    public static boolean updateTransaction(DBTransItem item) {
         ContentValues cv = new ContentValues();
 
         cv.put(TRANS_DATETIME_COL, item.getDatetime());
@@ -171,7 +171,7 @@ public class OpenturnkeyDB {
         return false;
     }
 
-    public boolean deleteTransactionById(long id) {
+    public static boolean deleteTransactionById(long id) {
         String where = TRANS_KEY_ID_COL + "=" + id;
 
         try {
@@ -183,7 +183,7 @@ public class OpenturnkeyDB {
         return false;
     }
 
-    public DBTransItem getTransactionItemById(long id) {
+    public static DBTransItem getTransactionItemById(long id) {
         DBTransItem item = null;
         try (Cursor cursor = otkDB.query(TRANS_TABLE_NAME, null,
                 TRANS_KEY_ID_COL + "=?", new String[]{String.valueOf(id)},
@@ -198,7 +198,7 @@ public class OpenturnkeyDB {
         return item;
     }
 
-    public List<DBTransItem> getAllTransaction() {
+    public static List<DBTransItem> getAllTransaction() {
         List<DBTransItem> result = new ArrayList<>();
 
         try (Cursor cursor = otkDB.query(TRANS_TABLE_NAME, null, null,
@@ -212,7 +212,7 @@ public class OpenturnkeyDB {
         return result;
     }
 
-    public boolean clearTransactionTable() {
+    public static boolean clearTransactionTable() {
         try {
             otkDB.execSQL("DROP TABLE IF EXISTS " + TRANS_TABLE_NAME);
             otkDB.execSQL(CREATE_TRANS_TABLE_SQL);
@@ -223,7 +223,7 @@ public class OpenturnkeyDB {
         return true;
     }
 
-    public int getAddrbookCount() {
+    public static int getAddrbookCount() {
         int ret = 0;
 
         try (Cursor cursor = otkDB.rawQuery(
@@ -237,7 +237,7 @@ public class OpenturnkeyDB {
         return ret;
     }
 
-    public boolean addAddress(DBAddrItem item) {
+    public static boolean addAddress(DBAddrItem item) {
         if (item.getDbId() > 0) {
             return updateAddressbook(item);
         }
@@ -257,7 +257,7 @@ public class OpenturnkeyDB {
         }
     }
 
-    public boolean updateAddressbook(DBAddrItem item) {
+    public static boolean updateAddressbook(DBAddrItem item) {
         if (item.getDbId() > 0) {
             ContentValues cv = new ContentValues();
 
@@ -278,7 +278,7 @@ public class OpenturnkeyDB {
         }
     }
 
-    public boolean deleteAddressbookByAddr(String address) {
+    public static boolean deleteAddressbookByAddr(String address) {
         try {
             return (otkDB.delete(ADDR_BOOK_TABLE_NAME, ADDRBOOK_ADDR_COL + "=?" , new String[]{address}) > 0);
         }
@@ -288,7 +288,7 @@ public class OpenturnkeyDB {
         return false;
     }
 
-    public boolean deleteAddressbookByAlias(String alias) {
+    public static boolean deleteAddressbookByAlias(String alias) {
         try {
             return (otkDB.delete(ADDR_BOOK_TABLE_NAME, ADDRBOOK_USR_NAME_COL + "=?", new String[]{alias}) > 0);
         }
@@ -298,7 +298,7 @@ public class OpenturnkeyDB {
         return false;
     }
 
-    public List<DBAddrItem> getAllAddressbook() {
+    public static List<DBAddrItem> getAllAddressbook() {
         List<DBAddrItem> result = new ArrayList<>();
         Cursor cursor = otkDB.query(ADDR_BOOK_TABLE_NAME, null,null,
                 null, null,null,null,null);
@@ -310,7 +310,7 @@ public class OpenturnkeyDB {
         return result;
     }
 
-    public DBAddrItem getAddressItemByAlias(String alias) {
+    public static DBAddrItem getAddressItemByAlias(String alias) {
         DBAddrItem item = null;
 
         try (Cursor cursor = otkDB.query(ADDR_BOOK_TABLE_NAME, null,

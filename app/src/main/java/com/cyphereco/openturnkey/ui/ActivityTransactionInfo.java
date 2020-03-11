@@ -46,7 +46,6 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     private ImageButton mBtnPreviousItem;
     private ImageButton mBtnNextItem;
 
-    private OpenturnkeyDB mOtkDB = null;
     private List<DBTransItem> mTransactionDataSet;
     private int mCurrentPosition = 0;
 
@@ -76,7 +75,6 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         Intent intent = this.getIntent();
         long selectedTransId = intent.getLongExtra(KEY_CURRENT_TRANS_ID, 0);
 
-        mOtkDB = new OpenturnkeyDB(getApplicationContext());
         getDatasetFromDB();
 
         DBTransItem item = null;
@@ -189,7 +187,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                                     nextItem = mTransactionDataSet.get(mCurrentPosition + 1);
                                 }
 
-                                if (!mOtkDB.deleteTransactionById(oriItem.getId())) {
+                                if (!OpenturnkeyDB.deleteTransactionById(oriItem.getId())) {
                                     AlertPrompt.alert(getApplicationContext(), getString(R.string.failed_to_delete));
                                     return;
                                 }
@@ -245,7 +243,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
 
     private void showEmptyTransactionDialog() {
         new AlertDialog.Builder(this)
-                .setMessage(R.string.no_transaction)
+                .setMessage(R.string.no_payment_records)
                 .setPositiveButton(R.string.ok,
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -330,9 +328,9 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                 ivResultIcon.setImageResource(R.drawable.ic_success_24dp);
                 c = confirmations + " " + getString(R.string.confirmation);
 
-                if (confirmations > 6){
-                    c = "> 144 " + getString(R.string.confirmation);
-                }
+//                if (confirmations > 6){
+//                    c = "> 144 " + getString(R.string.confirmation);
+//                }
             }
 
             tvResult.setText(c);
@@ -400,7 +398,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     }
 
     private void getDatasetFromDB() {
-        mTransactionDataSet = mOtkDB.getAllTransaction();
+        mTransactionDataSet = OpenturnkeyDB.getAllTransaction();
 
         Collections.sort(mTransactionDataSet, new Comparator<DBTransItem>() {
             @Override
@@ -416,7 +414,6 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                 return -1;
             }
         });
-
     }
 
     @Override

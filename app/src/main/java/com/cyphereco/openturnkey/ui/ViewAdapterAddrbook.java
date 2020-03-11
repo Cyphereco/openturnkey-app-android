@@ -95,7 +95,6 @@ public class ViewAdapterAddrbook extends RecyclerView.Adapter<ViewAdapterAddrboo
             mTVAlias = itemView.findViewById(R.id.textView_addrbook_item_alias);
             mTVAddress = itemView.findViewById(R.id.textView_addrbook_item_address);
             ImageView ivDeleteBtn = itemView.findViewById(R.id.imageView_addrbook_item_delete);
-            ImageView ivEditBtn = itemView.findViewById(R.id.imageView_addrbook_item_edit);
             ImageView ivQRCodeBtn = itemView.findViewById(R.id.imageView_addrbook_item_qrcode);
             ImageView ivPayBtn = itemView.findViewById(R.id.imageView_addrbook_item_pay);
 

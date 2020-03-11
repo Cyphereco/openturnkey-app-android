@@ -109,6 +109,10 @@ public class DialogReadOtk extends AppCompatDialogFragment {
         animation.start();
     }
 
+    public static void updateReadOtkDesc(String desc) {
+        textDesc.setText(desc);
+    }
+
     public static void updateReadOtkStatus(int flag) {
         textTitle.setVisibility(View.INVISIBLE);
         cancelButton.setVisibility(View.INVISIBLE);
@@ -116,11 +120,11 @@ public class DialogReadOtk extends AppCompatDialogFragment {
 
         switch (flag) {
             case READ_SUCCESS:
-                textDesc.setText("Request has been sent.");
+                textDesc.setText(R.string.request_sent);
                 iconSuccess.setVisibility(View.VISIBLE);
                 break;
             default:
-                textDesc.setText("Not a valid OpenTurnKey! Do not remove OpenTurnKey until reading completed.");
+                textDesc.setText(R.string.not_valid_openturnkey);
                 iconFail.setVisibility(View.VISIBLE);
         }
 

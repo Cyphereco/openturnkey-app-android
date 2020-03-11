@@ -17,20 +17,19 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
+
 import org.slf4j.Logger;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-public class FragmentHistory extends FragmentExtOtkData {
-    private final static String TAG = FragmentHistory.class.getSimpleName();
-    private static Logger logger = Log4jHelper.getLogger(TAG);
+public class FragmentHistory extends FragmentExtendOtkViewPage {
 
+    final int INTERVAL_REFRESH_CONFIRMATIONS = 10; // minute
+    
     private TextView mTVNoHistoryMessage;
     private RecyclerView mRVHistory;
-
-    private OpenturnkeyDB mOtkDB = null;
     private ViewAdapterHistory mItemViewAdapter;
 
     private void setAdapterListener() {
@@ -58,7 +57,7 @@ public class FragmentHistory extends FragmentExtOtkData {
     }
 
     private void updateTransactionDataset() {
-        List<DBTransItem> dataset = mOtkDB.getAllTransaction();
+        List<DBTransItem> dataset = OpenturnkeyDB.getAllTransaction();
 
         Collections.sort(dataset, new Comparator<DBTransItem>() {
             @Override
@@ -96,12 +95,7 @@ public class FragmentHistory extends FragmentExtOtkData {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        logger.debug("onCreateView");
         View view = inflater.inflate(R.layout.fragment_history, container, false);
-
-        if (null == mOtkDB) {
-            mOtkDB = new OpenturnkeyDB(getContext());
-        }
 
         mTVNoHistoryMessage = view.findViewById(R.id.text_no_history);
         mRVHistory = view.findViewById(R.id.recyclerView_history);
@@ -118,10 +112,29 @@ public class FragmentHistory extends FragmentExtOtkData {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        logger.debug("Refresh History List");
+    public void onPageSelected() {
+        super.onPageSelected();
+
+        logger.debug("refresh history");
         updateTransactionDataset();
+
+        // update confirmations of transactions
+//        Thread t = new Thread() {
+//            @Override
+//            public void run() {
+//                super.run();
+//                // Update confirmations number for each transaction
+//                List<DBTransItem> dataset = OpenturnkeyDB.getAllTransaction();
+//                for (int i = 0; i < dataset.size(); i++) {
+//                    DBTransItem dbItem = dataset.get(i);
+//                    int confirmations = BlockChainInfo.getConfirmations(dbItem.getHash());
+//                    // Update db
+//                    dbItem.setConfrimations(confirmations);
+//                    OpenturnkeyDB.updateTransaction(dbItem);
+//                }
+//            }
+//        };
+//        t.start();
     }
 
     @Override
