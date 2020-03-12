@@ -8,6 +8,7 @@ import android.nfc.NfcAdapter;
 import android.os.CountDownTimer;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -63,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_CHOOSE_KEY = 3;
     public static final int REQUEST_CODE_TRANSACTION_INFO = 5;
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
-    public static final String KEY_CHOOSE_KEY = "KEY_CHOOSE_KEY";
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
     public static final String KEY_MESSAGE_TO_SIGN = "KEY_MESSAGE_TO_SIGN";
     public static final String KEY_SIGN_VALIDATE_MESSAGE = "KEY_SIGN_VALIDATE_MESSAGE";
@@ -790,28 +790,20 @@ public class MainActivity extends AppCompatActivity {
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
-            if (resultCode == RESULT_OK) {
-                qrScanText = intent.getStringExtra(KEY_QR_CODE);
-                logger.debug("qr scan result: {}", qrScanText);
-            }
-        }
-        else if (requestCode == MainActivity.REQUEST_CODE_CHOOSE_KEY) {
-            if (intent == null) return;
-            String keyPath = intent.getStringExtra(KEY_CHOOSE_KEY);
-            if (keyPath != null && keyPath.length() > 0) {
-                String[] strList = keyPath.split(",");
-                if (strList.length == 5) {
-                    logger.debug("Set Key Path: {}", keyPath);
-                    OtkRequest request = otkRequestQueue.peek();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-                    if (request != null && request.getCommand().equals(Command.SET_KEY.toString())) {
-                        request.setData(keyPath);
-                    }
-                }
-            }
+        if (getClass().getName().equals(currentActivity)) {
+            mSelectedFragment.onActivityResult(requestCode, resultCode, data);
         }
+
+//        if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
+//            if (resultCode == RESULT_OK) {
+//                qrScanText = intent.getStringExtra(KEY_QR_CODE);
+//                logger.debug("qr scan result: {}", qrScanText);
+//            }
+//        }
     }
 
     boolean dialogConfirmOperationAndWaitResult(String title, String message, String positiveButtonString) {

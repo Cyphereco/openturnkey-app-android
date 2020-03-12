@@ -59,17 +59,12 @@ public class FragmentExtendOtkViewPage extends Fragment {
                         logger.info("Waiting for request result");
 
                         // Sanity check on the otkData
-                        if (otkData.getSessionData().getSessionId().equals(request.getSessionId()) &&
-                                otkData.getSessionData().getAddress().equals(request.getOtkAddress())) {
+                        if (!otkData.getSessionData().getSessionId().equals(request.getSessionId())) {
                             /*
                              Request has been delivered, intent should contain request result.
-                             Either success or fail, the request is made, remove it from the
-                             otkRequestQueue.
-                             */
-                        }
-                        else {
-                            /*
-                             Sanity check failed, error occurs, should quit request to avoid
+                             Either success or fail。
+
+                             If session id mismatches, error occurs, should quit request to avoid
                              suspicious hack.
                              */
                             logger.error("Invalid request result.");

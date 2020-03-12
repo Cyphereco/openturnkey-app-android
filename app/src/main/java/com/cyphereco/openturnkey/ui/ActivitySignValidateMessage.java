@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -86,7 +87,7 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
 
         Toolbar toolbar = findViewById(R.id.toolbar_sign_verify_message);
         setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         TabLayout mTabs = findViewById(R.id.tabLayoutSignVerify);
         mTabs.bringToFront();
@@ -138,6 +139,15 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
             // Failed to process signed message
             AlertPrompt.alert(getApplicationContext(), getString(R.string.sign_message_fail));
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (android.R.id.home == item.getItemId()) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

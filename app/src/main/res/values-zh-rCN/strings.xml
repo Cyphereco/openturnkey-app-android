@@ -138,7 +138,7 @@
     <string name="choose_key_fail">选择密钥失败</string>
     <string name="sign_message_fail">签署信息失敗</string>
     <string name="sign_message_success">签署信息成功</string>
-    <string name="data_copied">数据已拷贝</string>
+    <string name="data_copied">数据已复制</string>
     <string name="message_to_be_signed">待签署消息</string>
     <string name="message_to_be_signed_hint">消息内容</string>
     <string name="signed_message">信息已签署</string>

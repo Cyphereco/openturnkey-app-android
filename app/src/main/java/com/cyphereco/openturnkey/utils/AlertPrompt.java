@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Vibrator;
+import android.view.Gravity;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,8 +31,9 @@ public class AlertPrompt {
         Toast toast = Toast.makeText(context, msg, Toast.LENGTH_LONG);
         TextView tv = toast.getView().findViewById(android.R.id.message);
         tv.setTextColor(Color.BLACK);
-        tv.setTextSize(22);
-        tv.setMinWidth(200);
+        tv.setGravity(Gravity.CENTER);
+        tv.setTextSize(20);
+        tv.setMinWidth(300);
         tv.setTypeface(tv.getTypeface(), Typeface.BOLD);
         toast.getView().setBackgroundResource(decor);
         toast.show();

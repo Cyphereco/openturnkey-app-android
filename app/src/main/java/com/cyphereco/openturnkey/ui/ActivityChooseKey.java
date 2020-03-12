@@ -13,6 +13,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,6 +24,8 @@ import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
 
+import java.util.Objects;
+
 
 public class ActivityChooseKey extends AppCompatActivity {
     public static final String TAG = ActivityChooseKey.class.getSimpleName();
@@ -30,6 +33,7 @@ public class ActivityChooseKey extends AppCompatActivity {
 
     private static final int ZXING_CAMERA_PERMISSION = 1;
     public static final int REQUEST_CODE_QR_CODE = 0;
+    public static final String KEY_PATH = "KEY_PATH";
 
     private boolean isValidL1 = false;
     private boolean isValidL2 = false;
@@ -38,7 +42,7 @@ public class ActivityChooseKey extends AppCompatActivity {
     private boolean isValidL5 = false;
 
     private boolean isAllPathValid() {
-        return (isValidL1 && isValidL2 && isValidL3 && isValidL4 &&isValidL5);
+        return (isValidL1 && isValidL2 && isValidL3 && isValidL4 && isValidL5);
     }
 
     private void processKeyPathChanged() {
@@ -46,8 +50,7 @@ public class ActivityChooseKey extends AppCompatActivity {
         if (isAllPathValid()) {
             btn.setEnabled(true);
             btn.setAlpha(1.0f);
-        }
-        else {
+        } else {
             btn.setEnabled(false);
             btn.setAlpha(.5f);
         }
@@ -82,7 +85,7 @@ public class ActivityChooseKey extends AppCompatActivity {
         setContentView(R.layout.activity_choose_key);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         ImageView iv;
         iv = findViewById(R.id.imageChooseKeyScanQRCode);
@@ -114,15 +117,9 @@ public class ActivityChooseKey extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
-                if (isKeyPathValid()) {
-                    isValidL1 = true;
-                }
-                else {
-                    isValidL1 = false;
-                }
+                isValidL1 = isKeyPathValid();
                 processKeyPathChanged();
             }
-
         });
 
         EditText etL2 = findViewById(R.id.editTextChooseKeyL2);
@@ -130,15 +127,9 @@ public class ActivityChooseKey extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
-                if (isKeyPathValid()) {
-                    isValidL2 = true;
-                }
-                else {
-                    isValidL2 = false;
-                }
+                isValidL2 = isKeyPathValid();
                 processKeyPathChanged();
             }
-
         });
 
         EditText etL3 = findViewById(R.id.editTextChooseKeyL3);
@@ -146,15 +137,9 @@ public class ActivityChooseKey extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
-                if (isKeyPathValid()) {
-                    isValidL3 = true;
-                }
-                else {
-                    isValidL3 = false;
-                }
+                isValidL3 = isKeyPathValid();
                 processKeyPathChanged();
             }
-
         });
 
         EditText etL4 = findViewById(R.id.editTextChooseKeyL4);
@@ -162,15 +147,9 @@ public class ActivityChooseKey extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
-                if (isKeyPathValid()) {
-                    isValidL4 = true;
-                }
-                else {
-                    isValidL4 = false;
-                }
+                isValidL4 = isKeyPathValid();
                 processKeyPathChanged();
             }
-
         });
 
         EditText etL5 = findViewById(R.id.editTextChooseKeyL5);
@@ -178,15 +157,9 @@ public class ActivityChooseKey extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
-                if (isKeyPathValid()) {
-                    isValidL5 = true;
-                }
-                else {
-                    isValidL5 = false;
-                }
+                isValidL5 = isKeyPathValid();
                 processKeyPathChanged();
             }
-
         });
 
         Button btnOk = findViewById(R.id.buttonChooseKeyOk);
@@ -210,7 +183,7 @@ public class ActivityChooseKey extends AppCompatActivity {
                 String l5 = etL5.getText().toString();
                 String path = l1 + "," + l2 + "," + l3 + "," + l4 + "," + l5;
                 logger.debug("Choose key:{}", path);
-                intent.putExtra(MainActivity.KEY_CHOOSE_KEY, path);
+                intent.putExtra(KEY_PATH, path);
                 setResult(RESULT_OK, intent);
                 finish();
             }
@@ -222,6 +195,15 @@ public class ActivityChooseKey extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (android.R.id.home == item.getItemId()) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void showFmtErrorDialog(String contents) {
@@ -268,8 +250,7 @@ public class ActivityChooseKey extends AppCompatActivity {
             Long.parseLong(l3);
             Long.parseLong(l4);
             Long.parseLong(l5);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             showFmtErrorDialog(contents);
             return;
         }

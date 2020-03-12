@@ -28,20 +28,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.OtkData;
-import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.protocol.Command;
-import com.cyphereco.openturnkey.core.protocol.OtkCommand;
 import com.cyphereco.openturnkey.core.protocol.OtkRequest;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 
-import java.util.Objects;
+import org.apache.log4j.chainsaw.Main;
 
-import static com.cyphereco.openturnkey.ui.MainActivity.KEY_OTK_DATA;
-import static com.cyphereco.openturnkey.ui.MainActivity.readOtk;
+import java.util.Objects;
 
 public class FragmentOtk extends FragmentExtendOtkViewPage {
 
@@ -163,7 +159,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                                 if (clipboard != null) {
                                     clipboard.setPrimaryClip(clip);
                                 }
-                                AlertPrompt.info(context, getString(R.string.copy));
+                                AlertPrompt.info(context, getString(R.string.data_copied));
                             }
                         });
 
@@ -206,10 +202,27 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
             }
 
             if (intent != null) {
-                intent.putExtra(KEY_OTK_DATA, otkData);
+                intent.putExtra(MainActivity.KEY_OTK_DATA, otkData);
                 startActivity(intent);
             }
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == MainActivity.REQUEST_CODE_CHOOSE_KEY) {
+            if (data == null) return;
+            String keyPath = data.getStringExtra(ActivityChooseKey.KEY_PATH);
+            if (keyPath != null && keyPath.length() > 0) {
+                String[] strList = keyPath.split(",");
+                if (strList.length == 5) {
+                    cbUsePin.setVisibility(View.VISIBLE);
+                    tvRequestDesc.setText(R.string.choose_key);
+                    pushRequest(new OtkRequest(Command.SET_KEY.toString(), keyPath));
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -291,11 +304,9 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                     public void onConfirmed() {
                         Intent intent = new Intent(getContext(), ActivityChooseKey.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                        startActivity(intent);
-
-                        cbUsePin.setVisibility(View.VISIBLE);
-                        tvRequestDesc.setText(R.string.choose_key);
-                        pushRequest(new OtkRequest(Command.SET_PIN.toString(), "2,4,6,8,10"));
+                        startActivityForResult(intent, MainActivity.REQUEST_CODE_CHOOSE_KEY);
+                        // following process will be handled in onActivityResult, depending on
+                        // whether valid key path is entered.
                     }
                 });
                 dialog.show();
