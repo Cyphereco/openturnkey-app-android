@@ -217,5 +217,6 @@
     <string name="reason">Reason</string>
     <string name="signature_valid">Valid Signature!</string>
     <string name="signature_invalid">Invalid Signature!</string>
+    <string name="unlock_warning">Unlock OpenTurnKey will erase enrolled fingerprint and clear PIN coe setting. It is highly recommend to move your funds to another address or back up the private key before unlock to avoid the risk of losing access to your crypto assets.</string>
 
 </resources>

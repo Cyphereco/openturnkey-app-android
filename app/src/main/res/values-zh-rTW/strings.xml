@@ -199,4 +199,5 @@
     <string name="reason">原因</string>
     <string name="signature_valid">有效的簽名！</string>
     <string name="signature_invalid">無效的簽名！</string>
+    <string name="unlock_warning">解鎖OpenTurnKey將注銷已註冊的指紋並清除PIN碼設置。 強烈您建議在解鎖之前將資金轉移到另一個地址或備份私鑰，以避免失去訪問您的加密資產的風險。</string>
 </resources>

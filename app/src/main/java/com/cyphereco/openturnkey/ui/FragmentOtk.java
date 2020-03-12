@@ -307,8 +307,15 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 dialog.show();
                 break;
             case R.id.menu_openturnkey_unlock:
-                tvRequestDesc.setText(R.string.unlock);
-                pushRequest(new OtkRequest(Command.UNLOCK.toString()));
+                dialog.setMessage(getString(R.string.unlock_warning));
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                    @Override
+                    public void onConfirmed() {
+                        tvRequestDesc.setText(R.string.unlock);
+                        pushRequest(new OtkRequest(Command.UNLOCK.toString()));
+                    }
+                });
+                dialog.show();
                 break;
             case R.id.menu_openturnkey_reset:
                 dialog.setMessage(getString(R.string.reset_warning_message));
