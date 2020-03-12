@@ -197,4 +197,6 @@
     <string name="request_sent">請求已發送</string>
     <string name="request_fail">請求失敗</string>
     <string name="reason">原因</string>
+    <string name="signature_valid">有效的簽名！</string>
+    <string name="signature_invalid">無效的簽名！</string>
 </resources>

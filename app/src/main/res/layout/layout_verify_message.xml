@@ -52,8 +52,8 @@
 
     <ImageView
         android:id="@+id/imageViewVerifyScanQR"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toBottomOf="@+id/textView17"
         app:layout_constraintEnd_toEndOf="parent"
@@ -62,9 +62,9 @@
 
     <ImageView
         android:id="@+id/imageViewVerifyPaste"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toBottomOf="@+id/textView17"
         app:layout_constraintEnd_toStartOf="@+id/imageViewVerifyScanQR"
         app:layout_constraintTop_toTopOf="@+id/textView17"
@@ -72,23 +72,23 @@
 
     <ImageView
         android:id="@+id/imageViewVerifyGreen"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/buttonVerifyMessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/editTextMessageToBeVerified"
         app:srcCompat="@drawable/ic_check_circle_green_24dp" />
 
     <ImageView
         android:id="@+id/imageViewVerifyFail"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
         app:layout_constraintBottom_toBottomOf="@+id/imageViewVerifyGreen"
-        app:layout_constraintStart_toStartOf="@+id/imageViewVerifyGreen"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/imageViewVerifyGreen"
         app:srcCompat="@drawable/ic_fail_24dp" />
 

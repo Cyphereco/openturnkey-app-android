@@ -32,6 +32,7 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkRequest;
+import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
@@ -47,15 +48,14 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
     public static final String TAG = ActivitySignValidateMessage.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
 
-    private static OtkData otkData;
     private ViewPager mViewPager;
+    private SignVerifyPagerAdapter mPageAdapter;
 
     private String mFormattedSignedMsg;
     private String mMsgToSign;
 
     private static final int ZXING_CAMERA_PERMISSION = 1;
     public static final int REQUEST_CODE_QR_CODE = 0;
-    private boolean mUsingMasterKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +70,8 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         mTabs.bringToFront();
 
         mViewPager = findViewById(R.id.viewPagerSignVerify);
-        mViewPager.setAdapter(new SignVerifyPagerAdapter());
+        mPageAdapter = new SignVerifyPagerAdapter();
+        mViewPager.setAdapter(mPageAdapter);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabs));
 
         mTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -111,7 +112,27 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         super.onOtkDataPosted(data);
         logger.debug("otkData: {}", data.toString());
 
-        
+        if (data.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
+            String pubKey = data.getSessionData().getPublicKey();
+            try {
+                String signedMsg = BtcUtils.processSignedMessage(
+                        BtcUtils.generateMessageToSign(mMsgToSign),
+                        BtcUtils.hexStringToBytes(pubKey),
+                        BtcUtils.hexStringToBytes(data.getSessionData().getRequestSigList().get(0)));
+                String publicAddress = BtcUtils.keyToAddress(pubKey);
+                SignedMessage sm = new SignedMessage(publicAddress, signedMsg, mMsgToSign);
+                mFormattedSignedMsg = sm.getFormattedMessage();
+            } catch (Exception e) {
+                // Failed to process signed message
+                AlertPrompt.alert(getApplicationContext(), getString(R.string.sign_message_fail) +
+                        "\n" + getString(R.string.reason) + ": " + parseFailureReason(null));
+            }
+
+            mPageAdapter.updateSignMessageOutput();
+        } else {
+            AlertPrompt.alert(getApplicationContext(), getString(R.string.sign_message_fail) +
+                    "\n" + getString(R.string.reason) + ": " + parseFailureReason(data.getFailureReason()));
+        }
     }
 
     @Override
@@ -121,6 +142,7 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
             if (resultCode == RESULT_OK) {
                 // Handle successful scan
+                assert data != null;
                 String contents = data.getStringExtra(MainActivity.KEY_QR_CODE);
                 EditText etMsgToBeVerified = findViewById(R.id.editTextMessageToBeVerified);
                 etMsgToBeVerified.setText(contents);
@@ -140,6 +162,8 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
     }
 
     class SignVerifyPagerAdapter extends PagerAdapter {
+        private View tabSignMessage;
+
         @Override
         public int getCount() {
             return 2;
@@ -148,6 +172,64 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         @Override
         public boolean isViewFromObject(@NotNull View view, @NotNull Object obj) {
             return obj == view;
+        }
+
+        void updateSignMessageOutput() {
+            if (mFormattedSignedMsg != null && mFormattedSignedMsg.length() > 0) {
+                ImageView ivQr = tabSignMessage.findViewById(R.id.signMessageGenerateQRcode);
+                ivQr.setEnabled(true);
+                ivQr.setVisibility(View.VISIBLE);
+                ivQr.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ImageView image = new ImageView(getApplicationContext());
+                        DisplayMetrics displayMetrics = new DisplayMetrics();
+                        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                        int size = displayMetrics.widthPixels * 7 / 10;
+                        Bitmap bitmap = QRCodeUtils.encodeAsBitmap(mFormattedSignedMsg, size, size);
+                        image.setImageBitmap(bitmap);
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ActivitySignValidateMessage.this)
+                                .setCancelable(true)
+                                .setView(image);
+                        builder.create().show();
+                    }
+                });
+                ImageView ivCopy = tabSignMessage.findViewById(R.id.signMessageCopy);
+                ivCopy.setEnabled(true);
+                ivCopy.setVisibility(View.VISIBLE);
+                ivCopy.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("Signed message", mFormattedSignedMsg);
+                        if (clipboard != null) {
+                            clipboard.setPrimaryClip(clip);
+                        }
+                        AlertPrompt.info(getApplicationContext(), getString(R.string.data_copied));
+                    }
+                });
+                EditText etSignedMsg = tabSignMessage.findViewById(R.id.editTextSignedMessage);
+                etSignedMsg.setEnabled(true);
+                etSignedMsg.setVisibility(View.VISIBLE);
+                etSignedMsg.setText(mFormattedSignedMsg);
+                TextView tvSignedMsg = tabSignMessage.findViewById(R.id.textViewSignedMessage);
+                tvSignedMsg.setEnabled(true);
+                tvSignedMsg.setVisibility(View.VISIBLE);
+            } else {
+                ImageView ivQr = tabSignMessage.findViewById(R.id.signMessageGenerateQRcode);
+                ivQr.setEnabled(false);
+                ivQr.setVisibility(View.INVISIBLE);
+                ImageView ivCopy = tabSignMessage.findViewById(R.id.signMessageCopy);
+                ivCopy.setEnabled(false);
+                ivCopy.setVisibility(View.INVISIBLE);
+                EditText etSignedMsg = tabSignMessage.findViewById(R.id.editTextSignedMessage);
+                etSignedMsg.setEnabled(false);
+                etSignedMsg.setVisibility(View.INVISIBLE);
+                TextView tvSignedMsg = tabSignMessage.findViewById(R.id.textViewSignedMessage);
+                tvSignedMsg.setEnabled(false);
+                tvSignedMsg.setVisibility(View.INVISIBLE);
+            }
         }
 
         private void updateSignMessageButton(View view, String msgToSign) {
@@ -173,68 +255,15 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         }
 
         private void initSignMessageTab(final View view) {
-            if (mFormattedSignedMsg != null && mFormattedSignedMsg.length() > 0) {
-                ImageView ivQr = view.findViewById(R.id.signMessageGenerateQRcode);
-                ivQr.setEnabled(true);
-                ivQr.setVisibility(View.VISIBLE);
-                ivQr.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        ImageView image = new ImageView(getApplicationContext());
-                        DisplayMetrics displayMetrics = new DisplayMetrics();
-                        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                        int size = displayMetrics.widthPixels * 7 / 10;
-                        Bitmap bitmap = QRCodeUtils.encodeAsBitmap(mFormattedSignedMsg, size, size);
-                        image.setImageBitmap(bitmap);
+            updateSignMessageOutput();
 
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ActivitySignValidateMessage.this)
-                                .setCancelable(true)
-                                .setView(image);
-                        builder.create().show();
-                    }
-                });
-                ImageView ivCopy = view.findViewById(R.id.signMessageCopy);
-                ivCopy.setEnabled(true);
-                ivCopy.setVisibility(View.VISIBLE);
-                ivCopy.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("Signed message", mFormattedSignedMsg);
-                        if (clipboard != null) {
-                            clipboard.setPrimaryClip(clip);
-                        }
-                        AlertPrompt.info(getApplicationContext(), getString(R.string.data_copied));
-                    }
-                });
-                EditText etSignedMsg = view.findViewById(R.id.editTextSignedMessage);
-                etSignedMsg.setEnabled(true);
-                etSignedMsg.setVisibility(View.VISIBLE);
-                etSignedMsg.setText(mFormattedSignedMsg);
-                TextView tvSignedMsg = view.findViewById(R.id.textViewSignedMessage);
-                tvSignedMsg.setEnabled(true);
-                tvSignedMsg.setVisibility(View.VISIBLE);
-            } else {
-                ImageView ivQr = view.findViewById(R.id.signMessageGenerateQRcode);
-                ivQr.setEnabled(false);
-                ivQr.setVisibility(View.INVISIBLE);
-                ImageView ivCopy = view.findViewById(R.id.signMessageCopy);
-                ivCopy.setEnabled(false);
-                ivCopy.setVisibility(View.INVISIBLE);
-                EditText etSignedMsg = view.findViewById(R.id.editTextSignedMessage);
-                etSignedMsg.setEnabled(false);
-                etSignedMsg.setVisibility(View.INVISIBLE);
-                TextView tvSignedMsg = view.findViewById(R.id.textViewSignedMessage);
-                tvSignedMsg.setEnabled(false);
-                tvSignedMsg.setVisibility(View.INVISIBLE);
-            }
             EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
             if (mMsgToSign != null && mMsgToSign.length() > 0) {
                 etMsgToSign.setText(mMsgToSign);
             }
 
             CheckBox cbUsingMasterKey = view.findViewById(R.id.checkBoxUsingMasterKey);
-            cbUsingMasterKey.setChecked(mUsingMasterKey);
+            cbUsingMasterKey.setChecked(false);
 
             updateSignMessageButton(view, etMsgToSign.getText().toString());
             etMsgToSign.addTextChangedListener(new TextWatcher() {
@@ -252,23 +281,55 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                 }
             });
 
-
+            final CheckBox cbUsePin = view.findViewById(R.id.sign_msg_use_pin);
             Button btnSignMsg = view.findViewById(R.id.buttonSignMessage);
             btnSignMsg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // Using Master Key checkbox
-                    CheckBox cbUsingMasterKey = view.findViewById(R.id.checkBoxUsingMasterKey);
-                    EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
-                    String msgToSign = etMsgToSign.getText().toString();
-                    OtkRequest request = new OtkRequest(Command.SIGN.toString());
-                    byte[] encodedMessageToSign = BtcUtils.generateMessageToSign(msgToSign);
-                    request.setData(BtcUtils.bytesToHexString(encodedMessageToSign));
-                    if (cbUsingMasterKey.isChecked()) request.setMasterKey();
-                    pushRequest(request);
+                    mFormattedSignedMsg = "";
+                    updateSignMessageOutput();
+                    clearRequest();
+                    if (cbUsePin.isChecked()) {
+                        DialogAuthByPin dialogAuthByPin = new DialogAuthByPin();
+                        dialogAuthByPin.setListener(new DialogAuthByPin.DialogAuthByPinListener() {
+                            @Override
+                            public void setPin(String pin) {
+                                CheckBox cbUsingMasterKey = view.findViewById(R.id.checkBoxUsingMasterKey);
+                                EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
+                                mMsgToSign = etMsgToSign.getText().toString();
+                                OtkRequest request = new OtkRequest(Command.SIGN.toString());
+                                byte[] encodedMessageToSign = BtcUtils.generateMessageToSign(mMsgToSign);
+                                assert encodedMessageToSign != null;
+                                request.setData(BtcUtils.bytesToHexString(encodedMessageToSign));
+                                if (cbUsingMasterKey.isChecked()) request.setMasterKey();
+                                request.setPin(pin);
+                                pushRequest(request);
 
-                    DialogReadOtk dialogReadOtk = new DialogReadOtk();
-                    dialogReadOtk.show(getSupportFragmentManager(),"SIGN_MESSAGE");
+                                DialogReadOtk dialogReadOtk = new DialogReadOtk();
+                                dialogReadOtk.setOnCanelListener(new DialogReadOtk.dialogReadOtkListener() {
+                                    @Override
+                                    public void onCancel() {
+                                        clearRequest();
+                                    }
+                                });
+                                dialogReadOtk.show(getSupportFragmentManager(), "SIGN_MESSAGE");
+                            }
+                        });
+                        dialogAuthByPin.show(getSupportFragmentManager(), "AuthByPin");
+                    } else {
+                        CheckBox cbUsingMasterKey = view.findViewById(R.id.checkBoxUsingMasterKey);
+                        EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
+                        mMsgToSign = etMsgToSign.getText().toString();
+                        OtkRequest request = new OtkRequest(Command.SIGN.toString());
+                        byte[] encodedMessageToSign = BtcUtils.generateMessageToSign(mMsgToSign);
+                        assert encodedMessageToSign != null;
+                        request.setData(BtcUtils.bytesToHexString(encodedMessageToSign));
+                        if (cbUsingMasterKey.isChecked()) request.setMasterKey();
+                        pushRequest(request);
+
+                        DialogReadOtk dialogReadOtk = new DialogReadOtk();
+                        dialogReadOtk.show(getSupportFragmentManager(), "SIGN_MESSAGE");
+                    }
                 }
             });
         }
@@ -337,9 +398,11 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                         if (isVerified) {
                             ivGreen.setVisibility(View.VISIBLE);
                             ivFail.setVisibility(View.INVISIBLE);
+                            AlertPrompt.info(getApplicationContext(),getString(R.string.signature_valid));
                         } else {
                             ivGreen.setVisibility(View.INVISIBLE);
                             ivFail.setVisibility(View.VISIBLE);
+                            AlertPrompt.alert(getApplicationContext(),getString(R.string.signature_invalid));
                         }
                     } else {
                         ivGreen.setVisibility(View.INVISIBLE);
@@ -352,17 +415,17 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         @NotNull
         @Override
         public Object instantiateItem(@NotNull ViewGroup container, int position) {
-            View view;
             if (position == 0) {
-                view = getLayoutInflater().inflate(R.layout.layout_sign_message, container, false);
-                container.addView(view);
-                initSignMessageTab(view);
+                tabSignMessage = getLayoutInflater().inflate(R.layout.layout_sign_message, container, false);
+                container.addView(tabSignMessage);
+                initSignMessageTab(tabSignMessage);
+                return tabSignMessage;
             } else {
-                view = getLayoutInflater().inflate(R.layout.layout_verify_message, container, false);
-                container.addView(view);
-                initVerifyMessageTab(view);
+                View tabVerifyMessage = getLayoutInflater().inflate(R.layout.layout_verify_message, container, false);
+                container.addView(tabVerifyMessage);
+                initVerifyMessageTab(tabVerifyMessage);
+                return tabVerifyMessage;
             }
-            return view;
         }
 
         @Override
@@ -371,7 +434,27 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         }
     }
 
-    public static void setOtkData(OtkData inOtkData) {
-        otkData = inOtkData;
+    public String parseFailureReason(String desc) {
+        if (desc == null || desc.equals("")) {
+            return getString(R.string.communication_error);
+        }
+        switch (desc) {
+            case "C0":
+                return getString(R.string.session_timeout);
+            case "C1":
+                return getString(R.string.auth_failed);
+            case "C3":
+                return getString(R.string.invalid_params);
+            case "C4":
+                return getString(R.string.missing_params);
+            case "C7":
+                return getString(R.string.pin_unset);
+            case "00":
+            case "C2":
+            case "FF":
+                return getString(R.string.invalid_command);
+            default:
+                return desc;
+        }
     }
 }

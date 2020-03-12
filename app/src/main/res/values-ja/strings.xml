@@ -197,4 +197,6 @@
     <string name="request_sent">リクエストが送信されました</string>
     <string name="request_fail">リクエスト失敗</string>
     <string name="reason">理由</string>
+    <string name="signature_valid">有効な署名！</string>
+    <string name="signature_invalid">無効な署名！</string>
 </resources>

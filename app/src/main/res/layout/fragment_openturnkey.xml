@@ -80,7 +80,7 @@
         app:layout_constraintTop_toBottomOf="@+id/text_request_desc" />
 
     <CheckBox
-        android:id="@+id/checkbox_use_pin"
+        android:id="@+id/otk_request_use_pin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"

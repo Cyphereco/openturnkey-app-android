@@ -1,19 +1,13 @@
 package com.cyphereco.openturnkey.ui;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -35,16 +29,14 @@ import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 
-import org.apache.log4j.chainsaw.Main;
-
 import java.util.Objects;
 
 public class FragmentOtk extends FragmentExtendOtkViewPage {
 
     private final int AUTO_DISMISS_MILLIS = 30 * 1000;
     private static CountDownTimer timerRequestDismiss = null;
-    private static TextView tvRequestDesc;
-    private static CheckBox cbUsePin;
+    private TextView tvRequestDesc;
+    private CheckBox cbUsePin;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,7 +51,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
 
         Button btnNfcRead = view.findViewById(R.id.btn_nfc_read);
         tvRequestDesc = view.findViewById(R.id.text_request_desc);
-        cbUsePin = view.findViewById(R.id.checkbox_use_pin);
+        cbUsePin = view.findViewById(R.id.otk_request_use_pin);
 
         btnNfcRead.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,9 +73,11 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                                         clearRequest();
                                     }
                                 });
+                                assert getFragmentManager() != null;
                                 dialogReadOtk.show(getFragmentManager(), "ReadOtk");
                             }
                         });
+                        assert getFragmentManager() != null;
                         dialogAuthByPin.show(getFragmentManager(), "AuthByPin");
                         return;
                     }
@@ -96,6 +90,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                         clearRequest();
                     }
                 });
+                assert getFragmentManager() != null;
                 dialogReadOtk.show(getFragmentManager(), "ReadOtk");
             }
         });
@@ -131,7 +126,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 // no particular request command, display general information
                 intent = new Intent(getContext(), ActivityOpenturnkeyInfo.class);
             } else {
-                // otkData contains request result, process the result according to the reqeust
+                // otkData contains request result, process the result according to the request
                 Command cmd = otkData.getOtkState().getCommand();
 
                 if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
@@ -263,7 +258,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                                 pushRequest(new OtkRequest(Command.SET_PIN.toString(), pin));
                             }
                         });
-                        dialog.show(getActivity().getSupportFragmentManager(), "dialog");
+                        dialog.show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "dialog");
                     }
                 });
                 dialog.show();
@@ -290,7 +285,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                         pushRequest(new OtkRequest(Command.SET_NOTE.toString(), note));
                     }
                 });
-                dialogAddNote.show(getActivity().getSupportFragmentManager(), "dialog");
+                dialogAddNote.show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "dialog");
                 break;
             case R.id.menu_openturnkey_sign_message:
                 intent = new Intent(getContext(), ActivitySignValidateMessage.class);
@@ -390,7 +385,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
 
     public String parseFailureReason(String desc) {
         if (desc == null || desc.equals("")) {
-            return getString(R.string.unknown_reason);
+            return getString(R.string.communication_error);
         }
         switch (desc) {
             case "C0":
@@ -420,13 +415,5 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 .setPositiveButton(R.string.ok, null)
                 .setCancelable(false)
                 .show();
-    }
-
-    AlertDialog.Builder confirmationDialogBuilder(String title, String message) {
-        return new AlertDialog.Builder(getContext())
-                .setTitle(title)
-                .setMessage(message)
-                .setNegativeButton(R.string.cancel, null)
-                .setCancelable(true);
     }
 }

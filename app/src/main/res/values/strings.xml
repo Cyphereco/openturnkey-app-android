@@ -215,5 +215,7 @@
     <string name="not_valid_openturnkey">Not a valid OpenTurnKey! Do not remove OpenTurnKey until reading completed.</string>
     <string name="request_fail">Request Fail</string>
     <string name="reason">Reason</string>
+    <string name="signature_valid">Valid Signature!</string>
+    <string name="signature_invalid">Invalid Signature!</string>
 
 </resources>

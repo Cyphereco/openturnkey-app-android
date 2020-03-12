@@ -72,9 +72,8 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
         Intent intent = this.getIntent();
 
         // retrieve passed in parameter when editing address
-        if (null != intent.getStringExtra(KEY_EDITOR_CONTACT_DB_ID)) {
-            mAddrDBId = intent.getLongExtra(KEY_EDITOR_CONTACT_DB_ID, 0);
-        }
+        mAddrDBId = intent.getLongExtra(KEY_EDITOR_CONTACT_DB_ID, 0);
+
         if (null != intent.getStringExtra(KEY_EDITOR_CONTACT_ALIAS)) {
             mInputAlias.setText(intent.getStringExtra(KEY_EDITOR_CONTACT_ALIAS));
         }

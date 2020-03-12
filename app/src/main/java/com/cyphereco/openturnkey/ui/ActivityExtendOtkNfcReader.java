@@ -120,6 +120,7 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
                              */
                             otkData = null;
                             enableReadOtk();
+                            DialogReadOtk.updateReadOtkDesc(getString(R.string.processing_request));
                         }
                     }
                 }
@@ -145,7 +146,6 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
                             onOtkDataPosted(_otkData);
                         }
                     }.start();
-
                 }
             }
             else {
