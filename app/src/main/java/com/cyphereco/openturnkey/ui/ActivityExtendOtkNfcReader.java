@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.NfcHandler;
+import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.core.protocol.OtkRequest;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
@@ -55,6 +56,7 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
                  */
                 if (hasRequest()) {
                     OtkRequest request = peekRequest();
+                    modifyRequestAfterReadOtkBeforeSubmit(request, otkData);
 
                     /*
                      If a request has a session Id and otk address, the request
@@ -185,6 +187,10 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
 
     protected boolean hasRequest() {
         return otkRequestQueue.size() > 0;
+    }
+
+    protected void modifyRequestAfterReadOtkBeforeSubmit(OtkRequest request, OtkData otkData) {
+        logger.debug("Modify request after received OtkData and before submit");
     }
 
     protected void enableReadOtk() {

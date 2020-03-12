@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -56,33 +57,9 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
     public static final int REQUEST_CODE_QR_CODE = 0;
     private boolean mUsingMasterKey;
 
-    public void launchQRcodeScanActivity(View v) {
-        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CAMERA}, ZXING_CAMERA_PERMISSION);
-        } else {
-            Intent intent = new Intent(getApplicationContext(), ActivityQRcodeScan.class);
-            startActivityForResult(intent, ActivitySignValidateMessage.REQUEST_CODE_QR_CODE);
-        }
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        logger.debug("onActivityResult:" + requestCode + " resultCode:" + resultCode);
-        if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
-            if (resultCode == RESULT_OK) {
-                // Handle successful scan
-                String contents = intent.getStringExtra(MainActivity.KEY_QR_CODE);
-                EditText etMsgToBeVerified = findViewById(R.id.editTextMessageToBeVerified);
-                etMsgToBeVerified.setText(contents);
-            }
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        logger.info("onCreate");
         setContentView(R.layout.activity_sign_validate_message);
 
         Toolbar toolbar = findViewById(R.id.toolbar_sign_verify_message);
@@ -112,33 +89,6 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
 
             }
         });
-
-        Intent intent = getIntent();
-        if (intent == null) {
-            return;
-        }
-
-        final OtkData otkData = (OtkData) intent.getSerializableExtra(MainActivity.KEY_OTK_DATA);
-        if (otkData == null) {
-            return;
-        }
-
-        mMsgToSign = (String) intent.getSerializableExtra(MainActivity.KEY_MESSAGE_TO_SIGN);
-        mUsingMasterKey = intent.getBooleanExtra(MainActivity.KEY_USING_MASTER_KEY, false);
-        String pubKey = otkData.getSessionData().getPublicKey();
-        logger.debug("message to sign:{} pubKey:{} signature:{}", mMsgToSign, pubKey, otkData.getSessionData().getRequestSigList().get(0));
-        try {
-            String signedMsg = BtcUtils.processSignedMessage(
-                    BtcUtils.generateMessageToSign(mMsgToSign),
-                    BtcUtils.hexStringToBytes(pubKey),
-                    BtcUtils.hexStringToBytes(otkData.getSessionData().getRequestSigList().get(0)));
-            String publicAddress = BtcUtils.keyToAddress(pubKey);
-            SignedMessage sm = new SignedMessage(publicAddress, signedMsg, mMsgToSign);
-            mFormattedSignedMsg = sm.getFormattedMessage();
-        } catch (Exception e) {
-            // Failed to process signed message
-            AlertPrompt.alert(getApplicationContext(), getString(R.string.sign_message_fail));
-        }
     }
 
     @Override
@@ -157,9 +107,54 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
     }
 
     @Override
+    protected void modifyRequestAfterReadOtkBeforeSubmit(OtkRequest request, OtkData otkData) {
+        super.modifyRequestAfterReadOtkBeforeSubmit(request, otkData);
+        String pubKey = otkData.getSessionData().getPublicKey();
+        String msgHash = "";
+        try {
+            String signedMsg = BtcUtils.processSignedMessage(
+                    BtcUtils.generateMessageToSign(mMsgToSign),
+                    BtcUtils.hexStringToBytes(pubKey),
+                    BtcUtils.hexStringToBytes(otkData.getSessionData().getRequestSigList().get(0)));
+            String publicAddress = BtcUtils.keyToAddress(pubKey);
+            SignedMessage sm = new SignedMessage(publicAddress, signedMsg, mMsgToSign);
+            msgHash = sm.getFormattedMessage();
+        } catch (Exception e) {
+            // Failed to process signed message
+            AlertPrompt.alert(getApplicationContext(), getString(R.string.sign_message_fail));
+        }
+        request.setData(msgHash);
+    }
+
+    @Override
     public void onOtkDataPosted(OtkData data) {
         super.onOtkDataPosted(data);
         logger.debug("otkData: {}", data.toString());
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
+            if (resultCode == RESULT_OK) {
+                // Handle successful scan
+                String contents = data.getStringExtra(MainActivity.KEY_QR_CODE);
+                EditText etMsgToBeVerified = findViewById(R.id.editTextMessageToBeVerified);
+                etMsgToBeVerified.setText(contents);
+            }
+        }
+    }
+
+    public void launchQRcodeScanActivity(View v) {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA}, ZXING_CAMERA_PERMISSION);
+        } else {
+            Intent intent = new Intent(getApplicationContext(), ActivityQRcodeScan.class);
+            startActivityForResult(intent, ActivitySignValidateMessage.REQUEST_CODE_QR_CODE);
+        }
     }
 
     class SignVerifyPagerAdapter extends PagerAdapter {
@@ -287,7 +282,9 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                     OtkRequest request = new OtkRequest(Command.SIGN.toString());
                     request.setData(msgToSign);
                     if (cbUsingMasterKey.isChecked()) request.setMasterKey();
-                    MainActivity.pushRequest(request);
+                    pushRequest(request);
+
+
 
                     DialogReadOtk dialogReadOtk = new DialogReadOtk();
                     dialogReadOtk.show(getSupportFragmentManager(),"SIGN_MESSAGE");
