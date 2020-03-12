@@ -107,29 +107,11 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
     }
 
     @Override
-    protected void modifyRequestAfterReadOtkBeforeSubmit(OtkRequest request, OtkData otkData) {
-        super.modifyRequestAfterReadOtkBeforeSubmit(request, otkData);
-        String pubKey = otkData.getSessionData().getPublicKey();
-        String msgHash = "";
-        try {
-            String signedMsg = BtcUtils.processSignedMessage(
-                    BtcUtils.generateMessageToSign(mMsgToSign),
-                    BtcUtils.hexStringToBytes(pubKey),
-                    BtcUtils.hexStringToBytes(otkData.getSessionData().getRequestSigList().get(0)));
-            String publicAddress = BtcUtils.keyToAddress(pubKey);
-            SignedMessage sm = new SignedMessage(publicAddress, signedMsg, mMsgToSign);
-            msgHash = sm.getFormattedMessage();
-        } catch (Exception e) {
-            // Failed to process signed message
-            AlertPrompt.alert(getApplicationContext(), getString(R.string.sign_message_fail));
-        }
-        request.setData(msgHash);
-    }
-
-    @Override
     public void onOtkDataPosted(OtkData data) {
         super.onOtkDataPosted(data);
         logger.debug("otkData: {}", data.toString());
+
+        
     }
 
     @Override
@@ -280,11 +262,10 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                     EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
                     String msgToSign = etMsgToSign.getText().toString();
                     OtkRequest request = new OtkRequest(Command.SIGN.toString());
-                    request.setData(msgToSign);
+                    byte[] encodedMessageToSign = BtcUtils.generateMessageToSign(msgToSign);
+                    request.setData(BtcUtils.bytesToHexString(encodedMessageToSign));
                     if (cbUsingMasterKey.isChecked()) request.setMasterKey();
                     pushRequest(request);
-
-
 
                     DialogReadOtk dialogReadOtk = new DialogReadOtk();
                     dialogReadOtk.show(getSupportFragmentManager(),"SIGN_MESSAGE");
