@@ -50,6 +50,7 @@ public class FragmentExtendOtkViewPage extends Fragment {
                  */
                 if (hasRequest()) {
                     OtkRequest request = peekRequest();
+                    modifyRequestAfterReadOtkBeforeSubmit(request, otkData);
 
                     /*
                      If a request has a session Id and otk address, the request
@@ -185,8 +186,13 @@ public class FragmentExtendOtkViewPage extends Fragment {
     protected int numOfRequest() {
         return otkRequestQueue.size();
     }
+
     protected boolean hasRequest() {
         return numOfRequest() > 0;
+    }
+
+    protected void modifyRequestAfterReadOtkBeforeSubmit(OtkRequest request, OtkData otkData) {
+        logger.debug("Modify request after received OtkData and before submit");
     }
 
     protected void enableReadOtk() {
