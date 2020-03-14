@@ -40,4 +40,15 @@ public class ExchangeRate {
     public void setmCNY(double mCNY) {
         this.mCNY = mCNY;
     }
+
+    @Override
+    public String toString() {
+        return "ExchangeRate{" +
+                "mTWD=" + mTWD +
+                ", mUSD=" + mUSD +
+                ", mJPY=" + mJPY +
+                ", mEUR=" + mEUR +
+                ", mCNY=" + mCNY +
+                '}';
+    }
 }

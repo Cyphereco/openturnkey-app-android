@@ -13,12 +13,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
-import com.cyphereco.openturnkey.utils.Log4jHelper;
 
-import org.slf4j.Logger;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -26,8 +25,6 @@ import java.util.List;
 
 public class FragmentHistory extends FragmentExtendOtkViewPage {
 
-    final int INTERVAL_REFRESH_CONFIRMATIONS = 10; // minute
-    
     private TextView mTVNoHistoryMessage;
     private RecyclerView mRVHistory;
     private ViewAdapterHistory mItemViewAdapter;
@@ -155,6 +152,7 @@ public class FragmentHistory extends FragmentExtendOtkViewPage {
                     updateTransactionDataset();
                 }
             });
+            assert getFragmentManager() != null;
             dialog.show(getFragmentManager(), "dialog");
         }
         return super.onOptionsItemSelected(item);

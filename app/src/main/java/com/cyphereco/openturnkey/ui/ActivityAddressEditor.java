@@ -107,6 +107,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
     @Override
     protected void onResume() {
         super.onResume();
+        logger.debug("resumed");
 
         // set current activity in MainActivity property
         MainActivity.setCurrentActivity(getClass().getName());
@@ -119,6 +120,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
     @Override
     protected void onPause() {
         super.onPause();
+        logger.debug("paused");
 
         // store inputs in activity's properties
         mAlias = Objects.requireNonNull(mInputAlias.getText()).toString();
@@ -224,7 +226,11 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
                     mAddress = addr;
                     mInputAddress.setText(mAddress);
                 } else {
-                    AlertPrompt.alert(this, getString(R.string.invalid_address));
+                    if (BtcUtils.isSegWitAddress(!Preferences.isTestnet(), addr)) {
+                        AlertPrompt.alert(this, getString(R.string.seg_wit_address_is_not_supported));
+                    } else {
+                        AlertPrompt.alert(this, getString(R.string.invalid_address));
+                    }
                 }
             }
         }

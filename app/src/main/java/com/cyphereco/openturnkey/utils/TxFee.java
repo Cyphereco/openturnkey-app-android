@@ -14,4 +14,13 @@ public class TxFee {
     public long getLow() {return mLow;}
     public long getMid() {return mMid;}
     public long getHigh() {return mHigh;}
+
+    @Override
+    public String toString() {
+        return "TxFee{" +
+                "mLow=" + mLow +
+                ", mMid=" + mMid +
+                ", mHigh=" + mHigh +
+                '}';
+    }
 }

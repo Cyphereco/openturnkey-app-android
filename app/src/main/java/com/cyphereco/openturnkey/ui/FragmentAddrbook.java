@@ -207,6 +207,7 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_DB_ID, item.getDbId());
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ALIAS, item.getName());
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ADDR, item.getAddress());
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         if (null != getActivity()) {
             getActivity().startActivity(intent);
         }

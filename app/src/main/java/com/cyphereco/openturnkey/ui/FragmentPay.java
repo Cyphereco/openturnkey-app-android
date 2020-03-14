@@ -27,20 +27,25 @@ import android.widget.TextView;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.OtkData;
+import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.ExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
+import com.cyphereco.openturnkey.utils.TxFee;
 
 import java.util.Locale;
 import java.util.Objects;
 
+import static android.app.Activity.RESULT_OK;
+
 public class FragmentPay extends FragmentExtendOtkViewPage {
 
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
-    private FragmentPayListener mListener;
-//    private String mRecipientAddress;
+
+    private boolean setPayer = false;
+    private String addrPayer = null;
 
     boolean mUseFixAddress = false;
     boolean mIsCryptoCurrencySet = true;
@@ -56,6 +61,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     private EditText mEtCc;
     private EditText mEtLc;
     private TextView tvAddress;
+    private TextView tvCurrency;
     private Menu mMenu;
 
 //    public static FragmentPay newInstance(String to, String btcAmount, String lcAmount, boolean isUseAllFundsChecked) {
@@ -75,7 +81,38 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             showFixAddressDialog();
         } else {
             Intent intent = new Intent(getActivity(), ActivityQRcodeScan.class);
-            getActivity().startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
+            startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
+        }
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (MainActivity.getSelectedFragment() == null) {
+            MainActivity.setSelectedFragment(this);
+            onPageSelected();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        logger.debug("onActivityResult:" + requestCode + " resultCode:" + resultCode);
+        if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
+            if (resultCode == RESULT_OK) {
+                String addr = data.getStringExtra(KEY_QR_CODE);
+                logger.info("QR result: {}", addr);
+
+                if (MainActivity.isAddressValid(addr)) {
+                    tvAddress.setText(addr);
+                } else {
+                    if (BtcUtils.isSegWitAddress(!Preferences.isTestnet(), addr)) {
+                        AlertPrompt.alert(getContext(), getString(R.string.seg_wit_address_is_not_supported));
+                    } else {
+                        AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
+                    }
+                }
+            }
         }
     }
 
@@ -100,11 +137,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         }
     }
 
-    private void updateCurrencyName(View view) {
-        TextView tv = view.findViewById(R.id.text_local_currency);
-        tv.setText(mLocalCurrency.toString());
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +151,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         tvAddress = view.findViewById(R.id.input_recipient_address);
         tvAddress.setFocusable(false);
+        tvCurrency = view.findViewById(R.id.text_local_currency);
 
         ImageView iv;
         iv = view.findViewById(R.id.icon_scan_qrcode);
@@ -143,21 +176,65 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             public void onClick(View view) {
                 if (mUseFixAddress) {
                     showFixAddressDialog();
-                }
-                else {
+                } else {
                     DialogReadOtk dialogReadOtk = new DialogReadOtk();
                     dialogReadOtk.show(getFragmentManager(), "ReadOtk");
-
-//                    if (mListener != null) {
-//                        CheckBox cb = Objects.requireNonNull(getView()).findViewById(R.id.checkBox_use_all_funds);
-//                        mListener.ontvAddress.getText().toStringByReadNfcButtonClick(mRecipientAddress, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
-//                    }
                 }
             }
         });
 
         mEtCc = view.findViewById(R.id.input_crypto_currency);
+        mEtCc.setSelectAllOnFocus(true);
         mEtLc = view.findViewById(R.id.input_local_currency);
+        mEtLc.setSelectAllOnFocus(true);
+        mEtLc.setText("-.-");
+        mEtLc.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && objExchangeRate == null) {
+                    AlertPrompt.alert(getContext(), "Could not get exchange rate.");
+                    mEtLc.clearFocus();
+                    mEtCc.requestFocus();
+                }
+            }
+        });
+        updateLocalCurrency(Preferences.getLocalCurrency());
+
+        MainActivity.setOnlineDataUpdateListner(new MainActivity.OnlineDataUpdateListener() {
+            @Override
+            public void onExchangeRateUpdated(ExchangeRate exchangeRate) {
+                mEtLc.setText("");
+                objExchangeRate = exchangeRate;
+                updateCurrency();
+            }
+
+            @Override
+            public void onTxFeeUpdated(TxFee txFee) {
+
+            }
+        });
+
+        iv = view.findViewById(R.id.clear_recipient_address);
+        iv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!Preferences.getUseFixAddressChecked()) {
+                    tvAddress.setText("");
+                }
+                else {
+                    showFixAddressDialog();
+                }
+            }
+        });
+
+        iv = view.findViewById(R.id.clear_amount);
+        iv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mEtCc.setText("");
+                mEtLc.setText("");
+            }
+        });
 
         if (getArguments() != null) {
             mEtCc.setText(getArguments().getString(ARG_BTC));
@@ -227,38 +304,37 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             @Override
             public void onClick(View view) {
                 // Check if recipient address is valid.
-                View v = getView();
                 try {
                     // Check if address is valid
                     if (tvAddress.getText() == null || tvAddress.getText().length() == 0) {
-                        Snackbar.make(view, getString(R.string.recipient_is_empty), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                        makeToastMessage(getString(R.string.recipient_is_empty));
                         return;
                     }
                     if (BtcUtils.isSegWitAddress(!Preferences.isTestnet(), tvAddress.getText().toString())) {
-                        Snackbar.make(view, getString(R.string.seg_wit_address_is_not_supported), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                        makeToastMessage(getString(R.string.seg_wit_address_is_not_supported));
                         return;
                     }
                     if (!BtcUtils.validateAddress(!Preferences.isTestnet(), tvAddress.getText().toString())) {
-                        Snackbar.make(view, getString(R.string.invalid_address), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                        makeToastMessage(getString(R.string.invalid_address));
                         return;
                     }
-                    CheckBox cb = null;
-                    if (v != null) {
-                        cb = v.findViewById(R.id.checkBox_use_all_funds);
-                    }
+                    CheckBox cb = getView().findViewById(R.id.checkBox_use_all_funds);
                     if (cb != null && !cb.isChecked() && mBtc <= 0) {
-                        Snackbar.make(view, getString(R.string.incorrect_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                        makeToastMessage(getString(R.string.incorrect_amount));
                         return;
                     }
 
-                    if (mListener != null) {
-                        if (cb != null) {
-                            mListener.onSignPaymentButtonClick(tvAddress.getText().toString(), mBtc, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
-                        }
-                    }
+                    DialogReadOtk dialogReadOtk = new DialogReadOtk();
+                    dialogReadOtk.show(getFragmentManager(), "ReadOtk");
+
+//                    if (mListener != null) {
+//                        if (cb != null) {
+//                            mListener.onSignPaymentButtonClick(tvAddress.getText().toString(), mBtc, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
+//                        }
+//                    }
                 } catch (NullPointerException | NumberFormatException e) {
                     e.printStackTrace();
-                    Snackbar.make(view, getString(R.string.incorrect_recipient_amount), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    makeToastMessage(getString(R.string.incorrect_recipient_amount));
                 }
             }
         });
@@ -294,6 +370,9 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         super.onPageSelected();
 
         if (Preferences.getUseFixAddressChecked()) {
+            if (MainActivity.getPayToAddress().length() > 0) {
+                showFixAddressDialog();
+            }
             tvAddress.setText(Preferences.getUseFixAddressAddrString());
             mUseFixAddress = true;
         }
@@ -319,25 +398,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             }
         }
 
-
-//        mLocalCurrency = MainActivity.pref.getLocalCurrency(Objects.requireNonNull(getActivity()).getApplicationContext());
         mLocalCurrency = Preferences.getLocalCurrency();
-        updateCurrencyName(Objects.requireNonNull(getView()));
-
-//        updateRecipientAddress(mRecipientAddress);
-//        if (context instanceof FragmentPayListener) {
-//            mListener = (FragmentPayListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-
-        mListener = null;
+        tvCurrency.setText(mLocalCurrency.toString());
     }
 
     private double toLocalCurrency(double amount) {
@@ -358,19 +420,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         return 0;
     }
-
-//    public void updateRecipientAddress(String recipientAddress) {
-//        updateRecipientAddress(getView(), recipientAddress);
-//    }
-
-//    public void updateRecipientAddress(View view, String recipientAddress) {
-//        mRecipientAddress = recipientAddress;
-//        if (view == null) {
-//            return;
-//        }
-//        TextView tv = view.findViewById(R.id.input_recipient_address);
-//        tv.setText(recipientAddress);
-//    }
 
     public void updateAmount(String amount) {
         View view = getView();
@@ -435,19 +484,9 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         }
     }
 
-    public void updateCurrencyExchangeRate(ExchangeRate rate) {
-        // Update currency only if there is no rate set before
-        if (objExchangeRate == null) {
-            objExchangeRate = rate;
-            updateCurrency();
-        } else {
-            objExchangeRate = rate;
-        }
-    }
-
     public void updateLocalCurrency(LocalCurrency localCurrency) {
         mLocalCurrency = localCurrency;
-        updateCurrencyName(Objects.requireNonNull(getView()));
+        tvCurrency.setText(mLocalCurrency.toString());
         boolean cache = mIsCryptoCurrencySet;
         mIsCryptoCurrencySet = true;
         updateCurrency();
@@ -621,6 +660,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 .setMessage(R.string.disable_fix_addr_first)
                 .setNegativeButton(R.string.ok, null)
                 .show();
+        MainActivity.setPayToAddress("");
     }
 
     @Override
@@ -630,17 +670,36 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         // process received otk data
         if (otkData != null) {
             if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
-                // read OTK general information, must be getting the OTK address
-                String addr = otkData.getSessionData().getAddress();
-
-                if (MainActivity.isAddressValid(addr)) {
-                    tvAddress.setText(addr);
-                } else {
-                    AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
+                if (setPayer && addrPayer == null) {
+                    // check balance from payer address
+                    // construct transaction
+                    // show confirmation dialog
                 }
-            }
-            else {
+                else {
+                    // read OTK general information, must be getting the OTK address
+                    String addr = otkData.getSessionData().getAddress();
+
+                    if (MainActivity.isAddressValid(addr)) {
+                        tvAddress.setText(addr);
+                    } else {
+                        AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
+                    }
+                }
+            } else {
                 // otkData contains request result, process with proper indications
+                if (otkData.getOtkState().getCommand() == Command.SIGN) {
+                    if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
+                        // got signatures, prompt a processing dialog
+                    }
+                    else {
+                        AlertPrompt.alert(getContext(), "Pay fail\n"
+                                + getString(R.string.reason) + ": " + otkData.getFailureReason());
+                    }
+                }
+                else {
+                    AlertPrompt.alert(getContext(), getString(R.string.communication_error)+ "\n"
+                            + getString(R.string.reason) + ": " + getString(R.string.not_valid_openturnkey));
+                }
             }
         }
     }
@@ -656,6 +715,11 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             return getString(R.string.fees_mid);
         }
         return getString(R.string.fees_low);
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
     }
 
     public void updatePayConfig(Menu menu) {
@@ -697,5 +761,12 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         updatePayConfig(menu);
         mMenu = menu;
+    }
+
+    private void makeToastMessage(String message) {
+        Snackbar snackbar = Snackbar.make(getView(), message, Snackbar.LENGTH_LONG);
+        TextView textView = snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextSize(22);
+        snackbar.setAction("Action", null).show();
     }
 }
