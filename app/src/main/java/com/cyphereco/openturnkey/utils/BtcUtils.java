@@ -21,7 +21,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,7 +45,10 @@ public class BtcUtils {
     private static final int[] INDEXES = new int[128];
 
     static {
-        Arrays.fill(INDEXES, -1);
+
+        for (int i = 0; i < INDEXES.length; i++) {
+            INDEXES[i] = -1;
+        }
         for (int i = 0; i < ALPHABET.length; i++) {
             INDEXES[ALPHABET[i]] = i;
         }
@@ -248,6 +250,7 @@ public class BtcUtils {
             }
         }
         return txFee;
+
     }
 
     static public ExchangeRate getCurrencyExchangeRate() {

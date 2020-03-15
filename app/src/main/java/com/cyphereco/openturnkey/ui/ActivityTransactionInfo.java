@@ -102,7 +102,9 @@ public class ActivityTransactionInfo extends AppCompatActivity {
             onBackPressed();
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     private void configUI() {

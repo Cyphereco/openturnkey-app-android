@@ -40,6 +40,7 @@ public class BlockChainInfo {
     public static final String TAG = BlockChainInfo.class.getSimpleName();
     static Logger logger = Log4jHelper.getLogger(TAG);
 
+    private static Client webClient = ClientBuilder.newClient();
     private static String URI = "https://blockchain.info/";
     private static String PATH_RAWTX = "rawtx";
     private static int latestBlockHeight = -1;
@@ -50,13 +51,11 @@ public class BlockChainInfo {
         String PARAMETER_ACTIVE = "active";
 
         try {
-            Client webClient = ClientBuilder.newClient();
             Response response = webClient.target(URI).path(PATH_ADDRESS_BALANCE).queryParam(PARAMETER_ACTIVE, address)
                     .request().get();
             JSONObject json = new JSONObject(response.readEntity(String.class));
             String finalBalance = json.getJSONObject(address).getString("final_balance");
             ret = new BigDecimal(finalBalance);
-            webClient.close();
         } catch (Exception e) {
             logger.error("e:{}", e.toString());
         }
@@ -64,25 +63,11 @@ public class BlockChainInfo {
         return ret;
     }
 
-    public static void getBalance(final String address, final WebResultHandler handler) {
-        if (handler != null) {
-            new Thread() {
-                @Override
-                public void run() {
-                    synchronized (this) {
-                        handler.onBalanceUpdated(getBalance(address));
-                    }
-                }
-            }.start();
-        }
-    }
-
     public static int getLatestBlockHeight() {
         String PATH_LATESTBLOCK = "latestblock";
         if (latestBlockHeight > 0) return  latestBlockHeight;
 
         try {
-            Client webClient = ClientBuilder.newClient();
             Response response = webClient.target(URI)
                     .path(PATH_LATESTBLOCK)
                     .request()
@@ -90,7 +75,6 @@ public class BlockChainInfo {
             JSONObject json = new JSONObject(response.readEntity(String.class));
             String height = json.getString("height");
             latestBlockHeight = Integer.parseInt(height);
-            webClient.close();
         } catch (Exception e) {
             logger.error("e:{}", e.toString());
         }
@@ -98,23 +82,15 @@ public class BlockChainInfo {
         return latestBlockHeight;
     }
 
-    public static void getLatestBlockHeight(WebResultHandler handler) {
-        if (handler != null) {
-            handler.onBlockHeightUpdated(getLatestBlockHeight());
-        }
-    }
-
     public static int getTxBlockHeight(String txHash) {
         int ret = 0;
         try {
-            Client webClient = ClientBuilder.newClient();
             Response response = webClient.target(URI).path(PATH_RAWTX).path(txHash)
                     .request().get();
             String body = response.readEntity(String.class);
             JSONObject json = new JSONObject(body);
             String height = json.getString("block_height");
             ret = Integer.parseInt(height);
-            webClient.close();
         } catch (Exception e) {
             logger.error("e:{}", e.toString());
         }
@@ -122,22 +98,15 @@ public class BlockChainInfo {
         return ret;
     }
 
-    public static void getTxBlockHeight(String txHash, WebResultHandler handler) {
-        if (handler != null) {
-            handler.onTxBlockHeightUpdated(getTxBlockHeight(txHash));
-        }
-    }
-
     public static String getRawTx(String txHash) {
         String rawTx = null;
         String PARAMETER_FORMAT = "format";
         String PARAMETER_VALUE_HEX = "hex";
         try {
-            Client webClient = ClientBuilder.newClient();
+
             Response response = webClient.target(URI).path(PATH_RAWTX).path(txHash).queryParam(PARAMETER_FORMAT, PARAMETER_VALUE_HEX)
                     .request().get();
             rawTx = response.readEntity(String.class);
-            webClient.close();
         } catch (Exception e) {
             logger.error("e:{}", e.toString());
         }
@@ -145,27 +114,7 @@ public class BlockChainInfo {
         return rawTx;
     }
 
-    public static void getRawTx(String txHash, WebResultHandler handler) {
-        if (handler != null) {
-            handler.onRawTxUpdated(getRawTx(txHash));
-        }
-    }
-
     public static int getConfirmations(String tx) {
         return getLatestBlockHeight() - getTxBlockHeight(tx) + 1;
-    }
-
-    public static void getConfirmations(String tx, WebResultHandler handler) {
-        if (handler != null) {
-            handler.onConfirmationsUpdated(getConfirmations(tx));
-        }
-    }
-
-    public interface WebResultHandler {
-        void onBalanceUpdated(BigDecimal balance);
-        void onBlockHeightUpdated(int height);
-        void onTxBlockHeightUpdated(int height);
-        void onRawTxUpdated(String rawTx);
-        void onConfirmationsUpdated(int confirmations);
     }
 }

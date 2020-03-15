@@ -106,18 +106,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // if system configuration changed, i.e. language changed,
-        // finish the activity and start from the splash for a complete UI refreshment
-        if (selectedFragment != null) {
-            selectedFragment = null;
-            startActivity(new Intent(this, ActivitySplash.class));
-            finish();
-        }
-
         // Initialize Database
         OpenturnkeyDB.init(getApplicationContext());
 
-        updateXchangeRateAndFeesTask();
+        startBackgroundTask();
 
         Tx tx = new Tx(Tx.Status.STATUS_SUCCESS, "5dc7bee70b2d4d486d2e9ca997354e6909769049b2d971dc4034e2c03df909c7", "");
         tx.setFrom("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
@@ -431,12 +423,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        logger.debug("destroyed");
-    }
-
-    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         logger.debug("new intent");
@@ -605,6 +591,72 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    boolean showConfirmPaymentDialog(UnsignedTx utx) {
+        @SuppressLint("HandlerLeak") final Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                throw new RuntimeException();
+            }
+        };
+
+        if (mConfirmPaymentDialog != null && mConfirmPaymentDialog.isShowing()) {
+            logger.error("Confirm dialog is shown, should be some error!");
+        }
+
+        // From:
+        // To:
+        // Amount:
+        // Fee:
+        // Estimated time to be confirmed:
+
+        long estBlocks = BtcUtils.getEstimatedTime(utx.getFee());
+        String estTime = (estBlocks == 1) ? " 5~15" : ((estBlocks > 3) ? " 40~60+" : " 15~35");
+        double txFees = BtcUtils.satoshiToBtc(utx.getFee());
+        double payAmount = utx.getAmount() + txFees;
+
+        LocalCurrency lc = Preferences.getLocalCurrency();
+        String strBtcAmount = String.format(Locale.ENGLISH, "%.8f", payAmount);
+        String strFiatAmount = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(exchangeRate, lc, payAmount));
+        String strBtcFees = String.format(Locale.ENGLISH, "%.8f", txFees);
+        String strFiatFess = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(exchangeRate, lc, txFees));
+
+        String msg = getString(R.string.subject_sender) + "\n" + utx.getFrom() + "\n" +
+                getString(R.string.subject_recipient) + "\n" + utx.getTo() + "\n\n" +
+                getString(R.string.amount_fees_included) + ":\n" +
+                strBtcAmount + " / " + strFiatAmount + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")\n\n" +
+                getString(R.string.transaction_fee) + ":\n" +
+                strBtcFees + " / " + strFiatFess + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")\n\n" +
+                getString(R.string.subject_text_estimated_time) + estTime;
+        mConfirmPaymentDialog = mConfirmPaymentDialogBuilder.setTitle(R.string.confirm_payment)
+                .setMessage(msg)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        logger.debug("onCancel()");
+                        mConfirmPaymentDialogResultValue = false;
+                        handler.sendMessage(handler.obtainMessage());
+                        onCancelButtonClick();
+                    }
+                })
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        logger.debug("onOk()");
+                        hideConfirmPaymentDialog();
+                        mConfirmPaymentDialogResultValue = true;
+                        handler.sendMessage(handler.obtainMessage());
+                    }
+                })
+                .setCancelable(true)
+                .show();
+        try {
+            Looper.loop();
+        } catch (RuntimeException e) {
+            logger.debug("Exit showConfirmPaymentDialog");
+        }
+        return mConfirmPaymentDialogResultValue;
+    }
+
     void showCommandResultDialog(String title, String message) {
         @SuppressLint("HandlerLeak") final Handler handler = new Handler() {
             @Override
@@ -757,6 +809,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        logger.debug("paused");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        logger.debug("destroyed");
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             SearchView v = findViewById(R.id.menu_addresses_search);
@@ -769,26 +833,20 @@ public class MainActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private void updateXchangeRateAndFeesTask() {
+    private void startBackgroundTask() {
         final Timer t = new Timer();
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-                boolean restartTask = false;
                 ExchangeRate r = BtcUtils.getCurrencyExchangeRate();
                 if (r == null) {
-                    restartTask = true;
-                }
-                else {
-                    if (!setExchangeRate(r)) {
-                        restartTask = true;
-                    };
-                    setTxFee(BtcUtils.getTxFee());
-                }
-                if (restartTask) {
                     t.cancel();
                     t.purge();
-                    updateXchangeRateAndFeesTask();
+                    startBackgroundTask();
+                }
+                else {
+                    setExchangeRate(r);
+                    setTxFee(BtcUtils.getTxFee());
                 }
             }
         }, 1000, 1000 * 60 * Configurations.INTERVAL_EXCHANGE_RATE_UPDATE);
@@ -798,14 +856,13 @@ public class MainActivity extends AppCompatActivity {
         return exchangeRate;
     }
 
-    public boolean setExchangeRate(ExchangeRate exchangeRate) {
+    public void setExchangeRate(ExchangeRate exchangeRate) {
         logger.debug("Update ExchangeRate: {}", exchangeRate.toString());
         if (exchangeRate != null) {
             if (MainActivity.exchangeRate == null) MainActivity.exchangeRate = exchangeRate;
             if (onlineDataUpdateListner != null)
-                return onlineDataUpdateListner.onExchangeRateUpdated(exchangeRate);
+                onlineDataUpdateListner.onExchangeRateUpdated(exchangeRate);
         }
-        return false;
     }
 
     public static TxFee getTxFee() {
@@ -833,7 +890,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public interface OnlineDataUpdateListener {
-        boolean onExchangeRateUpdated(ExchangeRate xrate);
+        void onExchangeRateUpdated(ExchangeRate exchangeRate);
         void onTxFeeUpdated(TxFee txFee);
     }
 }

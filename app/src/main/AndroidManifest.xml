@@ -28,7 +28,7 @@
         <activity
             android:name=".ui.ActivitySplash"
             android:configChanges="orientation"
-            android:launchMode="singleTop"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme"
             android:windowSoftInputMode="adjustNothing"
@@ -63,8 +63,7 @@
         <activity
             android:name=".ui.ActivityOpenturnkeyInfo"
             android:configChanges="orientation"
-            android:launchMode="singleTop"
-            android:parentActivityName=".ui.MainActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing"
             tools:ignore="LockedOrientationActivity" />
@@ -72,8 +71,7 @@
         <activity
             android:name=".ui.ActivitySignValidateMessage"
             android:configChanges="orientation"
-            android:launchMode="singleTop"
-            android:parentActivityName=".ui.MainActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing"
             tools:ignore="LockedOrientationActivity" />
@@ -81,8 +79,7 @@
         <activity
             android:name=".ui.ActivityQRcodeScan"
             android:label="@string/title_activity_qrcode_scan"
-            android:launchMode="singleTop"
-            android:parentActivityName=".ui.MainActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing"
             tools:ignore="LockedOrientationActivity" />
@@ -90,8 +87,7 @@
         <activity
             android:name=".ui.ActivityAddressEditor"
             android:label="Add Contact"
-            android:launchMode="singleTop"
-            android:parentActivityName=".ui.MainActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing"
             tools:ignore="LockedOrientationActivity" />
@@ -99,24 +95,21 @@
         <activity
             android:name=".ui.ActivityChooseKey"
             android:configChanges="orientation"
-            android:launchMode="singleTop"
-            android:parentActivityName=".ui.MainActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
         <activity
             android:name=".ui.ActivityKeyInformation"
-            android:launchMode="singleTop"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:parentActivityName=".ui.MainActivity"
             android:windowSoftInputMode="adjustNothing"
             tools:ignore="LockedOrientationActivity" />
 
         <activity
             android:name=".ui.ActivityTransactionInfo"
-            android:launchMode="singleTop"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:parentActivityName=".ui.MainActivity"
             android:windowSoftInputMode="adjustNothing"
             tools:ignore="LockedOrientationActivity" />
 
