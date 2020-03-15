@@ -126,7 +126,7 @@
     <string name="write_note_success">寫入備注成功</string>
     <string name="write_note_fail">寫入備注失敗</string>
     <string name="write_note_hint">備注(不超過64字)</string>
-    <string name="check_balance">查詢餘額</string>
+    <string name="check_balance">查詢餘額中，請稍後...</string>
     <string name="set_pin_success">設定PIN碼成功</string>
     <string name="set_pin_fail">設定PIN碼失敗</string>
     <string name="warning">注意!</string>

@@ -216,7 +216,6 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        logger.debug("onActivityResult:" + requestCode + " resultCode:" + resultCode);
         if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
             if (resultCode == RESULT_OK) {
                 String addr = intent.getStringExtra(KEY_QR_CODE);
@@ -276,7 +275,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
                 // Update database
                 item.setDbId(mAddrDBId);
                 if (!OpenturnkeyDB.updateAddressbook(item)) {
-                    logger.error("Update address failed");
+                    AlertPrompt.alert(this, getString(R.string.update_addr_fail));
                 }
             } else {
                 if (existItem != null) {
@@ -285,7 +284,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
                     return;
                 }
                 if (!OpenturnkeyDB.addAddress(item)) {
-                    logger.error("Add address failed");
+                    AlertPrompt.alert(this, getString(R.string.add_new_addr_fail));
                 }
             }
             finish();

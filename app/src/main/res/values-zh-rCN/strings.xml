@@ -126,7 +126,7 @@
     <string name="write_note">写入备注</string>
     <string name="currency_btc">BTC (比特币)</string>
     <string name="write_note_hint">备注(不超过64字)</string>
-    <string name="check_balance">查询余额</string>
+    <string name="check_balance">查询余额中，请稍后...</string>
     <string name="set_pin_success">设定PIN码成功</string>
     <string name="set_pin_fail">设定PIN码失敗</string>
     <string name="warning">注意!</string>
