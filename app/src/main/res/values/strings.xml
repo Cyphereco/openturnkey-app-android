@@ -145,7 +145,7 @@
     <string name="_unit_cny" translatable="false">CNY</string>
     <string name="currency_btc">BTC (Bitcoin)</string>
     <string name="write_note_hint">Note (Less than 64 characters)</string>
-    <string name="check_balance">Checking Balance</string>
+    <string name="check_balance">Checking balance, please wait ...</string>
     <string name="set_pin_success">Set PIN Code Successfully</string>
     <string name="set_pin_fail">Set PIN Code Failed</string>
     <string name="_choose_key_hint" translatable="false">0~2147483647</string>
@@ -218,5 +218,7 @@
     <string name="signature_valid">Valid Signature!</string>
     <string name="signature_invalid">Invalid Signature!</string>
     <string name="unlock_warning">Unlock OpenTurnKey will erase enrolled fingerprint and clear PIN coe setting. It is highly recommend to move your funds to another address or back up the private key before unlock to avoid the risk of losing access to your crypto assets.</string>
+    <string name="update_addr_fail">Update address failed.</string>
+    <string name="add_new_addr_fail">Add new address failed.</string>
 
 </resources>

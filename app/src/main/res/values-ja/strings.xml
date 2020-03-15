@@ -127,7 +127,7 @@
     <string name="currency_btc">BTC (ビットコイン)</string>
     <string name="pin_confirmation_not_match">ピンコードが一致しません</string>
     <string name="write_note_hint">メモ (64文字未満)</string>
-    <string name="check_balance">残高の確認</string>
+    <string name="check_balance">残高の確認中、お待ちください</string>
     <string name="set_pin_success">PINコードを設定しました</string>
     <string name="set_pin_fail">PINコードの設定に失敗しました</string>
     <string name="warning">注意!</string>
