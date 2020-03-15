@@ -1,19 +1,16 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.text.Editable;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,7 +27,6 @@ import android.widget.TextView;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.OtkData;
-import com.cyphereco.openturnkey.core.UnsignedTx;
 import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
@@ -38,9 +34,7 @@ import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.ExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.TxFee;
-import com.cyphereco.openturnkey.webservices.BlockChainInfo;
 
-import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -56,7 +50,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     boolean mUseFixAddress = false;
     boolean mIsCryptoCurrencySet = true;
     private LocalCurrency mLocalCurrency = LocalCurrency.LOCAL_CURRENCY_USD;
-    private ExchangeRate exchangeRate;
+    private ExchangeRate objExchangeRate;
     private boolean mIsAmountConverting = false;
     private double mBtc = 0.0;
     private static final String ARG_TO = "TO";
@@ -197,7 +191,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         mEtLc.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && exchangeRate == null) {
+                if (hasFocus && objExchangeRate == null) {
                     AlertPrompt.alert(getContext(), "Could not get exchange rate.");
                     mEtLc.clearFocus();
                     mEtCc.requestFocus();
@@ -208,12 +202,10 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         MainActivity.setOnlineDataUpdateListner(new MainActivity.OnlineDataUpdateListener() {
             @Override
-            public boolean onExchangeRateUpdated(ExchangeRate xrate) {
-                if (mEtLc == null) return false;
+            public void onExchangeRateUpdated(ExchangeRate exchangeRate) {
                 mEtLc.setText("");
-                exchangeRate = xrate;
+                objExchangeRate = exchangeRate;
                 updateCurrency();
-                return true;
             }
 
             @Override
@@ -332,9 +324,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         return;
                     }
 
-                    setPayer = true;
-                    addrPayer = tvAddress.getText().toString();
-
                     DialogReadOtk dialogReadOtk = new DialogReadOtk();
                     dialogReadOtk.show(getFragmentManager(), "ReadOtk");
 
@@ -414,18 +403,18 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     }
 
     private double toLocalCurrency(double amount) {
-        if (amount > 0 && exchangeRate != null) {
+        if (amount > 0 && objExchangeRate != null) {
             switch (mLocalCurrency) {
                 case LOCAL_CURRENCY_TWD:
-                    return (exchangeRate.getTWD() * amount);
+                    return (objExchangeRate.getTWD() * amount);
                 case LOCAL_CURRENCY_USD:
-                    return (exchangeRate.getUSD() * amount);
+                    return (objExchangeRate.getUSD() * amount);
                 case LOCAL_CURRENCY_CNY:
-                    return (exchangeRate.getCNY() * amount);
+                    return (objExchangeRate.getCNY() * amount);
                 case LOCAL_CURRENCY_EUR:
-                    return (exchangeRate.getEUR() * amount);
+                    return (objExchangeRate.getEUR() * amount);
                 case LOCAL_CURRENCY_JPY:
-                    return (exchangeRate.getJPY() * amount);
+                    return (objExchangeRate.getJPY() * amount);
             }
         }
 
@@ -444,20 +433,20 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     }
 
     private double getCryptoCurrency(double lc) {
-        if (exchangeRate == null) {
+        if (objExchangeRate == null) {
             return 0;
         }
         switch (mLocalCurrency) {
             case LOCAL_CURRENCY_TWD:
-                return lc / exchangeRate.getTWD();
+                return lc / objExchangeRate.getTWD();
             case LOCAL_CURRENCY_USD:
-                return lc / exchangeRate.getUSD();
+                return lc / objExchangeRate.getUSD();
             case LOCAL_CURRENCY_CNY:
-                return lc / exchangeRate.getCNY();
+                return lc / objExchangeRate.getCNY();
             case LOCAL_CURRENCY_EUR:
-                return lc / exchangeRate.getEUR();
+                return lc / objExchangeRate.getEUR();
             case LOCAL_CURRENCY_JPY:
-                return lc / exchangeRate.getJPY();
+                return lc / objExchangeRate.getJPY();
         }
         return 0;
     }
@@ -680,41 +669,16 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         // process received otk data
         if (otkData != null) {
-            String addr = otkData.getSessionData().getAddress();
-
             if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
-                if (setPayer && addrPayer != null) {
-                    // prepare to make payment
-                    final Dialog dialog = dialogFullscreenAlert(getString(R.string.check_balance));
-                    dialog.show();
+                if (setPayer && addrPayer == null) {
                     // check balance from payer address
-                    logger.debug("checking balance");
-                    BlockChainInfo.getBalance(addr, new BlockChainInfo.WebResultHandler() {
-                        @Override
-                        public void onBalanceUpdated(BigDecimal balance) {
-                            logger.debug("Account ({}) balance: {}", addrPayer, balance);
-                            dialog.cancel();
-
-
-                        }
-
-                        @Override
-                        public void onBlockHeightUpdated(int height) { }
-
-                        @Override
-                        public void onTxBlockHeightUpdated(int height) { }
-
-                        @Override
-                        public void onRawTxUpdated(String rawTx) { }
-
-                        @Override
-                        public void onConfirmationsUpdated(int confirmations) { }
-                    });
                     // construct transaction
                     // show confirmation dialog
                 }
                 else {
                     // read OTK general information, must be getting the OTK address
+                    String addr = otkData.getSessionData().getAddress();
+
                     if (MainActivity.isAddressValid(addr)) {
                         tvAddress.setText(addr);
                     } else {
@@ -799,69 +763,10 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         mMenu = menu;
     }
 
-    boolean showConfirmPaymentDialog(UnsignedTx utx) {
-        long estBlocks = BtcUtils.getEstimatedTime(utx.getFee());
-        String estTime = (estBlocks == 1) ? " 5~15" : ((estBlocks > 3) ? " 40~60+" : " 15~35");
-        double txFees = BtcUtils.satoshiToBtc(utx.getFee());
-        double payAmount = utx.getAmount() + txFees;
-
-        LocalCurrency lc = Preferences.getLocalCurrency();
-        String strBtcAmount = String.format(Locale.ENGLISH, "%.8f", payAmount);
-        String strFiatAmount = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(exchangeRate, lc, payAmount));
-        String strBtcFees = String.format(Locale.ENGLISH, "%.8f", txFees);
-        String strFiatFess = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(exchangeRate, lc, txFees));
-
-        String msg = getString(R.string.subject_sender) + "\n" + utx.getFrom() + "\n" +
-                getString(R.string.subject_recipient) + "\n" + utx.getTo() + "\n\n" +
-                getString(R.string.amount_fees_included) + ":\n" +
-                strBtcAmount + " / " + strFiatAmount + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")\n\n" +
-                getString(R.string.transaction_fee) + ":\n" +
-                strBtcFees + " / " + strFiatFess + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")\n\n" +
-                getString(R.string.subject_text_estimated_time) + estTime;
-        AlertDialog mConfirmPaymentDialog =  new AlertDialog.Builder(getContext())
-                .setTitle(R.string.confirm_payment)
-                .setMessage(msg)
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        logger.debug("onCancel()");
-//                        mConfirmPaymentDialogResultValue = false;
-//                        handler.sendMessage(handler.obtainMessage());
-//                        onCancelButtonClick();
-                    }
-                })
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        logger.debug("onOk()");
-//                        hideConfirmPaymentDialog();
-//                        mConfirmPaymentDialogResultValue = true;
-//                        handler.sendMessage(handler.obtainMessage());
-                    }
-                })
-                .setCancelable(true)
-                .show();
-
-        return true;
-    }
-
     private void makeToastMessage(String message) {
         Snackbar snackbar = Snackbar.make(getView(), message, Snackbar.LENGTH_LONG);
         TextView textView = snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
         textView.setTextSize(22);
         snackbar.setAction("Action", null).show();
-    }
-
-    private Dialog dialogFullscreenAlert(String msg) {
-        TextView tv = new TextView(getContext());
-        tv.setText(msg);
-        tv.setTextSize(24);
-        tv.setTextColor(Color.WHITE);
-        tv.setGravity(Gravity.CENTER);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        Dialog dialog = builder.setView(tv).create();
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        dialog.setCanceledOnTouchOutside(false);
-        return dialog;
     }
 }

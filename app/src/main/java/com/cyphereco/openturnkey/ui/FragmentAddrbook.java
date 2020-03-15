@@ -64,25 +64,25 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
         mAdapter.setAdapterListener(new ViewAdapterAddrbook.AdapterListener() {
             @Override
             public void onDeleteAddress(int position) {
-//                logger.debug("onDelete the position is: " + position);
+                logger.debug("onDelete the position is: " + position);
                 processDeleteAddress(position);
             }
 
             @Override
             public void onEditAddress(int position) {
-//                logger.debug("onEditAddress the position is: " + position);
+                logger.debug("onEditAddress the position is: " + position);
                 processEditAddress(position);
             }
 
             @Override
             public void onShowQRCode(int position) {
-//                logger.debug("onShowQRCode the position is: " + position);
+                logger.debug("onShowQRCode the position is: " + position);
                 processShowQRCode(position);
             }
 
             @Override
             public void onPay(int position) {
-//                logger.debug("onPay the position is: " + position);
+                logger.debug("onPay the position is: " + position);
                 DBAddrItem item = mAdapter.getAddressItemByPosition(position);
                 MainActivity.setPayToAddress(item.getAddress());
                 MainActivity.navToFragment(MainActivity.FRAGMENT_PAY);
@@ -96,17 +96,6 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
         mRVAddressList.setAdapter(mAdapter);
 
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        logger.debug("started");
-        if (MainActivity.getSelectedFragment() == null) {
-            logger.debug("activity restarted");
-            MainActivity.setSelectedFragment(this);
-            onPageSelected();
-        }
     }
 
     @Override
@@ -131,11 +120,7 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
         if (item.getItemId() == R.id.menu_addresses_add) {
             Intent intent = new Intent(getContext(), ActivityAddressEditor.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            // we don't need result here, we called startActivityForResult
-            // only to prevent a bug, that we user press back button
-            // the app closed instead of return to MainActivity,
-            // when it return from pause state
-            startActivityForResult(intent, 0);
+            startActivity(intent);
             return true;
         }
 
