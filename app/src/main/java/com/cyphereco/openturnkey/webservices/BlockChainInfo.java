@@ -1,11 +1,15 @@
 package com.cyphereco.openturnkey.webservices;
 
 import com.cyphereco.openturnkey.utils.Log4jHelper;
+
 import org.slf4j.Logger;
+
 import java.math.BigDecimal;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
+
 import org.json.*;
 
 /*
@@ -79,7 +83,7 @@ public class BlockChainInfo {
 
     public static int getLatestBlockHeight() {
         String PATH_LATESTBLOCK = "latestblock";
-        if (latestBlockHeight > 0) return  latestBlockHeight;
+        if (latestBlockHeight > 0) return latestBlockHeight;
 
         try {
             Client webClient = ClientBuilder.newClient();
@@ -163,9 +167,13 @@ public class BlockChainInfo {
 
     public interface WebResultHandler {
         void onBalanceUpdated(BigDecimal balance);
+
         void onBlockHeightUpdated(int height);
+
         void onTxBlockHeightUpdated(int height);
+
         void onRawTxUpdated(String rawTx);
+
         void onConfirmationsUpdated(int confirmations);
     }
 }

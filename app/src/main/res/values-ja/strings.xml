@@ -46,13 +46,13 @@
     <string name="qr_code_scan_cancelled">QRコード撮りキャンセル</string>
     <string name="subject_reason">理由:</string>
     <string name="recipient_is_empty">入金アドレスが空です</string>
-    <string name="incorrect_amount">金額間違い</string>
+    <string name="amount_empty">金額が入力されていません</string>
     <string name="incorrect_recipient_amount">金額や入金アドレス間違い</string>
-    <string name="subject_sender">差出人:</string>
+    <string name="sender">送金方</string>
     <string name="subject_amount">金額:</string>
     <string name="subject_fees">手数料:</string>
     <string name="subject_time">時間:</string>
-    <string name="subject_recipient">受取人:</string>
+    <string name="recipient">受金方</string>
     <string name="user_guide">ユーザーガイド</string>
     <string name="terminate">終了</string>
     <string name="confirm_terminate_op">終了しますか %s？</string>
@@ -184,7 +184,7 @@
     <string name="fees_excluded">手数料抜</string>
     <string name="not_openturnkey">有効なOpenTurnKeyではありません、読み取りが完了するまでOpenTurnKeyを離れないでください。</string>
     <string name="confirmation">確認</string>
-    <string name="amount_fees_included">金額 (手数料込)</string>
+    <string name="amount_sent">送金金額:</string>
     <string name="disable_fix_addr_first">固定アドレスをオフにしてください</string>
     <string name="cannot_change_addr">アドレスを変更できません</string>
     <string name="alias_exists">別称は既に存在します。別の別称を入力してください。</string>
@@ -200,4 +200,7 @@
     <string name="signature_valid">有効な署名！</string>
     <string name="signature_invalid">無効な署名！</string>
     <string name="unlock_warning">"OpenTurnKeyのロックを解除すると、登録済みの指紋が消去され、PIN coe設定がクリアされます。 暗号資産へのアクセスを失うリスクを回避するために、ロックを解除する前に資金を別のアドレスに移動するか、私有鍵をバックアップすることを強くお勧めします。 "</string>
+    <string name="amount_received">受金金額:</string>
+    <string name="add_new_addr_fail">新しい入金アドレスの追加に失敗しました</string>
+    <string name="amount_less_than_fees">" 金額は手数料より低い"</string>
 </resources>

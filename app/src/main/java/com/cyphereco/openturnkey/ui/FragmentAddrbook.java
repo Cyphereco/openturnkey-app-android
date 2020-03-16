@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -53,7 +54,7 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         // inflate layout
-        View view = inflater.inflate(R.layout.fragment_addrbook, container, false);
+        final View view = inflater.inflate(R.layout.fragment_addrbook, container, false);
 
         // get view components
         mTVNoAddressMessage = view.findViewById(R.id.text_no_address);
@@ -85,7 +86,10 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
 //                logger.debug("onPay the position is: " + position);
                 DBAddrItem item = mAdapter.getAddressItemByPosition(position);
                 MainActivity.setPayToAddress(item.getAddress());
-                MainActivity.navToFragment(MainActivity.FRAGMENT_PAY);
+                ViewPager viewPager = getActivity().findViewById(R.id.view_pager_main);
+                if (viewPager != null) {
+                    viewPager.setCurrentItem(0, true);
+                }
             }
         });
 

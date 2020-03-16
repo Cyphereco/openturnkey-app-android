@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Locale;
 
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONException;
@@ -76,21 +77,20 @@ public class BtcUtils {
      * leading zero to indicate that the number is positive and it may need padding.
      *
      * @param bigInteger Integer to format into a byte array
-     * @param numBytes   Desired size of the resulting byte array
      * @return Byte array of the desired length
      */
-    public static byte[] bigIntegerToBytes(BigInteger bigInteger, int numBytes) {
+    private static byte[] bigIntegerToBytes(BigInteger bigInteger) {
         if (bigInteger == null)
             return null;
         byte[] bigBytes = bigInteger.toByteArray();
-        byte[] bytes = new byte[numBytes];
-        int start = (bigBytes.length == numBytes + 1) ? 1 : 0;
-        int length = Math.min(bigBytes.length, numBytes);
-        System.arraycopy(bigBytes, start, bytes, numBytes - length, length);
+        byte[] bytes = new byte[32];
+        int start = (bigBytes.length == 32 + 1) ? 1 : 0;
+        int length = Math.min(bigBytes.length, 32);
+        System.arraycopy(bigBytes, start, bytes, 32 - length, length);
         return bytes;
     }
 
-    public static boolean isKeyCompressed(byte[] key) {
+    private static boolean isKeyCompressed(byte[] key) {
         return key.length == 33;
     }
 
@@ -118,8 +118,8 @@ public class BtcUtils {
             int headerByte = recID + 27 + (isKeyCompressed(publicKey) ? 4 : 0);
             byte[] sigData = new byte[65];
             sigData[0] = (byte) headerByte;
-            System.arraycopy(bigIntegerToBytes(sig.getR(), 32), 0, sigData, 1, 32);
-            System.arraycopy(bigIntegerToBytes(sig.getS(), 32), 0, sigData, 33, 32);
+            System.arraycopy(bigIntegerToBytes(sig.getR()), 0, sigData, 1, 32);
+            System.arraycopy(bigIntegerToBytes(sig.getS()), 0, sigData, 33, 32);
             //
             // Create a Base-64 encoded string for the message signature
             //
@@ -157,7 +157,7 @@ public class BtcUtils {
         return data;
     }
 
-    static byte[] doubleSha256(byte[] message) {
+    private static byte[] doubleSha256(byte[] message) {
         return Utils.doubleDigest(message);
     }
 
@@ -421,7 +421,7 @@ public class BtcUtils {
         if (dateTime == null) return 0;
         try {
             //2019-09-15T16:49:49.584902078Z
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'");
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'", Locale.getDefault());
             Date d = format.parse(dateTime);
             return d.getTime();
         } catch (ParseException e) {
@@ -433,7 +433,7 @@ public class BtcUtils {
     static public String convertDateTimeStringFromLong(long time) {
         Date date = new Date(time);
         //2019-09-15T16:49:49.584902078Z
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'", Locale.getDefault());
         return format.format(date);
     }
 

@@ -46,13 +46,13 @@
     <string name="nfc_unavailable">無法使用NFC</string>
     <string name="title_activity_qrcode_scan">掃描二維碼</string>
     <string name="recipient_is_empty">收款地址為空</string>
-    <string name="incorrect_amount">金額錯誤</string>
+    <string name="amount_empty">未輸入金額</string>
     <string name="incorrect_recipient_amount">金額或地址錯誤</string>
-    <string name="subject_sender">發送方:</string>
+    <string name="sender">發送方</string>
     <string name="subject_amount">金额:</string>
     <string name="subject_fees">手續費:</string>
     <string name="subject_time">時間:</string>
-    <string name="subject_recipient">接收方:</string>
+    <string name="recipient">受領方</string>
     <string name="user_guide">使用指南</string>
     <string name="terminate">中止</string>
     <string name="confirm_terminate_op">確定要結束 %s？</string>
@@ -184,7 +184,7 @@
     <string name="fees_excluded">手续费外加</string>
     <string name="not_openturnkey">不是有效的OpenTurnKey, 讀取完成前請勿移開OpenTurnKey.</string>
     <string name="confirmation">確認</string>
-    <string name="amount_fees_included">金額 (包含手續費)</string>
+    <string name="amount_sent">發送金額:</string>
     <string name="disable_fix_addr_first">請先停用固定地址功能。</string>
     <string name="cannot_change_addr">無法變更地址</string>
     <string name="alias_exists">此別名已使用，請輸入不同的別名。</string>
@@ -200,4 +200,7 @@
     <string name="signature_valid">有效的簽名！</string>
     <string name="signature_invalid">無效的簽名！</string>
     <string name="unlock_warning">解鎖OpenTurnKey將注銷已註冊的指紋並清除PIN碼設置。 強烈您建議在解鎖之前將資金轉移到另一個地址或備份私鑰，以避免失去訪問您的加密資產的風險。</string>
+    <string name="amount_received">實收金額:</string>
+    <string name="add_new_addr_fail">新增常用地址失敗</string>
+    <string name="amount_less_than_fees">金額低於手續費</string>
 </resources>

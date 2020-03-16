@@ -24,13 +24,11 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.Tx;
-import com.cyphereco.openturnkey.core.UnsignedTx;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.ExchangeRate;
-import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.TxFee;
 
@@ -38,7 +36,6 @@ import org.slf4j.Logger;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -58,8 +55,6 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_TRANSACTION_INFO = 5;
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
-    public static final String KEY_MESSAGE_TO_SIGN = "KEY_MESSAGE_TO_SIGN";
-    public static final String KEY_USING_MASTER_KEY = "KEY_USING_MASTER_KEY";
     public static final int REQUEST_RESULT_CODE_REPAY = 1000;
 
     static private Otk mOtk = null;
@@ -83,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int FRAGMENT_HISTORY = R.id.nav_menu_history;
     public static final int FRAGMENT_ADDRBOOK = R.id.nav_menu_addresses;
 
-    private static BottomNavigationView bottomNav;
+    private BottomNavigationView bottomNav;
 
     private int[] navItems = {
             FRAGMENT_PAY,
@@ -258,7 +253,6 @@ public class MainActivity extends AppCompatActivity {
 //                        // Go back to pay fragment
 //                        mOp = Otk.Operation.OTK_OP_NONE;
 //                        /* TODO: Go to history page and show the tx */
-//                        navToFragment(FRAGMENT_HISTORY);
 //                        // Show tx
 //                        dialogBtcSent(tx);
 //                    }
@@ -284,7 +278,6 @@ public class MainActivity extends AppCompatActivity {
 //                    // Make sure we are in FragmentOtk
 //                    if (selectedFragment instanceof FragmentOtk) {
 //                        // Go back to pay fragment
-//                        navToFragment(FRAGMENT_PAY);
 //                    }
 //                } else if (type == OtkEvent.Type.COMPLETE_PAYMENT_FAIL) {
 //                    // Hide progress
@@ -294,7 +287,6 @@ public class MainActivity extends AppCompatActivity {
 //                    // Make sure we are in FragmentOtk
 //                    if (selectedFragment instanceof FragmentOtk) {
 //                        /* TODO: Go to history page and show the tx */
-//                        navToFragment(FRAGMENT_HISTORY);
 //                        // Show error in dialog
 //                        String reason;
 //                        if (event.getTx() != null) {
@@ -508,25 +500,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void onSignPaymentButtonClick(String to, double amount, String btcAmount, String lcAmount, boolean isAllFundsChecked) {
-        logger.debug("Make payment:\nTo: " + to +
-                "\nBTC = " + btcAmount + "\nLocal currency = " + lcAmount +
-                "\nmAmount:" + amount + "\nUse all funds: " + isAllFundsChecked);
-
-        long txFees = BtcUtils.getTxFeeInSatoshi();
-
-        double payAmount = isAllFundsChecked ? -1 : amount;
-        boolean includeFee = false;
-        mOtk.setOperation(Otk.Operation.OTK_OP_SIGN_PAYMENT, to, payAmount, includeFee, txFees);
-
-        navToFragment(FRAGMENT_OTK);
-
-        // Cache recipient address and amount
-    }
-
-    public static void navToFragment(int fragmentId) {
-        bottomNav.setSelectedItemId(fragmentId);
-    }
+//    public void onSignPaymentButtonClick(String to, double amount, String btcAmount, String lcAmount, boolean isAllFundsChecked) {
+//        logger.debug("Make payment:\nTo: " + to +
+//                "\nBTC = " + btcAmount + "\nLocal currency = " + lcAmount +
+//                "\nmAmount:" + amount + "\nUse all funds: " + isAllFundsChecked);
+//
+//        long txFees = BtcUtils.getTxFeeInSatoshi();
+//
+//        double payAmount = isAllFundsChecked ? -1 : amount;
+//        boolean includeFee = false;
+//        mOtk.setOperation(Otk.Operation.OTK_OP_SIGN_PAYMENT, to, payAmount, includeFee, txFees);
+//
+//
+//        // Cache recipient address and amount
+//    }
 
     public void onCancelButtonClick() {
         AlertPrompt.info(this, getString(R.string.operation_cancelled));
@@ -774,21 +761,14 @@ public class MainActivity extends AppCompatActivity {
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-                boolean restartTask = false;
                 ExchangeRate r = BtcUtils.getCurrencyExchangeRate();
                 if (r == null) {
-                    restartTask = true;
-                }
-                else {
-                    if (!setExchangeRate(r)) {
-                        restartTask = true;
-                    };
-                    setTxFee(BtcUtils.getTxFee());
-                }
-                if (restartTask) {
                     t.cancel();
                     t.purge();
                     updateXchangeRateAndFeesTask();
+                } else {
+                    setExchangeRate(r);
+                    setTxFee(BtcUtils.getTxFee());
                 }
             }
         }, 1000, 1000 * 60 * Configurations.INTERVAL_EXCHANGE_RATE_UPDATE);
@@ -798,14 +778,13 @@ public class MainActivity extends AppCompatActivity {
         return exchangeRate;
     }
 
-    public boolean setExchangeRate(ExchangeRate exchangeRate) {
+    public void setExchangeRate(ExchangeRate exchangeRate) {
         logger.debug("Update ExchangeRate: {}", exchangeRate.toString());
         if (exchangeRate != null) {
             if (MainActivity.exchangeRate == null) MainActivity.exchangeRate = exchangeRate;
             if (onlineDataUpdateListner != null)
-                return onlineDataUpdateListner.onExchangeRateUpdated(exchangeRate);
+                onlineDataUpdateListner.onExchangeRateUpdated(exchangeRate);
         }
-        return false;
     }
 
     public static TxFee getTxFee() {
@@ -833,7 +812,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public interface OnlineDataUpdateListener {
-        boolean onExchangeRateUpdated(ExchangeRate xrate);
+        void onExchangeRateUpdated(ExchangeRate xrate);
+
         void onTxFeeUpdated(TxFee txFee);
     }
 }

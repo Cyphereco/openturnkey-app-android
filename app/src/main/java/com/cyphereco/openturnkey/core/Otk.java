@@ -31,12 +31,6 @@ public class Otk {
     public static final String TAG = Otk.class.getSimpleName();
     private static Logger logger = Log4jHelper.getLogger(TAG);
 
-    /**
-     * Return value.
-     */
-    static final int OTK_RETURN_OK = 0;
-    static final int OTK_RETURN_ERROR = 1;
-
 
     private static final int OTK_MSG_GOT_UNSIGNED_TX = 0;
     private static final int OTK_MSG_BITCOIN_SENT = 1;
@@ -48,10 +42,8 @@ public class Otk {
     private static final int OTK_MSG_READ_RESPONSE_TIMED_OUT = 7;
     private static final int OTK_MSG_CHECK_BALANCE = 8;
 
-
     public enum Operation {
         OTK_OP_NONE("None"),
-        OTK_OP_READ_GENERAL_INFO("Read General Info"),
         OTK_OP_SIGN_PAYMENT("Sign Payment");
 
         private final String value;
@@ -79,8 +71,6 @@ public class Otk {
 
     /* Operation. */
     private static Operation mOp = Operation.OTK_OP_NONE;
-    /* In processing. */
-    private static boolean isInProcessing = false;
     /* Handler. */
     private static Handler mHandler;
 
@@ -297,8 +287,7 @@ public class Otk {
         mAmount = 0;
         mFeeIncluded = false;
         mTxFees = 0;
-        isInProcessing = false;
-        boolean mUsingMasterKey = false;
+        /* In processing. */
         mArgs.clear();
         processCommandWritten();
         processResponseRead();
@@ -318,40 +307,8 @@ public class Otk {
         void onOtkEvent(OtkEvent event);
     }
 
-    /**
-     * Event listener.
-     */
-    public void setEventListener(OtkEventListener eventListener) {
-        mEventListener = eventListener;
-    }
-
     public void setBalanceListener(BalanceUpdateListener eventListener) {
         mBalanceUpdateListener = eventListener;
-    }
-
-    /**
-     * Set operation to pay
-     */
-    public void setOperation(Operation op, String to, double amount, boolean feeIncluded, long txFees) {
-        if (mOp != Operation.OTK_OP_NONE && isInProcessing) {
-            /* Some operation is in processing, set another operation is not allowed.
-             * Should cancel current operation first.
-             */
-            return;
-        }
-
-        if (op != Operation.OTK_OP_SIGN_PAYMENT) {
-            return;
-        }
-
-        logger.debug("Set op to:{} to:{} amount:{} fee:{} feeIncluded:{}", op.name(), to, amount, txFees, feeIncluded);
-        mOp = op;
-        // Cache data
-        mTo = to;
-        mAmount = amount;
-        mFeeIncluded = feeIncluded;
-        mTxFees = txFees;
-
     }
 
     public void cancelOperation() {
@@ -410,14 +367,5 @@ public class Otk {
             }
         };
         t.start();
-    }
-
-    public void confirmPayment() {
-        logger.debug("confirm payment");
-        // Make sure op
-        if (mOp != Operation.OTK_OP_SIGN_PAYMENT) {
-            logger.warn("Confirm payment but operation is cancelled.");
-            /* Op cancelled, ignore it */
-        }
     }
 }

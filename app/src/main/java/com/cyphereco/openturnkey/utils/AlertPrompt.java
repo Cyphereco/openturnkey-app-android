@@ -3,6 +3,7 @@ package com.cyphereco.openturnkey.utils;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Looper;
 import android.os.Vibrator;
 import android.view.Gravity;
 import android.widget.TextView;
@@ -18,8 +19,20 @@ public class AlertPrompt {
         prompt(context, msg, decorInfo, false);
     }
 
+    public static void threadSafeInfo(Context context, String msg) {
+        Looper.prepare();
+        info(context, msg);
+        Looper.loop();
+    }
+
     public static void alert(Context context, String msg) {
         prompt(context, msg, decorAlert, true);
+    }
+
+    public static void threadSafeAlert(Context context, String msg) {
+        Looper.prepare();
+        alert(context, msg);
+        Looper.loop();
     }
 
     private static void prompt(Context context, String msg, int decor, boolean vibration) {

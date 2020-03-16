@@ -9,6 +9,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -30,7 +33,6 @@ import android.widget.TextView;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.OtkData;
-import com.cyphereco.openturnkey.core.UnsignedTx;
 import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
@@ -50,8 +52,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
 
-    private boolean setPayer = false;
-    private String addrPayer = null;
+    private boolean requestSignature = false;
 
     boolean mUseFixAddress = false;
     boolean mIsCryptoCurrencySet = true;
@@ -59,16 +60,14 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     private ExchangeRate exchangeRate;
     private boolean mIsAmountConverting = false;
     private double mBtc = 0.0;
-    private static final String ARG_TO = "TO";
-    private static final String ARG_BTC = "BTC";
-    private static final String ARG_LC = "LC";
-    private static final String ARG_USE_ALL_FUNDS = "USE_ALL_FUNDS";
 
     private EditText mEtCc;
     private EditText mEtLc;
     private TextView tvAddress;
     private TextView tvCurrency;
+    private CheckBox cbUseAllFunds;
     private Menu mMenu;
+    private static Handler handler;
 
 //    public static FragmentPay newInstance(String to, String btcAmount, String lcAmount, boolean isUseAllFundsChecked) {
 //        FragmentPay fragment = new FragmentPay();
@@ -84,7 +83,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
     public void launchQRcodeScanActivity() {
         if (mUseFixAddress) {
-            showFixAddressDialog();
+            dialogFixAddressEnabled();
         } else {
             Intent intent = new Intent(getActivity(), ActivityQRcodeScan.class);
             startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
@@ -124,7 +123,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
     public void pasteAddressFromClipboard() {
         if (mUseFixAddress) {
-            showFixAddressDialog();
+            dialogFixAddressEnabled();
         } else {
             ClipboardManager clipboard = (ClipboardManager) Objects.requireNonNull(getActivity()).getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null && clipboard.hasPrimaryClip()) {
@@ -155,6 +154,16 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         View view = inflater.inflate(R.layout.fragment_pay, container, false);
         // Set not focusable for recipient address so that the hint is shown correctly
 
+        handler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                mEtLc.setText("");
+                exchangeRate = (ExchangeRate) msg.obj;
+                convertCurrency();
+                return false;
+            }
+        });
+
         tvAddress = view.findViewById(R.id.input_recipient_address);
         tvAddress.setFocusable(false);
         tvCurrency = view.findViewById(R.id.text_local_currency);
@@ -181,14 +190,16 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             @Override
             public void onClick(View view) {
                 if (mUseFixAddress) {
-                    showFixAddressDialog();
+                    dialogFixAddressEnabled();
                 } else {
                     DialogReadOtk dialogReadOtk = new DialogReadOtk();
+                    assert getFragmentManager() != null;
                     dialogReadOtk.show(getFragmentManager(), "ReadOtk");
                 }
             }
         });
 
+        cbUseAllFunds = view.findViewById(R.id.checkBox_use_all_funds);
         mEtCc = view.findViewById(R.id.input_crypto_currency);
         mEtCc.setSelectAllOnFocus(true);
         mEtLc = view.findViewById(R.id.input_local_currency);
@@ -208,12 +219,10 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         MainActivity.setOnlineDataUpdateListner(new MainActivity.OnlineDataUpdateListener() {
             @Override
-            public boolean onExchangeRateUpdated(ExchangeRate xrate) {
-                if (mEtLc == null) return false;
-                mEtLc.setText("");
-                exchangeRate = xrate;
-                updateCurrency();
-                return true;
+            public void onExchangeRateUpdated(ExchangeRate xrate) {
+                Message msg = new Message();
+                msg.obj = xrate;
+                handler.sendMessage(msg);
             }
 
             @Override
@@ -228,9 +237,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             public void onClick(View view) {
                 if (!Preferences.getUseFixAddressChecked()) {
                     tvAddress.setText("");
-                }
-                else {
-                    showFixAddressDialog();
+                } else {
+                    dialogFixAddressEnabled();
                 }
             }
         });
@@ -244,24 +252,23 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             }
         });
 
-        if (getArguments() != null) {
-            mEtCc.setText(getArguments().getString(ARG_BTC));
-            try {
-                mBtc = Double.parseDouble(mEtCc.getText().toString());
-            } catch (NumberFormatException e) {
-                mEtCc.setText("");
-            }
-            mEtLc.setText(getArguments().getString(ARG_LC));
-            String to = getArguments().getString(ARG_TO);
-            if (to != null && to.length() > 0) {
-                tvAddress.setText(to);
-            }
-            CheckBox cb = view.findViewById(R.id.checkBox_use_all_funds);
-            boolean b = getArguments().getBoolean(ARG_USE_ALL_FUNDS);
-            logger.debug("Use all funds checked:" + b);
-            cb.setChecked(b);
-            updateCurrency();
-        }
+//        if (getArguments() != null) {
+//            mEtCc.setText(getArguments().getString(ARG_BTC));
+//            try {
+//                mBtc = Double.parseDouble(mEtCc.getText().toString());
+//            } catch (NumberFormatException e) {
+//                mEtCc.setText("");
+//            }
+//            mEtLc.setText(getArguments().getString(ARG_LC));
+//            String to = getArguments().getString(ARG_TO);
+//            if (to != null && to.length() > 0) {
+//                tvAddress.setText(to);
+//            }
+//            boolean b = getArguments().getBoolean(ARG_USE_ALL_FUNDS);
+//            logger.debug("Use all funds checked:" + b);
+//            cbUseAllFunds.setChecked(b);
+//            convertCurrency();
+//        }
 
         mEtCc.addTextChangedListener(new TextWatcherCurrency(mEtCc) {
             @Override
@@ -275,7 +282,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 mIsAmountConverting = true;
                 try {
                     double cc = Double.parseDouble(mEtCc.getText().toString());
-                    mEtLc.setText(String.format(Locale.ENGLISH, "%.2f", toLocalCurrency(cc)));
+                    mEtLc.setText(String.format(Locale.ENGLISH, "%.2f", btcToFiat(cc)));
                     mBtc = cc;
                 } catch (NumberFormatException e) {
                     mEtLc.setText("");
@@ -296,7 +303,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 mIsAmountConverting = true;
                 try {
                     double lc = Double.parseDouble(mEtLc.getText().toString());
-                    mBtc = getCryptoCurrency(lc);
+                    mBtc = fiatToBtc(lc);
                     mEtCc.setText(String.format(Locale.ENGLISH, "%.8f", mBtc));
 
                 } catch (NumberFormatException e) {
@@ -326,16 +333,19 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         makeToastMessage(getString(R.string.invalid_address));
                         return;
                     }
-                    CheckBox cb = getView().findViewById(R.id.checkBox_use_all_funds);
-                    if (cb != null && !cb.isChecked() && mBtc <= 0) {
-                        makeToastMessage(getString(R.string.incorrect_amount));
+                    if (!cbUseAllFunds.isChecked() && mEtCc.length() == 0) {
+                        makeToastMessage(getString(R.string.amount_empty));
+                        return;
+                    }
+                    if (totalAmountSent() >= 0 && totalAmountReceived() < 0) {
+                        makeToastMessage(getString(R.string.amount_less_than_fees));
                         return;
                     }
 
-                    setPayer = true;
-                    addrPayer = tvAddress.getText().toString();
+                    requestSignature = true;
 
                     DialogReadOtk dialogReadOtk = new DialogReadOtk();
+                    assert getFragmentManager() != null;
                     dialogReadOtk.show(getFragmentManager(), "ReadOtk");
 
 //                    if (mListener != null) {
@@ -350,12 +360,13 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             }
         });
 
-        CheckBox cb = view.findViewById(R.id.checkBox_use_all_funds);
-        cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        cbUseAllFunds.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
+                    mEtCc.setText("");
                     mEtCc.setEnabled(false);
+                    mEtLc.setText("");
                     mEtLc.setEnabled(false);
                 } else {
                     mEtCc.setEnabled(true);
@@ -365,7 +376,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         });
 
         // Use All Fund might be checked already, update amount field if it's editable
-        if (cb.isChecked()) {
+        if (cbUseAllFunds.isChecked()) {
             mEtCc.setEnabled(false);
             mEtLc.setEnabled(false);
         } else {
@@ -382,12 +393,11 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         if (Preferences.getUseFixAddressChecked()) {
             if (MainActivity.getPayToAddress().length() > 0) {
-                showFixAddressDialog();
+                dialogFixAddressEnabled();
             }
             tvAddress.setText(Preferences.getUseFixAddressAddrString());
             mUseFixAddress = true;
-        }
-        else {
+        } else {
             String addr = "";
 
             if (MainActivity.getPayToAddress().length() > 0) {
@@ -413,7 +423,259 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         tvCurrency.setText(mLocalCurrency.toString());
     }
 
-    private double toLocalCurrency(double amount) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int optionId = item.getItemId();
+
+        switch (optionId) {
+            case R.id.menu_pay_local_curreny:
+                dialogLocalCurrency();
+                return true;
+            case R.id.menu_pay_transaction_fee:
+                dialogTransactionFee();
+                return true;
+            case R.id.menu_pay_fee_included:
+                Preferences.setFeeIncluded(item.setChecked(!item.isChecked()).isChecked());
+                return true;
+            case R.id.menu_pay_use_fix_address:
+                mUseFixAddress = onFixAddressOption(!item.isChecked());
+                item.setChecked(mUseFixAddress);
+                Preferences.setUseFixAddress(mUseFixAddress, tvAddress.getText().toString());
+                return true;
+            case R.id.menu_pay_user_guide:
+                String url = "https://openturnkey.com/guide";
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(browserIntent);
+                return true;
+            case R.id.menu_pay_about:
+                dialogAbout();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+    }
+
+    @Override
+    public void onOtkDataPosted(final OtkData otkData) {
+        super.onOtkDataPosted(otkData);
+
+        // process received otk data
+        if (otkData != null) {
+            String addr = otkData.getSessionData().getAddress();
+
+            if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
+                if (requestSignature) {
+                    final String from = otkData.getSessionData().getAddress();
+                    final String to = tvAddress.getText().toString();
+                    logger.debug("Pay to ({}) for {} / {} (btc/{}) with tx fee ({}) included: {}",
+                            to, mEtCc.getText(), mEtLc.getText(),
+                            Preferences.getLocalCurrency().toString(), getFees(),
+                            Preferences.getFeeIncluded());
+                    // prepare to make payment
+                    final Dialog dialog = dialogFullscreenAlert(getString(R.string.check_balance));
+                    dialog.show();
+                    // check balance from payer address
+                    logger.debug("checking balance");
+                    BlockChainInfo.getBalance(addr, new BlockChainInfo.WebResultHandler() {
+                        @Override
+                        public void onBalanceUpdated(BigDecimal balance) {
+                            logger.debug("Account ({}) balance: {}", otkData.getSessionData().getAddress(), balance);
+                            long amountSent = totalAmountSent();
+                            long amountReceived = totalAmountReceived();
+                            if (amountSent < 0) {
+                                amountSent = balance.longValue();
+                                amountReceived += amountSent;
+                            }
+                            dialog.cancel();
+                            if (balance.longValue() < amountSent || amountReceived < 0) {
+                                // balance not enough
+                                // calling AlertPrompt from thread need Looper.prepare
+                                AlertPrompt.threadSafeAlert(getContext(), getString(R.string.balance_insufficient));
+                            } else {
+                                // construct transaction in the background
+
+                                // proceed final confirmation
+                                logger.debug("Amount sent (include fees): {}, Amount received: {}",
+                                        amountSent, amountReceived);
+                                dialogConfirmPayment(from, to, amountSent, amountReceived, getFees());
+                            }
+                        }
+
+                        @Override
+                        public void onBlockHeightUpdated(int height) {
+                        }
+
+                        @Override
+                        public void onTxBlockHeightUpdated(int height) {
+                        }
+
+                        @Override
+                        public void onRawTxUpdated(String rawTx) {
+                        }
+
+                        @Override
+                        public void onConfirmationsUpdated(int confirmations) {
+                        }
+                    });
+                    // construct transaction
+                    // show confirmation dialog
+                } else {
+                    // read OTK general information, must be getting the OTK address
+                    if (MainActivity.isAddressValid(addr)) {
+                        tvAddress.setText(addr);
+                    } else {
+                        AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
+                    }
+                }
+            } else {
+                // otkData contains request result, process with proper indications
+                if (otkData.getOtkState().getCommand() == Command.SIGN) {
+                    if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
+                        // got signatures, prompt a processing dialog
+                    } else {
+                        AlertPrompt.alert(getContext(), "Pay fail\n"
+                                + getString(R.string.reason) + ": " + otkData.getFailureReason());
+                    }
+                } else {
+                    AlertPrompt.alert(getContext(), getString(R.string.communication_error) + "\n"
+                            + getString(R.string.reason) + ": " + getString(R.string.not_valid_openturnkey));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.menu_pay, menu);
+
+        updatePayConfig(menu);
+        mMenu = menu;
+    }
+
+    private void updateAmount(String amount) {
+        View view = getView();
+        TextView tv = null;
+        if (view != null) {
+            tv = view.findViewById(R.id.input_crypto_currency);
+        }
+        if (tv != null) {
+            tv.setText(amount);
+        }
+    }
+
+    private void updatePayConfig(Menu menu) {
+        String str;
+        MenuItem menuItem;
+
+        menuItem = menu.findItem(R.id.menu_pay_local_curreny);
+        LocalCurrency lc = Preferences.getLocalCurrency();
+        if (menuItem != null) {
+            str = getString(R.string.local_currency) +
+                    " (" + lc.toString() + ")";
+            menuItem.setTitle(str);
+        }
+
+        menuItem = menu.findItem(R.id.menu_pay_transaction_fee);
+        Configurations.TxFeeType txFeeType = Preferences.getTxFeeType();
+        if (menuItem != null) {
+            str = getString(R.string.transaction_fee) +
+                    " (" + txFeeToString(txFeeType) + ")";
+            menuItem.setTitle(str);
+        }
+
+        menuItem = menu.findItem(R.id.menu_pay_fee_included);
+        if (menuItem != null) {
+            menuItem.setChecked(Preferences.getFeeIncluded());
+        }
+
+        menuItem = menu.findItem(R.id.menu_pay_use_fix_address);
+        if (menuItem != null) {
+            menuItem.setChecked(Preferences.getUseFixAddressChecked());
+        }
+    }
+
+    public void updateLocalCurrency(LocalCurrency localCurrency) {
+        mLocalCurrency = localCurrency;
+        tvCurrency.setText(mLocalCurrency.toString());
+        boolean cache = mIsCryptoCurrencySet;
+        mIsCryptoCurrencySet = true;
+        convertCurrency();
+        mIsCryptoCurrencySet = cache;
+    }
+
+    private boolean onFixAddressOption(boolean isChecked) {
+        if (isChecked) {
+            // If address editor is empty, prompt warning dialog
+            if ((null == tvAddress.getText()) || (tvAddress.getText().toString().isEmpty())) {
+                mUseFixAddress = false;
+                new AlertDialog.Builder(getActivity())
+                        .setMessage(getString(R.string.recipient_is_empty))
+                        .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .show();
+                return false;
+            }
+            // There is address
+            Preferences.setUseFixAddress(true, tvAddress.getText().toString());
+            mUseFixAddress = true;
+            return true;
+        }
+        mUseFixAddress = false;
+        return false;
+    }
+
+    private Configurations.TxFeeType toTxFee(int transactionFee) {
+        switch (transactionFee) {
+            case R.id.radio_custom:
+                return Configurations.TxFeeType.CUSTOMIZED;
+            case R.id.radio_high:
+                return Configurations.TxFeeType.HIGH;
+            case R.id.radio_mid:
+                return Configurations.TxFeeType.MID;
+            default:
+                return Configurations.TxFeeType.LOW;
+        }
+    }
+
+    private String txFeeToString(Configurations.TxFeeType txFeeType) {
+        if (txFeeType == Configurations.TxFeeType.CUSTOMIZED) {
+            return getString(R.string.customized_fees);
+        }
+        if (txFeeType == Configurations.TxFeeType.HIGH) {
+            return getString(R.string.fees_high);
+        }
+        if (txFeeType == Configurations.TxFeeType.MID) {
+            return getString(R.string.fees_mid);
+        }
+        return getString(R.string.fees_low);
+    }
+
+    public LocalCurrency optionToLocalCurrency(int currency) {
+        switch (currency) {
+            case R.id.radio_cny:
+                return LocalCurrency.LOCAL_CURRENCY_CNY;
+            case R.id.radio_eur:
+                return LocalCurrency.LOCAL_CURRENCY_EUR;
+            case R.id.radio_jpy:
+                return LocalCurrency.LOCAL_CURRENCY_JPY;
+            case R.id.radio_twd:
+                return LocalCurrency.LOCAL_CURRENCY_TWD;
+            default:
+                return LocalCurrency.LOCAL_CURRENCY_USD;
+        }
+    }
+
+    private double btcToFiat(double amount) {
         if (amount > 0 && exchangeRate != null) {
             switch (mLocalCurrency) {
                 case LOCAL_CURRENCY_TWD:
@@ -432,18 +694,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         return 0;
     }
 
-    public void updateAmount(String amount) {
-        View view = getView();
-        TextView tv = null;
-        if (view != null) {
-            tv = view.findViewById(R.id.input_crypto_currency);
-        }
-        if (tv != null) {
-            tv.setText(amount);
-        }
-    }
-
-    private double getCryptoCurrency(double lc) {
+    private double fiatToBtc(double lc) {
         if (exchangeRate == null) {
             return 0;
         }
@@ -462,7 +713,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         return 0;
     }
 
-    private void updateCurrency() {
+    private void convertCurrency() {
         try {
             if (mIsCryptoCurrencySet) {
                 if (mBtc == 0.0) {
@@ -472,7 +723,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 // update local currency
                 mIsAmountConverting = true;
                 try {
-                    mEtLc.setText(String.format(Locale.ENGLISH, "%.2f", toLocalCurrency(mBtc)));
+                    mEtLc.setText(String.format(Locale.ENGLISH, "%.2f", btcToFiat(mBtc)));
                 } catch (NumberFormatException e) {
                     mEtLc.setText("");
                 }
@@ -481,7 +732,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 mIsAmountConverting = true;
                 try {
                     double lc = Double.parseDouble(mEtLc.getText().toString());
-                    mBtc = getCryptoCurrency(lc);
+                    mBtc = fiatToBtc(lc);
                     mEtCc.setText(String.format(Locale.ENGLISH, "%.8f", mBtc));
                 } catch (NumberFormatException e) {
                     mEtCc.setText("");
@@ -495,44 +746,127 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         }
     }
 
-    public void updateLocalCurrency(LocalCurrency localCurrency) {
-        mLocalCurrency = localCurrency;
-        tvCurrency.setText(mLocalCurrency.toString());
-        boolean cache = mIsCryptoCurrencySet;
-        mIsCryptoCurrencySet = true;
-        updateCurrency();
-        mIsCryptoCurrencySet = cache;
-    }
-
-    public LocalCurrency currencyToLocalCurrency(int currency) {
-        switch (currency) {
-            case R.id.radio_cny:
-                return LocalCurrency.LOCAL_CURRENCY_CNY;
-            case R.id.radio_eur:
-                return LocalCurrency.LOCAL_CURRENCY_EUR;
-            case R.id.radio_jpy:
-                return LocalCurrency.LOCAL_CURRENCY_JPY;
-            case R.id.radio_twd:
-                return LocalCurrency.LOCAL_CURRENCY_TWD;
-            default:
-                return LocalCurrency.LOCAL_CURRENCY_USD;
+    private long getFees() {
+        switch (Preferences.getTxFeeType()) {
+            case HIGH:
+                return Preferences.getTxFee().getHigh() * 200;
+            case MID:
+                return Preferences.getTxFee().getMid() * 200;
+            case LOW:
+                return Preferences.getTxFee().getLow() * 200;
+            case CUSTOMIZED:
+                return Preferences.getCustomizedTxFee();
         }
+        return 1000;
     }
 
-    Configurations.TxFeeType toTxFee(int transactionFee) {
-        switch (transactionFee) {
-            case R.id.radio_custom:
-                return Configurations.TxFeeType.CUSTOMIZED;
-            case R.id.radio_high:
-                return Configurations.TxFeeType.HIGH;
-            case R.id.radio_mid:
-                return Configurations.TxFeeType.MID;
-            default:
-                return Configurations.TxFeeType.LOW;
+    private long totalAmountSent() {
+        if (cbUseAllFunds.isChecked()) return -1;
+
+        long total = 0;
+        if (mEtCc.getText().length() != 0) {
+            total = (long) (Double.parseDouble(mEtCc.getText().toString()) * 100000000);
         }
+        if (!Preferences.getFeeIncluded()) {
+            total += getFees();
+        }
+        return total;
     }
 
-    public void dialogLocalCurrency() {
+    private long totalAmountReceived() {
+        if (cbUseAllFunds.isChecked()) return -(getFees());
+
+        long total = 0;
+        if (mEtCc.getText().length() != 0) {
+            total = (long) (Double.parseDouble(mEtCc.getText().toString()) * 100000000);
+        }
+        if (Preferences.getFeeIncluded()) {
+            total -= getFees();
+        }
+        return total;
+    }
+
+    private void makeToastMessage(String message) {
+        Snackbar snackbar = Snackbar.make(Objects.requireNonNull(getView()), message, Snackbar.LENGTH_LONG);
+        TextView textView = snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextSize(22);
+        snackbar.setAction("Action", null).show();
+    }
+
+    private void dialogFixAddressEnabled() {
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.cannot_change_addr)
+                .setMessage(R.string.disable_fix_addr_first)
+                .setNegativeButton(R.string.ok, null)
+                .show();
+        MainActivity.setPayToAddress("");
+    }
+
+    private void dialogConfirmPayment(String from, String to, long amountSent, long amountReceived, long fees) {
+        long estBlocks = BtcUtils.getEstimatedTime(fees);
+        String estTime = (estBlocks == 1) ? " 5~15" : ((estBlocks > 3) ? " 40~60+" : " 15~35");
+        double btcTxfees = BtcUtils.satoshiToBtc(fees);
+        double btcAmountSent = BtcUtils.satoshiToBtc(amountSent);
+        double btcAmountRecv = BtcUtils.satoshiToBtc(amountReceived);
+
+        LocalCurrency lc = Preferences.getLocalCurrency();
+        String strBtcAmountSent = String.format(Locale.ENGLISH, "%.8f", btcAmountSent);
+        String strFiatAmountSent = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(exchangeRate, lc, btcAmountSent));
+        String strBtcAmountRecv = String.format(Locale.ENGLISH, "%.8f", btcAmountRecv);
+        String strFiatAmountRecv = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(exchangeRate, lc, btcAmountRecv));
+        String strBtcFees = String.format(Locale.ENGLISH, "%.8f", btcTxfees);
+        String strFiatFess = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(exchangeRate, lc, btcTxfees));
+
+        String msg = getString(R.string.subject_text_estimated_time) + estTime + "\n\n" +
+                getString(R.string.amount_sent) + "\n" + strBtcAmountSent + " / " +
+                strFiatAmountSent + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")\n" +
+                getString(R.string.sender) + ":\n" + from + "\n\n" +
+                getString(R.string.amount_received) + "\n" + strBtcAmountRecv + " / " +
+                strFiatAmountRecv + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")\n" +
+                getString(R.string.recipient) + ":\n" + to + "\n\n" +
+                getString(R.string.transaction_fee) + ":\n" + strBtcFees + " / " +
+                strFiatFess + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")";
+
+        if (Looper.myLooper() == null) Looper.prepare();
+        AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setTitle(R.string.confirm_payment)
+                .setMessage(msg)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        logger.debug("canceled payment on confirmation");
+                    }
+                })
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        logger.debug("confirmed payment");
+//                        hideConfirmPaymentDialog();
+//                        mConfirmPaymentDialogResultValue = true;
+//                        handler.sendMessage(handler.obtainMessage());
+                    }
+                })
+                .setCancelable(true)
+                .create();
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
+        Looper.loop();
+    }
+
+    private Dialog dialogFullscreenAlert(String msg) {
+        TextView tv = new TextView(getContext());
+        tv.setText(msg);
+        tv.setTextSize(24);
+        tv.setTextColor(Color.WHITE);
+        tv.setGravity(Gravity.CENTER);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        Dialog dialog = builder.setView(tv).create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
+    }
+
+    private void dialogLocalCurrency() {
         DialogLocalCurrency dialog = new DialogLocalCurrency();
         int localCurrencyId;
 
@@ -554,16 +888,17 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         dialog.setDialogLocalCurrecyListener(new DialogLocalCurrency.DialogLocalCurrecyListener() {
             @Override
             public void setLocalCurrency(int localCurrency) {
-                LocalCurrency lc = currencyToLocalCurrency(localCurrency);
+                LocalCurrency lc = optionToLocalCurrency(localCurrency);
                 Preferences.setLocalCurrency(lc);
                 updateLocalCurrency(lc);
                 updatePayConfig(mMenu);
             }
         });
+        assert getFragmentManager() != null;
         dialog.show(getFragmentManager(), "dialog");
     }
 
-    public void dialogTransactionFee() {
+    private void dialogTransactionFee() {
         DialogTransactionFee dialog = new DialogTransactionFee();
 
         Configurations.TxFeeType txFeeType = Preferences.getTxFeeType();
@@ -595,273 +930,20 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 updatePayConfig(mMenu);
             }
         });
+        assert getFragmentManager() != null;
         dialog.show(getFragmentManager(), "dialog");
     }
 
-    public void dialogAbout() {
+    private void dialogAbout() {
         DialogAbout dialog = new DialogAbout();
+        assert getFragmentManager() != null;
         dialog.show(getFragmentManager(), "dialog");
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int optionId = item.getItemId();
-
-        switch (optionId) {
-            case R.id.menu_pay_local_curreny:
-                dialogLocalCurrency();
-                return true;
-            case R.id.menu_pay_transaction_fee:
-                dialogTransactionFee();
-                return true;
-            case R.id.menu_pay_fee_included:
-                Preferences.setFeeIncluded(item.setChecked(!item.isChecked()).isChecked());
-                return true;
-            case R.id.menu_pay_use_fix_address:
-                mUseFixAddress = processFixAddressClick(!item.isChecked());
-                item.setChecked(mUseFixAddress);
-                Preferences.setUseFixAddress(mUseFixAddress, tvAddress.getText().toString());
-                return true;
-            case R.id.menu_pay_user_guide:
-                String url = "https://openturnkey.com/guide";
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                startActivity(browserIntent);
-                return true;
-            case R.id.menu_pay_about:
-                dialogAbout();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    public interface FragmentPayListener {
+//    public interface FragmentPayListener {
 //        void ontvAddress.getText().toStringByReadNfcButtonClick(String to, String btc, String lc, boolean isAllFundChecked);
-
-        void onSignPaymentButtonClick(String to, double amount, String btc, String lc, boolean isAllFundChecked);
-    }
-
-    public boolean processFixAddressClick(boolean isChecked) {
-        if (isChecked) {
-            // If address editor is empty, prompt warning dialog
-            if ((null == tvAddress.getText()) || (tvAddress.getText().toString().isEmpty())) {
-                mUseFixAddress = false;
-                new AlertDialog.Builder(getActivity())
-                        .setMessage(getString(R.string.recipient_is_empty))
-                        .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })
-                        .show();
-                return false;
-            }
-            // There is address
-            Preferences.setUseFixAddress(true, tvAddress.getText().toString());
-            mUseFixAddress = true;
-            return true;
-        }
-        mUseFixAddress = false;
-        return false;
-    }
-
-    private void showFixAddressDialog() {
-        new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.cannot_change_addr)
-                .setMessage(R.string.disable_fix_addr_first)
-                .setNegativeButton(R.string.ok, null)
-                .show();
-        MainActivity.setPayToAddress("");
-    }
-
-    @Override
-    public void onOtkDataPosted(OtkData otkData) {
-        super.onOtkDataPosted(otkData);
-
-        // process received otk data
-        if (otkData != null) {
-            String addr = otkData.getSessionData().getAddress();
-
-            if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
-                if (setPayer && addrPayer != null) {
-                    // prepare to make payment
-                    final Dialog dialog = dialogFullscreenAlert(getString(R.string.check_balance));
-                    dialog.show();
-                    // check balance from payer address
-                    logger.debug("checking balance");
-                    BlockChainInfo.getBalance(addr, new BlockChainInfo.WebResultHandler() {
-                        @Override
-                        public void onBalanceUpdated(BigDecimal balance) {
-                            logger.debug("Account ({}) balance: {}", addrPayer, balance);
-                            dialog.cancel();
-
-
-                        }
-
-                        @Override
-                        public void onBlockHeightUpdated(int height) { }
-
-                        @Override
-                        public void onTxBlockHeightUpdated(int height) { }
-
-                        @Override
-                        public void onRawTxUpdated(String rawTx) { }
-
-                        @Override
-                        public void onConfirmationsUpdated(int confirmations) { }
-                    });
-                    // construct transaction
-                    // show confirmation dialog
-                }
-                else {
-                    // read OTK general information, must be getting the OTK address
-                    if (MainActivity.isAddressValid(addr)) {
-                        tvAddress.setText(addr);
-                    } else {
-                        AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
-                    }
-                }
-            } else {
-                // otkData contains request result, process with proper indications
-                if (otkData.getOtkState().getCommand() == Command.SIGN) {
-                    if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
-                        // got signatures, prompt a processing dialog
-                    }
-                    else {
-                        AlertPrompt.alert(getContext(), "Pay fail\n"
-                                + getString(R.string.reason) + ": " + otkData.getFailureReason());
-                    }
-                }
-                else {
-                    AlertPrompt.alert(getContext(), getString(R.string.communication_error)+ "\n"
-                            + getString(R.string.reason) + ": " + getString(R.string.not_valid_openturnkey));
-                }
-            }
-        }
-    }
-
-    public String transactionFeeToString(Configurations.TxFeeType txFeeType) {
-        if (txFeeType == Configurations.TxFeeType.CUSTOMIZED) {
-            return getString(R.string.customized_fees);
-        }
-        if (txFeeType == Configurations.TxFeeType.HIGH) {
-            return getString(R.string.fees_high);
-        }
-        if (txFeeType == Configurations.TxFeeType.MID) {
-            return getString(R.string.fees_mid);
-        }
-        return getString(R.string.fees_low);
-    }
-
-    @Override
-    public void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-    }
-
-    public void updatePayConfig(Menu menu) {
-        String str;
-        MenuItem menuItem;
-
-        menuItem = menu.findItem(R.id.menu_pay_local_curreny);
-        LocalCurrency lc = Preferences.getLocalCurrency();
-        if (menuItem != null) {
-            str = getString(R.string.local_currency) +
-                    " (" + lc.toString() + ")";
-            menuItem.setTitle(str);
-        }
-
-        menuItem = menu.findItem(R.id.menu_pay_transaction_fee);
-        Configurations.TxFeeType txFeeType = Preferences.getTxFeeType();
-        if (menuItem != null) {
-            str = getString(R.string.transaction_fee) +
-                    " (" + transactionFeeToString(txFeeType) + ")";
-            menuItem.setTitle(str);
-        }
-
-        menuItem = menu.findItem(R.id.menu_pay_fee_included);
-        if (menuItem != null) {
-            menuItem.setChecked(Preferences.getFeeIncluded());
-        }
-
-        menuItem = menu.findItem(R.id.menu_pay_use_fix_address);
-        if (menuItem != null) {
-            menuItem.setChecked(Preferences.getUseFixAddressChecked());
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.clear();
-        inflater.inflate(R.menu.menu_pay, menu);
-
-        updatePayConfig(menu);
-        mMenu = menu;
-    }
-
-    boolean showConfirmPaymentDialog(UnsignedTx utx) {
-        long estBlocks = BtcUtils.getEstimatedTime(utx.getFee());
-        String estTime = (estBlocks == 1) ? " 5~15" : ((estBlocks > 3) ? " 40~60+" : " 15~35");
-        double txFees = BtcUtils.satoshiToBtc(utx.getFee());
-        double payAmount = utx.getAmount() + txFees;
-
-        LocalCurrency lc = Preferences.getLocalCurrency();
-        String strBtcAmount = String.format(Locale.ENGLISH, "%.8f", payAmount);
-        String strFiatAmount = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(exchangeRate, lc, payAmount));
-        String strBtcFees = String.format(Locale.ENGLISH, "%.8f", txFees);
-        String strFiatFess = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(exchangeRate, lc, txFees));
-
-        String msg = getString(R.string.subject_sender) + "\n" + utx.getFrom() + "\n" +
-                getString(R.string.subject_recipient) + "\n" + utx.getTo() + "\n\n" +
-                getString(R.string.amount_fees_included) + ":\n" +
-                strBtcAmount + " / " + strFiatAmount + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")\n\n" +
-                getString(R.string.transaction_fee) + ":\n" +
-                strBtcFees + " / " + strFiatFess + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")\n\n" +
-                getString(R.string.subject_text_estimated_time) + estTime;
-        AlertDialog mConfirmPaymentDialog =  new AlertDialog.Builder(getContext())
-                .setTitle(R.string.confirm_payment)
-                .setMessage(msg)
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        logger.debug("onCancel()");
-//                        mConfirmPaymentDialogResultValue = false;
-//                        handler.sendMessage(handler.obtainMessage());
-//                        onCancelButtonClick();
-                    }
-                })
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        logger.debug("onOk()");
-//                        hideConfirmPaymentDialog();
-//                        mConfirmPaymentDialogResultValue = true;
-//                        handler.sendMessage(handler.obtainMessage());
-                    }
-                })
-                .setCancelable(true)
-                .show();
-
-        return true;
-    }
-
-    private void makeToastMessage(String message) {
-        Snackbar snackbar = Snackbar.make(getView(), message, Snackbar.LENGTH_LONG);
-        TextView textView = snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-        textView.setTextSize(22);
-        snackbar.setAction("Action", null).show();
-    }
-
-    private Dialog dialogFullscreenAlert(String msg) {
-        TextView tv = new TextView(getContext());
-        tv.setText(msg);
-        tv.setTextSize(24);
-        tv.setTextColor(Color.WHITE);
-        tv.setGravity(Gravity.CENTER);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        Dialog dialog = builder.setView(tv).create();
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        dialog.setCanceledOnTouchOutside(false);
-        return dialog;
-    }
+//
+//        void onSignPaymentButtonClick(String to, double amount, String btc, String lc, boolean isAllFundChecked);
+//    }
 }
+

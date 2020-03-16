@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -146,6 +147,30 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
+            if (resultCode == RESULT_OK) {
+                assert data != null;
+                String addr = data.getStringExtra(KEY_QR_CODE);
+                logger.info("QR result: {}", addr);
+
+                if (MainActivity.isAddressValid(addr)) {
+                    mAddress = addr;
+                    mInputAddress.setText(mAddress);
+                } else {
+                    if (BtcUtils.isSegWitAddress(!Preferences.isTestnet(), addr)) {
+                        AlertPrompt.alert(this, getString(R.string.seg_wit_address_is_not_supported));
+                    } else {
+                        AlertPrompt.alert(this, getString(R.string.invalid_address));
+                    }
+                }
+            }
+        }
+    }
+
     private void setUIListener() {
         final Context ctx = this;
         mSaveBtn.setOnClickListener(new View.OnClickListener() {
@@ -213,26 +238,6 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
                 }
             }
         });
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
-            if (resultCode == RESULT_OK) {
-                String addr = intent.getStringExtra(KEY_QR_CODE);
-                logger.info("QR result: {}", addr);
-
-                if (MainActivity.isAddressValid(addr)) {
-                    mAddress = addr;
-                    mInputAddress.setText(mAddress);
-                } else {
-                    if (BtcUtils.isSegWitAddress(!Preferences.isTestnet(), addr)) {
-                        AlertPrompt.alert(this, getString(R.string.seg_wit_address_is_not_supported));
-                    } else {
-                        AlertPrompt.alert(this, getString(R.string.invalid_address));
-                    }
-                }
-            }
-        }
     }
 
     private void saveContact(View v) {
