@@ -1,5 +1,6 @@
 package com.cyphereco.openturnkey.core.protocol;
 
+import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
@@ -48,10 +49,11 @@ public class OtkRequest implements Serializable {
         return sessionId;
     }
 
-    public void setSessionId(String sessionId) {
+    public OtkRequest setSessionId(String sessionId) {
         // sessionId can only be set once
         if (this.sessionId.length() == 0)
             this.sessionId = sessionId;
+        return this;
     }
 
     public String getRequestId() {
@@ -66,51 +68,62 @@ public class OtkRequest implements Serializable {
         return data;
     }
 
-    public void setData(String data) {
+    public OtkRequest setData(String data) {
         this.data = data;
         if (this.data == null)
             this.data = "";
 
         logger.debug("Update request ({}) data: {}", this.command, data);
+        return this;
     }
 
     public String getOption() {
         return option;
     }
 
-    public void setOption(String option) {
+    public OtkRequest setOption(String option) {
         this.option = option;
         logger.debug("Update request ({}) option: {}", this.command, option);
+        return this;
     }
 
     public String getOtkAddress() { return otkAddress; }
 
-    public void setOtkAddress(String otkAddress) {
+    public OtkRequest setOtkAddress(String otkAddress) {
         // the OtkAddress can only be set once
         if (this.otkAddress.length() == 0)
             this.otkAddress = otkAddress;
         logger.debug("Set request ({}) OtkAddress: {}", this.command, otkAddress);
+        return this;
     }
 
     public String getPin() {
         String pin = "";
         String[] strList = this.option.split(",");
 
-        for (int i = 0; i < strList.length; i++) {
-            if (strList[i].contains("pin=")) {
-                pin = strList[i].substring(4);
+        for (String s : strList) {
+            if (s.contains("pin=")) {
+                pin = s.substring(4);
                 return pin;
             }
         }
         return pin;
     }
 
-    public void setPin(String pin) {
+    public OtkRequest setPin(String pin) {
         setOption(getOption() + ",pin=" + pin);
+        return this;
     }
 
-    public void setMore() {
-        setOption(getOption() + ",more=1");
+    public OtkRequest setMore() {
+        if (!hasMore()) {
+            setOption(getOption() + ",more=1");
+        }
+        return this;
+    }
+
+    public boolean hasMore() {
+        return this.option.contains("more=1");
     }
 
     public void setMasterKey() {
