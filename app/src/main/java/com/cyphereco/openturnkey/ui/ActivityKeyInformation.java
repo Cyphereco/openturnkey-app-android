@@ -10,13 +10,14 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.method.LinkMovementMethod;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.OtkData;
@@ -25,8 +26,9 @@ import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 
-import org.apache.log4j.chainsaw.Main;
 import org.slf4j.Logger;
+
+import java.util.Objects;
 
 public class ActivityKeyInformation extends AppCompatActivity {
     public static final String TAG = ActivityKeyInformation.class.getSimpleName();
@@ -36,6 +38,10 @@ public class ActivityKeyInformation extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_keys);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -61,6 +67,15 @@ public class ActivityKeyInformation extends AppCompatActivity {
                 startActivity(browserIntent);
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void updateInfo(final OtkData otkData) {
