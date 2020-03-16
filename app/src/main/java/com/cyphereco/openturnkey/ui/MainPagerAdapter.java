@@ -4,7 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-public class PagerAdapter extends FragmentStatePagerAdapter {
+public class MainPagerAdapter extends FragmentStatePagerAdapter {
 
     private FragmentPay fragmentPay;
     private FragmentOtk fragmentOtk;
@@ -16,7 +16,7 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
     static final int PAGE_HISTORY = 2;
     static final int PAGE_ADDRBOOK = 3;
 
-    PagerAdapter(FragmentManager fm) {
+    MainPagerAdapter(FragmentManager fm) {
         super(fm);
         fragmentPay = new FragmentPay();
         fragmentOtk = new FragmentOtk();

@@ -106,6 +106,8 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
     public void onStart() {
         super.onStart();
         logger.debug("started");
+        // in case when MainActivity resumed for the first time, no fragment has been selected yet
+        // and onPageSelected is not called; call onPageSelected to update UI/Configurations/Dataset
         if (MainActivity.getSelectedFragment() == null) {
             logger.debug("activity restarted");
             MainActivity.setSelectedFragment(this);

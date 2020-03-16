@@ -203,4 +203,6 @@
     <string name="amount_received">實收金額:</string>
     <string name="add_new_addr_fail">新增常用地址失敗</string>
     <string name="amount_less_than_fees">金額低於手續費</string>
+    <string name="sign">簽名</string>
+    <string name="verify">驗證</string>
 </resources>

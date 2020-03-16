@@ -203,4 +203,6 @@
     <string name="amount_received">实收金额:</string>
     <string name="add_new_addr_fail">新增常用地址失败</string>
     <string name="amount_less_than_fees">金额低于手续费</string>
+    <string name="sign">签名</string>
+    <string name="verify">验证</string>
 </resources>

@@ -90,37 +90,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         }
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        if (MainActivity.getSelectedFragment() == null) {
-            MainActivity.setSelectedFragment(this);
-            onPageSelected();
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        logger.debug("onActivityResult:" + requestCode + " resultCode:" + resultCode);
-        if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
-            if (resultCode == RESULT_OK) {
-                String addr = data.getStringExtra(KEY_QR_CODE);
-                logger.info("QR result: {}", addr);
-
-                if (MainActivity.isAddressValid(addr)) {
-                    tvAddress.setText(addr);
-                } else {
-                    if (BtcUtils.isSegWitAddress(!Preferences.isTestnet(), addr)) {
-                        AlertPrompt.alert(getContext(), getString(R.string.seg_wit_address_is_not_supported));
-                    } else {
-                        AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
-                    }
-                }
-            }
-        }
-    }
-
     public void pasteAddressFromClipboard() {
         if (mUseFixAddress) {
             dialogFixAddressEnabled();
@@ -385,6 +354,39 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         }
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // in case when MainActivity resumed for the first time, no fragment has been selected yet
+        // and onPageSelected is not called; call onPageSelected to update UI/Configurations/Dataset
+        if (MainActivity.getSelectedFragment() == null) {
+            MainActivity.setSelectedFragment(this);
+            onPageSelected();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        logger.debug("onActivityResult:" + requestCode + " resultCode:" + resultCode);
+        if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
+            if (resultCode == RESULT_OK) {
+                String addr = data.getStringExtra(KEY_QR_CODE);
+                logger.info("QR result: {}", addr);
+
+                if (MainActivity.isAddressValid(addr)) {
+                    tvAddress.setText(addr);
+                } else {
+                    if (BtcUtils.isSegWitAddress(!Preferences.isTestnet(), addr)) {
+                        AlertPrompt.alert(getContext(), getString(R.string.seg_wit_address_is_not_supported));
+                    } else {
+                        AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
+                    }
+                }
+            }
+        }
     }
 
     @Override

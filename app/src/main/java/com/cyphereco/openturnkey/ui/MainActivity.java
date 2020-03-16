@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final ViewPager viewPager = findViewById(R.id.view_pager_main);
-        final PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager());
+        final MainPagerAdapter pagerAdapter = new MainPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -171,19 +171,19 @@ public class MainActivity extends AppCompatActivity {
                         switch (menuItem.getItemId()) {
                             case FRAGMENT_ADDRBOOK:
                                 getSupportActionBar().setTitle(getString(R.string.addresses));
-                                page = PagerAdapter.PAGE_ADDRBOOK;
+                                page = MainPagerAdapter.PAGE_ADDRBOOK;
                                 break;
                             case FRAGMENT_HISTORY:
                                 getSupportActionBar().setTitle(getString(R.string.history));
-                                page = PagerAdapter.PAGE_HISTORY;
+                                page = MainPagerAdapter.PAGE_HISTORY;
                                 break;
                             case FRAGMENT_OTK:
                                 getSupportActionBar().setTitle(getString(R.string._openturnkey));
-                                page = PagerAdapter.PAGE_OTK;
+                                page = MainPagerAdapter.PAGE_OTK;
                                 break;
                             default:
                                 getSupportActionBar().setTitle(getString(R.string.pay));
-                                page = PagerAdapter.PAGE_PAY;
+                                page = MainPagerAdapter.PAGE_PAY;
                                 break;
                         }
 

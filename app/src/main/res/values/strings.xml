@@ -222,5 +222,7 @@
     <string name="add_new_addr_fail">Add new address failed</string>
     <string name="amount_received">Received Amount:</string>
     <string name="amount_less_than_fees">Amount is less than transaction fee</string>
+    <string name="sign">Sign</string>
+    <string name="verify">Verify</string>
 
 </resources>
