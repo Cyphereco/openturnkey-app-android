@@ -22,4 +22,15 @@ public class UnsignedTx {
     public List<String> getToSign() { return mToSign;}
     public double getAmount() { return mAmount;}
     public long getFee() { return mFee;}
+
+    @Override
+    public String toString() {
+        return "UnsignedTx{" +
+                "mFrom='" + mFrom + '\'' +
+                ", mTo='" + mTo + '\'' +
+                ", mAmount=" + mAmount +
+                ", mFee=" + mFee +
+                ", mToSign=" + mToSign +
+                '}';
+    }
 }
