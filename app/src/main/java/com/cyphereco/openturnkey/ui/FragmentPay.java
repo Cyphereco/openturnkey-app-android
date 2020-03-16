@@ -30,9 +30,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.blockcypher.exception.BlockCypherException;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.OtkData;
+import com.cyphereco.openturnkey.core.UnsignedTx;
 import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
@@ -41,8 +43,10 @@ import com.cyphereco.openturnkey.utils.ExchangeRate;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.TxFee;
 import com.cyphereco.openturnkey.webservices.BlockChainInfo;
+import com.cyphereco.openturnkey.webservices.BlockCypher;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -50,9 +54,10 @@ import static android.app.Activity.RESULT_OK;
 
 public class FragmentPay extends FragmentExtendOtkViewPage {
 
+    final String CRLF = "\n";
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
 
-    private boolean requestSignature = false;
+    private boolean signPayment = false;
 
     boolean mUseFixAddress = false;
     boolean mIsCryptoCurrencySet = true;
@@ -311,7 +316,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         return;
                     }
 
-                    requestSignature = true;
+                    signPayment = true;
 
                     DialogReadOtk dialogReadOtk = new DialogReadOtk();
                     assert getFragmentManager() != null;
@@ -471,7 +476,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             String addr = otkData.getSessionData().getAddress();
 
             if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
-                if (requestSignature) {
+                if (signPayment) {
                     final String from = otkData.getSessionData().getAddress();
                     final String to = tvAddress.getText().toString();
                     logger.debug("Pay to ({}) for {} / {} (btc/{}) with tx fee ({}) included: {}",
@@ -540,11 +545,11 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
                         // got signatures, prompt a processing dialog
                     } else {
-                        AlertPrompt.alert(getContext(), "Pay fail\n"
+                        AlertPrompt.alert(getContext(), "Pay fail" + CRLF
                                 + getString(R.string.reason) + ": " + otkData.getFailureReason());
                     }
                 } else {
-                    AlertPrompt.alert(getContext(), getString(R.string.communication_error) + "\n"
+                    AlertPrompt.alert(getContext(), getString(R.string.communication_error) + CRLF
                             + getString(R.string.reason) + ": " + getString(R.string.not_valid_openturnkey));
                 }
             }
@@ -788,6 +793,48 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         return total;
     }
 
+    private void paymentConfirmed(final String from, final String to, final long amountReceived, final long fees) {
+        logger.debug("payment confirmed");
+
+        final Dialog dialog = dialogFullscreenAlert(getString(R.string.processing));
+        final Handler handler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                dialog.cancel();
+                logger.debug("Unsigned Tx created: {}", msg.obj.toString());
+                if (msg.obj == null) {
+                    AlertPrompt.threadSafeAlert(getContext(), getString(R.string.error_cannot_create_tx));
+                }
+                else {
+                    UnsignedTx unsignedTx = (UnsignedTx) msg.obj;
+                    // create OTK request for signatures
+                    List list = unsignedTx.getToSign();
+                    for (int i = 0; i < list.size(); i++) {
+                        logger.debug("{}", list.get(i));
+                    }
+                }
+                return false;
+            }
+        });
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                Message msg = new Message();
+                try {
+                    msg.obj = BlockCypher.newTransaction(from, to, amountReceived, fees);
+                } catch (BlockCypherException e) {
+                    logger.error("Error: {}",
+                            BlockCypher.parseError(e.getBlockCypherError().getErrors().get(0).toString()));
+                } catch (Exception e) {
+                    logger.error("Error: {}", e.toString());
+                }
+                handler.sendMessage(msg);
+            }
+        }.start();
+        dialog.show();
+    }
+
     private void makeToastMessage(String message) {
         Snackbar snackbar = Snackbar.make(Objects.requireNonNull(getView()), message, Snackbar.LENGTH_LONG);
         TextView textView = snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
@@ -804,7 +851,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         MainActivity.setPayToAddress("");
     }
 
-    private void dialogConfirmPayment(String from, String to, long amountSent, long amountReceived, long fees) {
+    private void dialogConfirmPayment(final String from, final String to, long amountSent, final long amountReceived, final long fees) {
+        // preparing confirmation context
         long estBlocks = BtcUtils.getEstimatedTime(fees);
         String estTime = (estBlocks == 1) ? " 5~15" : ((estBlocks > 3) ? " 40~60+" : " 15~35");
         double btcTxfees = BtcUtils.satoshiToBtc(fees);
@@ -812,6 +860,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         double btcAmountRecv = BtcUtils.satoshiToBtc(amountReceived);
 
         LocalCurrency lc = Preferences.getLocalCurrency();
+
+        // format amount Strings
         String strBtcAmountSent = String.format(Locale.ENGLISH, "%.8f", btcAmountSent);
         String strFiatAmountSent = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(exchangeRate, lc, btcAmountSent));
         String strBtcAmountRecv = String.format(Locale.ENGLISH, "%.8f", btcAmountRecv);
@@ -819,14 +869,15 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         String strBtcFees = String.format(Locale.ENGLISH, "%.8f", btcTxfees);
         String strFiatFess = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(exchangeRate, lc, btcTxfees));
 
-        String msg = getString(R.string.subject_text_estimated_time) + estTime + "\n\n" +
-                getString(R.string.amount_sent) + "\n" + strBtcAmountSent + " / " +
-                strFiatAmountSent + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")\n" +
-                getString(R.string.sender) + ":\n" + from + "\n\n" +
-                getString(R.string.amount_received) + "\n" + strBtcAmountRecv + " / " +
-                strFiatAmountRecv + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")\n" +
-                getString(R.string.recipient) + ":\n" + to + "\n\n" +
-                getString(R.string.transaction_fee) + ":\n" + strBtcFees + " / " +
+        // confirmation summary string
+        String msg = getString(R.string.subject_text_estimated_time) + estTime + CRLF + CRLF +
+                getString(R.string.amount_sent) + CRLF + strBtcAmountSent + " / " +
+                strFiatAmountSent + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")" + CRLF +
+                getString(R.string.sender) + ":" + CRLF + from + CRLF + CRLF +
+                getString(R.string.amount_received) + CRLF + strBtcAmountRecv + " / " +
+                strFiatAmountRecv + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")" + CRLF +
+                getString(R.string.recipient) + ":" + CRLF + to + CRLF + CRLF +
+                getString(R.string.transaction_fee) + ":" + CRLF + strBtcFees + " / " +
                 strFiatFess + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")";
 
         if (Looper.myLooper() == null) Looper.prepare();
@@ -842,10 +893,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        logger.debug("confirmed payment");
-//                        hideConfirmPaymentDialog();
-//                        mConfirmPaymentDialogResultValue = true;
-//                        handler.sendMessage(handler.obtainMessage());
+                        paymentConfirmed(from, to, amountReceived, fees);
                     }
                 })
                 .setCancelable(true)
