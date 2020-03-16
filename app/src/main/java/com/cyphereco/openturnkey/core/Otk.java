@@ -323,7 +323,7 @@ public class Otk {
                 synchronized (this) {
                     try {
                         long amountInSatoshi = BtcUtils.btcToSatoshi(mAmount);
-                        UnsignedTx unsigendTx = BlockCypher.getInstance(mCtx).sendBitcoin(from, to, amountInSatoshi, txFees, feeIncluded);
+                        UnsignedTx unsigendTx = BlockCypher.newTransaction(from, to, amountInSatoshi, txFees);
                         Message msg = new Message();
                         msg.what = OTK_MSG_GOT_UNSIGNED_TX;
                         msg.obj = unsigendTx;
