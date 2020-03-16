@@ -18,7 +18,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/Base.ThemeOverlay.AppCompat.Light"
-        app:title="Key Information" />
+        app:title="@string/public_key_information" />
 
     <TextView
         android:id="@+id/ki_lable_master_pk"
