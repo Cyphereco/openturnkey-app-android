@@ -36,6 +36,7 @@ public class DialogReadOtk extends AppCompatDialogFragment {
 
     final public static int NOT_OPENTURNKEY   = 0;
     final public static int READ_SUCCESS      = 1;
+    final public static int REQUEST_FAIL      = 2;
 
 
     @Override
@@ -66,14 +67,7 @@ public class DialogReadOtk extends AppCompatDialogFragment {
             }
         });
 
-        dialogTImer = new CountDownTimer(DIALOG_LIFETIME, 1000) {
-            public void onTick(long millisUntilFinished) {
-            }
-
-            public void onFinish() {
-                cancelButton.callOnClick();
-            }
-        }.start();
+        setCancelTimer();
 
         return dialog;
     }
@@ -123,6 +117,10 @@ public class DialogReadOtk extends AppCompatDialogFragment {
                 textDesc.setText(R.string.request_sent);
                 iconSuccess.setVisibility(View.VISIBLE);
                 break;
+            case REQUEST_FAIL:
+                textDesc.setText(R.string.request_fail);
+                iconFail.setVisibility(View.VISIBLE);
+                break;
             default:
                 textDesc.setText(R.string.not_valid_openturnkey);
                 iconFail.setVisibility(View.VISIBLE);
@@ -140,6 +138,26 @@ public class DialogReadOtk extends AppCompatDialogFragment {
 
     public void setOnCanelListener (dialogReadOtkListener listener) {
         dialogListner = listener;
+    }
+
+    public static void extendCancelTimer() {
+        disableCancelTimer();
+        setCancelTimer();
+    }
+
+    public static void disableCancelTimer() {
+        dialogTImer.cancel();
+    }
+
+    private static void setCancelTimer() {
+        dialogTImer = new CountDownTimer(DIALOG_LIFETIME, 1000) {
+            public void onTick(long millisUntilFinished) {
+            }
+
+            public void onFinish() {
+                cancelButton.callOnClick();
+            }
+        }.start();
     }
 
     public interface dialogReadOtkListener {
