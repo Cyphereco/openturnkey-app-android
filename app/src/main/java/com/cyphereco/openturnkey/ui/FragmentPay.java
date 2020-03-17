@@ -74,48 +74,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     private Menu mMenu;
     private Handler handler;
 
-//    public static FragmentPay newInstance(String to, String btcAmount, String lcAmount, boolean isUseAllFundsChecked) {
-//        FragmentPay fragment = new FragmentPay();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_TO, to);
-//        args.putString(ARG_BTC, btcAmount);
-//        args.putString(ARG_LC, lcAmount);
-//        args.putBoolean(ARG_USE_ALL_FUNDS, isUseAllFundsChecked);
-//
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
-
-    public void launchQRcodeScanActivity() {
-        if (mUseFixAddress) {
-            dialogFixAddressEnabled();
-        } else {
-            Intent intent = new Intent(getActivity(), ActivityQRcodeScan.class);
-            startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
-        }
-    }
-
-    public void pasteAddressFromClipboard() {
-        if (mUseFixAddress) {
-            dialogFixAddressEnabled();
-        } else {
-            ClipboardManager clipboard = (ClipboardManager) Objects.requireNonNull(getActivity()).getSystemService(Context.CLIPBOARD_SERVICE);
-            if (clipboard != null && clipboard.hasPrimaryClip()) {
-                android.content.ClipDescription description = clipboard.getPrimaryClipDescription();
-                android.content.ClipData data = clipboard.getPrimaryClip();
-                if (data != null && description != null) {
-                    String addr = String.valueOf(data.getItemAt(0).coerceToText(getContext()));
-
-                    if (MainActivity.isAddressValid(addr)) {
-                        tvAddress.setText(addr);
-                    } else {
-                        AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
-                    }
-                }
-            }
-        }
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -226,24 +184,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             }
         });
 
-//        if (getArguments() != null) {
-//            mEtCc.setText(getArguments().getString(ARG_BTC));
-//            try {
-//                mBtc = Double.parseDouble(mEtCc.getText().toString());
-//            } catch (NumberFormatException e) {
-//                mEtCc.setText("");
-//            }
-//            mEtLc.setText(getArguments().getString(ARG_LC));
-//            String to = getArguments().getString(ARG_TO);
-//            if (to != null && to.length() > 0) {
-//                tvAddress.setText(to);
-//            }
-//            boolean b = getArguments().getBoolean(ARG_USE_ALL_FUNDS);
-//            logger.debug("Use all funds checked:" + b);
-//            cbUseAllFunds.setChecked(b);
-//            convertCurrency();
-//        }
-
         mEtCc.addTextChangedListener(new TextWatcherCurrency(mEtCc) {
             @Override
             public void afterTextChanged(Editable editable) {
@@ -321,12 +261,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     DialogReadOtk dialogReadOtk = new DialogReadOtk();
                     assert getFragmentManager() != null;
                     dialogReadOtk.show(getFragmentManager(), "ReadOtk");
-
-//                    if (mListener != null) {
-//                        if (cb != null) {
-//                            mListener.onSignPaymentButtonClick(tvAddress.getText().toString(), mBtc, mEtCc.getText().toString(), mEtLc.getText().toString(), cb.isChecked());
-//                        }
-//                    }
                 } catch (NullPointerException | NumberFormatException e) {
                     e.printStackTrace();
                     makeToastMessage(getString(R.string.incorrect_recipient_amount));
@@ -463,11 +397,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     }
 
     @Override
-    public void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-    }
-
-    @Override
     public void onOtkDataPosted(final OtkData otkData) {
         super.onOtkDataPosted(otkData);
 
@@ -566,14 +495,33 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         mMenu = menu;
     }
 
-    private void updateAmount(String amount) {
-        View view = getView();
-        TextView tv = null;
-        if (view != null) {
-            tv = view.findViewById(R.id.input_crypto_currency);
+    public void launchQRcodeScanActivity() {
+        if (mUseFixAddress) {
+            dialogFixAddressEnabled();
+        } else {
+            Intent intent = new Intent(getActivity(), ActivityQRcodeScan.class);
+            startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
         }
-        if (tv != null) {
-            tv.setText(amount);
+    }
+
+    public void pasteAddressFromClipboard() {
+        if (mUseFixAddress) {
+            dialogFixAddressEnabled();
+        } else {
+            ClipboardManager clipboard = (ClipboardManager) Objects.requireNonNull(getActivity()).getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null && clipboard.hasPrimaryClip()) {
+                android.content.ClipDescription description = clipboard.getPrimaryClipDescription();
+                android.content.ClipData data = clipboard.getPrimaryClip();
+                if (data != null && description != null) {
+                    String addr = String.valueOf(data.getItemAt(0).coerceToText(getContext()));
+
+                    if (MainActivity.isAddressValid(addr)) {
+                        tvAddress.setText(addr);
+                    } else {
+                        AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
+                    }
+                }
+            }
         }
     }
 
@@ -804,8 +752,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 logger.debug("Unsigned Tx created: {}", msg.obj.toString());
                 if (msg.obj == null) {
                     AlertPrompt.threadSafeAlert(getContext(), getString(R.string.error_cannot_create_tx));
-                }
-                else {
+                } else {
                     UnsignedTx unsignedTx = (UnsignedTx) msg.obj;
                     // create OTK request for signatures
                     List list = unsignedTx.getToSign();
@@ -989,11 +936,5 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         assert getFragmentManager() != null;
         dialog.show(getFragmentManager(), "dialog");
     }
-
-//    public interface FragmentPayListener {
-//        void ontvAddress.getText().toStringByReadNfcButtonClick(String to, String btc, String lc, boolean isAllFundChecked);
-//
-//        void onSignPaymentButtonClick(String to, double amount, String btc, String lc, boolean isAllFundChecked);
-//    }
 }
 
