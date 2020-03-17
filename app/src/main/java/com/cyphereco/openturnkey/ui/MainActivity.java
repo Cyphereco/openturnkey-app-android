@@ -1,6 +1,5 @@
 package com.cyphereco.openturnkey.ui;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.support.annotation.NonNull;
@@ -51,11 +50,6 @@ public class MainActivity extends AppCompatActivity {
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
     public static final int REQUEST_RESULT_CODE_REPAY = 1000;
-    
-    AlertDialog.Builder mProgressDialogBuilder = null;
-    AlertDialog.Builder mConfirmTerminateOpDialogBuilder = null;
-    AlertDialog.Builder mConfirmPaymentDialogBuilder = null;
-    AlertDialog.Builder mCommandResultDialogBuilder = null;
 
     private static ExchangeRate exchangeRate;
     private static TxFee txFee;
@@ -79,6 +73,10 @@ public class MainActivity extends AppCompatActivity {
     private static String currentActivity = "";
 
     private static OnlineDataUpdateListener onlineDataUpdateListner;
+
+    public static String getCurrentActivity() {
+        return currentActivity;
+    }
 
     public static void setCurrentActivity(String activityName) {
         currentActivity = activityName;
@@ -198,215 +196,6 @@ public class MainActivity extends AppCompatActivity {
         if (mNfcAdapter == null) {
             AlertPrompt.alert(this, getString(R.string.nfc_unavailable));
         }
-
-        mProgressDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-        mConfirmTerminateOpDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-        mConfirmPaymentDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-        mCommandResultDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-
-//        mOtk = Otk.getInstance(getApplicationContext());
-//        mOtk.setEventListener(new Otk.OtkEventListener() {
-//            @Override
-//            public void onOtkEvent(OtkEvent event) {
-//                OtkEvent.Type type = event.getType();
-//                logger.debug("onOtkEvent:" + type.toString());
-//                /* TODO: process event */
-//                 if (type == OtkEvent.Type.TX_FEE_UPDATE) {
-//                    // Store to preference
-//                    Preferences.setTxFee(event.getTxFee());
-//                } else if (type == OtkEvent.Type.APPROACH_OTK) {
-//                    hideProgressDialog();
-//                } else if (type == OtkEvent.Type.FIND_UTXO || type == OtkEvent.Type.CHECKING_BALANCE_FOR_PAYMENT) {
-//                    // Hide status dialog
-//                    hideStatusDialog();
-//                    // Show progress spin circle
-//                    showProgressDialog(getString(R.string.check_balance));
-//                } else if (type == OtkEvent.Type.OPERATION_IN_PROCESSING) {
-//                    // Hide status dialog
-//                    hideStatusDialog();
-//                    // Show progress spin circle
-//                    showProgressDialog(getString(R.string.processing));
-//                } else if (type == OtkEvent.Type.GENERAL_INFORMATION) {
-//                    Intent intent = new Intent(getApplicationContext(), ActivityOpenturnkeyInfo.class);
-//                    intent.putExtra(KEY_OTK_DATA, event.getData());
-//                    startActivity(intent);
-//                } else if (type == OtkEvent.Type.SEND_BITCOIN_SUCCESS) {
-//                    hideProgressDialog();
-//                    Tx tx = event.getTx();
-//                    // Add transaction to database.
-//                    addTxToDb(tx);
-//                    // Make sure we are in FragmentOtk
-//                    if (selectedFragment instanceof FragmentOtk) {
-//                        // Go back to pay fragment
-//                        mOp = Otk.Operation.OTK_OP_NONE;
-//                        /* TODO: Go to history page and show the tx */
-//                        // Show tx
-//                        dialogBtcSent(tx);
-//                    }
-//
-//                } else if ((type == OtkEvent.Type.SEND_BITCOIN_FAIL) ||
-//                        (type == OtkEvent.Type.COMMAND_EXECUTION_FAILED) ||
-//                        (type == OtkEvent.Type.SESSION_ID_MISMATCH)) {
-//                    // Hide progress
-//                    hideProgressDialog();
-//                    // Show error in dialog
-//                    String s;
-//                    if (type == OtkEvent.Type.SESSION_ID_MISMATCH) {
-//                        s = getString(R.string.communication_error);
-//                    } else {
-//                        s = getString(R.string.try_later) + "\n\n" +
-//                                "{" + event.getFailureReason() + "}";
-//                    }
-//
-//                    dialogSentBtcFailed(parseFailureReason(s));
-//
-//                    mOp = Otk.Operation.OTK_OP_NONE;
-//                    mOtk.cancelOperation();
-//                    // Make sure we are in FragmentOtk
-//                    if (selectedFragment instanceof FragmentOtk) {
-//                        // Go back to pay fragment
-//                    }
-//                } else if (type == OtkEvent.Type.COMPLETE_PAYMENT_FAIL) {
-//                    // Hide progress
-//                    hideProgressDialog();
-//                    mOp = Otk.Operation.OTK_OP_NONE;
-//                    mOtk.cancelOperation();
-//                    // Make sure we are in FragmentOtk
-//                    if (selectedFragment instanceof FragmentOtk) {
-//                        /* TODO: Go to history page and show the tx */
-//                        // Show error in dialog
-//                        String reason;
-//                        if (event.getTx() != null) {
-//                            // Add tx to db
-//                            addTxToDb(event.getTx());
-//                            reason = event.getTx().getDesc();
-//                        } else {
-//                            reason = parseFailureReason(event.getFailureReason());
-//                        }
-//                        String s = getString(R.string.try_later) + "\n\n" +
-//                                "{" + reason + "}";
-//                        dialogSentBtcFailed(s);
-//                    }
-//
-//                } else if (type == OtkEvent.Type.OTK_UNAUTHORIZED) {
-//                    // Dismiss progress dialog
-//                    hideProgressDialog();
-//                    // Show pre-auth with pin dialog
-//                } else if (type == OtkEvent.Type.UNSIGNED_TX) {
-//                    if (mOp != Otk.Operation.OTK_OP_SIGN_PAYMENT) {
-//                        logger.error("Got unsigned tx but sign payment is already terminated");
-//                    } else {
-//                        // Show dialog for user to confirm the payment
-//                        UnsignedTx utx = event.getUnsignedTx();
-//                        if (showConfirmPaymentDialog(utx)) {
-//                            // Confirm payment
-//                            mOtk.confirmPayment();
-//                        } else {
-//                            // Cancel payment
-//                            onCancelButtonClick();
-//                        }
-//                    }
-//                } else if (type == OtkEvent.Type.OTK_IS_NOT_LOCKED) {
-//                    hideStatusDialog();
-//                    showCommandResultDialog(getString(R.string.unlock_failed), getString(R.string.otk_is_not_locked));
-//                    mOp = Otk.Operation.OTK_OP_NONE;
-//                    mOtk.cancelOperation();
-//                    Intent intent = new Intent(getApplicationContext(), ActivityOpenturnkeyInfo.class);
-//                    intent.putExtra(KEY_OTK_DATA, event.getData());
-//                    startActivity(intent);
-//
-//                } else if (type == OtkEvent.Type.UNLOCK_SUCCESS) {
-//                    hideStatusDialog();
-//                    showCommandResultDialog(getString(R.string.unlock_success), getString(R.string.otk_is_unlocked));
-//                    mOp = Otk.Operation.OTK_OP_NONE;
-//                    mOtk.cancelOperation();
-//                    Intent intent = new Intent(getApplicationContext(), ActivityOpenturnkeyInfo.class);
-//                    intent.putExtra(KEY_OTK_DATA, event.getData());
-//                    startActivity(intent);
-//                } else if (type == OtkEvent.Type.UNLOCK_FAIL) {
-//                    hideStatusDialog();
-//                    mOp = Otk.Operation.OTK_OP_NONE;
-//                    mOtk.cancelOperation();
-//                    showStatusDialog(getString(R.string.unlock_failed), parseFailureReason(event.getFailureReason()));
-//                } else if (type == OtkEvent.Type.WRITE_NOTE_SUCCESS) {
-//                    hideStatusDialog();
-//                    showCommandResultDialog(getString(R.string.write_note), getString(R.string.write_note_success));
-//                    mOp = Otk.Operation.OTK_OP_NONE;
-//                    mOtk.cancelOperation();
-//                    Intent intent = new Intent(getApplicationContext(), ActivityOpenturnkeyInfo.class);
-//                    intent.putExtra(KEY_OTK_DATA, event.getData());
-//                    startActivity(intent);
-//                } else if (type == OtkEvent.Type.WRITE_NOTE_FAIL) {
-//                    hideStatusDialog();
-//                    mOp = Otk.Operation.OTK_OP_NONE;
-//                    mOtk.cancelOperation();
-//                    showStatusDialog(getString(R.string.write_note_fail), parseFailureReason(event.getFailureReason()));
-//                } else if (type == OtkEvent.Type.SET_PIN_SUCCESS) {
-//                    hideStatusDialog();
-//                    showCommandResultDialog(getString(R.string.set_pin_code), getString(R.string.set_pin_success));
-//                    mOp = Otk.Operation.OTK_OP_NONE;
-//                    mOtk.cancelOperation();
-//                    Intent intent = new Intent(getApplicationContext(), ActivityOpenturnkeyInfo.class);
-//                    intent.putExtra(KEY_OTK_DATA, event.getData());
-//                    startActivity(intent);
-//                } else if (type == OtkEvent.Type.SET_PIN_FAIL) {
-//                    hideStatusDialog();
-//                    mOp = Otk.Operation.OTK_OP_NONE;
-//                    mOtk.cancelOperation();
-//                    showStatusDialog(getString(R.string.set_pin_fail), parseFailureReason(event.getFailureReason()));
-//                } else if (type == OtkEvent.Type.CHOOSE_KEY_SUCCESS) {
-//                    hideStatusDialog();
-//                    showCommandResultDialog(getString(R.string.choose_key), getString(R.string.choose_key_success));
-//                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                    mOtk.cancelOperation();
-//                } else if (type == OtkEvent.Type.CHOOSE_KEY_FAIL) {
-//                    hideStatusDialog();
-//                    mOtk.cancelOperation();
-//                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                    showStatusDialog(getString(R.string.choose_key_fail), parseFailureReason(event.getFailureReason()));
-//                } else if (type == OtkEvent.Type.SIGN_MESSAGE_SUCCESS) {
-//                    hideStatusDialog();
-//                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                    mOtk.cancelOperation();
-//                    Intent intent = new Intent(getApplicationContext(), ActivitySignValidateMessage.class);
-//                    intent.putExtra(KEY_OTK_DATA, event.getData());
-//                    intent.putExtra(KEY_MESSAGE_TO_SIGN, event.getMessageToSign());
-//                    intent.putExtra(KEY_USING_MASTER_KEY, event.getUsingMasterKey());
-//                    startActivity(intent);
-////                    startActivityForResult(intent, MainActivity.REQUEST_CODE_SIGN_MESSAGE);
-//                } else if (type == OtkEvent.Type.SIGN_MESSAGE_FAIL) {
-//                    hideStatusDialog();
-//                    mOtk.cancelOperation();
-//                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                    showStatusDialog(getString(R.string.sign_message_fail), parseFailureReason(event.getFailureReason()));
-//                } else if (type == OtkEvent.Type.OTK_PIN_UNSET) {
-//                    /* Clear current OTK op */
-//                    mOtk.cancelOperation();
-//                    /* Go to set PIN page */
-//                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                    showStatusDialog(getString(R.string.pin_unset), getString(R.string.pin_unset_msg));
-//                } else if ((type == OtkEvent.Type.SESSION_TIMED_OUT) ||
-//                        (type == OtkEvent.Type.READ_RESPONSE_TIMED_OUT)) {
-//                    // Dismiss dialogs
-//                    hideProgressDialog();
-//                    hideDialogConfirmOperationAndWaitResult();
-//                    hideConfirmPaymentDialog();
-//                    hideStatusDialog();
-//                    /* TODO update error description */
-//                    if (type == OtkEvent.Type.SESSION_TIMED_OUT) {
-//                        showStatusDialog(getString(R.string.operation_timeout), getString(R.string.session_timeout));
-//                    } else {
-//                        showStatusDialog(getString(R.string.operation_timeout), getString(R.string.read_response_timeout));
-//                    }
-//                    /* Clear current OTK op */
-//                    mOtk.cancelOperation();
-//                    /* Go to set PIN page */
-//                    mOp = Otk.Operation.OTK_OP_READ_GENERAL_INFO;
-//                } else {
-//                    logger.debug("Unhandled event:{}", type.name());
-//                }
-//            }
-//        });
     }
 
     @Override
@@ -418,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        logger.debug("new intent");
         /*
          For the incoming intents, we only care about NFC event, (at the moment)
          specifically, NDEF message event, which is used by OpenTurnKey. We will
@@ -463,8 +251,7 @@ public class MainActivity extends AppCompatActivity {
                             .putExtra(NfcAdapter.EXTRA_TAG,
                                     intent.getParcelableExtra(NfcAdapter.EXTRA_TAG))
                             .putExtra(NfcAdapter.EXTRA_NDEF_MESSAGES,
-                                    intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES))
-                            .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                    intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES));
                 }
                 startActivity(newIntent);
             }
@@ -474,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        intent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
         intent.addCategory(Intent.CATEGORY_HOME);
         startActivity(intent);
     }

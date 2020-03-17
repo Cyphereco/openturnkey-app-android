@@ -206,10 +206,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
 
             if (intent != null) {
                 intent.putExtra(MainActivity.KEY_OTK_DATA, otkData);
-                // we don't need result here, we called startActivityForResult
-                // only to prevent a bug, that we user press back button
-                // the app closed instead of return to MainActivity,
-                // when it return from pause state
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivityForResult(intent, 0);
             }
         }

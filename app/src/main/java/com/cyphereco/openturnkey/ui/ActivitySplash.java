@@ -19,7 +19,6 @@ public class ActivitySplash extends AppCompatActivity {
     public static final String TAG = ActivitySplash.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
 
-    private static boolean isStarted = false;
     private static final int REQUEST_CODE = 0x11;
 
     String[] permissions = {"android.permission.WRITE_EXTERNAL_STORAGE"};
@@ -58,10 +57,31 @@ public class ActivitySplash extends AppCompatActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        gotoAcitivity();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        if (isStarted) {
-            startActivity(new Intent(this, MainActivity.class));
+        gotoAcitivity();
+    }
+
+    private void gotoAcitivity() {
+        if (MainActivity.getCurrentActivity() != null) {
+            // app is already running, switch to current activity
+            Class cls = null;
+
+            try {
+                cls = Class.forName(MainActivity.getCurrentActivity());
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            if (cls != null) {
+                startActivity(new Intent(this, cls));
+            }
         }
     }
 
@@ -80,7 +100,6 @@ public class ActivitySplash extends AppCompatActivity {
 
             Intent intent = new Intent(ActivitySplash.this, MainActivity.class);
             startActivity(intent);
-            isStarted = true;
 
             logger.debug("Start MainActivity");
 

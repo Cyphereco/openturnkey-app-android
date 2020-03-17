@@ -126,13 +126,13 @@
 
     <ImageView
         android:id="@+id/icon_copy"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
         android:contentDescription="@android:string/copyUrl"
-        app:layout_constraintEnd_toEndOf="@+id/btc_address_context"
-        app:layout_constraintStart_toStartOf="@+id/btc_address_context"
-        app:layout_constraintTop_toBottomOf="@+id/btc_address_context"
+        app:layout_constraintBottom_toBottomOf="@+id/btc_address_context"
+        app:layout_constraintStart_toEndOf="@+id/btc_address_context"
+        app:layout_constraintTop_toTopOf="@+id/btc_address_context"
         app:srcCompat="@drawable/ic_content_copy_black_24dp" />
 
     <ImageView
