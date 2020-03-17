@@ -1,6 +1,5 @@
 package com.cyphereco.openturnkey.core.protocol;
 
-import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;

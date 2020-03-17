@@ -1,18 +1,13 @@
 package com.cyphereco.openturnkey.ui;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Handler;
-import android.os.Message;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -22,7 +17,6 @@ import android.widget.SearchView;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
-import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.Tx;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
@@ -36,6 +30,7 @@ import org.slf4j.Logger;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -56,19 +51,11 @@ public class MainActivity extends AppCompatActivity {
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
     public static final int REQUEST_RESULT_CODE_REPAY = 1000;
-
-    static private Otk mOtk = null;
-
+    
     AlertDialog.Builder mProgressDialogBuilder = null;
-    AlertDialog mProgressDialog = null;
-    static AlertDialog mStatusDialog = null;
-    static AlertDialog mConfirmOpDialog = null;
     AlertDialog.Builder mConfirmTerminateOpDialogBuilder = null;
     AlertDialog.Builder mConfirmPaymentDialogBuilder = null;
-    AlertDialog mConfirmPaymentDialog = null;
     AlertDialog.Builder mCommandResultDialogBuilder = null;
-    AlertDialog mCommandResultDialog = null;
-    private boolean mConfirmPaymentDialogResultValue;
 
     private static ExchangeRate exchangeRate;
     private static TxFee txFee;
@@ -156,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getString(R.string.pay));
+        Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.pay));
 
         bottomNav = findViewById(R.id.bottom_navigation);
 
@@ -170,19 +157,19 @@ public class MainActivity extends AppCompatActivity {
                         int page;
                         switch (menuItem.getItemId()) {
                             case FRAGMENT_ADDRBOOK:
-                                getSupportActionBar().setTitle(getString(R.string.addresses));
+                                Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.addresses));
                                 page = MainPagerAdapter.PAGE_ADDRBOOK;
                                 break;
                             case FRAGMENT_HISTORY:
-                                getSupportActionBar().setTitle(getString(R.string.history));
+                                Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.history));
                                 page = MainPagerAdapter.PAGE_HISTORY;
                                 break;
                             case FRAGMENT_OTK:
-                                getSupportActionBar().setTitle(getString(R.string._openturnkey));
+                                Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string._openturnkey));
                                 page = MainPagerAdapter.PAGE_OTK;
                                 break;
                             default:
-                                getSupportActionBar().setTitle(getString(R.string.pay));
+                                Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.pay));
                                 page = MainPagerAdapter.PAGE_PAY;
                                 break;
                         }
@@ -197,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                         // if soft-keyboard is opened, close it!
                         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                         if (imm.isAcceptingText()) { // verify if the soft keyboard is open
-                            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                            imm.hideSoftInputFromWindow(Objects.requireNonNull(getCurrentFocus()).getWindowToken(), 0);
                         }
 
                         return true;
@@ -503,33 +490,7 @@ public class MainActivity extends AppCompatActivity {
             selectedFragment.onPageSelected();
         }
     }
-
-//    public void onSignPaymentButtonClick(String to, double amount, String btcAmount, String lcAmount, boolean isAllFundsChecked) {
-//        logger.debug("Make payment:\nTo: " + to +
-//                "\nBTC = " + btcAmount + "\nLocal currency = " + lcAmount +
-//                "\nmAmount:" + amount + "\nUse all funds: " + isAllFundsChecked);
-//
-//        long txFees = BtcUtils.getTxFeeInSatoshi();
-//
-//        double payAmount = isAllFundsChecked ? -1 : amount;
-//        boolean includeFee = false;
-//        mOtk.setOperation(Otk.Operation.OTK_OP_SIGN_PAYMENT, to, payAmount, includeFee, txFees);
-//
-//
-//        // Cache recipient address and amount
-//    }
-
-    public void onCancelButtonClick() {
-        AlertPrompt.info(this, getString(R.string.operation_cancelled));
-
-        // For sign payment
-        hideConfirmPaymentDialog();
-        hideProgressDialog();
-        hideDialogConfirmOperationAndWaitResult();
-        hideStatusDialog();
-        mOtk.cancelOperation();
-    }
-
+    
     private void addTxToDb(Tx tx) {
         if (tx == null) {
             logger.error("addTxToDb(): tx is null");
@@ -551,87 +512,6 @@ public class MainActivity extends AppCompatActivity {
         logger.info("DB tx count:{}", OpenturnkeyDB.getTransactionCount());
     }
 
-    private void showProgressDialog(String title) {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            return;
-        }
-        mProgressDialog = mProgressDialogBuilder.setTitle(title)
-                .setView(R.layout.dialog_progress_circle)
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        logger.debug("onCancel()");
-                        onCancelButtonClick();
-                    }
-                })
-                .setCancelable(true)
-                .show();
-    }
-
-    private void hideProgressDialog() {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-    }
-
-    private void showStatusDialog(String title, String message) {
-        if (mStatusDialog != null && mStatusDialog.isShowing()) {
-            // Update title and message
-            mStatusDialog.setTitle(title);
-            mStatusDialog.setMessage(message);
-            return;
-        }
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-
-        mStatusDialog = alertDialogBuilder.setTitle(title)
-                .setMessage(message)
-                .setPositiveButton(R.string.ok, null)
-                .setCancelable(false)
-                .show();
-    }
-
-    private void hideStatusDialog() {
-        if (mStatusDialog != null) {
-            mStatusDialog.dismiss();
-        }
-    }
-
-    void showCommandResultDialog(String title, String message) {
-        @SuppressLint("HandlerLeak") final Handler handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                throw new RuntimeException();
-            }
-        };
-
-        if (mCommandResultDialog != null && mCommandResultDialog.isShowing()) {
-            logger.error("Command result dialog is shown, should be some error!");
-        }
-        mCommandResultDialog = mConfirmPaymentDialogBuilder.setTitle(title)
-                .setMessage(message)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        logger.debug("onOk()");
-                        mCommandResultDialog.dismiss();
-                        handler.sendMessage(handler.obtainMessage());
-                    }
-                })
-                .setCancelable(false)
-                .show();
-        try {
-            Looper.loop();
-        } catch (RuntimeException e) {
-            logger.debug("Exit showCommandResultDialog");
-        }
-    }
-
-    private void hideConfirmPaymentDialog() {
-        if (mConfirmPaymentDialog != null) {
-            mConfirmPaymentDialog.dismiss();
-        }
-    }
-
     public void dialogBtcSent(Tx tx) {
         DialogSendBtcResult dialog = new DialogSendBtcResult();
         Bundle bundle = new Bundle();
@@ -648,22 +528,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.setArguments(bundle);
         dialog.show(getSupportFragmentManager(), "dialog");
     }
-
-    public void dialogSentBtcFailed(String reason) {
-        DialogSendBtcResult dialog = new DialogSendBtcResult();
-        Bundle bundle = new Bundle();
-        // result string id
-        bundle.putInt("sendBtcResult", R.string.transaction_not_executed);
-        bundle.putString("failureReason", reason);
-        /* Here we want to replace the reason from the web service to
-         * out own strings. Such as "Not enough balance, transaction canceled"
-         * or "Transaction cannot be completed at the moment, try again later"
-         */
-        //bundle.putString("failureReason", getString(R.string.try_later));
-        dialog.setArguments(bundle);
-        dialog.show(getSupportFragmentManager(), "dialog");
-    }
-
+    
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -671,45 +536,8 @@ public class MainActivity extends AppCompatActivity {
         if (getClass().getName().equals(currentActivity) && selectedFragment != null) {
             selectedFragment.onActivityResult(requestCode, resultCode, data);
         }
-
-//        if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
-//            if (resultCode == RESULT_OK) {
-//                qrScanText = intent.getStringExtra(KEY_QR_CODE);
-//                logger.debug("qr scan result: {}", qrScanText);
-//            }
-//        }
     }
-
-    private void hideDialogConfirmOperationAndWaitResult() {
-        if (mConfirmOpDialog != null) {
-            mConfirmOpDialog.dismiss();
-        }
-    }
-
-    public String parseFailureReason(String desc) {
-        if (desc == null || desc.equals("")) {
-            return getString(R.string.communication_error);
-        }
-        switch (desc) {
-            case "C0":
-                return getString(R.string.session_timeout);
-            case "C1":
-                return getString(R.string.auth_failed);
-            case "C3":
-                return getString(R.string.invalid_params);
-            case "C4":
-                return getString(R.string.missing_params);
-            case "C7":
-                return getString(R.string.pin_unset);
-            case "00":
-            case "C2":
-            case "FF":
-                return getString(R.string.invalid_command);
-            default:
-                return desc;
-        }
-    }
-
+    
     public static void enableReadOtk() {
         mEnableReadOtk = true;
     }
@@ -784,11 +612,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void setExchangeRate(ExchangeRate exchangeRate) {
         logger.debug("Update ExchangeRate: {}", exchangeRate.toString());
-        if (exchangeRate != null) {
-            if (MainActivity.exchangeRate == null) MainActivity.exchangeRate = exchangeRate;
-            if (onlineDataUpdateListner != null)
-                onlineDataUpdateListner.onExchangeRateUpdated(exchangeRate);
-        }
+        if (MainActivity.exchangeRate == null) MainActivity.exchangeRate = exchangeRate;
+        if (onlineDataUpdateListner != null)
+            onlineDataUpdateListner.onExchangeRateUpdated(exchangeRate);
     }
 
     public static TxFee getTxFee() {
@@ -797,10 +623,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void setTxFee(TxFee txFee) {
         logger.debug("Update TxFee: {}", txFee.toString());
-        if (txFee != null) {
-            if (MainActivity.txFee != null) MainActivity.txFee = txFee;
-            if (onlineDataUpdateListner != null) onlineDataUpdateListner.onTxFeeUpdated(txFee);
-        }
+        if (MainActivity.txFee != null) MainActivity.txFee = txFee;
+        if (onlineDataUpdateListner != null) onlineDataUpdateListner.onTxFeeUpdated(txFee);
     }
 
     public static FragmentExtendOtkViewPage getSelectedFragment() {
@@ -817,7 +641,6 @@ public class MainActivity extends AppCompatActivity {
 
     public interface OnlineDataUpdateListener {
         void onExchangeRateUpdated(ExchangeRate xrate);
-
         void onTxFeeUpdated(TxFee txFee);
     }
 }
