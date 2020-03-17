@@ -107,7 +107,7 @@ public class DialogReadOtk extends AppCompatDialogFragment {
         textDesc.setText(desc);
     }
 
-    public static void updateReadOtkStatus(int flag) {
+    public static void endingDialogReadOtkWithReason(int flag) {
         textTitle.setVisibility(View.INVISIBLE);
         cancelButton.setVisibility(View.INVISIBLE);
         iconHint.setVisibility(View.INVISIBLE);

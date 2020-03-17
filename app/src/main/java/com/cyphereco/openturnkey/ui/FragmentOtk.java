@@ -107,11 +107,17 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 // the request has been sent
                 if (request.getCommand().equals(Command.RESET.toString())) {
                     // a reset command needs no response, when it's sent, the request is completed
-                    DialogReadOtk.updateReadOtkStatus(DialogReadOtk.READ_SUCCESS);
+                    DialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.READ_SUCCESS);
                     showStatusDialog(getString(R.string.reset_success), getString(R.string.reset_step_intro));
                 }
             }
         }
+    }
+
+    @Override
+    protected void modifyRequestAfterReadOtkBeforeSubmit(OtkRequest request, OtkData otkData) {
+        super.modifyRequestAfterReadOtkBeforeSubmit(request, otkData);
+//        logger.debug("peekRequest ({}): {}", numOfRequest(), peekRequest());
     }
 
     @Override
@@ -131,6 +137,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
 
                 if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
                     if (cmd == Command.SHOW_KEY) {
+//                        logger.debug("showKey - numOfRequest: {}", numOfRequest());
                         intent = new Intent(getContext(), ActivityKeyInformation.class);
                     } else if (cmd == Command.EXPORT_WIF_KEY) {
                         final String keyInfo = otkData.getSessionData().getWIFKey();
@@ -189,11 +196,12 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                         }
                         AlertPrompt.info(getContext(), msg);
                     }
-                } else {
-                    AlertPrompt.alert(getContext(), getString(R.string.request_fail) +
-                            "\n" + getString(R.string.reason) + ": " +
-                            parseFailureReason(otkData.getFailureReason()));
                 }
+//                else {
+//                    AlertPrompt.alert(getContext(), getString(R.string.request_fail) +
+//                            "\n" + getString(R.string.reason) + ": " +
+//                            parseFailureReason(otkData.getFailureReason()));
+//                }
             }
 
             if (intent != null) {
@@ -274,6 +282,8 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                     public void onConfirmed() {
                         cbUsePin.setVisibility(View.VISIBLE);
                         tvRequestDesc.setText(R.string.full_pubkey_information);
+//                        pushRequest(new OtkRequest(Command.SHOW_KEY.toString()).setMore());
+//                        pushRequest(new OtkRequest(Command.SHOW_KEY.toString()).setMore());
                         pushRequest(new OtkRequest(Command.SHOW_KEY.toString()));
                     }
                 });
@@ -294,11 +304,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
             case R.id.menu_openturnkey_sign_message:
                 intent = new Intent(getContext(), ActivitySignValidateMessage.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                // we don't need result here, we called startActivityForResult
-                // only to prevent a bug, that we user press back button
-                // the app closed instead of return to MainActivity,
-                // when it return from pause state
-                startActivityForResult(intent, 0);
+                startActivity(intent);
                 break;
             case R.id.menu_openturnkey_choose_key:
                 dialog.setMessage(getString(R.string.choose_key_warning_message));
@@ -396,30 +402,6 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
             }
         };
         timerRequestDismiss.start();
-    }
-
-    public String parseFailureReason(String desc) {
-        if (desc == null || desc.equals("")) {
-            return getString(R.string.communication_error);
-        }
-        switch (desc) {
-            case "C0":
-                return getString(R.string.session_timeout);
-            case "C1":
-                return getString(R.string.auth_failed);
-            case "C3":
-                return getString(R.string.invalid_params);
-            case "C4":
-                return getString(R.string.missing_params);
-            case "C7":
-                return getString(R.string.pin_unset);
-            case "00":
-            case "C2":
-            case "FF":
-                return getString(R.string.invalid_command);
-            default:
-                return desc;
-        }
     }
 
     private void showStatusDialog(String title, String message) {

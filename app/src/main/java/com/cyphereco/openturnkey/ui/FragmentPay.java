@@ -72,7 +72,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     private TextView tvCurrency;
     private CheckBox cbUseAllFunds;
     private Menu mMenu;
-    private static Handler handler;
+    private Handler handler;
 
 //    public static FragmentPay newInstance(String to, String btcAmount, String lcAmount, boolean isUseAllFundsChecked) {
 //        FragmentPay fragment = new FragmentPay();

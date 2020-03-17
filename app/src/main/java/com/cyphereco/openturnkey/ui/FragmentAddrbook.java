@@ -137,11 +137,7 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
         if (item.getItemId() == R.id.menu_addresses_add) {
             Intent intent = new Intent(getContext(), ActivityAddressEditor.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            // we don't need result here, we called startActivityForResult
-            // only to prevent a bug, that we user press back button
-            // the app closed instead of return to MainActivity,
-            // when it return from pause state
-            startActivityForResult(intent, 0);
+            startActivity(intent);
             return true;
         }
 

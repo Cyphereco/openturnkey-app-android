@@ -1,6 +1,5 @@
 package com.cyphereco.openturnkey.ui;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -21,15 +20,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.OtkData;
-import com.cyphereco.openturnkey.core.OtkEvent;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
+import com.cyphereco.openturnkey.webservices.BlockChainInfo;
 import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
 
 import org.slf4j.Logger;
@@ -42,141 +40,110 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
     public static final String TAG = ActivityOpenturnkeyInfo.class.getSimpleName();
     private static Logger logger = Log4jHelper.getLogger(TAG);
 
-    static private Otk mOtk = null;
-    static Handler handler = null;
+    private static OtkData otkData;
+    private Handler handler;
 
-    @SuppressLint("HandlerLeak")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        logger.debug("onCreate");
+
+        if (otkData == null) {
+            otkData = (OtkData) getIntent().getSerializableExtra(MainActivity.KEY_OTK_DATA);
+            if (otkData == null) {
+                AlertPrompt.alert(this, getString(R.string.communication_error));
+                finish();
+            }
+        }
+
+        // inflate layout
         setContentView(R.layout.activity_openturnkey_info);
+
+        // configure toolbar and home buttom
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        Intent intent = getIntent();
-        if (intent == null) {
-            return;
+        // show lock state icon
+        ImageView ivLockIcon = findViewById(R.id.lock_state);
+        if (OtkState.LockState.UNLOCKED != otkData.getOtkState().getLockState()) {
+            ivLockIcon.setImageResource(R.drawable.ic_lock_outline_black_24dp);
+            ivLockIcon.setColorFilter(Color.argb(255, 0xf4, 0x43, 0x36));
+        } else {
+            ivLockIcon.setImageResource(R.drawable.ic_lock_open_black_24dp);
+            ivLockIcon.setColorFilter(Color.argb(0xff, 0x4c, 0xaf, 0x50));
         }
 
-        final OtkData otkData = (OtkData) intent.getSerializableExtra(MainActivity.KEY_OTK_DATA);
-        if (otkData == null) {
-            return;
+        // show power level
+        int batLevel = otkData.getMintInfo().getBatteryLevel();
+        TextView tvPowerLevel = findViewById(R.id.power_state_value);
+        tvPowerLevel.setText(String.format(Locale.ENGLISH, "%d%%", batLevel));
+
+        // show power level icon
+        ImageView ivPowerIcon = findViewById(R.id.power_state);
+        if (batLevel < 20) {
+            ivPowerIcon.setImageResource(R.drawable.ic_battery_20_black_24dp);
+        } else if (batLevel < 50) {
+            ivPowerIcon.setImageResource(R.drawable.ic_battery_50_black_24dp);
+        } else if (batLevel < 80) {
+            ivPowerIcon.setImageResource(R.drawable.ic_battery_80_black_24dp);
+        } else {
+            ivPowerIcon.setImageResource(R.drawable.ic_battery_full_black_24dp);
         }
 
-        mOtk = Otk.getInstance(getApplicationContext());
+        // show local currency label
+        final LocalCurrency localCurrency = Preferences.getLocalCurrency();
+        TextView labelFiat = findViewById(R.id.label_fiat);
+        labelFiat.setText(localCurrency.toString());
 
-        final LocalCurrency lc = Preferences.getLocalCurrency();
-        TextView tv = findViewById(R.id.label_fiat);
+        // show btc address
 
-        tv.setText(lc.toString());
-
-        handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                logger.debug("handle message:" + msg.what);
-                TextView tv = findViewById(R.id.text_balance_btc);
-                OtkEvent event = (OtkEvent) msg.obj;
-                BigDecimal b = event.getBalance();
-                if (b.equals(BigDecimal.valueOf(-1))) {
-                    tv.setText(R.string.cannot_reach_network);
-                    tv = findViewById(R.id.text_balance_fiat);
-                    tv.setText(R.string.cannot_reach_network);
-                    return;
-                }
-                double btc = BtcUtils.satoshiToBtc(b.longValue());
-                tv.setText(String.format(Locale.ENGLISH, "%.8f", btc));
-                tv = findViewById(R.id.text_balance_fiat);
-                double lcAmount = BtcUtils.btcToLocalCurrency(event.getCurrencyExRate(), lc, btc);
-                tv.setText(String.format(Locale.ENGLISH, "%.2f", lcAmount));
-            }
-        };
-
-        final TextView txt = findViewById(R.id.btc_address_context);
-        txt.setMovementMethod(LinkMovementMethod.getInstance());
-        txt.setOnClickListener(new View.OnClickListener() {
+        final String address = otkData.getSessionData().getAddress();
+        final TextView tvAddress = findViewById(R.id.btc_address_context);
+        tvAddress.setText(address);
+        tvAddress.setMovementMethod(LinkMovementMethod.getInstance());
+        tvAddress.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String url = "https://bitref.com/" + txt.getText().toString();
+                String url = "https://bitref.com/" + tvAddress.getText().toString();
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 startActivity(browserIntent);
             }
         });
 
-        updateInfo(otkData);
-    }
-
-    private void updateInfo(final OtkData otkData) {
-        final LocalCurrency lc = Preferences.getLocalCurrency();
-        TextView tv = findViewById(R.id.label_fiat);
-
-        tv.setText(lc.toString());
-        // Check balance
-        tv = findViewById(R.id.btc_address_context);
-        final String address = otkData.getSessionData().getAddress();
-        tv.setText(address);
+        // construct QR code
         BitcoinPaymentURI uri = new BitcoinPaymentURI.Builder().address(address).build();
         if (uri != null) {
-            ImageView iv = findViewById(R.id.btc_address_qrcode);
-            Bitmap bitmap = QRCodeUtils.encodeAsBitmap(uri.getURI(), iv.getDrawable().getIntrinsicWidth(), iv.getDrawable().getIntrinsicHeight());
-            iv.setImageBitmap(bitmap);
+            ImageView ivQrCode = findViewById(R.id.btc_address_qrcode);
+            Bitmap bitmap = QRCodeUtils.encodeAsBitmap(uri.getURI(), ivQrCode.getDrawable().getIntrinsicWidth(), ivQrCode.getDrawable().getIntrinsicHeight());
+            ivQrCode.setImageBitmap(bitmap);
         }
 
-        // Lock state
-        ImageView iv = findViewById(R.id.lock_state);
-        if (OtkState.LockState.UNLOCKED != otkData.getOtkState().getLockState()) {
-            iv.setImageResource(R.drawable.ic_lock_outline_black_24dp);
-            iv.setColorFilter(Color.argb(255, 0xf4, 0x43, 0x36));
-        } else {
-            iv.setImageResource(R.drawable.ic_lock_open_black_24dp);
-            iv.setColorFilter(Color.argb(0xff, 0x4c, 0xaf, 0x50));
-        }
+        // show balance
+        final TextView tvBalanceBtc = findViewById(R.id.text_balance_btc);
+        tvBalanceBtc.setText(R.string.fetching);
+        final TextView tvBalanceFiat = findViewById(R.id.text_balance_fiat);
+        tvBalanceFiat.setText(R.string.fetching);
 
-        // Battery level
-        int batLevel = otkData.getMintInfo().getBatteryLevel();
-        iv = findViewById(R.id.power_state);
-        if (batLevel < 20) {
-            iv.setImageResource(R.drawable.ic_battery_20_black_24dp);
-        } else if (batLevel < 50) {
-            iv.setImageResource(R.drawable.ic_battery_50_black_24dp);
-        } else if (batLevel < 80) {
-            iv.setImageResource(R.drawable.ic_battery_80_black_24dp);
-        } else {
-            iv.setImageResource(R.drawable.ic_battery_full_black_24dp);
-        }
+        // show note
+        TextView tvNote = findViewById(R.id.user_note_context);
+        tvNote.setText(otkData.getMintInfo().getNote());
 
-        tv = findViewById(R.id.power_state_value);
-        tv.setText(String.format(Locale.ENGLISH, "%d%%", batLevel));
-
-        // Note
-        tv = findViewById(R.id.user_note_context);
-        tv.setText(otkData.getMintInfo().getNote());
-
-        // Balance
-        tv = findViewById(R.id.text_balance_btc);
-        tv.setText(R.string.fetching);
-        tv = findViewById(R.id.text_balance_fiat);
-        tv.setText(R.string.fetching);
-
-        mOtk.setBalanceListener(new Otk.BalanceUpdateListener() {
+        // configure copy address button
+        ImageView ivCopy = findViewById(R.id.icon_copy);
+        ivCopy.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onOtkEvent(OtkEvent event) {
-                if (event.getType() == OtkEvent.Type.BALANCE_UPDATE) {
-                    if (!event.getAddress().equals(address)) {
-                        logger.debug("Address doesn't match." + event.getAddress() + " " + address);
-                        return;
-                    }
-                    Message msg = new Message();
-                    msg.obj = event;
-                    handler.sendMessage(msg);
+            public void onClick(View view) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("address", address);
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
                 }
+                AlertPrompt.info(getApplicationContext(), getString(R.string.address_copied));
             }
         });
-        mOtk.getBalance(address);
 
-        // i button
-        ImageView i = findViewById(R.id.icon_mint_information);
-        i.setOnClickListener(new View.OnClickListener() {
+        // configure mint information button
+        ImageView ivMintInfo = findViewById(R.id.icon_mint_information);
+        ivMintInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Show dialog
@@ -189,31 +156,52 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
             }
         });
 
-        // copy button
-        ImageView copy = findViewById(R.id.icon_copy);
-        copy.setOnClickListener(new View.OnClickListener() {
+        // handler for updating balance
+        handler = new Handler(new Handler.Callback() {
             @Override
-            public void onClick(View view) {
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("address", address);
-                if (clipboard != null) {
-                    clipboard.setPrimaryClip(clip);
+            public boolean handleMessage(Message msg) {
+                BigDecimal balance = (BigDecimal) msg.obj;
+                if (balance.equals(BigDecimal.valueOf(-1))) {
+                    tvBalanceBtc.setText(R.string.cannot_reach_network);
+                    tvBalanceFiat.setText(R.string.cannot_reach_network);
+                    return false;
                 }
-                AlertPrompt.info(getApplicationContext(), getString(R.string.address_copied));
+                double btc = BtcUtils.satoshiToBtc(balance.longValue());
+                tvBalanceBtc.setText(String.format(Locale.ENGLISH, "%.8f", btc));
+                double lcAmount = BtcUtils.btcToLocalCurrency(MainActivity.getExchangeRate(), localCurrency, btc);
+                tvBalanceFiat.setText(String.format(Locale.ENGLISH, "%.2f", lcAmount));
+                return false;
             }
         });
-    }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        logger.debug("onDestroy");
-        if (mOtk == null) {
-            logger.debug("mOtk is null");
-            return;
-        }
-        mOtk.setBalanceListener(null);
-        mOtk = null;
+        BlockChainInfo.getBalance(address, new BlockChainInfo.WebResultHandler() {
+            @Override
+            public void onBalanceUpdated(BigDecimal balance) {
+                Message msg = new Message();
+                msg.obj = balance;
+                handler.sendMessage(msg);
+            }
+
+            @Override
+            public void onBlockHeightUpdated(int height) {
+
+            }
+
+            @Override
+            public void onTxBlockHeightUpdated(int height) {
+
+            }
+
+            @Override
+            public void onRawTxUpdated(String rawTx) {
+
+            }
+
+            @Override
+            public void onConfirmationsUpdated(int confirmations) {
+
+            }
+        });
     }
 
     @Override
@@ -229,5 +217,11 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         MainActivity.setCurrentActivity(getClass().getName());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        otkData = null;
     }
 }

@@ -94,6 +94,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
     public void onOtkDataPosted(OtkData data) {
         super.onOtkDataPosted(data);
         if (data != null) {
+            logger.debug("got otkData: {}", otkData.toString());
             String addr = data.getSessionData().getAddress();
 
             if (MainActivity.isAddressValid(addr)) {
@@ -103,6 +104,14 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
                 AlertPrompt.alert(this, getString(R.string.invalid_address));
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        // this is a workaround for getting back to MainActivity after app paused, hope there is a better solution
+        startActivity(new Intent(this, ActivitySplash.class));
+        finish();
     }
 
     @Override

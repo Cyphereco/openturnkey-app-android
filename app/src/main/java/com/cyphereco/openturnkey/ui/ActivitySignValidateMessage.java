@@ -102,6 +102,14 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        // this is a workaround for getting back to MainActivity after app paused, hope there is a better solution
+        startActivity(new Intent(this, ActivitySplash.class));
+        finish();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         MainActivity.setCurrentActivity(getClass().getName());
@@ -129,9 +137,6 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
             }
 
             mPageAdapter.updateSignMessageOutput();
-        } else {
-            AlertPrompt.alert(getApplicationContext(), getString(R.string.sign_message_fail) +
-                    "\n" + getString(R.string.reason) + ": " + parseFailureReason(data.getFailureReason()));
         }
     }
 

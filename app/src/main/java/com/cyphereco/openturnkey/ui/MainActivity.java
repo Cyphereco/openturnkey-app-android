@@ -450,11 +450,14 @@ public class MainActivity extends AppCompatActivity {
 
 
         if (getClass().getName().equals(currentActivity)) {
+            logger.debug("MainActivity is current");
             if (mEnableReadOtk && selectedFragment != null) {
                 // MainAcitivy is the current activty, dispatch intent to current fragment.
+                logger.debug("dispatch intent to fragment");
                 selectedFragment.onNewIntent(intent);
             }
         } else {
+            logger.debug("MainActivity is not current");
             // MainActivity is not the current activity, dispatch intent to the current activity.
             Class cls = null;
 
@@ -465,6 +468,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (cls != null) {
+                logger.debug("dispatch intent to current activity class");
                 Intent newIntent = new Intent(this, cls);
 
                 if (mEnableReadOtk) {

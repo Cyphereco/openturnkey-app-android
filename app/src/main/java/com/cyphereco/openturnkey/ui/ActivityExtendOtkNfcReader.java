@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.NfcHandler;
-import com.cyphereco.openturnkey.core.Otk;
 import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.core.protocol.OtkRequest;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
@@ -38,9 +37,10 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
 
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
             logger.info("Found NFC tag!!");
-            OtkData otkData = NfcHandler.parseIntent(intent);
+            final OtkData otkData = NfcHandler.parseIntent(intent);
 
             if (otkData != null) {
+                OtkRequest request;
                 logger.debug("Found OpenTurnKey:\nSession#{} : {}{}",
                         otkData.getSessionData().getSessionId(),
                         otkData.getSessionData().getAddress(),
@@ -50,49 +50,91 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
                 // disableReadOtk to avoid new intent breaking unfinished processing
                 disableReadOtk();
 
-                /*
-                 If the otkRequestQueue is not empty, there is a request pending.
-                 Check if public key and session id matched current session.
-                 */
                 if (hasRequest()) {
-                    OtkRequest request = peekRequest();
+                    request = peekRequest();
+                    // can be override by inherited class to modify request, such as
+                    // if otk is not authorized, app can prompt a pin dialog and set pin
                     modifyRequestAfterReadOtkBeforeSubmit(request, otkData);
 
                     /*
-                     If a request has a session Id and otk address, the request
-                     must have been delivered to an openturnkey and expecting a request result.
+                     * If a request has a session Id, the request have been delivered
+                     * to an openturnkey and expecting a request result.
                      */
                     if (request.getSessionId().length() > 0) {
                         logger.info("Waiting for request result");
 
                         // Sanity check on the otkData
-                        if (otkData.getSessionData().getSessionId().equals(request.getSessionId()) &&
-                                otkData.getSessionData().getAddress().equals(request.getOtkAddress())) {
+                        if (!otkData.getSessionData().getSessionId().equals(request.getSessionId())) {
                             /*
-                             Request has been delivered, intent should contain request result.
-                             Either success or fail, the request is made, remove it from the
-                             otkRequestQueue.
-                             */
-                        }
-                        else {
-                            /*
-                             Sanity check failed, error occurs, should quit request to avoid
+                             If session id mismatches, error occurs, should quit request to avoid
                              suspicious hack.
                              */
-                            logger.error("Invalid request result.");
-                            otkData = null;
-                            // handleRequestResult(request, otkData)
+                            logger.error("Incorrect openturnkey");
+                            clearRequest();
+                            DialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.REQUEST_FAIL);
 
-                            AlertPrompt.info(this, getString(R.string.not_openturnkey));
+                            delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
+                                @Override
+                                public void postProcess() {
+                                    AlertPrompt.alert(getApplicationContext(), getString(R.string.not_openturnkey));
+                                }
+                            });
+                        } else {
+                            // otkData should contains request result
+                            if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
+                                // process valid OpenTurnKey data
+                                if (!request.hasMore()) {
+                                    // no more request followed, request execution completed
+                                    clearRequest();
+                                    // Notify the DialogReadOtk of the parsing result and close the dialog.
+                                    DialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.READ_SUCCESS);
+
+                                    delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
+                                        @Override
+                                        public void postProcess() {
+                                            onOtkDataPosted(otkData);
+                                        }
+                                    });
+                                } else {
+                                    // more request to process
+                                    pollRequest();
+                                    onOtkDataPosted(otkData);
+                                    enableReadOtk();
+                                    DialogReadOtk.extendCancelTimer();
+                                    DialogReadOtk.updateReadOtkDesc("More requests to be processed, move away OpenTurnKey then approach again.");
+                                }
+                            } else {
+                                // request failed, clear request and prompt failure reason
+                                clearRequest();
+                                DialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.REQUEST_FAIL);
+
+                                delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
+                                    @Override
+                                    public void postProcess() {
+                                        AlertPrompt.alert(getApplicationContext(), getString(R.string.request_fail) +
+                                                "\n" + getString(R.string.reason) + ": " +
+                                                parseFailureReason(otkData.getFailureReason()));
+                                    }
+                                });
+                            }
                         }
-                    }
-                    else {
+                    } else {
                         // Pending request has not been delivered, prepare to send.
 
                         // Check if OpenTurnKey is locked to accept authentication.
                         if (otkData.getOtkState().getLockState() == OtkState.LockState.UNLOCKED) {
                             // OpenTurnKey is not locked, request cannot be made
-                            AlertPrompt.info(this, getString(R.string.otk_is_unlocked));
+                            clearRequest();
+                            DialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.REQUEST_FAIL);
+
+                            delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
+                                @Override
+                                public void postProcess() {
+                                    AlertPrompt.alert(getApplicationContext(), getString(R.string.request_fail) +
+                                            "\n" + getString(R.string.reason) + ": " +
+                                            parseFailureReason(otkData.getFailureReason()));
+                                }
+                            });
                             return;
                         }
 
@@ -108,51 +150,51 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
                              Send request failed, most likely a communication error occurs.
                              Remove the session id and otk address and keep the request as a fresh one.
                              */
-                            request.setSessionId("");
-                            request.setOtkAddress("");
+
                             logger.info("Something wrong, request is not sent.");
-                        }
-                        else {
+                            clearRequest();
+                            DialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.REQUEST_FAIL);
+
+                            delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
+                                @Override
+                                public void postProcess() {
+                                    AlertPrompt.alert(getApplicationContext(), getString(R.string.not_openturnkey));
+
+                                }
+                            });
+                        } else {
                             /*
                              Request delivered, the current otkData is not useful result.
                              Set otkData to null and waiting for process request result in
                              the next intent.
                              */
-                            otkData = null;
                             enableReadOtk();
+                            DialogReadOtk.extendCancelTimer();
                             DialogReadOtk.updateReadOtkDesc(getString(R.string.processing_request));
                         }
                     }
-                }
+                } else {
+                    // no request, just read openturnkey information
+                    DialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.READ_SUCCESS);
 
-                // process valid OpenTurnKey data
-                if (otkData != null) {
-                    logger.info(otkData.toString());
-
-                    // Notify the DialogReadOtk of the parsing result and close the dialog.
-                    DialogReadOtk.updateReadOtkStatus(DialogReadOtk.READ_SUCCESS);
-
-                    /* There is an otk show result delay in DialogReadOtk,
-                        to start to a new activity, wait until the dialog closed.
-                     */
-                    final OtkData _otkData = otkData;
-                    new CountDownTimer(DialogReadOtk.SHOW_RESULT_DELAY +
-                            DialogReadOtk.DISMISS_ANIMATION_TIME, 1000) {
-                        public void onTick(long millisUntilFinished) {
+                    delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
+                        @Override
+                        public void postProcess() {
+                            // dispatch otkData
+                            onOtkDataPosted(otkData);
                         }
-
-                        public void onFinish() {
-                            // show otkData in ActivityOpenturnkeyInfo
-                            onOtkDataPosted(_otkData);
-                        }
-                    }.start();
+                    });
                 }
-            }
-            else {
+            } else {
                 logger.info("Not a valid OpenTurnKey");
                 // Notify the DialogReadOtk of the parsing result and close the dialog.
-                DialogReadOtk.updateReadOtkStatus(DialogReadOtk.NOT_OPENTURNKEY);
-                AlertPrompt.info(this, getString(R.string.not_openturnkey));
+                DialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.NOT_OPENTURNKEY);
+                delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
+                    @Override
+                    public void postProcess() {
+                        AlertPrompt.info(getApplicationContext(), getString(R.string.not_openturnkey));
+                    }
+                });
             }
         }
     }
@@ -163,7 +205,7 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
     }
 
     protected void clearRequest() {
-        while (otkRequestQueue.size() > 0) otkRequestQueue.poll();
+        while (numOfRequest() > 0) pollRequest();
     }
 
     protected void pushRequest(OtkRequest request) {
@@ -181,12 +223,16 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
     protected OtkRequest peekRequest() {
         OtkRequest request = otkRequestQueue.peek();
         assert request != null;
-        logger.debug("polled request: {}", request.toString());
+        logger.debug("peek request: {}", request.toString());
         return request;
     }
 
+    protected int numOfRequest() {
+        return otkRequestQueue.size();
+    }
+
     protected boolean hasRequest() {
-        return otkRequestQueue.size() > 0;
+        return numOfRequest() > 0;
     }
 
     protected void modifyRequestAfterReadOtkBeforeSubmit(OtkRequest request, OtkData otkData) {
@@ -201,5 +247,48 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
     protected void disableReadOtk() {
         MainActivity.disableReadOtk();
         logger.debug("ReadOtk disabled");
+    }
+
+    protected String parseFailureReason(String desc) {
+        if (desc == null || desc.equals("")) {
+            return getString(R.string.communication_error);
+        }
+        switch (desc) {
+            case "C0":
+                return getString(R.string.session_timeout);
+            case "C1":
+                return getString(R.string.auth_failed);
+            case "C3":
+                return getString(R.string.invalid_params);
+            case "C4":
+                return getString(R.string.missing_params);
+            case "C7":
+                return getString(R.string.pin_unset);
+            case "00":
+            case "C2":
+            case "FF":
+                return getString(R.string.invalid_command);
+            default:
+                return desc;
+        }
+    }
+
+    protected void delayProcessAfterReadOtkEnded(final PostReadOtkHandler handler) {
+        /* There is an otk show result delay in DialogReadOtk,
+            to start to a new activity, or prompt message, wait until the dialog closed.
+         */
+        new CountDownTimer(DialogReadOtk.SHOW_RESULT_DELAY +
+                DialogReadOtk.DISMISS_ANIMATION_TIME, 1000) {
+            public void onTick(long millisUntilFinished) {
+            }
+
+            public void onFinish() {
+                handler.postProcess();
+            }
+        }.start();
+    }
+
+    protected interface PostReadOtkHandler {
+        void postProcess();
     }
 }
