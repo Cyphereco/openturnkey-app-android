@@ -97,11 +97,11 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
                                     });
                                 } else {
                                     // more request to process
-                                    pollRequest();
                                     onOtkDataPosted(otkData);
+                                    pollRequest();
                                     enableReadOtk();
                                     DialogReadOtk.extendCancelTimer();
-                                    DialogReadOtk.updateReadOtkDesc("More requests to be processed, move away OpenTurnKey then approach again.");
+                                    DialogReadOtk.updateReadOtkDesc(getString(R.string.reapproach_openturnkey));
                                 }
                             } else {
                                 // request failed, clear request and prompt failure reason
@@ -209,21 +209,21 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
     }
 
     protected void pushRequest(OtkRequest request) {
-        logger.debug("pushed request: {}", request.toString());
+        logger.debug("pushed request: {}", request);
         otkRequestQueue.add(request);
     }
 
     protected OtkRequest pollRequest() {
         OtkRequest request = otkRequestQueue.poll();
         assert request != null;
-        logger.debug("polled request: {}", request.toString());
+        logger.debug("polled request: {}", request);
         return request;
     }
 
     protected OtkRequest peekRequest() {
         OtkRequest request = otkRequestQueue.peek();
         assert request != null;
-        logger.debug("peek request: {}", request.toString());
+        logger.debug("peek request: {}", request);
         return request;
     }
 

@@ -226,5 +226,6 @@
     <string name="verify">Verify</string>
     <string name="error_cannot_create_tx">Error! Cannot create transaction</string>
     <string name="public_key_information">Public Key Information</string>
+    <string name="reapproach_openturnkey">Move OpenTurnKey away, then approach again.</string>
 
 </resources>

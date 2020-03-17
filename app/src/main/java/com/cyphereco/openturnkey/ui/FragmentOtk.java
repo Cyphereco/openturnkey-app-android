@@ -137,7 +137,6 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
 
                 if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
                     if (cmd == Command.SHOW_KEY) {
-//                        logger.debug("showKey - numOfRequest: {}", numOfRequest());
                         intent = new Intent(getContext(), ActivityKeyInformation.class);
                     } else if (cmd == Command.EXPORT_WIF_KEY) {
                         final String keyInfo = otkData.getSessionData().getWIFKey();
@@ -279,8 +278,6 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                     public void onConfirmed() {
                         cbUsePin.setVisibility(View.VISIBLE);
                         tvRequestDesc.setText(R.string.full_pubkey_information);
-//                        pushRequest(new OtkRequest(Command.SHOW_KEY.toString()).setMore());
-//                        pushRequest(new OtkRequest(Command.SHOW_KEY.toString()).setMore());
                         pushRequest(new OtkRequest(Command.SHOW_KEY.toString()));
                     }
                 });

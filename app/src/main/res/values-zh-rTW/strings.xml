@@ -208,4 +208,5 @@
     <string name="error_cannot_create_tx">發生錯誤！無法創建交易</string>
     <string name="update_addr_fail">更新地址失敗</string>
     <string name="public_key_information">公鑰資訊</string>
+    <string name="reapproach_openturnkey">請暫時移開OpenTurnKey，再靠近一次。</string>
 </resources>
