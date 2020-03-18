@@ -34,9 +34,12 @@ import com.blockcypher.exception.BlockCypherException;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.core.OtkData;
+import com.cyphereco.openturnkey.core.Tx;
 import com.cyphereco.openturnkey.core.UnsignedTx;
 import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
+import com.cyphereco.openturnkey.db.DBTransItem;
+import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.ExchangeRate;
@@ -46,9 +49,12 @@ import com.cyphereco.openturnkey.webservices.BlockChainInfo;
 import com.cyphereco.openturnkey.webservices.BlockCypher;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.TimeZone;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -149,7 +155,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         });
         updateLocalCurrency(Preferences.getLocalCurrency());
 
-        MainActivity.setOnlineDataUpdateListner(new MainActivity.OnlineDataUpdateListener() {
+        MainActivity.setOnlineDataUpdateListener(new MainActivity.OnlineDataUpdateListener() {
             @Override
             public void onExchangeRateUpdated(ExchangeRate xrate) {
                 Message msg = new Message();
@@ -303,6 +309,15 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         if (MainActivity.getSelectedFragment() == null) {
             MainActivity.setSelectedFragment(this);
             onPageSelected();
+
+            // add dummy record for test
+            Tx tx = new Tx(Tx.Status.STATUS_SUCCESS, "5dc7bee70b2d4d486d2e9ca997354e6909769049b2d971dc4034e2c03df909c7", "");
+            tx.setFrom("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
+            tx.setTo("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
+            tx.setAmount(0.00191967);
+            tx.setTime("2020-01-11T23:00:09.584902078Z");
+            tx.setRaw("01000000030781f8fa7f6a30621c29ac47a2d5bb81bef88973839680f8f5de0d879c6417f9000000006a47304402204688a19b3ebe5bb05ff3fa05177f6f4889016c29a12ee9abdf325c5e1f32fe1e02205be7f1afa0df30c8165e4de6743f1b034d9de2cf7571f9500d7ce81c2bd9a55d01210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229fffffffff585248874c9b15176863d579379a5cc2c01453926395973da9264022ec3ed39010000006b483045022100baa9783aedc0b9860e0f486c09bdfbad92f71a5d383019cfcac35ea8ed59f282022030bde9f23990d434e1544e5e1bf227c66a0a2c1aed39e55bb8129385f127e70501210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229fffffffff585248874c9b15176863d579379a5cc2c01453926395973da9264022ec3ed39000000006a47304402201d6aa95358825ef7319c4a5f1ee89c864c3b71b45926610a9fc95574ca39bff20220459a21b1321687237bc9f37a17df6a0290a0920979882108e816cbd246ac679f01210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229ffffffff01dfed0200000000001976a914fee5819b32e8618699ad07a17b3df5a77346261788ac00000000");
+            addTxToDb(tx);
         }
     }
 
@@ -379,7 +394,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 Preferences.setFeeIncluded(item.setChecked(!item.isChecked()).isChecked());
                 return true;
             case R.id.menu_pay_use_fix_address:
-                mUseFixAddress = onFixAddressOption(!item.isChecked());
+                mUseFixAddress = onFixAddressChecked(!item.isChecked());
                 item.setChecked(mUseFixAddress);
                 Preferences.setUseFixAddress(mUseFixAddress, tvAddress.getText().toString());
                 return true;
@@ -410,7 +425,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     final String to = tvAddress.getText().toString();
                     logger.debug("Pay to ({}) for {} / {} (btc/{}) with tx fee ({}) included: {}",
                             to, mEtCc.getText(), mEtLc.getText(),
-                            Preferences.getLocalCurrency().toString(), getFees(),
+                            Preferences.getLocalCurrency().toString(), getTxFees(),
                             Preferences.getFeeIncluded());
                     // prepare to make payment
                     final Dialog dialog = dialogFullscreenAlert(getString(R.string.check_balance));
@@ -438,7 +453,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                                 // proceed final confirmation
                                 logger.debug("Amount sent (include fees): {}, Amount received: {}",
                                         amountSent, amountReceived);
-                                dialogConfirmPayment(from, to, amountSent, amountReceived, getFees());
+                                dialogConfirmPayment(from, to, amountSent, amountReceived, getTxFees());
                             }
                         }
 
@@ -495,7 +510,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         mMenu = menu;
     }
 
-    public void launchQRcodeScanActivity() {
+    private void launchQRcodeScanActivity() {
         if (mUseFixAddress) {
             dialogFixAddressEnabled();
         } else {
@@ -504,7 +519,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         }
     }
 
-    public void pasteAddressFromClipboard() {
+    private void pasteAddressFromClipboard() {
         if (mUseFixAddress) {
             dialogFixAddressEnabled();
         } else {
@@ -523,6 +538,27 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 }
             }
         }
+    }
+
+    private void addTxToDb(Tx tx) {
+        if (tx == null) {
+            logger.error("addTxToDb(): tx is null");
+            return;
+        }
+        logger.info("addTxToDb() tx:\n{}", tx.toString());
+
+        // Get timezone offset
+        Calendar mCalendar = new GregorianCalendar();
+        TimeZone mTimeZone = mCalendar.getTimeZone();
+        int mGMTOffset = mTimeZone.getRawOffset();
+
+        // Add transaction to database.
+        DBTransItem dbTrans = new DBTransItem(0,
+                BtcUtils.convertDateTimeStringToLong(tx.getTime()) + mGMTOffset,
+                tx.getHash(), tx.getFrom(), tx.getTo(), tx.getAmount(), tx.getFee(),
+                tx.getStatus().toInt(), tx.getDesc(), tx.getRaw(), tx.getConfirmations());
+        OpenturnkeyDB.addTransaction(dbTrans);
+        logger.info("DB tx count:{}", OpenturnkeyDB.getTransactionCount());
     }
 
     private void updatePayConfig(Menu menu) {
@@ -556,7 +592,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         }
     }
 
-    public void updateLocalCurrency(LocalCurrency localCurrency) {
+    private void updateLocalCurrency(LocalCurrency localCurrency) {
         mLocalCurrency = localCurrency;
         tvCurrency.setText(mLocalCurrency.toString());
         boolean cache = mIsCryptoCurrencySet;
@@ -565,7 +601,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         mIsCryptoCurrencySet = cache;
     }
 
-    private boolean onFixAddressOption(boolean isChecked) {
+    private boolean onFixAddressChecked(boolean isChecked) {
         if (isChecked) {
             // If address editor is empty, prompt warning dialog
             if ((null == tvAddress.getText()) || (tvAddress.getText().toString().isEmpty())) {
@@ -589,8 +625,23 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         return false;
     }
 
-    private Configurations.TxFeeType toTxFee(int transactionFee) {
-        switch (transactionFee) {
+    private LocalCurrency optionToLocalCurrency(int currency) {
+        switch (currency) {
+            case R.id.radio_cny:
+                return LocalCurrency.LOCAL_CURRENCY_CNY;
+            case R.id.radio_eur:
+                return LocalCurrency.LOCAL_CURRENCY_EUR;
+            case R.id.radio_jpy:
+                return LocalCurrency.LOCAL_CURRENCY_JPY;
+            case R.id.radio_twd:
+                return LocalCurrency.LOCAL_CURRENCY_TWD;
+            default:
+                return LocalCurrency.LOCAL_CURRENCY_USD;
+        }
+    }
+
+    private Configurations.TxFeeType optionToTxFeeType(int option) {
+        switch (option) {
             case R.id.radio_custom:
                 return Configurations.TxFeeType.CUSTOMIZED;
             case R.id.radio_high:
@@ -613,21 +664,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             return getString(R.string.fees_mid);
         }
         return getString(R.string.fees_low);
-    }
-
-    public LocalCurrency optionToLocalCurrency(int currency) {
-        switch (currency) {
-            case R.id.radio_cny:
-                return LocalCurrency.LOCAL_CURRENCY_CNY;
-            case R.id.radio_eur:
-                return LocalCurrency.LOCAL_CURRENCY_EUR;
-            case R.id.radio_jpy:
-                return LocalCurrency.LOCAL_CURRENCY_JPY;
-            case R.id.radio_twd:
-                return LocalCurrency.LOCAL_CURRENCY_TWD;
-            default:
-                return LocalCurrency.LOCAL_CURRENCY_USD;
-        }
     }
 
     private double btcToFiat(double amount) {
@@ -701,7 +737,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         }
     }
 
-    private long getFees() {
+    private long getTxFees() {
         switch (Preferences.getTxFeeType()) {
             case HIGH:
                 return Preferences.getTxFee().getHigh() * 200;
@@ -723,20 +759,20 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             total = (long) (Double.parseDouble(mEtCc.getText().toString()) * 100000000);
         }
         if (!Preferences.getFeeIncluded()) {
-            total += getFees();
+            total += getTxFees();
         }
         return total;
     }
 
     private long totalAmountReceived() {
-        if (cbUseAllFunds.isChecked()) return -(getFees());
+        if (cbUseAllFunds.isChecked()) return -(getTxFees());
 
         long total = 0;
         if (mEtCc.getText().length() != 0) {
             total = (long) (Double.parseDouble(mEtCc.getText().toString()) * 100000000);
         }
         if (Preferences.getFeeIncluded()) {
-            total -= getFees();
+            total -= getTxFees();
         }
         return total;
     }
@@ -780,22 +816,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             }
         }.start();
         dialog.show();
-    }
-
-    private void makeToastMessage(String message) {
-        Snackbar snackbar = Snackbar.make(Objects.requireNonNull(getView()), message, Snackbar.LENGTH_LONG);
-        TextView textView = snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-        textView.setTextSize(22);
-        snackbar.setAction("Action", null).show();
-    }
-
-    private void dialogFixAddressEnabled() {
-        new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.cannot_change_addr)
-                .setMessage(R.string.disable_fix_addr_first)
-                .setNegativeButton(R.string.ok, null)
-                .show();
-        MainActivity.setPayToAddress("");
     }
 
     private void dialogConfirmPayment(final String from, final String to, long amountSent, final long amountReceived, final long fees) {
@@ -850,17 +870,30 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         Looper.loop();
     }
 
-    private Dialog dialogFullscreenAlert(String msg) {
-        TextView tv = new TextView(getContext());
-        tv.setText(msg);
-        tv.setTextSize(24);
-        tv.setTextColor(Color.WHITE);
-        tv.setGravity(Gravity.CENTER);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        Dialog dialog = builder.setView(tv).create();
-        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
-        dialog.setCanceledOnTouchOutside(false);
-        return dialog;
+    private void dialogTxSummary(Tx tx) {
+        DialogSendBtcResult dialog = new DialogSendBtcResult();
+        Bundle bundle = new Bundle();
+        // result string id
+        bundle.putInt("sendBtcResult", R.string.transaction_receipt);
+        bundle.putString("from", tx.getFrom());
+        bundle.putString("to", tx.getTo());
+        bundle.putString("hash", tx.getHash());
+        bundle.putDouble("amount", tx.getAmount());
+        bundle.putDouble("fee", tx.getFee());
+        bundle.putString("time", tx.getTime());
+        bundle.putString("raw", tx.getRaw());
+
+        dialog.setArguments(bundle);
+        dialog.show(getFragmentManager(), "dialog");
+    }
+
+    private void dialogFixAddressEnabled() {
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.cannot_change_addr)
+                .setMessage(R.string.disable_fix_addr_first)
+                .setNegativeButton(R.string.ok, null)
+                .show();
+        MainActivity.setPayToAddress("");
     }
 
     private void dialogLocalCurrency() {
@@ -917,7 +950,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         dialog.setDialogTransactionFeeListener(new DialogTransactionFee.DialogTransactionFeeListener() {
             @Override
             public void setTransactionFee(int transactionFee) {
-                Preferences.setTxFeeType(toTxFee(transactionFee));
+                Preferences.setTxFeeType(optionToTxFeeType(transactionFee));
                 updatePayConfig(mMenu);
             }
 
@@ -935,6 +968,26 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         DialogAbout dialog = new DialogAbout();
         assert getFragmentManager() != null;
         dialog.show(getFragmentManager(), "dialog");
+    }
+
+    private Dialog dialogFullscreenAlert(String msg) {
+        TextView tv = new TextView(getContext());
+        tv.setText(msg);
+        tv.setTextSize(24);
+        tv.setTextColor(Color.WHITE);
+        tv.setGravity(Gravity.CENTER);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        Dialog dialog = builder.setView(tv).create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
+    }
+
+    private void makeToastMessage(String message) {
+        Snackbar snackbar = Snackbar.make(Objects.requireNonNull(getView()), message, Snackbar.LENGTH_LONG);
+        TextView textView = snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextSize(22);
+        snackbar.setAction("Action", null).show();
     }
 }
 

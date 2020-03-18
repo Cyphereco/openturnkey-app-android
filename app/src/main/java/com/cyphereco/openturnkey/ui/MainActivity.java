@@ -16,8 +16,6 @@ import android.widget.SearchView;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
-import com.cyphereco.openturnkey.core.Tx;
-import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
@@ -27,10 +25,7 @@ import com.cyphereco.openturnkey.utils.TxFee;
 
 import org.slf4j.Logger;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Objects;
-import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -72,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private static FragmentExtendOtkViewPage selectedFragment = null;
     private static String currentActivity = "";
 
-    private static OnlineDataUpdateListener onlineDataUpdateListner;
+    private static OnlineDataUpdateListener onlineDataUpdateListener;
 
     public static String getCurrentActivity() {
         return currentActivity;
@@ -90,22 +85,14 @@ public class MainActivity extends AppCompatActivity {
         // finish the activity and start from the splash for a complete UI refreshment
         if (selectedFragment != null) {
             selectedFragment = null;
-            startActivity(new Intent(this, ActivitySplash.class));
             finish();
+            startActivity(new Intent(this, MainActivity.class));
         }
 
         // Initialize Database
         OpenturnkeyDB.init(getApplicationContext());
 
-        updateXchangeRateAndFeesTask();
-
-        Tx tx = new Tx(Tx.Status.STATUS_SUCCESS, "5dc7bee70b2d4d486d2e9ca997354e6909769049b2d971dc4034e2c03df909c7", "");
-        tx.setFrom("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
-        tx.setTo("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
-        tx.setAmount(0.00191967);
-        tx.setTime("2020-01-11T23:00:09.584902078Z");
-        tx.setRaw("01000000030781f8fa7f6a30621c29ac47a2d5bb81bef88973839680f8f5de0d879c6417f9000000006a47304402204688a19b3ebe5bb05ff3fa05177f6f4889016c29a12ee9abdf325c5e1f32fe1e02205be7f1afa0df30c8165e4de6743f1b034d9de2cf7571f9500d7ce81c2bd9a55d01210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229fffffffff585248874c9b15176863d579379a5cc2c01453926395973da9264022ec3ed39010000006b483045022100baa9783aedc0b9860e0f486c09bdfbad92f71a5d383019cfcac35ea8ed59f282022030bde9f23990d434e1544e5e1bf227c66a0a2c1aed39e55bb8129385f127e70501210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229fffffffff585248874c9b15176863d579379a5cc2c01453926395973da9264022ec3ed39000000006a47304402201d6aa95358825ef7319c4a5f1ee89c864c3b71b45926610a9fc95574ca39bff20220459a21b1321687237bc9f37a17df6a0290a0920979882108e816cbd246ac679f01210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229ffffffff01dfed0200000000001976a914fee5819b32e8618699ad07a17b3df5a77346261788ac00000000");
-        addTxToDb(tx);
+        updateOnlineData();
 
         pref = new Preferences(getApplication());
 
@@ -215,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
 
         /*
          All the NFC new intent will be post here as the entry point, then dispatch
-         to its activiy or fragment.
+         to its activity or fragment.
 
          Note:
             The foreground dispatch system does not work as said in the manual.
@@ -227,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
         if (getClass().getName().equals(currentActivity)) {
             logger.debug("MainActivity is current");
             if (mEnableReadOtk && selectedFragment != null) {
-                // MainAcitivy is the current activty, dispatch intent to current fragment.
+                // MainActivity is the current activity, dispatch intent to current fragment.
                 logger.debug("dispatch intent to fragment");
                 selectedFragment.onNewIntent(intent);
             }
@@ -277,45 +264,7 @@ public class MainActivity extends AppCompatActivity {
             selectedFragment.onPageSelected();
         }
     }
-    
-    private void addTxToDb(Tx tx) {
-        if (tx == null) {
-            logger.error("addTxToDb(): tx is null");
-            return;
-        }
-        logger.info("addTxToDb() tx:\n{}", tx.toString());
 
-        // Get timezone offset
-        Calendar mCalendar = new GregorianCalendar();
-        TimeZone mTimeZone = mCalendar.getTimeZone();
-        int mGMTOffset = mTimeZone.getRawOffset();
-
-        // Add transaction to database.
-        DBTransItem dbTrans = new DBTransItem(0,
-                BtcUtils.convertDateTimeStringToLong(tx.getTime()) + mGMTOffset,
-                tx.getHash(), tx.getFrom(), tx.getTo(), tx.getAmount(), tx.getFee(),
-                tx.getStatus().toInt(), tx.getDesc(), tx.getRaw(), tx.getConfirmations());
-        OpenturnkeyDB.addTransaction(dbTrans);
-        logger.info("DB tx count:{}", OpenturnkeyDB.getTransactionCount());
-    }
-
-    public void dialogBtcSent(Tx tx) {
-        DialogSendBtcResult dialog = new DialogSendBtcResult();
-        Bundle bundle = new Bundle();
-        // result string id
-        bundle.putInt("sendBtcResult", R.string.transaction_receipt);
-        bundle.putString("from", tx.getFrom());
-        bundle.putString("to", tx.getTo());
-        bundle.putString("hash", tx.getHash());
-        bundle.putDouble("amount", tx.getAmount());
-        bundle.putDouble("fee", tx.getFee());
-        bundle.putString("time", tx.getTime());
-        bundle.putString("raw", tx.getRaw());
-
-        dialog.setArguments(bundle);
-        dialog.show(getSupportFragmentManager(), "dialog");
-    }
-    
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -324,7 +273,21 @@ public class MainActivity extends AppCompatActivity {
             selectedFragment.onActivityResult(requestCode, resultCode, data);
         }
     }
-    
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            // when focus is on address search view in history page, collapse view first
+            SearchView v = findViewById(R.id.menu_addresses_search);
+            if (v != null && v.hasFocus()) {
+                v.clearFocus();
+                v.onActionViewCollapsed();
+                return false;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
     public static void enableReadOtk() {
         mEnableReadOtk = true;
     }
@@ -362,37 +325,6 @@ public class MainActivity extends AppCompatActivity {
         return BtcUtils.validateAddress(true, addr) || BtcUtils.validateAddress(false, addr);
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            SearchView v = findViewById(R.id.menu_addresses_search);
-            if (v != null && v.hasFocus()) {
-                v.clearFocus();
-                v.onActionViewCollapsed();
-                return false;
-            }
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    private void updateXchangeRateAndFeesTask() {
-        final Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                ExchangeRate r = BtcUtils.getCurrencyExchangeRate();
-                if (r == null) {
-                    t.cancel();
-                    t.purge();
-                    updateXchangeRateAndFeesTask();
-                } else {
-                    setExchangeRate(r);
-                    setTxFee(BtcUtils.getTxFee());
-                }
-            }
-        }, 1000, 1000 * 60 * Configurations.INTERVAL_EXCHANGE_RATE_UPDATE);
-    }
-
     public static ExchangeRate getExchangeRate() {
         return exchangeRate;
     }
@@ -400,18 +332,14 @@ public class MainActivity extends AppCompatActivity {
     public void setExchangeRate(ExchangeRate exchangeRate) {
         logger.debug("Update ExchangeRate: {}", exchangeRate.toString());
         if (MainActivity.exchangeRate == null) MainActivity.exchangeRate = exchangeRate;
-        if (onlineDataUpdateListner != null)
-            onlineDataUpdateListner.onExchangeRateUpdated(exchangeRate);
-    }
-
-    public static TxFee getTxFee() {
-        return txFee;
+        if (onlineDataUpdateListener != null)
+            onlineDataUpdateListener.onExchangeRateUpdated(exchangeRate);
     }
 
     public void setTxFee(TxFee txFee) {
         logger.debug("Update TxFee: {}", txFee.toString());
         if (MainActivity.txFee != null) MainActivity.txFee = txFee;
-        if (onlineDataUpdateListner != null) onlineDataUpdateListner.onTxFeeUpdated(txFee);
+        if (onlineDataUpdateListener != null) onlineDataUpdateListener.onTxFeeUpdated(txFee);
     }
 
     public static FragmentExtendOtkViewPage getSelectedFragment() {
@@ -422,12 +350,31 @@ public class MainActivity extends AppCompatActivity {
         MainActivity.selectedFragment = selectedFragment;
     }
 
-    public static void setOnlineDataUpdateListner(OnlineDataUpdateListener listner) {
-        MainActivity.onlineDataUpdateListner = listner;
+    private void updateOnlineData() {
+        final Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                ExchangeRate r = BtcUtils.getCurrencyExchangeRate();
+                if (r == null) {
+                    t.cancel();
+                    t.purge();
+                    updateOnlineData();
+                } else {
+                    setExchangeRate(r);
+                    setTxFee(BtcUtils.getTxFee());
+                }
+            }
+        }, 1000, 1000 * 60 * Configurations.INTERVAL_EXCHANGE_RATE_UPDATE);
+    }
+
+    public static void setOnlineDataUpdateListener(OnlineDataUpdateListener listener) {
+        MainActivity.onlineDataUpdateListener = listener;
     }
 
     public interface OnlineDataUpdateListener {
         void onExchangeRateUpdated(ExchangeRate xrate);
+
         void onTxFeeUpdated(TxFee txFee);
     }
 }
