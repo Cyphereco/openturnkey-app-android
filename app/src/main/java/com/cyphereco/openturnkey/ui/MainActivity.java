@@ -2,6 +2,8 @@ package com.cyphereco.openturnkey.ui;
 
 import android.content.Intent;
 import android.nfc.NfcAdapter;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
@@ -46,8 +48,11 @@ public class MainActivity extends AppCompatActivity {
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
     public static final int REQUEST_RESULT_CODE_REPAY = 1000;
 
+    public enum PAGE {PAY, OTK, HISTORY, ADDRBOOK}
+
     private static ExchangeRate exchangeRate;
     private static TxFee txFee;
+    private static Handler pageSwitchHandler;
 
     public static final int FRAGMENT_PAY = R.id.nav_menu_pay;
     public static final int FRAGMENT_OTK = R.id.nav_menu_openturnkey;
@@ -177,6 +182,14 @@ public class MainActivity extends AppCompatActivity {
                 };
 
         bottomNav.setOnNavigationItemSelectedListener(navListener);
+
+        pageSwitchHandler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                viewPager.setCurrentItem(msg.arg1);
+                return false;
+            }
+        });
 
         /* init NFC. */
         NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -348,6 +361,12 @@ public class MainActivity extends AppCompatActivity {
 
     public static void setSelectedFragment(FragmentExtendOtkViewPage selectedFragment) {
         MainActivity.selectedFragment = selectedFragment;
+    }
+
+    public static void switchToPage(int page) {
+        Message msg = new Message();
+        msg.arg1 = page;
+        pageSwitchHandler.sendMessage(msg);
     }
 
     private void updateOnlineData() {
