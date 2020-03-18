@@ -1,5 +1,7 @@
 package com.cyphereco.openturnkey.core.protocol;
 
+import org.jetbrains.annotations.NotNull;
+
 public enum Command {
     INVALID("00"),
     LOCK("160"),
@@ -14,11 +16,13 @@ public enum Command {
     EXPORT_WIF_KEY("169");
 
     private final String value;
-    private Command(String s) {
+
+    Command(String s) {
         value = s;
     }
 
-    public String toString(){
+    @NotNull
+    public String toString() {
         return value;
     }
 }

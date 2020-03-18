@@ -22,7 +22,6 @@ public class SessionData implements Serializable {
     private static final String OTK_LABEL_MASTER_EXT_KEY = "<Master_Extended_Key>\r\n";
     private static final String OTK_LABEL_DERIVATIVE_EXT_KEY = "<Derivative_Exteded_Key>\r\n";
     private static final String OTK_LABEL_DERIVATIVE_PATH = "<Derivative_Path>\r\n";
-    private static final String OTK_LABEL_SECURE_PIN = "<Secure_Pin>\r\n";
     private static final String OTK_LABEL_WIF_KEY = "<WIF_Key>\r\n";
     private static final String OTK_REQUEST_SIGNATURE_DELIM = "\n";
 
@@ -46,16 +45,16 @@ public class SessionData implements Serializable {
             sessionId = sessData.substring(sessIdStart, crlf);
         }
         // Address
-        int lableAddrStart = sessData.indexOf(OTK_LABEL_BITCOIN_ADDR);
-        if (lableAddrStart != -1) {
-            int addrStart = lableAddrStart + OTK_LABEL_BITCOIN_ADDR.length();
+        int labelAddrStart = sessData.indexOf(OTK_LABEL_BITCOIN_ADDR);
+        if (labelAddrStart != -1) {
+            int addrStart = labelAddrStart + OTK_LABEL_BITCOIN_ADDR.length();
             int crlf = sessData.indexOf(CRLF, addrStart);
             address = sessData.substring(addrStart, crlf);
         }
         // Request signature
-        int lableReqSigStart = sessData.indexOf(OTK_LABEL_REQUEST_SIG);
-        if (lableReqSigStart != -1) {
-            int reqSigStart = lableReqSigStart + OTK_LABEL_REQUEST_SIG.length();
+        int labelReqSigStart = sessData.indexOf(OTK_LABEL_REQUEST_SIG);
+        if (labelReqSigStart != -1) {
+            int reqSigStart = labelReqSigStart + OTK_LABEL_REQUEST_SIG.length();
             int crlf = sessData.indexOf(CRLF, reqSigStart);
             String requestSig = sessData.substring(reqSigStart, crlf);
             while (true) {
@@ -84,56 +83,49 @@ public class SessionData implements Serializable {
         }
 
         // Request id
-        int lableReqIdStart = sessData.indexOf(OTK_LABEL_REQUEST_ID);
-        if (lableReqIdStart != -1) {
-            int reqIdStart = lableReqIdStart + OTK_LABEL_REQUEST_ID.length();
+        int labelReqIdStart = sessData.indexOf(OTK_LABEL_REQUEST_ID);
+        if (labelReqIdStart != -1) {
+            int reqIdStart = labelReqIdStart + OTK_LABEL_REQUEST_ID.length();
             int crlf = sessData.indexOf(CRLF, reqIdStart);
             requestId = sessData.substring(reqIdStart, crlf);
         }
 
         // Public Key
-        int lablePubKeyStart = sessData.indexOf(OTK_LABEL_PUBLIC_KEY);
-        if (lablePubKeyStart != -1) {
-            int pubKeyStart = lablePubKeyStart + OTK_LABEL_PUBLIC_KEY.length();
+        int labelPubKeyStart = sessData.indexOf(OTK_LABEL_PUBLIC_KEY);
+        if (labelPubKeyStart != -1) {
+            int pubKeyStart = labelPubKeyStart + OTK_LABEL_PUBLIC_KEY.length();
             int crlf = sessData.indexOf(CRLF, pubKeyStart);
             publicKey = sessData.substring(pubKeyStart, crlf);
         }
 
         // Master ext key
-        int lableMasterExtKeyStart = sessData.indexOf(OTK_LABEL_MASTER_EXT_KEY);
-        if (lableMasterExtKeyStart != -1) {
-            int masterExtKeyStart = lableMasterExtKeyStart + OTK_LABEL_MASTER_EXT_KEY.length();
+        int labelMasterExtKeyStart = sessData.indexOf(OTK_LABEL_MASTER_EXT_KEY);
+        if (labelMasterExtKeyStart != -1) {
+            int masterExtKeyStart = labelMasterExtKeyStart + OTK_LABEL_MASTER_EXT_KEY.length();
             int crlf = sessData.indexOf(CRLF, masterExtKeyStart);
             masterExtKey = sessData.substring(masterExtKeyStart, crlf);
         }
 
         // Derivative ext key
-        int lableDerivativeExtKeyStart = sessData.indexOf(OTK_LABEL_DERIVATIVE_EXT_KEY);
-        if (lableDerivativeExtKeyStart != -1) {
-            int derivativeExtKeyStart = lableDerivativeExtKeyStart + OTK_LABEL_DERIVATIVE_EXT_KEY.length();
+        int labelDerivativeExtKeyStart = sessData.indexOf(OTK_LABEL_DERIVATIVE_EXT_KEY);
+        if (labelDerivativeExtKeyStart != -1) {
+            int derivativeExtKeyStart = labelDerivativeExtKeyStart + OTK_LABEL_DERIVATIVE_EXT_KEY.length();
             int crlf = sessData.indexOf(CRLF, derivativeExtKeyStart);
             derivativeExtKey = sessData.substring(derivativeExtKeyStart, crlf);
         }
 
         // Derivative path
-        int lableDerivativePathStart = sessData.indexOf(OTK_LABEL_DERIVATIVE_PATH);
-        if (lableDerivativePathStart != -1) {
-            int derivativePathStart = lableDerivativePathStart + OTK_LABEL_DERIVATIVE_PATH.length();
+        int labelDerivativePathStart = sessData.indexOf(OTK_LABEL_DERIVATIVE_PATH);
+        if (labelDerivativePathStart != -1) {
+            int derivativePathStart = labelDerivativePathStart + OTK_LABEL_DERIVATIVE_PATH.length();
             int crlf = sessData.indexOf(CRLF, derivativePathStart);
             derivativePath = sessData.substring(derivativePathStart, crlf);
         }
 
-        // PIN
-        int lablePINStart = sessData.indexOf(OTK_LABEL_SECURE_PIN);
-        if (lablePINStart != -1) {
-            int pinStart = lablePINStart + OTK_LABEL_SECURE_PIN.length();
-            int crlf = sessData.indexOf(CRLF, pinStart);
-        }
-
         // WIF_Key
-        int lableWIFKeyStart = sessData.indexOf(OTK_LABEL_WIF_KEY);
-        if (lableWIFKeyStart != -1) {
-            int wifKeyStart = lableWIFKeyStart + OTK_LABEL_WIF_KEY.length();
+        int labelWIFKeyStart = sessData.indexOf(OTK_LABEL_WIF_KEY);
+        if (labelWIFKeyStart != -1) {
+            int wifKeyStart = labelWIFKeyStart + OTK_LABEL_WIF_KEY.length();
             int crlf = sessData.indexOf(CRLF, wifKeyStart);
             wifKey = sessData.substring(wifKeyStart, crlf);
         }

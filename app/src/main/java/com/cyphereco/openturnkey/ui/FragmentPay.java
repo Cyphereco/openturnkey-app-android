@@ -65,6 +65,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
 
     private boolean signPayment = false;
+    private String pubKeyPayer = "";
 
     boolean mUseFixAddress = false;
     boolean mIsCryptoCurrencySet = true;
@@ -302,6 +303,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     public void onStart() {
         super.onStart();
 
+        pubKeyPayer = "";
+
         // in case when MainActivity resumed for the first time, no fragment has been selected yet
         // and onPageSelected is not called; call onPageSelected to update UI/Configurations/Dataset
         if (MainActivity.getSelectedFragment() == null) {
@@ -378,6 +381,16 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     }
 
     @Override
+    public void onPageUnselected() {
+        super.onPageUnselected();
+
+        if (!Preferences.getUseFixAddressChecked()) tvAddress.setText("");
+        mEtCc.setText("");
+        mEtLc.setText("");
+        cbUseAllFunds.setChecked(false);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int optionId = item.getItemId();
 
@@ -410,12 +423,30 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     }
 
     @Override
+    protected void preRequestSend(OtkRequest request, OtkData otkData) {
+        super.preRequestSend(request, otkData);
+        if (pubKeyPayer.length() > 0 && !otkData.getPublicKey().equals(pubKeyPayer)) {
+            request.setValid(false);
+
+            dialogReadOtk.updateReadOtkDesc(getString(R.string.incorrect_openturnkey))
+                .endingDialogReadOtkWithReason(DialogReadOtk.REQUEST_FAIL);
+
+            delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
+                @Override
+                public void postProcess() {
+                    AlertPrompt.alert(getContext(), getString(R.string.incorrect_openturnkey));
+                }
+            });
+        }
+    }
+
+    @Override
     public void onOtkDataPosted(final OtkData otkData) {
         super.onOtkDataPosted(otkData);
 
         // process received otk data
         if (otkData != null) {
-            String addr = otkData.getSessionData().getAddress();
+            final String addr = otkData.getSessionData().getAddress();
 
             if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
                 if (signPayment) {
@@ -446,8 +477,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                                 // calling AlertPrompt from thread need Looper.prepare
                                 AlertPrompt.threadSafeAlert(getContext(), getString(R.string.balance_insufficient));
                             } else {
-                                // construct transaction in the background
-
+                                pubKeyPayer = otkData.getPublicKey();
                                 // proceed final confirmation
                                 logger.debug("Amount sent (include fees): {}, Amount received: {}",
                                         amountSent, amountReceived);
@@ -779,7 +809,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     private void paymentConfirmed(final String from, final String to, final long amountReceived, final long fees) {
         logger.debug("payment confirmed");
 
-        final Dialog dialog = dialogFullscreenAlert(getString(R.string.processing));
+        final Dialog dialog = dialogFullscreenAlert(getString(R.string.create_transaction));
         final Handler handler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
@@ -794,21 +824,21 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     StringBuilder hashes = new StringBuilder();
                     int hashesCounter = 0;
                     for (int i = 0; i < list.size(); i++) {
-                        hashes.append(hashes.length() > 0 ? "," : "").append(list.get(i));
+                        hashes.append(hashes.length() > 0 ? "\n" : "").append(list.get(i));
                         hashesCounter++;
 
                         if (hashesCounter > 9) {
-                            pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()).setMore(i+1 < list.size()).setPin("99999999"));
+                            pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()).setPin("99999999").setMore(i+1 < list.size()));
                             hashes = new StringBuilder();
                             hashesCounter = 0;
                         }
                     }
                     if (hashesCounter > 0) {
-                        pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()));
+                        pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()).setPin("99999999"));
                     }
                     logger.debug("Request Number: {}", numOfRequest());
 
-                    showDialogReadOtk(null, null);
+                    showDialogReadOtk(getString(R.string.signing_transaction), null);
                 }
                 return false;
             }

@@ -99,8 +99,8 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
     }
 
     @Override
-    protected void modifyRequestAfterOtkDataRead(OtkRequest request, OtkData otkData) {
-        super.modifyRequestAfterOtkDataRead(request, otkData);
+    protected void preRequestSend(OtkRequest request, OtkData otkData) {
+        super.preRequestSend(request, otkData);
     }
 
     @Override

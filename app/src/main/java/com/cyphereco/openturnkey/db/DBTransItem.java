@@ -1,7 +1,7 @@
 package com.cyphereco.openturnkey.db;
 
 public class DBTransItem implements java.io.Serializable {
-    public static final String AMOUNT_UNIT_STRING_DEFAULT = "BTC";
+    private static final String AMOUNT_UNIT_STRING_DEFAULT = "BTC";
 
     private long id;
     private long datetime;
@@ -106,6 +106,7 @@ public class DBTransItem implements java.io.Serializable {
     public int getStatus() {
         return status;
     }
+
     public int getConfirmations() {
         return confirmations;
     }
@@ -113,6 +114,7 @@ public class DBTransItem implements java.io.Serializable {
     public void setStatus(int status) {
         this.status = status;
     }
+
     public void setConfrimations(int confirmations) {
         this.confirmations = confirmations;
     }
@@ -134,7 +136,7 @@ public class DBTransItem implements java.io.Serializable {
     }
 
     public void setAmountUnitString(String unitString) {
-        if ((null ==unitString) || ("" == unitString)) {
+        if ((null == unitString) || ("" == unitString)) {
             unitString = AMOUNT_UNIT_STRING_DEFAULT;
         }
         this.amountUnitString = unitString;
@@ -148,7 +150,7 @@ public class DBTransItem implements java.io.Serializable {
     }
 
     public void setFeeUnitString(String unitString) {
-        if ((null ==unitString) || ("" == unitString)) {
+        if ((null == unitString) || ("" == unitString)) {
             unitString = AMOUNT_UNIT_STRING_DEFAULT;
         }
         this.feeUnitString = unitString;

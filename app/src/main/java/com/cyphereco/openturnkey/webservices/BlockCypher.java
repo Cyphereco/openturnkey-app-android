@@ -35,14 +35,8 @@ public class BlockCypher {
     private static void newBlockCypherContext() {
         String network = Preferences.isTestnet() ? "text3" : "main";
 
-        if (token != null) {
-            // BlockCypherContext with token
-            mBcCtx = new BlockCypherContext("v1", "btc", network, "");
-        }
-        else {
-            // BlockCypherContext without token
-            mBcCtx = new BlockCypherContext("v1", "btc", network, "");
-        }
+        // BlockCypherContext with token
+        mBcCtx = new BlockCypherContext("v1", "btc", network, "");
     }
 
     public static void reInit() {

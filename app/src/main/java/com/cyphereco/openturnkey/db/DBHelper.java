@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper {
-//    private static final String TAG = DBHelper.class.getSimpleName();
+
     private static final int DB_VERSION = 5;
     private static final String DB_NAME = "OpenTurnKey.db";
 
@@ -26,12 +26,11 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion == 4 && newVersion == 5){
+        if (oldVersion == 4 && newVersion == 5) {
             //Add confirmations
-            String sql = "alter table "+ OpenturnkeyDB.TRANS_TABLE_NAME + " add COLUMN confirmations INTEGER";
+            String sql = "alter table " + OpenturnkeyDB.TRANS_TABLE_NAME + " add COLUMN confirmations INTEGER";
             db.execSQL(sql);
-        }
-        else {
+        } else {
             // Drop original tables
             db.execSQL("DROP TABLE IF EXISTS " + OpenturnkeyDB.TRANS_TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + OpenturnkeyDB.ADDR_BOOK_TABLE_NAME);
@@ -52,7 +51,7 @@ public class DBHelper extends SQLiteOpenHelper {
     static SQLiteDatabase getDatabase(Context context) {
         if (database == null || !database.isOpen()) {
             database = new DBHelper(context, DB_NAME,
-            null, DB_VERSION).getWritableDatabase();
+                    null, DB_VERSION).getWritableDatabase();
         }
 
         return database;

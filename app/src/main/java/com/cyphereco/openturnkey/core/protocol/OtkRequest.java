@@ -10,15 +10,14 @@ import java.util.Random;
 
 public class OtkRequest implements Serializable {
     private static final String TAG = "OtkRequest";
-    Logger logger = Log4jHelper.getLogger(TAG);
+    private Logger logger = Log4jHelper.getLogger(TAG);
 
     private String sessionId = "";   // default empty, set after request sent
     private String requestId;   // auto-generated in all constructors
     private String command;     // mandatory require parameter in all constructors
-    private String data = "";        // optional
+    private String data;        // optional
     private String option = "";      // optional
 
-    private String pin = "";
     private String otkAddress = "";
     private boolean valid = true;
 
@@ -87,7 +86,9 @@ public class OtkRequest implements Serializable {
         return this;
     }
 
-    public String getOtkAddress() { return otkAddress; }
+    public String getOtkAddress() {
+        return otkAddress;
+    }
 
     public OtkRequest setOtkAddress(String otkAddress) {
         // the OtkAddress can only be set once

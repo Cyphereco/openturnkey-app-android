@@ -9,26 +9,12 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Serializable;
 
 public class OtkData implements Serializable {
-    /* Data type. */
-    public enum Type {
-        OTK_DATA_TYPE_GENERAL_INFO,
-        OTK_DATA_TYPE_SIGNATURE,
-        OTK_DATA_TYPE_KEY_INFO,
-        OTK_DATA_TYPE_COMMAND_EXEC_FAILURE,
-        OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS,
-    }
 
-    private Type mType;
     private MintInfo mMintInfo;
-
     private OtkState mOtkState;
     private String mPublicKey;
     private SessionData mSessionData;
     private String mFailureReason = "";
-
-    Type getType() {
-        return mType;
-    }
 
     public SessionData getSessionData() {
         return mSessionData;
@@ -38,7 +24,7 @@ public class OtkData implements Serializable {
         return mOtkState;
     }
 
-    String getPublicKey() {
+    public String getPublicKey() {
         return mPublicKey;
     }
 
@@ -55,26 +41,12 @@ public class OtkData implements Serializable {
         mOtkState = otkState;
         mSessionData = sd;
         mPublicKey = pubKey;
-        // Determine data type
-        if (sd.getRequestSigList() != null && sd.getRequestSigList().size() != 0) {
-            mType = Type.OTK_DATA_TYPE_SIGNATURE;
-        } else if (sd.getMasterExtKey() != null && !sd.getMasterExtKey().equals("")) {
-            mType = Type.OTK_DATA_TYPE_KEY_INFO;
-        } else if (otkState.getFailureReason() != OtkState.FailureReason.NFC_REASON_INVALID) {
-            mType = Type.OTK_DATA_TYPE_COMMAND_EXEC_FAILURE;
-            mFailureReason = otkState.getFailureReason().getValue();
-        } else if (otkState.getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
-            mType = Type.OTK_DATA_TYPE_COMMAND_EXEC_SUCCESS;
-        } else {
-            mType = Type.OTK_DATA_TYPE_GENERAL_INFO;
-        }
     }
 
     @NotNull
     @Override
     public String toString() {
         return "OtkData{" +
-                "mType=" + mType +
                 ", mMintInfo=" + mMintInfo +
                 ", mOtkState=" + mOtkState +
                 ", mPublicKey='" + mPublicKey + '\'' +

@@ -8,11 +8,12 @@ public enum LocalCurrency {
     LOCAL_CURRENCY_CNY("CNY");
 
     private final String value;
-    private LocalCurrency(String s) {
+
+    LocalCurrency(String s) {
         value = s;
     }
 
-    public String toString(){
+    public String toString() {
         return value;
     }
 }

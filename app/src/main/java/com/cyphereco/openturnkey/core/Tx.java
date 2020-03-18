@@ -5,11 +5,12 @@ import com.blockcypher.model.transaction.output.Output;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 public class Tx {
-    public static final String TAG = Tx.class.getSimpleName();
-    Logger logger = Log4jHelper.getLogger(TAG);
+    private static final String TAG = Tx.class.getSimpleName();
+    private Logger logger = Log4jHelper.getLogger(TAG);
 
     private String mFrom;
     private String mTo;
@@ -20,7 +21,7 @@ public class Tx {
     private String mHash;
     private Status mStatus;
     private String mDesc;
-    private int    mConfirmations;
+    private int mConfirmations;
 
     public enum Status {
         STATUS_SUCCESS(0),
@@ -29,10 +30,12 @@ public class Tx {
         STATUS_SIGNATURE_MISMATCH(3);
 
         private final int value;
-        private Status(int s) {
+
+        Status(int s) {
             value = s;
         }
-        public int toInt(){
+
+        public int toInt() {
             return value;
         }
     }
@@ -85,23 +88,75 @@ public class Tx {
         mDesc = errorDesc;
     }
 
-    public String getFrom() { return mFrom;}
-    public String getTo() { return mTo;}
-    public String getHash() { return mHash;}
-    public double getAmount() { return mAmount;}
-    public double getFee() { return mFee;}
-    public String getTime() { return mTime;}
-    public String getRaw() { return mRaw;}
-    public String getDesc() { return mDesc;}
-    public Status getStatus() { return mStatus;}
-    public void setFrom(String from) {mFrom = from;}
-    public void setTo(String to) {mTo = to;}
-    public void setRaw(String raw) {mRaw = raw;}
-    public void setAmount(double amount) {mAmount = amount;}
-    public void setFee(double fee) {mFee = fee;}
-    public void setDesc(String desc) { mDesc = desc;}
-    public void setTime(String time) { mTime = time;}
-    public int getConfirmations() { return mConfirmations;}
+    public String getFrom() {
+        return mFrom;
+    }
+
+    public String getTo() {
+        return mTo;
+    }
+
+    public String getHash() {
+        return mHash;
+    }
+
+    public double getAmount() {
+        return mAmount;
+    }
+
+    public double getFee() {
+        return mFee;
+    }
+
+    public String getTime() {
+        return mTime;
+    }
+
+    public String getRaw() {
+        return mRaw;
+    }
+
+    public String getDesc() {
+        return mDesc;
+    }
+
+    public Status getStatus() {
+        return mStatus;
+    }
+
+    public void setFrom(String from) {
+        mFrom = from;
+    }
+
+    public void setTo(String to) {
+        mTo = to;
+    }
+
+    public void setRaw(String raw) {
+        mRaw = raw;
+    }
+
+    public void setAmount(double amount) {
+        mAmount = amount;
+    }
+
+    public void setFee(double fee) {
+        mFee = fee;
+    }
+
+    public void setDesc(String desc) {
+        mDesc = desc;
+    }
+
+    public void setTime(String time) {
+        mTime = time;
+    }
+
+    public int getConfirmations() {
+        return mConfirmations;
+    }
+
+    @NotNull
     public String toString() {
         return "Raw:" + mRaw +
                 "\nFrom:" + mFrom +

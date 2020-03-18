@@ -1,13 +1,15 @@
 package com.cyphereco.openturnkey.utils;
 
-public class ExchangeRate {
-    double mTWD; // 1 BTC to mTWD TWD
-    double mUSD;
-    double mJPY;
-    double mEUR;
-    double mCNY;
+import org.jetbrains.annotations.NotNull;
 
-    public ExchangeRate(double twd, double usd, double jpy, double eur, double cny) {
+public class ExchangeRate {
+    private double mTWD; // 1 BTC to mTWD TWD
+    private double mUSD;
+    private double mJPY;
+    private double mEUR;
+    private double mCNY;
+
+    ExchangeRate(double twd, double usd, double jpy, double eur, double cny) {
         mTWD = twd;
         mUSD = usd;
         mJPY = jpy;
@@ -15,11 +17,25 @@ public class ExchangeRate {
         mCNY = cny;
     }
 
-    public double getTWD() {return mTWD;}
-    public double getUSD() {return mUSD;}
-    public double getJPY() {return mJPY;}
-    public double getEUR() {return mEUR;}
-    public double getCNY() {return mCNY;}
+    public double getTWD() {
+        return mTWD;
+    }
+
+    public double getUSD() {
+        return mUSD;
+    }
+
+    public double getJPY() {
+        return mJPY;
+    }
+
+    public double getEUR() {
+        return mEUR;
+    }
+
+    public double getCNY() {
+        return mCNY;
+    }
 
     public void setmTWD(double mTWD) {
         this.mTWD = mTWD;
@@ -41,6 +57,7 @@ public class ExchangeRate {
         this.mCNY = mCNY;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return "ExchangeRate{" +
