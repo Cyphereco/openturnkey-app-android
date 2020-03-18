@@ -168,8 +168,8 @@ public class MainActivity extends AppCompatActivity {
 
                         // if soft-keyboard is opened, close it!
                         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                        if (imm.isAcceptingText()) { // verify if the soft keyboard is open
-                            imm.hideSoftInputFromWindow(Objects.requireNonNull(getCurrentFocus()).getWindowToken(), 0);
+                        if (getCurrentFocus() != null && imm.isAcceptingText()) { // verify if the soft keyboard is open
+                            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                         }
 
                         return true;
