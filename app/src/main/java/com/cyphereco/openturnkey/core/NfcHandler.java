@@ -35,12 +35,12 @@ public class NfcHandler {
     private static final int RECORD_TYPE_SESSION_HASH = 5;
     private static final int NUM_OF_OTK_RECORDS = 6;
 
-    private static final int RECORD_REQUET_TYPE_SESSION_ID = 0;
-    private static final int RECORD_REQUET_TYPE_REQUEST_ID = 1;
-    private static final int RECORD_REQUET_TYPE_COMMAND = 2;
-    private static final int RECORD_REQUET_TYPE_DATA = 3;
-    private static final int RECORD_REQUET_TYPE_OPTION = 4;
-    private static final int NUM_OF_REQUET_RECORDS = 5;
+    private static final int RECORD_REQUEST_TYPE_SESSION_ID = 0;
+    private static final int RECORD_REQUEST_TYPE_REQUEST_ID = 1;
+    private static final int RECORD_REQUEST_TYPE_COMMAND = 2;
+    private static final int RECORD_REQUEST_TYPE_DATA = 3;
+    private static final int RECORD_REQUEST_TYPE_OPTION = 4;
+    private static final int NAM_OF_REQUEST_RECORDS = 5;
 
     public static String sendRequest(Intent intent, OtkRequest request) {
         logger.info("\n" + request.toString());
@@ -50,13 +50,13 @@ public class NfcHandler {
             Ndef ndef = Ndef.get(tag);
             if (ndef != null) {
 
-                NdefRecord[] records = new NdefRecord[NUM_OF_REQUET_RECORDS];
+                NdefRecord[] records = new NdefRecord[NAM_OF_REQUEST_RECORDS];
 
-                records[RECORD_REQUET_TYPE_SESSION_ID] = NdefRecord.createTextRecord("en", request.getSessionId());
-                records[RECORD_REQUET_TYPE_REQUEST_ID] = NdefRecord.createTextRecord("en", request.getRequestId());
-                records[RECORD_REQUET_TYPE_COMMAND] = NdefRecord.createTextRecord("en", request.getCommand());
-                records[RECORD_REQUET_TYPE_DATA] = NdefRecord.createTextRecord("en", request.getData());
-                records[RECORD_REQUET_TYPE_OPTION] = NdefRecord.createTextRecord("en", request.getOption());
+                records[RECORD_REQUEST_TYPE_SESSION_ID] = NdefRecord.createTextRecord("en", request.getSessionId());
+                records[RECORD_REQUEST_TYPE_REQUEST_ID] = NdefRecord.createTextRecord("en", request.getRequestId());
+                records[RECORD_REQUEST_TYPE_COMMAND] = NdefRecord.createTextRecord("en", request.getCommand());
+                records[RECORD_REQUEST_TYPE_DATA] = NdefRecord.createTextRecord("en", request.getData());
+                records[RECORD_REQUEST_TYPE_OPTION] = NdefRecord.createTextRecord("en", request.getOption());
 
                 try {
                     ndef.connect();
@@ -103,15 +103,15 @@ public class NfcHandler {
         OtkState otkState = new OtkState(new String(ndefMessage.getRecords()[RECORD_TYPE_OTK_STATE].getPayload()).substring(3));
         String pubKey = new String(ndefMessage.getRecords()[RECORD_TYPE_PUBLIC_KEY].getPayload()).substring(3);
 
-        String sessData = new String(ndefMessage.getRecords()[RECORD_TYPE_SESSION_DATA].getPayload()).substring(3);
+        String strSessionData = new String(ndefMessage.getRecords()[RECORD_TYPE_SESSION_DATA].getPayload()).substring(3);
         String hash = new String(ndefMessage.getRecords()[RECORD_TYPE_SESSION_HASH].getPayload()).substring(3);
 
-        if (!verifySessionData(pubKey, sessData, hash)) {
+        if (!verifySessionData(pubKey, strSessionData, hash)) {
             logger.error("Session hash validated failed");
             return null;
         }
 
-        SessionData sessionData = new SessionData(sessData);
+        SessionData sessionData = new SessionData(strSessionData);
 
         return new OtkData(mintInfo, otkState, pubKey, sessionData);
     }

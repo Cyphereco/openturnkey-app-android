@@ -4,12 +4,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * OpenturnkeyDB.java - This is used to operate database of OpenTurnKey
- *
  */
 public class OpenturnkeyDB {
     // private static final String TAG = OpenturnkeyDB.class.getSimpleName();
@@ -115,7 +115,7 @@ public class OpenturnkeyDB {
         int ret = 0;
 
         try (Cursor cursor = otkDB.rawQuery(
-                "SELECT COUNT(*) FROM " + TRANS_TABLE_NAME,null)) {
+                "SELECT COUNT(*) FROM " + TRANS_TABLE_NAME, null)) {
             if (cursor.moveToNext()) {
                 ret = cursor.getInt(0);
             }
@@ -164,8 +164,7 @@ public class OpenturnkeyDB {
 
         try {
             return (otkDB.update(TRANS_TABLE_NAME, cv, where, null) > 0);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -176,8 +175,7 @@ public class OpenturnkeyDB {
 
         try {
             return (otkDB.delete(TRANS_TABLE_NAME, where, null) > 0);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -240,8 +238,7 @@ public class OpenturnkeyDB {
     public static boolean addAddress(DBAddrItem item) {
         if (item.getDbId() > 0) {
             return updateAddressbook(item);
-        }
-        else {
+        } else {
             ContentValues cv = new ContentValues();
 
             cv.put(ADDRBOOK_ADDR_COL, item.getAddress());
@@ -249,8 +246,7 @@ public class OpenturnkeyDB {
 
             try {
                 return (otkDB.insert(ADDR_BOOK_TABLE_NAME, null, cv) > 0);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return false;
@@ -267,22 +263,19 @@ public class OpenturnkeyDB {
 
             try {
                 return (otkDB.update(ADDR_BOOK_TABLE_NAME, cv, where, null) > 0);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return false;
-        }
-        else {
+        } else {
             return addAddress(item);
         }
     }
 
     public static boolean deleteAddressbookByAddr(String address) {
         try {
-            return (otkDB.delete(ADDR_BOOK_TABLE_NAME, ADDRBOOK_ADDR_COL + "=?" , new String[]{address}) > 0);
-        }
-        catch (Exception e) {
+            return (otkDB.delete(ADDR_BOOK_TABLE_NAME, ADDRBOOK_ADDR_COL + "=?", new String[]{address}) > 0);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -291,8 +284,7 @@ public class OpenturnkeyDB {
     public static boolean deleteAddressbookByAlias(String alias) {
         try {
             return (otkDB.delete(ADDR_BOOK_TABLE_NAME, ADDRBOOK_USR_NAME_COL + "=?", new String[]{alias}) > 0);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -300,8 +292,8 @@ public class OpenturnkeyDB {
 
     public static List<DBAddrItem> getAllAddressbook() {
         List<DBAddrItem> result = new ArrayList<>();
-        Cursor cursor = otkDB.query(ADDR_BOOK_TABLE_NAME, null,null,
-                null, null,null,null,null);
+        Cursor cursor = otkDB.query(ADDR_BOOK_TABLE_NAME, null, null,
+                null, null, null, null, null);
         while (cursor.moveToNext()) {
             result.add(generateAddrbookItemByQueryResult(cursor));
         }
