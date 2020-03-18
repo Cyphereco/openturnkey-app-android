@@ -8,11 +8,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.utils.AddressUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
+
 import org.slf4j.Logger;
+
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;

@@ -9,8 +9,9 @@ import java.lang.ref.WeakReference;
 public class TextWatcherCurrency implements TextWatcher {
     private final WeakReference<EditText> editTextWeakReference;
     private String current;
-    public TextWatcherCurrency(EditText editText) {
-        editTextWeakReference = new WeakReference<EditText>(editText);
+
+    TextWatcherCurrency(EditText editText) {
+        editTextWeakReference = new WeakReference<>(editText);
     }
 
     @Override
@@ -28,8 +29,7 @@ public class TextWatcherCurrency implements TextWatcher {
             double parsed = Double.parseDouble(now);
             current = now;
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             editText.setText(current);
             editText.setSelection(start);
         }

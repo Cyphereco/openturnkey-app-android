@@ -3,10 +3,12 @@ package com.cyphereco.openturnkey.ui;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.TxFee;
+
 import org.slf4j.Logger;
 
 import java.util.Locale;
@@ -43,20 +45,16 @@ public class Preferences {
         if (s.length() == 0) {
             if (Locale.getDefault().getCountry().equals(Locale.TAIWAN.getCountry())) {
                 s = LocalCurrency.LOCAL_CURRENCY_TWD.name();
-            }
-            else if (Locale.getDefault().getCountry().equals(Locale.CHINA.getCountry())) {
+            } else if (Locale.getDefault().getCountry().equals(Locale.CHINA.getCountry())) {
                 s = LocalCurrency.LOCAL_CURRENCY_CNY.name();
-            }
-            else if (Locale.getDefault().getCountry().equals(Locale.JAPAN.getCountry())) {
+            } else if (Locale.getDefault().getCountry().equals(Locale.JAPAN.getCountry())) {
                 s = LocalCurrency.LOCAL_CURRENCY_JPY.name();
-            }
-            else if (Locale.getDefault().getCountry().equals(Locale.GERMAN.getCountry()) ||
+            } else if (Locale.getDefault().getCountry().equals(Locale.GERMAN.getCountry()) ||
                     Locale.getDefault().getCountry().equals(Locale.FRANCE.getCountry()) ||
                     Locale.getDefault().getCountry().equals(Locale.ITALY.getCountry()) ||
                     Locale.getDefault().getCountry().equals(Locale.UK.getCountry())) {
                 s = LocalCurrency.LOCAL_CURRENCY_EUR.name();
-            }
-            else {
+            } else {
                 s = LocalCurrency.LOCAL_CURRENCY_USD.name();
             }
             logger.debug("Auto-select Currency by locale: {}", s);

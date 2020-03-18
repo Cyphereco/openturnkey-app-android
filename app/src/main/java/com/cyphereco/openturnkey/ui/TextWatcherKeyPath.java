@@ -11,11 +11,12 @@ public class TextWatcherKeyPath implements TextWatcher {
     private final WeakReference<EditText> editTextWeakReference;
     private String current;
     private boolean isValid = false;
-    public TextWatcherKeyPath(EditText editText) {
-        editTextWeakReference = new WeakReference<EditText>(editText);
+
+    TextWatcherKeyPath(EditText editText) {
+        editTextWeakReference = new WeakReference<>(editText);
     }
 
-    public boolean isKeyPathValid() {
+    boolean isKeyPathValid() {
         return isValid;
     }
 
@@ -41,14 +42,12 @@ public class TextWatcherKeyPath implements TextWatcher {
             if (parsed >= 0 && parsed <= 2147483647L) {
                 editText.setTextColor(Color.BLACK);
                 isValid = true;
-            }
-            else {
+            } else {
                 editText.setTextColor(Color.RED);
                 isValid = false;
             }
             current = now;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             editText.setText(current);
             editText.setSelection(start);
         }
