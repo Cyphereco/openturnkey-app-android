@@ -67,7 +67,7 @@ public class DialogReadOtk extends AppCompatDialogFragment {
                 // turn off the nfc reading for otk
                 MainActivity.disableReadOtk();
                 if (dialogListner != null) dialogListner.onCancel();
-                dismissAnimation(Objects.requireNonNull(getDialog().getWindow()).getDecorView());
+                if (getDialog() != null) dismissAnimation(getDialog().getWindow().getDecorView());
             }
         });
 
@@ -155,6 +155,8 @@ public class DialogReadOtk extends AppCompatDialogFragment {
     }
 
     public void endingDialogReadOtkWithReason(int flag) {
+        disableCancelTimer();
+
         textTitle.setVisibility(View.INVISIBLE);
         cancelButton.setVisibility(View.INVISIBLE);
         iconHint.setVisibility(View.INVISIBLE);

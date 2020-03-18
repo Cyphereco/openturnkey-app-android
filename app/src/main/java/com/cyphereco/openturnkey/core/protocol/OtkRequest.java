@@ -110,7 +110,7 @@ public class OtkRequest implements Serializable {
     }
 
     public OtkRequest setPin(String pin) {
-        setOption(getOption() + ",pin=" + pin);
+        if (!option.contains("pin=")) setOption(getOption() + ",pin=" + pin);
         return this;
     }
 
