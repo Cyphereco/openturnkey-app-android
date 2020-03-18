@@ -62,7 +62,7 @@
     <string name="transaction_not_executed">Transaction Not Executed</string>
     <string name="transaction_receipt">Transaction Receipt</string>
     <string name="subject_reason">Reason:</string>
-    <string name="processing">Processing Transaction</string>
+    <string name="processing_transaction">Processing Transaction</string>
     <string name="recipient_is_empty">Recipient Address is Empty</string>
     <string name="amount_empty">Amount is not entered</string>
     <string name="incorrect_recipient_amount">Incorrect Recipient Address or Amount</string>
@@ -227,5 +227,7 @@
     <string name="error_cannot_create_tx">Error! Cannot create transaction</string>
     <string name="public_key_information">Public Key Information</string>
     <string name="reapproach_openturnkey">Move OpenTurnKey away, then approach again.</string>
+    <string name="incorrect_openturnkey">Incorrect OpenTurnKey</string>
+    <string name="create_transaction">Create Transaction</string>
 
 </resources>

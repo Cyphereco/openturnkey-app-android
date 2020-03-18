@@ -37,7 +37,7 @@
     <string name="customized_fees">自订手续费</string>
     <string name="suggested">推荐</string>
     <string name="command_executed_successfully">命令成功执行</string>
-    <string name="processing">交易处理中</string>
+    <string name="processing_transaction">交易处理中</string>
     <string name="operation_cancelled">操作取消</string>
     <string name="qr_code_scan_cancelled">取消二维码扫描</string>
     <string name="subject_reason">原因:</string>
@@ -209,4 +209,6 @@
     <string name="update_addr_fail">更新地址失败</string>
     <string name="public_key_information">公钥信息</string>
     <string name="reapproach_openturnkey">请暂时移开OpenTurnKey，再靠近一次。</string>
+    <string name="create_transaction">创建交易</string>
+    <string name="incorrect_openturnkey">不是正确的OpenTurnKey</string>
 </resources>

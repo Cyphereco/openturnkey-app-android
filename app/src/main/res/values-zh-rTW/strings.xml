@@ -37,7 +37,7 @@
     <string name="customized_fees">自訂手續費</string>
     <string name="suggested">推薦</string>
     <string name="command_executed_successfully">命令成功執行</string>
-    <string name="processing">交易處理中</string>
+    <string name="processing_transaction">交易處理中</string>
     <string name="operation_cancelled">操作取消</string>
     <string name="qr_code_scan_cancelled">取消二維碼掃描</string>
     <string name="subject_reason">原因:</string>
@@ -209,4 +209,6 @@
     <string name="update_addr_fail">更新地址失敗</string>
     <string name="public_key_information">公鑰資訊</string>
     <string name="reapproach_openturnkey">請暫時移開OpenTurnKey，再靠近一次。</string>
+    <string name="create_transaction">創建交易</string>
+    <string name="incorrect_openturnkey">不是正確的OpenTurnKey</string>
 </resources>
