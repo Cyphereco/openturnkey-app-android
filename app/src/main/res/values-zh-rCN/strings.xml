@@ -68,9 +68,9 @@
     <string name="add_address">新增地址</string>
     <string name="subject_account_balance">账户余额</string>
     <string name="openturnkey_information">OpenTurnKey信息</string>
-    <string name="fetching">数据更新中...</string>
+    <string name="fetching">数据更新中…</string>
     <string name="address_copied">地址已复制</string>
-    <string name="please_wait">您现在可以移开OpenTurnKey.\n请稍候...</string>
+    <string name="please_wait">您现在可以移开OpenTurnKey.\n请稍候…</string>
     <string name="operation_timeout">操作逾时</string>
     <string name="do_not_remove_otk">请靠近OpenTurnKey完成交易签署.\n完成前请勿移开OpenTurnKey.</string>
     <string name="confirm_payment">确认支付</string>
@@ -126,7 +126,7 @@
     <string name="write_note">写入备注</string>
     <string name="currency_btc">BTC (比特币)</string>
     <string name="write_note_hint">备注(不超过64字)</string>
-    <string name="check_balance">查询余额中，请稍后...</string>
+    <string name="check_balance">查询余额中，请稍后…</string>
     <string name="set_pin_success">设定PIN码成功</string>
     <string name="set_pin_fail">设定PIN码失敗</string>
     <string name="warning">注意!</string>
@@ -189,7 +189,7 @@
     <string name="cannot_change_addr">无法变更地址</string>
     <string name="alias_exists">此别名已使用，请输入不同别名。</string>
     <string name="make_request">发送请求</string>
-    <string name="processing_request">请求处理中...\\n请勿移动OpenTurnKey.</string>
+    <string name="processing_request">请求处理中…\\n请勿移动OpenTurnKey.</string>
     <string name="fail_reason">失败原因</string>
     <string name="read_openturnkey">读取OpenTurnKey</string>
     <string name="approach_openturnkey_to_the_nfc_reader">将OpenTurnKey靠近NFC读写器</string>

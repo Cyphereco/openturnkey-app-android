@@ -145,7 +145,7 @@
     <string name="_unit_cny" translatable="false">CNY</string>
     <string name="currency_btc">BTC (Bitcoin)</string>
     <string name="write_note_hint">Note (Less than 64 characters)</string>
-    <string name="check_balance">Checking balance, please wait ...</string>
+    <string name="check_balance">Checking balance, please wait …</string>
     <string name="set_pin_success">Set PIN Code Successfully</string>
     <string name="set_pin_fail">Set PIN Code Failed</string>
     <string name="_choose_key_hint" translatable="false">0~2147483647</string>
@@ -208,7 +208,7 @@
     <string name="fail_reason">Fail Reason</string>
     <string name="alias_exists">Alias exists already, please enter different alias.</string>
     <string name="make_request">Make Request</string>
-    <string name="processing_request">Processing Request...\nDo Not Move OpenTurnKey!</string>
+    <string name="processing_request">Processing Request…\nDo Not Move OpenTurnKey!</string>
     <string name="read_openturnkey">Read OpenTurnKey</string>
     <string name="approach_openturnkey_to_the_nfc_reader">Approach OpenTurnKey to the NFC reader.</string>
     <string name="request_sent">Request has been sent.</string>

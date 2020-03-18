@@ -189,7 +189,7 @@
     <string name="cannot_change_addr">アドレスを変更できません</string>
     <string name="alias_exists">別称は既に存在します。別の別称を入力してください。</string>
     <string name="make_request">リクエストする</string>
-    <string name="processing_request">リクエストを処理しています...\nOpenTurnKeyを離れないでください！</string>
+    <string name="processing_request">リクエストを処理しています…\nOpenTurnKeyを離れないでください！</string>
     <string name="fail_reason">失敗理由</string>
     <string name="read_openturnkey">OpenTurnKeyを読む</string>
     <string name="approach_openturnkey_to_the_nfc_reader">OpenTurnKeyをNFCリーダーに近づけます</string>

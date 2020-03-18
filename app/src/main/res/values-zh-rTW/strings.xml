@@ -126,7 +126,7 @@
     <string name="write_note_success">寫入備注成功</string>
     <string name="write_note_fail">寫入備注失敗</string>
     <string name="write_note_hint">備注(不超過64字)</string>
-    <string name="check_balance">查詢餘額中，請稍後...</string>
+    <string name="check_balance">查詢餘額中，請稍後…</string>
     <string name="set_pin_success">設定PIN碼成功</string>
     <string name="set_pin_fail">設定PIN碼失敗</string>
     <string name="warning">注意!</string>
@@ -189,7 +189,7 @@
     <string name="cannot_change_addr">無法變更地址</string>
     <string name="alias_exists">此別名已使用，請輸入不同的別名。</string>
     <string name="make_request">發送請求</string>
-    <string name="processing_request">請求處理中...\n請勿移動OpenTurnKey.</string>
+    <string name="processing_request">請求處理中…\n請勿移動OpenTurnKey.</string>
     <string name="fail_reason">失敗原因</string>
     <string name="read_openturnkey">讀取OpenTurnKey</string>
     <string name="approach_openturnkey_to_the_nfc_reader">將OpenTurnKey靠近NFC讀寫器</string>
