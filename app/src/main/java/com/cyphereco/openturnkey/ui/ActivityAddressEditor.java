@@ -215,9 +215,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
         mReadNFCBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DialogReadOtk dialogReadOtk = new DialogReadOtk();
-                dialogReadOtk.show(getSupportFragmentManager(),
-                        "Get Address for Address Editor");
+                showDialogReadOtk(null, null);
             }
         });
 

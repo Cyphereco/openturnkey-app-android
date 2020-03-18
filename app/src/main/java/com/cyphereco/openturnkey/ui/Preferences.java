@@ -9,6 +9,8 @@ import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.TxFee;
 import org.slf4j.Logger;
 
+import java.util.Locale;
+
 public class Preferences {
     public static final String TAG = Preferences.class.getSimpleName();
     private static Logger logger = Log4jHelper.getLogger(TAG);
@@ -37,6 +39,29 @@ public class Preferences {
 
     static LocalCurrency getLocalCurrency() {
         String s = prefs.getString(LOCAL_CURRENCY, "");
+
+        if (s.length() == 0) {
+            if (Locale.getDefault().getCountry().equals(Locale.TAIWAN.getCountry())) {
+                s = LocalCurrency.LOCAL_CURRENCY_TWD.name();
+            }
+            else if (Locale.getDefault().getCountry().equals(Locale.CHINA.getCountry())) {
+                s = LocalCurrency.LOCAL_CURRENCY_CNY.name();
+            }
+            else if (Locale.getDefault().getCountry().equals(Locale.JAPAN.getCountry())) {
+                s = LocalCurrency.LOCAL_CURRENCY_JPY.name();
+            }
+            else if (Locale.getDefault().getCountry().equals(Locale.GERMAN.getCountry()) ||
+                    Locale.getDefault().getCountry().equals(Locale.FRANCE.getCountry()) ||
+                    Locale.getDefault().getCountry().equals(Locale.ITALY.getCountry()) ||
+                    Locale.getDefault().getCountry().equals(Locale.UK.getCountry())) {
+                s = LocalCurrency.LOCAL_CURRENCY_EUR.name();
+            }
+            else {
+                s = LocalCurrency.LOCAL_CURRENCY_USD.name();
+            }
+            logger.debug("Auto-select Currency by locale: {}", s);
+        }
+
         if (s.equals(LocalCurrency.LOCAL_CURRENCY_CNY.name())) {
             return LocalCurrency.LOCAL_CURRENCY_CNY;
         }
@@ -45,9 +70,6 @@ public class Preferences {
         }
         if (s.equals(LocalCurrency.LOCAL_CURRENCY_TWD.name())) {
             return LocalCurrency.LOCAL_CURRENCY_TWD;
-        }
-        if (s.equals(LocalCurrency.LOCAL_CURRENCY_USD.name())) {
-            return LocalCurrency.LOCAL_CURRENCY_USD;
         }
         if (s.equals(LocalCurrency.LOCAL_CURRENCY_JPY.name())) {
             return LocalCurrency.LOCAL_CURRENCY_JPY;

@@ -121,6 +121,13 @@ public class OtkRequest implements Serializable {
         return this;
     }
 
+    public OtkRequest setMore(boolean more) {
+        if (!hasMore() && more) {
+            setOption(getOption() + ",more=1");
+        }
+        return this;
+    }
+
     public boolean hasMore() {
         return this.option.contains("more=1");
     }

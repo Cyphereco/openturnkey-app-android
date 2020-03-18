@@ -294,46 +294,30 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                     mFormattedSignedMsg = "";
                     updateSignMessageOutput();
                     clearRequest();
+
+                    CheckBox cbUsingMasterKey = view.findViewById(R.id.checkBoxUsingMasterKey);
+                    EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
+                    mMsgToSign = etMsgToSign.getText().toString();
+                    final OtkRequest request = new OtkRequest(Command.SIGN.toString());
+                    byte[] encodedMessageToSign = BtcUtils.generateMessageToSign(mMsgToSign);
+                    assert encodedMessageToSign != null;
+                    request.setData(BtcUtils.bytesToHexString(encodedMessageToSign));
+                    if (cbUsingMasterKey.isChecked()) request.setMasterKey();
+
                     if (cbUsePin.isChecked()) {
                         DialogAuthByPin dialogAuthByPin = new DialogAuthByPin();
                         dialogAuthByPin.setListener(new DialogAuthByPin.DialogAuthByPinListener() {
                             @Override
                             public void setPin(String pin) {
-                                CheckBox cbUsingMasterKey = view.findViewById(R.id.checkBoxUsingMasterKey);
-                                EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
-                                mMsgToSign = etMsgToSign.getText().toString();
-                                OtkRequest request = new OtkRequest(Command.SIGN.toString());
-                                byte[] encodedMessageToSign = BtcUtils.generateMessageToSign(mMsgToSign);
-                                assert encodedMessageToSign != null;
-                                request.setData(BtcUtils.bytesToHexString(encodedMessageToSign));
-                                if (cbUsingMasterKey.isChecked()) request.setMasterKey();
                                 request.setPin(pin);
                                 pushRequest(request);
-
-                                DialogReadOtk dialogReadOtk = new DialogReadOtk();
-                                dialogReadOtk.setOnCanelListener(new DialogReadOtk.dialogReadOtkListener() {
-                                    @Override
-                                    public void onCancel() {
-                                        clearRequest();
-                                    }
-                                });
-                                dialogReadOtk.show(getSupportFragmentManager(), "SIGN_MESSAGE");
+                                showDialogReadOtk(null, null);
                             }
                         });
                         dialogAuthByPin.show(getSupportFragmentManager(), "AuthByPin");
                     } else {
-                        CheckBox cbUsingMasterKey = view.findViewById(R.id.checkBoxUsingMasterKey);
-                        EditText etMsgToSign = view.findViewById(R.id.editTextMessageToBeSign);
-                        mMsgToSign = etMsgToSign.getText().toString();
-                        OtkRequest request = new OtkRequest(Command.SIGN.toString());
-                        byte[] encodedMessageToSign = BtcUtils.generateMessageToSign(mMsgToSign);
-                        assert encodedMessageToSign != null;
-                        request.setData(BtcUtils.bytesToHexString(encodedMessageToSign));
-                        if (cbUsingMasterKey.isChecked()) request.setMasterKey();
                         pushRequest(request);
-
-                        DialogReadOtk dialogReadOtk = new DialogReadOtk();
-                        dialogReadOtk.show(getSupportFragmentManager(), "SIGN_MESSAGE");
+                        showDialogReadOtk(null, null);
                     }
                 }
             });

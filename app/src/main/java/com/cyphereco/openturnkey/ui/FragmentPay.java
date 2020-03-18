@@ -37,6 +37,7 @@ import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.core.Tx;
 import com.cyphereco.openturnkey.core.UnsignedTx;
 import com.cyphereco.openturnkey.core.protocol.Command;
+import com.cyphereco.openturnkey.core.protocol.OtkRequest;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.db.DBTransItem;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
@@ -130,9 +131,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 if (mUseFixAddress) {
                     dialogFixAddressEnabled();
                 } else {
-                    DialogReadOtk dialogReadOtk = new DialogReadOtk();
-                    assert getFragmentManager() != null;
-                    dialogReadOtk.show(getFragmentManager(), "ReadOtk");
+                    showDialogReadOtk(null, null);
                 }
             }
         });
@@ -264,9 +263,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
                     signPayment = true;
 
-                    DialogReadOtk dialogReadOtk = new DialogReadOtk();
-                    assert getFragmentManager() != null;
-                    dialogReadOtk.show(getFragmentManager(), "ReadOtk");
+                    showDialogReadOtk(null, null);
                 } catch (NullPointerException | NumberFormatException e) {
                     e.printStackTrace();
                     makeToastMessage(getString(R.string.incorrect_recipient_amount));
@@ -304,6 +301,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     @Override
     public void onStart() {
         super.onStart();
+
         // in case when MainActivity resumed for the first time, no fragment has been selected yet
         // and onPageSelected is not called; call onPageSelected to update UI/Configurations/Dataset
         if (MainActivity.getSelectedFragment() == null) {
@@ -488,6 +486,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 if (otkData.getOtkState().getCommand() == Command.SIGN) {
                     if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
                         // got signatures, prompt a processing dialog
+                        logger.debug("Got signatures: {}", otkData.getSessionData().getRequestSigList());
                     } else {
                         AlertPrompt.alert(getContext(), "Pay fail" + CRLF
                                 + getString(R.string.reason) + ": " + otkData.getFailureReason());
@@ -792,9 +791,24 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     UnsignedTx unsignedTx = (UnsignedTx) msg.obj;
                     // create OTK request for signatures
                     List list = unsignedTx.getToSign();
+                    StringBuilder hashes = new StringBuilder();
+                    int hashesCounter = 0;
                     for (int i = 0; i < list.size(); i++) {
-                        logger.debug("{}", list.get(i));
+                        hashes.append(hashes.length() > 0 ? "," : "").append(list.get(i));
+                        hashesCounter++;
+
+                        if (hashesCounter > 9) {
+                            pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()).setMore(i+1 < list.size()).setPin("99999999"));
+                            hashes = new StringBuilder();
+                            hashesCounter = 0;
+                        }
                     }
+                    if (hashesCounter > 0) {
+                        pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()));
+                    }
+                    logger.debug("Request Number: {}", numOfRequest());
+
+                    showDialogReadOtk(null, null);
                 }
                 return false;
             }
@@ -884,6 +898,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         bundle.putString("raw", tx.getRaw());
 
         dialog.setArguments(bundle);
+        assert getFragmentManager() != null;
         dialog.show(getFragmentManager(), "dialog");
     }
 

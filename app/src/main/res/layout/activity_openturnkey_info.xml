@@ -137,13 +137,15 @@
 
     <ImageView
         android:id="@+id/icon_mint_information"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
         android:contentDescription="@string/mint_information"
+        android:tint="#FFB300"
+        app:layout_constraintBottom_toBottomOf="@+id/user_note_context"
         app:layout_constraintStart_toEndOf="@+id/user_note_context"
-        app:layout_constraintTop_toTopOf="@+id/user_note_context"
-        app:srcCompat="@drawable/ic_info_outline_black_24dp" />
+        app:srcCompat="@android:drawable/ic_dialog_info" />
 
     <TextView
         android:id="@+id/text_balance_fiat"

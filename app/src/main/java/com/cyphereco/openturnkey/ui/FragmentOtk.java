@@ -66,15 +66,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                             @Override
                             public void setPin(String pin) {
                                 request.setPin(pin);
-                                DialogReadOtk dialogReadOtk = new DialogReadOtk();
-                                dialogReadOtk.setOnCanelListener(new DialogReadOtk.dialogReadOtkListener() {
-                                    @Override
-                                    public void onCancel() {
-                                        clearRequest();
-                                    }
-                                });
-                                assert getFragmentManager() != null;
-                                dialogReadOtk.show(getFragmentManager(), "ReadOtk");
+                                showDialogReadOtk(null, null);
                             }
                         });
                         assert getFragmentManager() != null;
@@ -83,15 +75,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                     }
                 }
 
-                DialogReadOtk dialogReadOtk = new DialogReadOtk();
-                dialogReadOtk.setOnCanelListener(new DialogReadOtk.dialogReadOtkListener() {
-                    @Override
-                    public void onCancel() {
-                        clearRequest();
-                    }
-                });
-                assert getFragmentManager() != null;
-                dialogReadOtk.show(getFragmentManager(), "ReadOtk");
+                showDialogReadOtk(null, null);
             }
         });
         return view;
@@ -107,7 +91,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 // the request has been sent
                 if (request.getCommand().equals(Command.RESET.toString())) {
                     // a reset command needs no response, when it's sent, the request is completed
-                    DialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.READ_SUCCESS);
+                    dialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.READ_SUCCESS);
                     showStatusDialog(getString(R.string.reset_success), getString(R.string.reset_step_intro));
                 }
             }
@@ -115,9 +99,8 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
     }
 
     @Override
-    protected void modifyRequestAfterReadOtkBeforeSubmit(OtkRequest request, OtkData otkData) {
-        super.modifyRequestAfterReadOtkBeforeSubmit(request, otkData);
-//        logger.debug("peekRequest ({}): {}", numOfRequest(), peekRequest());
+    protected void modifyRequestAfterOtkDataRead(OtkRequest request, OtkData otkData) {
+        super.modifyRequestAfterOtkDataRead(request, otkData);
     }
 
     @Override
@@ -381,6 +364,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
         cbUsePin.setChecked(false);
         tvRequestDesc.setText(R.string.read_general_information);
     }
+
 
     @Override
     protected void pushRequest(OtkRequest request) {

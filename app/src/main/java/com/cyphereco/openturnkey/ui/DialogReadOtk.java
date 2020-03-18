@@ -19,33 +19,37 @@ import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+
 public class DialogReadOtk extends AppCompatDialogFragment {
     public static final int DIALOG_LIFETIME = 15000;
     public static final int SHOW_RESULT_DELAY = 2000;
     public static final int DISMISS_ANIMATION_TIME = 250;
 
-    private static Button cancelButton;
-    private static TextView textTitle;
-    private static TextView textDesc;
-    private static ImageView iconHint;
-    private static ImageView iconSuccess;
-    private static ImageView iconFail;
+    private Button cancelButton;
+    private TextView textTitle;
+    private TextView textDesc;
+    private ImageView iconHint;
+    private ImageView iconSuccess;
+    private ImageView iconFail;
 
-    private static dialogReadOtkListener dialogListner;
+    private static DialogReadOtkListener dialogListner;
     private static CountDownTimer dialogTImer;
 
-    final public static int NOT_OPENTURNKEY   = 0;
-    final public static int READ_SUCCESS      = 1;
-    final public static int REQUEST_FAIL      = 2;
+    final public static int NOT_OPENTURNKEY = 0;
+    final public static int READ_SUCCESS = 1;
+    final public static int REQUEST_FAIL = 2;
 
-
+    @NotNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
         final View view = inflater.inflate(R.layout.dialog_read_otk, null);
 
         final Dialog dialog = new AlertDialog.Builder(getActivity()).setView(view).create();
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
         dialog.setCanceledOnTouchOutside(false);
 
@@ -63,7 +67,7 @@ public class DialogReadOtk extends AppCompatDialogFragment {
                 // turn off the nfc reading for otk
                 MainActivity.disableReadOtk();
                 if (dialogListner != null) dialogListner.onCancel();
-                dismissAnimation(getDialog().getWindow().getDecorView());
+                dismissAnimation(Objects.requireNonNull(getDialog().getWindow()).getDecorView());
             }
         });
 
@@ -76,6 +80,25 @@ public class DialogReadOtk extends AppCompatDialogFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MainActivity.enableReadOtk();
+    }
+
+    private void setCancelTimer() {
+        dialogTImer = new CountDownTimer(DIALOG_LIFETIME, 1000) {
+            public void onTick(long millisUntilFinished) {
+            }
+
+            public void onFinish() {
+                if (cancelButton != null) {
+                    // trigger normal cancel as cancel button clicked, exit with animation
+                    cancelButton.callOnClick();
+                } else {
+                    // dialog has been closed, finish cancel operations
+                    dialogTImer.cancel();
+                    MainActivity.disableReadOtk();
+                    if (dialogListner != null) dialogListner.onCancel();
+                }
+            }
+        }.start();
     }
 
     private void dismissAnimation(View view) {
@@ -92,9 +115,11 @@ public class DialogReadOtk extends AppCompatDialogFragment {
             @Override
             public void onAnimationStart(Animator animation) {
             }
+
             @Override
             public void onAnimationCancel(Animator animation) {
             }
+
             @Override
             public void onAnimationRepeat(Animator animation) {
             }
@@ -103,11 +128,33 @@ public class DialogReadOtk extends AppCompatDialogFragment {
         animation.start();
     }
 
-    public static void updateReadOtkDesc(String desc) {
-        textDesc.setText(desc);
+    public DialogReadOtk updateReadOtkTitle(String title) {
+        if (title != null && title.length() > 0) textTitle.setText(title);
+        return this;
     }
 
-    public static void endingDialogReadOtkWithReason(int flag) {
+    public DialogReadOtk updateReadOtkDesc(String desc) {
+        if (desc != null && desc.length() > 0) textDesc.setText(desc);
+        return this;
+    }
+
+    public DialogReadOtk extendCancelTimer() {
+        disableCancelTimer();
+        setCancelTimer();
+        return this;
+    }
+
+    public DialogReadOtk disableCancelTimer() {
+        dialogTImer.cancel();
+        return this;
+    }
+
+    public DialogReadOtk setOnCanelListener(DialogReadOtkListener listener) {
+        dialogListner = listener;
+        return this;
+    }
+
+    public void endingDialogReadOtkWithReason(int flag) {
         textTitle.setVisibility(View.INVISIBLE);
         cancelButton.setVisibility(View.INVISIBLE);
         iconHint.setVisibility(View.INVISIBLE);
@@ -136,31 +183,7 @@ public class DialogReadOtk extends AppCompatDialogFragment {
         }.start();
     }
 
-    public void setOnCanelListener (dialogReadOtkListener listener) {
-        dialogListner = listener;
-    }
-
-    public static void extendCancelTimer() {
-        disableCancelTimer();
-        setCancelTimer();
-    }
-
-    public static void disableCancelTimer() {
-        dialogTImer.cancel();
-    }
-
-    private static void setCancelTimer() {
-        dialogTImer = new CountDownTimer(DIALOG_LIFETIME, 1000) {
-            public void onTick(long millisUntilFinished) {
-            }
-
-            public void onFinish() {
-                cancelButton.callOnClick();
-            }
-        }.start();
-    }
-
-    public interface dialogReadOtkListener {
+    public interface DialogReadOtkListener {
         void onCancel();
     }
 }
