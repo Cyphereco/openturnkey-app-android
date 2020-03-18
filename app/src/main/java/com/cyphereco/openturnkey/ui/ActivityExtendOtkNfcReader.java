@@ -56,7 +56,10 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
                     request = peekRequest();
                     // can be override by inherited class to modify request, such as
                     // if otk is not authorized, app can prompt a pin dialog and set pin
-                    modifyRequestAfterOtkDataRead(request, otkData);
+                    preRequestSend(request, otkData);
+
+                    // request being canceled, do nothing
+                    if (!request.isValid()) return;
 
                     /*
                      * If a request has a session Id, the request have been delivered
@@ -239,7 +242,7 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
         return numOfRequest() > 0;
     }
 
-    protected void modifyRequestAfterOtkDataRead(OtkRequest request, OtkData otkData) {
+    protected void preRequestSend(OtkRequest request, OtkData otkData) {
         logger.debug("request/otkData before modification:\n{}\n{}", request, otkData);
     }
 

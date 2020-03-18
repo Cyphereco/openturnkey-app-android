@@ -34,6 +34,7 @@ public class DialogReadOtk extends AppCompatDialogFragment {
     private ImageView iconHint;
     private ImageView iconSuccess;
     private ImageView iconFail;
+    private String customizeTitle;
 
     private static DialogReadOtkListener dialogListner;
     private static CountDownTimer dialogTImer;
@@ -59,6 +60,8 @@ public class DialogReadOtk extends AppCompatDialogFragment {
         iconSuccess = view.findViewById(R.id.image_read_otk_success);
         iconFail = view.findViewById(R.id.image_read_otk_fail);
         cancelButton = view.findViewById(R.id.btn_cancel_read_otk);
+
+        if (customizeTitle != null && customizeTitle.length() > 0) textTitle.setText(customizeTitle);
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,7 +132,7 @@ public class DialogReadOtk extends AppCompatDialogFragment {
     }
 
     public DialogReadOtk updateReadOtkTitle(String title) {
-        if (title != null && title.length() > 0) textTitle.setText(title);
+        customizeTitle = title;
         return this;
     }
 

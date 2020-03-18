@@ -20,6 +20,7 @@ public class OtkRequest implements Serializable {
 
     private String pin = "";
     private String otkAddress = "";
+    private boolean valid = true;
 
     public OtkRequest(String command) {
         this.requestId = getId();
@@ -112,6 +113,14 @@ public class OtkRequest implements Serializable {
     public OtkRequest setPin(String pin) {
         if (!option.contains("pin=")) setOption(getOption() + ",pin=" + pin);
         return this;
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 
     public OtkRequest setMore() {
