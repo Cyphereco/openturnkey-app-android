@@ -231,5 +231,8 @@
     <string name="create_transaction">Create Transaction</string>
     <string name="sending_transaction">Sending Transaction</string>
     <string name="send_tx_fail">Send Transaction Fail</string>
+    <string name="no_internet">No Internet Connection</string>
+    <string name="unconfirmed">Unconfirmed</string>
+    <string name="exchange_rate">Exchange Rate</string>
 
 </resources>

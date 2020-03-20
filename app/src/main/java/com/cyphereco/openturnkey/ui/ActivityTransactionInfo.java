@@ -14,7 +14,6 @@ import android.support.v7.widget.Toolbar;
 
 import org.slf4j.Logger;
 
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -31,7 +30,6 @@ import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcExchangeRates;
 import com.cyphereco.openturnkey.utils.BtcUtils;
-import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import java.text.DecimalFormat;
@@ -42,7 +40,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 public class ActivityTransactionInfo extends AppCompatActivity {
     private final static String TAG = ActivityTransactionInfo.class.getSimpleName();
@@ -256,19 +253,6 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                 .show();
     }
 
-    private void showFailReasonDialog(String reason) {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.fail_reason)
-                .setMessage(reason)
-                .setPositiveButton(R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })
-                .show();
-    }
-
     private void showRawDataDialog() {
         final RecordTransaction item = listRecordTransactions.get(idxCurrentPosition);
 
@@ -303,7 +287,6 @@ public class ActivityTransactionInfo extends AppCompatActivity {
 
         LayoutInflater inflater = this.getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_exchange_rates, null);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         ((TextView) view.findViewById(R.id.tv_dialog_exchange_rate_datetime))
                 .setText(((TextView) findViewById(R.id.tv_tx_info_datetime)).getText());
@@ -319,7 +302,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                 .setText(formattedFiatAmount(loggedExchangeRate.getRate_usd()));
 
         new AlertDialog.Builder(this)
-                .setTitle("Exchange Rate")
+                .setTitle(R.string.exchange_rate)
                 .setView(view)
                 .setPositiveButton(R.string.ok, null)
                 .show();
@@ -353,15 +336,15 @@ public class ActivityTransactionInfo extends AppCompatActivity {
 
         long confirmations = MainActivity.getBlockHeight() - recordTransaction.getBlockHeight();
         if (recordTransaction.getBlockHeight() < 0 || confirmations < 0) {
-            tvResult.setText("Unconfirmed");
+            tvResult.setText(R.string.unconfirmed);
         } else {
             tvResult.setText((MainActivity.getBlockHeight() - recordTransaction.getBlockHeight()) +
                     " " + getString(R.string.confirmation));
         }
 
-        Double amountSent = recordTransaction.getAmountSent();
-        Double amountRecv = recordTransaction.getAmountRecv();
-        Double fees = amountSent - amountRecv;
+        double amountSent = recordTransaction.getAmountSent();
+        double amountRecv = recordTransaction.getAmountRecv();
+        double fees = amountSent - amountRecv;
 
         if (switchShowLocalCurrency.isChecked()) {
             String strUnit = Preferences.getLocalCurrency().toString();

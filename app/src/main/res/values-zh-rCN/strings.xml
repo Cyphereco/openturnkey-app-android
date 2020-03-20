@@ -213,4 +213,7 @@
     <string name="incorrect_openturnkey">不是正确的OpenTurnKey</string>
     <string name="sending_transaction">发送交易</string>
     <string name="send_tx_fail">发送交易失败</string>
+    <string name="no_internet">没有网络連接</string>
+    <string name="unconfirmed">未确认</string>
+    <string name="exchange_rate">汇率</string>
 </resources>

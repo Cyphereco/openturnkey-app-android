@@ -280,6 +280,10 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             public void onClick(View view) {
                 // Check if recipient address is valid.
                 try {
+                    if (!((MainActivity)getActivity()).isNetworkConnected()) {
+                        makeToastMessage(getString(R.string.no_internet));
+                        return;
+                    }
                     // Check if address is valid
                     if (tvAddress.getText() == null || tvAddress.getText().length() == 0) {
                         makeToastMessage(getString(R.string.recipient_is_empty));

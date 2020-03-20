@@ -213,4 +213,7 @@
     <string name="incorrect_openturnkey">誤ったOpenTurnKey</string>
     <string name="sending_transaction">トランザクションを送信</string>
     <string name="send_tx_fail">トランザクションの送信に失敗しました</string>
+    <string name="no_internet">インターネット接続なし</string>
+    <string name="unconfirmed">未確認</string>
+    <string name="exchange_rate">為替レート</string>
 </resources>

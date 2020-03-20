@@ -1,6 +1,8 @@
 package com.cyphereco.openturnkey.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.nfc.NfcAdapter;
 import android.os.Handler;
 import android.os.Message;
@@ -387,6 +389,11 @@ public class MainActivity extends AppCompatActivity {
         Message msg = new Message();
         msg.arg1 = page;
         pageSwitchHandler.sendMessage(msg);
+    }
+
+    protected boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
     private void updateOnlineData() {
