@@ -202,7 +202,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
         if (clipboard != null) {
             clipboard.setPrimaryClip(clip);
         }
-        AlertPrompt.info(getApplicationContext(), label + " is copied");
+        AlertPrompt.info(getApplicationContext(), label + getString(R.string.is_copied));
     }
 
     private void showQRCode(String dialogTitle, String text) {

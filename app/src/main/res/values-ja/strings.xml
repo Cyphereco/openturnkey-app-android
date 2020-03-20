@@ -217,4 +217,7 @@
     <string name="unconfirmed">未確認</string>
     <string name="exchange_rate">為替レート</string>
     <string name="show_local_currency">現地通貨を表示</string>
+    <string name="could_not_get_exchange_rate">為替レートを更新できませんでした</string>
+    <string name="pay_fail">支払い失敗</string>
+    <string name="is_copied">コピーされた</string>
 </resources>

@@ -50,11 +50,9 @@ import com.cyphereco.openturnkey.webservices.BlockCypher;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.TimeZone;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -182,7 +180,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus && btcExchangeRates == null) {
-                    AlertPrompt.alert(getContext(), "Could not get exchange rate.");
+                    AlertPrompt.alert(getContext(), getString(R.string.could_not_get_exchange_rate));
                     mEtLc.clearFocus();
                     mEtCc.requestFocus();
                 }
@@ -578,7 +576,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                             });
                         }
                     } else {
-                        AlertPrompt.alert(getContext(), "Pay fail" + CRLF
+                        AlertPrompt.alert(getContext(), getString(R.string.pay_fail) + CRLF
                                 + getString(R.string.reason) + ": " + otkData.getFailureReason());
                     }
                 } else {
@@ -1120,7 +1118,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         // add dummy record for test
         if (cbUseAllFunds.isChecked()) {
-            recordTransaction.setTimestamp(1584633269000l);
+            recordTransaction.setTimestamp(1584633269000L);
             recordTransaction.setHash("c92faf592e028f0d3d50203a4119022bfb8f60995cad1d138d48a9fa67c38cdb");
             recordTransaction.setPayer("1A8Ukx5NEytHdnGHRZejmSMaU5md6k4HRN");
             recordTransaction.setPayee("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
@@ -1131,7 +1129,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             recordTransaction.setExchangeRate(MainActivity.getBtcExchangeRates().toString());
         }
         else {
-            recordTransaction.setTimestamp(1578754831000l);
+            recordTransaction.setTimestamp(1578754831000L);
             recordTransaction.setHash("5dc7bee70b2d4d486d2e9ca997354e6909769049b2d971dc4034e2c03df909c7");
             recordTransaction.setPayer("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
             recordTransaction.setPayee("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");

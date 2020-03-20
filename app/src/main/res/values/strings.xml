@@ -235,5 +235,8 @@
     <string name="unconfirmed">Unconfirmed</string>
     <string name="exchange_rate">Exchange Rate</string>
     <string name="show_local_currency">Show Local Currency</string>
+    <string name="could_not_get_exchange_rate">Could not update exchange rate.</string>
+    <string name="pay_fail">Pay Fail</string>
+    <string name="is_copied">" is copied"</string>
 
 </resources>

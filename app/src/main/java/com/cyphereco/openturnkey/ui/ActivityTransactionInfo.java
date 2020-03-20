@@ -103,13 +103,13 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         } else {
             // Show transaction information
             showTransactionInfo(recordTransaction);
-            final RecordTransaction finalRecordTransaction = recordTransaction;
-            switchShowLocalCurrency.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    showTransactionInfo(finalRecordTransaction);
-                }
-            });
         }
+
+        switchShowLocalCurrency.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                showCurrentTransaction();
+            }
+        });
     }
 
     @Override
@@ -312,6 +312,10 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         Intent intent = new Intent();
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    private void showCurrentTransaction() {
+        showTransactionInfo(listRecordTransactions.get(idxCurrentPosition));
     }
 
     private void showTransactionInfo(final RecordTransaction recordTransaction) {

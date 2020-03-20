@@ -217,4 +217,7 @@
     <string name="unconfirmed">未确认</string>
     <string name="exchange_rate">汇率</string>
     <string name="show_local_currency">显示当地货币</string>
+    <string name="could_not_get_exchange_rate">无法更新汇率</string>
+    <string name="pay_fail">支付失败</string>
+    <string name="is_copied">已复制</string>
 </resources>
