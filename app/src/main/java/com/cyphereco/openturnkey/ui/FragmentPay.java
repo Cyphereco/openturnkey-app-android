@@ -911,7 +911,12 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 super.run();
                 Message msg = new Message();
                 try {
-                    msg.obj = BlockCypher.newTransaction(from, to, amountReceived, fees);
+                    if (cbUseAllFunds.isChecked()) {
+                        msg.obj = BlockCypher.newTransaction(from, to, -1, fees);
+                    }
+                    else {
+                        msg.obj = BlockCypher.newTransaction(from, to, amountReceived, fees);
+                    }
                 } catch (BlockCypherException e) {
                     logger.error("Error: {}",
                             BlockCypher.parseError(e.getBlockCypherError().getErrors().get(0).toString()));
