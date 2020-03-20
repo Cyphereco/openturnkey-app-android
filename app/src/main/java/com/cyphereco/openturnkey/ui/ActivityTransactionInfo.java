@@ -334,12 +334,11 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         tvRecvAmountUnit.setText(getString(R.string._unit_btc));
         tvFeesUnit.setText(getString(R.string._unit_btc));
 
-        long confirmations = MainActivity.getBlockHeight() - recordTransaction.getBlockHeight();
+        long confirmations = MainActivity.getBlockHeight() - recordTransaction.getBlockHeight() + 1;
         if (recordTransaction.getBlockHeight() < 0 || confirmations < 0) {
             tvResult.setText(R.string.unconfirmed);
         } else {
-            tvResult.setText((MainActivity.getBlockHeight() - recordTransaction.getBlockHeight()) +
-                    " " + getString(R.string.confirmation));
+            tvResult.setText(String.format(Locale.getDefault(), "%d %s", confirmations, getString(R.string.confirmation)));
         }
 
         double amountSent = recordTransaction.getAmountSent();

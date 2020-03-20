@@ -69,7 +69,7 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
         // for its uncertainty. If still not confirmed after 144 blocks (1 day)
         // the transaction should be considered failed.
 
-        long confirmations = MainActivity.getBlockHeight() - mTransDataset.get(position).getBlockHeight();
+        long confirmations = MainActivity.getBlockHeight() - mTransDataset.get(position).getBlockHeight() + 1;
 
         if (mTransDataset.get(position).getBlockHeight() < 0 || confirmations < 0) {
             viewHolder.mIVTransResult.setImageResource(R.drawable.ic_unconfirmed);

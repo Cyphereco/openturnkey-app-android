@@ -1116,17 +1116,31 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
     // add dummy transaction record
     private RecordTransaction _newyDummyTransaction() {
-        // add dummy record for test
         RecordTransaction recordTransaction = new RecordTransaction();
-        recordTransaction.setTimestamp(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime().getTime());
-        recordTransaction.setHash("5dc7bee70b2d4d486d2e9ca997354e6909769049b2d971dc4034e2c03df909c7");
-        recordTransaction.setPayer("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
-        recordTransaction.setPayee("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
-        recordTransaction.setAmountSent(0.00191967);
-        recordTransaction.setAmountRecv(0.00191567);
-        recordTransaction.setRawData("01000000030781f8fa7f6a30621c29ac47a2d5bb81bef88973839680f8f5de0d879c6417f9000000006a47304402204688a19b3ebe5bb05ff3fa05177f6f4889016c29a12ee9abdf325c5e1f32fe1e02205be7f1afa0df30c8165e4de6743f1b034d9de2cf7571f9500d7ce81c2bd9a55d01210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229fffffffff585248874c9b15176863d579379a5cc2c01453926395973da9264022ec3ed39010000006b483045022100baa9783aedc0b9860e0f486c09bdfbad92f71a5d383019cfcac35ea8ed59f282022030bde9f23990d434e1544e5e1bf227c66a0a2c1aed39e55bb8129385f127e70501210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229fffffffff585248874c9b15176863d579379a5cc2c01453926395973da9264022ec3ed39000000006a47304402201d6aa95358825ef7319c4a5f1ee89c864c3b71b45926610a9fc95574ca39bff20220459a21b1321687237bc9f37a17df6a0290a0920979882108e816cbd246ac679f01210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229ffffffff01dfed0200000000001976a914fee5819b32e8618699ad07a17b3df5a77346261788ac00000000");
-        recordTransaction.setBlockHeight(612369);
-        recordTransaction.setExchangeRate(MainActivity.getBtcExchangeRates().toString());
+
+        // add dummy record for test
+        if (cbUseAllFunds.isChecked()) {
+            recordTransaction.setTimestamp(1584633269000l);
+            recordTransaction.setHash("c92faf592e028f0d3d50203a4119022bfb8f60995cad1d138d48a9fa67c38cdb");
+            recordTransaction.setPayer("1A8Ukx5NEytHdnGHRZejmSMaU5md6k4HRN");
+            recordTransaction.setPayee("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
+            recordTransaction.setAmountSent(0.00168139d);
+            recordTransaction.setAmountRecv(0.00167739d);
+            recordTransaction.setRawData("010000000110b1373bddada5b32bf4e958694cf767a3ecc104aa3d7f50f5ecf2f91ea6bf75000000006b4830450221009df2ee983117010ddda121eef54aa91edbe1963200f821a19d48c6a4e7c58f2502201cd9508ca99e5f9f54a599d32a589bfe9db527cd527c979656bfca28e79bb7540121034ded0e5cd55e848c946430fc8eb32b445d7650f4e77bee4ca5dd3c358d1dbcb7ffffffff013b8f0200000000001976a914fee5819b32e8618699ad07a17b3df5a77346261788ac00000000");
+            recordTransaction.setBlockHeight(-1);
+            recordTransaction.setExchangeRate(MainActivity.getBtcExchangeRates().toString());
+        }
+        else {
+            recordTransaction.setTimestamp(1578754831000l);
+            recordTransaction.setHash("5dc7bee70b2d4d486d2e9ca997354e6909769049b2d971dc4034e2c03df909c7");
+            recordTransaction.setPayer("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
+            recordTransaction.setPayee("1QEma6prBJscNqw7s3t8EGFcx3zF7mzWab");
+            recordTransaction.setAmountSent(0.00192767d);
+            recordTransaction.setAmountRecv(0.00191967d);
+            recordTransaction.setRawData("01000000030781f8fa7f6a30621c29ac47a2d5bb81bef88973839680f8f5de0d879c6417f9000000006a47304402204688a19b3ebe5bb05ff3fa05177f6f4889016c29a12ee9abdf325c5e1f32fe1e02205be7f1afa0df30c8165e4de6743f1b034d9de2cf7571f9500d7ce81c2bd9a55d01210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229fffffffff585248874c9b15176863d579379a5cc2c01453926395973da9264022ec3ed39010000006b483045022100baa9783aedc0b9860e0f486c09bdfbad92f71a5d383019cfcac35ea8ed59f282022030bde9f23990d434e1544e5e1bf227c66a0a2c1aed39e55bb8129385f127e70501210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229fffffffff585248874c9b15176863d579379a5cc2c01453926395973da9264022ec3ed39000000006a47304402201d6aa95358825ef7319c4a5f1ee89c864c3b71b45926610a9fc95574ca39bff20220459a21b1321687237bc9f37a17df6a0290a0920979882108e816cbd246ac679f01210323c012252f1f00996c6f05b074b99f516c1a9a0c8966cb645f9a01a11b9fc229ffffffff01dfed0200000000001976a914fee5819b32e8618699ad07a17b3df5a77346261788ac00000000");
+            recordTransaction.setBlockHeight(612369);
+            recordTransaction.setExchangeRate(MainActivity.getBtcExchangeRates().toString());
+        }
         return recordTransaction;
     }
 }

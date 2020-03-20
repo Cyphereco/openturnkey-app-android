@@ -216,4 +216,5 @@
     <string name="no_internet">没有网络連接</string>
     <string name="unconfirmed">未确认</string>
     <string name="exchange_rate">汇率</string>
+    <string name="show_local_currency">显示当地货币</string>
 </resources>

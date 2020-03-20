@@ -117,6 +117,9 @@ public class OpenturnkeyDB {
     }
 
     public static RecordTransaction insertTransaction(RecordTransaction recordTransaction) {
+        RecordTransaction r = getTransactionByHash(recordTransaction.getHash());
+        if (r != null) return r;
+
         ContentValues cv = new ContentValues();
 
         cv.put(TX_TIMESTAMP, recordTransaction.getTimestamp());
@@ -177,7 +180,23 @@ public class OpenturnkeyDB {
         return deleteTransactionById(recordTransaction.getId());
     }
 
-    public static RecordTransaction getTransactionItemById(long id) {
+    public static RecordTransaction getTransactionByHash(String hash) {
+        RecordTransaction item = null;
+        try (Cursor cursor = otkDB.query(TABLE_TRANSACTION, null,
+                TX_HASH + "=?", new String[]{String.valueOf(hash)},
+                null, null, null, null)) {
+            if (1 == cursor.getCount()) {
+                cursor.moveToNext();
+                item = generateTransItemByQueryResult(cursor);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return item;
+    }
+
+    public static RecordTransaction getTransactionById(long id) {
         RecordTransaction item = null;
         try (Cursor cursor = otkDB.query(TABLE_TRANSACTION, null,
                 TX_KEY_ID + "=?", new String[]{String.valueOf(id)},
