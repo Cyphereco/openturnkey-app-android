@@ -305,17 +305,17 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         View view = inflater.inflate(R.layout.dialog_exchange_rates, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        ((TextView)view.findViewById(R.id.tv_dialog_exchange_rate_datetime))
-                .setText(((TextView)findViewById(R.id.tv_tx_info_datetime)).getText());
-        ((TextView)view.findViewById(R.id.tv_dialog_exhange_rate_amount_cny))
+        ((TextView) view.findViewById(R.id.tv_dialog_exchange_rate_datetime))
+                .setText(((TextView) findViewById(R.id.tv_tx_info_datetime)).getText());
+        ((TextView) view.findViewById(R.id.tv_dialog_exhange_rate_amount_cny))
                 .setText(formattedFiatAmount(loggedExchangeRate.getRate_cny()));
-        ((TextView)view.findViewById(R.id.tv_dialog_exhange_rate_amount_eur))
+        ((TextView) view.findViewById(R.id.tv_dialog_exhange_rate_amount_eur))
                 .setText(formattedFiatAmount(loggedExchangeRate.getRate_eur()));
-        ((TextView)view.findViewById(R.id.tv_dialog_exhange_rate_amount_jpy))
+        ((TextView) view.findViewById(R.id.tv_dialog_exhange_rate_amount_jpy))
                 .setText(formattedFiatAmount(loggedExchangeRate.getRate_jpy()));
-        ((TextView)view.findViewById(R.id.tv_dialog_exhange_rate_amount_twd))
+        ((TextView) view.findViewById(R.id.tv_dialog_exhange_rate_amount_twd))
                 .setText(formattedFiatAmount(loggedExchangeRate.getRate_twd()));
-        ((TextView)view.findViewById(R.id.tv_dialog_exhange_rate_amount_usd))
+        ((TextView) view.findViewById(R.id.tv_dialog_exhange_rate_amount_usd))
                 .setText(formattedFiatAmount(loggedExchangeRate.getRate_usd()));
 
         new AlertDialog.Builder(this)
@@ -354,8 +354,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         long confirmations = MainActivity.getBlockHeight() - recordTransaction.getBlockHeight();
         if (recordTransaction.getBlockHeight() < 0 || confirmations < 0) {
             tvResult.setText("Unconfirmed");
-        }
-        else {
+        } else {
             tvResult.setText((MainActivity.getBlockHeight() - recordTransaction.getBlockHeight()) +
                     " " + getString(R.string.confirmation));
         }
@@ -457,20 +456,17 @@ public class ActivityTransactionInfo extends AppCompatActivity {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch(event.getAction())
-        {
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 x1 = event.getX();
                 break;
             case MotionEvent.ACTION_UP:
                 float x2 = event.getX();
                 float deltaX = x2 - x1;
-                if (Math.abs(deltaX) > MIN_DISTANCE)
-                {
+                if (Math.abs(deltaX) > MIN_DISTANCE) {
                     if (x2 > x1) {
                         btnPrevious.callOnClick();
-                    }
-                    else {
+                    } else {
                         btnNext.callOnClick();
                     }
                 }

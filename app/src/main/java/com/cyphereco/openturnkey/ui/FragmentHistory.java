@@ -122,8 +122,8 @@ public class FragmentHistory extends FragmentExtendOtkViewPage {
             public void onBlockHeightUpdated(int height) {
                 if (isSelected()) {
                     // switch page quickly to refresh adapter items confirmation icon
-                    MainActivity.switchToPage(0);
-                    MainActivity.switchToPage(2);
+                    MainActivity.switchToPage(MainActivity.PAGE.PAY.ordinal());
+                    MainActivity.switchToPage(MainActivity.PAGE.HISTORY.ordinal());
                 }
             }
         });

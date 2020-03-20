@@ -128,11 +128,9 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         getActivity().startActivityForResult(intent,
                                 MainActivity.REQUEST_CODE_TRANSACTION_INFO);
                     }
-                }
-                else {
+                } else {
                     AlertPrompt.alert(getContext(), getString(R.string.send_tx_fail));
                 }
-//                dialogTxSummary(transaction);
 
                 // clear signatures after transaction processed
                 listSignatures.clear();
@@ -1108,7 +1106,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     }
 
     // add dummy transaction record
-    private RecordTransaction _newyDummyTransaction () {
+    private RecordTransaction _newyDummyTransaction() {
         // add dummy record for test
         RecordTransaction recordTransaction = new RecordTransaction();
         recordTransaction.setTimestamp(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime().getTime());

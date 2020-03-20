@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_TRANSACTION_INFO = 5;
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
     public static final String KEY_OTK_DATA = "KEY_OTK_DATA";
-    public static final int REQUEST_RESULT_CODE_REPAY = 1000;
 
     public enum PAGE {PAY, OTK, HISTORY, ADDRBOOK}
 
@@ -349,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
     public void setExchangeRate(BtcExchangeRates btcExchangeRates) {
         if (MainActivity.btcExchangeRates == null) MainActivity.btcExchangeRates = btcExchangeRates;
         for (OnlineDataUpdateListener listener : listOnlineDataUpdateListener
-             ) {
+        ) {
             listener.onExchangeRateUpdated(btcExchangeRates);
         }
     }
