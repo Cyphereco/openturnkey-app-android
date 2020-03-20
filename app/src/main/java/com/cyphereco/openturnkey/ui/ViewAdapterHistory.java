@@ -16,6 +16,8 @@ import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
@@ -60,28 +62,6 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
             return;
         }
 
-        long timepassed = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime().getTime() -
-                mTransDataset.get(position).getTimestamp();
-
-        // for test
-        if (timepassed < 0) {
-            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_unconfirmed);
-        } else if (timepassed < 1 * 600000) {
-            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm0);
-        } else if (timepassed < 2 * 600000) {
-            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm1);
-        } else if (timepassed < 3 * 600000) {
-            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm2);
-        } else if (timepassed < 4 * 600000) {
-            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm3);
-        } else if (timepassed < 5 * 600000) {
-            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm4);
-        } else if (timepassed < 6 * 600000) {
-            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm5);
-        } else {
-            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm6);
-        }
-
         // if a transaction is not included in the transaction memory pool,
         // which cannot be queried from the blockchain network (not unconfirmed)
         // the transaction might not be broadcast successfully or simply not accepted
@@ -89,23 +69,25 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
         // for its uncertainty. If still not confirmed after 144 blocks (1 day)
         // the transaction should be considered failed.
 
-//        if (mTransDataset.get(position).getConfirmations() < 0) {
-//            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_unconfirmed);
-//        } else if (mTransDataset.get(position).getConfirmations() < 1) {
-//            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm0);
-//        } else if (mTransDataset.get(position).getConfirmations() < 2) {
-//            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm1);
-//        } else if (mTransDataset.get(position).getConfirmations() < 3) {
-//            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm2);
-//        } else if (mTransDataset.get(position).getConfirmations() < 4) {
-//            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm3);
-//        } else if (mTransDataset.get(position).getConfirmations() < 5) {
-//            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm4);
-//        } else if (mTransDataset.get(position).getConfirmations() < 6) {
-//            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm5);
-//        } else {
-//            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm6);
-//        }
+        long confirmations = MainActivity.getBlockHeight() - mTransDataset.get(position).getBlockHeight();
+
+        if (mTransDataset.get(position).getBlockHeight() < 0 || confirmations < 0) {
+            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_unconfirmed);
+        } else if (confirmations < 1) {
+            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm0);
+        } else if (confirmations < 2) {
+            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm1);
+        } else if (confirmations < 3) {
+            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm2);
+        } else if (confirmations < 4) {
+            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm3);
+        } else if (confirmations < 5) {
+            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm4);
+        } else if (confirmations < 6) {
+            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm5);
+        } else {
+            viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm6);
+        }
 
         viewHolder.mTVTransDate.setText(
                 new SimpleDateFormat("yyyy/MM/dd", Locale.US).format(
@@ -117,7 +99,7 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
                 AddressUtils.getShortAddress(mTransDataset.get(position).getPayer()));
         viewHolder.mTVTransTo.setText(
                 AddressUtils.getShortAddress(mTransDataset.get(position).getPayee()));
-//        viewHolder.mTVTransAmount.setText(getAmountString(mTransDataset.get(position).getAmount()));
+        viewHolder.mTVTransAmount.setText(getAmountString(mTransDataset.get(position).getAmountSent()));
     }
 
     @Override
@@ -140,16 +122,8 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
     }
 
     private String getAmountString(double amount) {
-        /*
-         * The amount of BTC of the transaction,
-         * decimal points up to 4 digits when integer number is less/equal to 4 digits,
-         * and decimal points up to 2 digits when integer number is greater than 4 digits
-         */
-        if (amount >= 1000) {
-            return String.format(Locale.getDefault(), "%.2f", amount);
-        } else {
-            return String.format(Locale.getDefault(), "%.4f", amount);
-        }
+        NumberFormat formatter = new DecimalFormat("#,###.####");
+        return formatter.format(amount);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

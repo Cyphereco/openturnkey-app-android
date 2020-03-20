@@ -17,6 +17,8 @@ import android.widget.TextView;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.RecordTransaction;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
+import com.cyphereco.openturnkey.utils.BtcExchangeRates;
+import com.cyphereco.openturnkey.utils.TxFee;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -105,6 +107,27 @@ public class FragmentHistory extends FragmentExtendOtkViewPage {
         mRVHistory.setLayoutManager(layoutManager);
         mRVHistory.setAdapter(mItemViewAdapter);
 
+        MainActivity.addToListOnlineDataUpdateListener(new MainActivity.OnlineDataUpdateListener() {
+            @Override
+            public void onExchangeRateUpdated(BtcExchangeRates xrate) {
+
+            }
+
+            @Override
+            public void onTxFeeUpdated(TxFee txFee) {
+
+            }
+
+            @Override
+            public void onBlockHeightUpdated(int height) {
+                if (isSelected()) {
+                    // switch page quickly to refresh adapter items confirmation icon
+                    MainActivity.switchToPage(0);
+                    MainActivity.switchToPage(2);
+                }
+            }
+        });
+
         return view;
     }
 
@@ -114,24 +137,6 @@ public class FragmentHistory extends FragmentExtendOtkViewPage {
 
         logger.debug("refresh history");
         updateTransactionDataset();
-
-        // update confirmations of transactions
-//        Thread t = new Thread() {
-//            @Override
-//            public void run() {
-//                super.run();
-//                // Update confirmations number for each transaction
-//                List<DBTransItem> dataset = OpenturnkeyDB.getAllTransaction();
-//                for (int i = 0; i < dataset.size(); i++) {
-//                    DBTransItem dbItem = dataset.get(i);
-//                    int confirmations = BlockChainInfo.getConfirmations(dbItem.getHash());
-//                    // Update db
-//                    dbItem.setConfrimations(confirmations);
-//                    OpenturnkeyDB.updateTransaction(dbItem);
-//                }
-//            }
-//        };
-//        t.start();
     }
 
     @Override

@@ -1,5 +1,8 @@
 package com.cyphereco.openturnkey.utils;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
 public class BtcExchangeRates {
     private double rate_cny;
     private double rate_eur;
@@ -13,6 +16,24 @@ public class BtcExchangeRates {
         this.rate_jpy = rate_jpy;
         this.rate_twd = rate_twd;
         this.rate_usd = rate_usd;
+    }
+
+    public BtcExchangeRates(String strBtcExchangeRate) {
+        Pattern pattern = Pattern.compile("BtcExchangeRates[{]rate_cny=.*, rate_eur=.*, rate_jpy=.*, rate_twd=.*, rate_usd=.*[}]");
+        if (pattern.matcher(strBtcExchangeRate).matches()) {
+            String[] listExchagneRates = strBtcExchangeRate.replace("BtcExchangeRates{", "")
+                    .replace("}", "")
+                    .replace(" ", "").split(",");
+
+            this.rate_cny = Double.parseDouble(listExchagneRates[0].split("=")[1]);
+            this.rate_eur = Double.parseDouble(listExchagneRates[1].split("=")[1]);
+            this.rate_jpy = Double.parseDouble(listExchagneRates[2].split("=")[1]);
+            this.rate_twd = Double.parseDouble(listExchagneRates[3].split("=")[1]);
+            this.rate_usd = Double.parseDouble(listExchagneRates[4].split("=")[1]);
+        }
+        else {
+            new BtcExchangeRates(0, 0, 0, 0, 0);
+        }
     }
 
     public double getRate_cny() {

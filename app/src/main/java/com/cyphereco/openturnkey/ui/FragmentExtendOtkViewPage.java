@@ -20,6 +20,7 @@ public class FragmentExtendOtkViewPage extends Fragment {
     public OtkData otkData = null;
     private Queue<OtkRequest> otkRequestQueue = new LinkedList<>();
     protected Logger logger;
+    private boolean isSelected = false;
 
     protected DialogReadOtk dialogReadOtk;
 
@@ -208,10 +209,16 @@ public class FragmentExtendOtkViewPage extends Fragment {
 
     public void onPageSelected() {
         logger.debug("Page selected");
+        isSelected = true;
     }
 
     public void onPageUnselected() {
         logger.debug("Page unselected");
+        isSelected = false;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
     }
 
     protected void clearRequest() {

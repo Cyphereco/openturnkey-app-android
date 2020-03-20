@@ -14,25 +14,35 @@ import android.support.v7.widget.Toolbar;
 
 import org.slf4j.Logger;
 
+import android.text.Html;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.RecordTransaction;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
+import com.cyphereco.openturnkey.utils.BtcExchangeRates;
+import com.cyphereco.openturnkey.utils.BtcUtils;
+import com.cyphereco.openturnkey.utils.LocalCurrency;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class ActivityTransactionInfo extends AppCompatActivity {
     private final static String TAG = ActivityTransactionInfo.class.getSimpleName();
@@ -41,54 +51,67 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     private ImageView ivTxDelete;
     private ImageView ivRawData;
     private ImageView ivViewOnline;
+    private ImageView ivExchangeRate;
     private ImageButton btnPrevious;
     private ImageButton btnNext;
+    private Switch switchShowLocalCurrency;
 
-    private List<RecordTransaction> mTransactionDataSet;
-    private int mCurrentPosition = 0;
+    private List<RecordTransaction> listRecordTransactions;
+    private int idxCurrentPosition = 0;
 
     public static final String KEY_CURRENT_TRANS_ID = "CURRENT_TRANS_ID";
+
+    private float x1;
+    static final int MIN_DISTANCE = 150;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_info);
 
-        Toolbar toolbar = findViewById(R.id.toolbar_tx_info_info);
+        Toolbar toolbar = findViewById(R.id.toolbar_tx_info_title);
         setSupportActionBar(toolbar);
         if (null != getSupportActionBar()) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        ivTxDelete = findViewById(R.id.iv_tx_delete);
-        ivRawData = findViewById(R.id.iv_raw_data);
-        ivViewOnline = findViewById(R.id.iv_view_online);
+        ivTxDelete = findViewById(R.id.iv_tx_info_delete);
+        ivRawData = findViewById(R.id.iv_tx_info_raw_data);
+        ivViewOnline = findViewById(R.id.iv_tx_info_view_online);
+        ivExchangeRate = findViewById(R.id.iv_tx_info_exchange_rate);
 
         btnPrevious = findViewById(R.id.btn_tx_info_previous_item);
         btnNext = findViewById(R.id.btn_tx_info_next_item);
+        switchShowLocalCurrency = findViewById(R.id.switch_tx_info_show_local_currency);
 
-        configUI();
+        setViewOnClickListener();
 
         Intent intent = this.getIntent();
         long selectedTransId = intent.getLongExtra(KEY_CURRENT_TRANS_ID, 0);
 
         getDatasetFromDB();
 
-        RecordTransaction item = null;
-        for (int idx = 0; idx < mTransactionDataSet.size(); idx++) {
-            if (selectedTransId == mTransactionDataSet.get(idx).getId()) {
-                item = mTransactionDataSet.get(idx);
-                mCurrentPosition = idx;
+        RecordTransaction recordTransaction = null;
+        for (int idx = 0; idx < listRecordTransactions.size(); idx++) {
+            if (selectedTransId == listRecordTransactions.get(idx).getId()) {
+                recordTransaction = listRecordTransactions.get(idx);
+                idxCurrentPosition = idx;
                 break;
             }
         }
 
-        if (null == item) {
+        if (null == recordTransaction) {
             AlertPrompt.alert(this, getString(R.string.transaction_not_found));
             finishActivity();
         } else {
             // Show transaction information
-            showTransactionInfo(item);
+            showTransactionInfo(recordTransaction);
+            final RecordTransaction finalRecordTransaction = recordTransaction;
+            switchShowLocalCurrency.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    showTransactionInfo(finalRecordTransaction);
+                }
+            });
         }
     }
 
@@ -101,11 +124,11 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void configUI() {
+    private void setViewOnClickListener() {
         ivTxDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                processDeleteBtnClick();
+                onBtnDeleteClick();
             }
         });
         ivRawData.setOnClickListener(new View.OnClickListener() {
@@ -114,33 +137,39 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                 showRawDataDialog();
             }
         });
+        ivExchangeRate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showExchangeRate();
+            }
+        });
         ivViewOnline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                processViewOnLineBtnClick();
+                onBtnViewOnlineClick();
             }
         });
         btnPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ((mCurrentPosition - 1) >= 0) {
-                    mCurrentPosition -= 1;
-                    showTransactionInfo(mTransactionDataSet.get(mCurrentPosition));
+                if ((idxCurrentPosition - 1) >= 0) {
+                    idxCurrentPosition -= 1;
+                    showTransactionInfo(listRecordTransactions.get(idxCurrentPosition));
                 }
             }
         });
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ((mCurrentPosition + 1) < mTransactionDataSet.size()) {
-                    mCurrentPosition += 1;
-                    showTransactionInfo(mTransactionDataSet.get(mCurrentPosition));
+                if ((idxCurrentPosition + 1) < listRecordTransactions.size()) {
+                    idxCurrentPosition += 1;
+                    showTransactionInfo(listRecordTransactions.get(idxCurrentPosition));
                 }
             }
         });
     }
 
-    private void processDeleteBtnClick() {
+    private void onBtnDeleteClick() {
         logger.debug("processDeleteBtnClick");
         new AlertDialog.Builder(this)
                 .setMessage(getString(R.string.delete_this_transaction_record))
@@ -154,15 +183,15 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                RecordTransaction oriItem = mTransactionDataSet.get(mCurrentPosition);
+                                RecordTransaction oriItem = listRecordTransactions.get(idxCurrentPosition);
                                 RecordTransaction previousItem = null;
                                 RecordTransaction nextItem = null;
 
-                                if ((mCurrentPosition - 1) >= 0) {
-                                    previousItem = mTransactionDataSet.get(mCurrentPosition - 1);
+                                if ((idxCurrentPosition - 1) >= 0) {
+                                    previousItem = listRecordTransactions.get(idxCurrentPosition - 1);
                                 }
-                                if ((mCurrentPosition + 1) < mTransactionDataSet.size()) {
-                                    nextItem = mTransactionDataSet.get(mCurrentPosition + 1);
+                                if ((idxCurrentPosition + 1) < listRecordTransactions.size()) {
+                                    nextItem = listRecordTransactions.get(idxCurrentPosition + 1);
                                 }
 
                                 if (!OpenturnkeyDB.deleteTransactionById(oriItem.getId())) {
@@ -174,40 +203,40 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                                 getDatasetFromDB();
 
                                 if (null != previousItem) {
-                                    for (int i = 0; i < mTransactionDataSet.size(); i++) {
+                                    for (int i = 0; i < listRecordTransactions.size(); i++) {
                                         if (previousItem.getId() ==
-                                                mTransactionDataSet.get(i).getId()) {
-                                            mCurrentPosition = i;
+                                                listRecordTransactions.get(i).getId()) {
+                                            idxCurrentPosition = i;
                                         }
                                     }
                                 } else if (null != nextItem) {
-                                    for (int i = 0; i < mTransactionDataSet.size(); i++) {
+                                    for (int i = 0; i < listRecordTransactions.size(); i++) {
                                         if (nextItem.getId() ==
-                                                mTransactionDataSet.get(i).getId()) {
-                                            mCurrentPosition = i;
+                                                listRecordTransactions.get(i).getId()) {
+                                            idxCurrentPosition = i;
                                         }
                                     }
                                 } else {
-                                    if (mTransactionDataSet.size() > 0) {
-                                        mCurrentPosition = 0;
+                                    if (listRecordTransactions.size() > 0) {
+                                        idxCurrentPosition = 0;
                                     } else {
-                                        mCurrentPosition = -1;
+                                        idxCurrentPosition = -1;
                                         showEmptyTransactionDialog();
                                     }
                                 }
-                                if (mCurrentPosition >= 0) {
-                                    showTransactionInfo(mTransactionDataSet.get(mCurrentPosition));
+                                if (idxCurrentPosition >= 0) {
+                                    showTransactionInfo(listRecordTransactions.get(idxCurrentPosition));
                                 }
                             }
                         })
                 .show();
     }
 
-    private void processViewOnLineBtnClick() {
+    private void onBtnViewOnlineClick() {
         logger.debug("processViewOnLineBtnClick");
         Intent browserIntent;
         String uriString;
-        RecordTransaction item = mTransactionDataSet.get(mCurrentPosition);
+        RecordTransaction item = listRecordTransactions.get(idxCurrentPosition);
 
         uriString = "https://www.blockchain.com/btc/tx/" + item.getHash();
         browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriString));
@@ -241,7 +270,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     }
 
     private void showRawDataDialog() {
-        final RecordTransaction item = mTransactionDataSet.get(mCurrentPosition);
+        final RecordTransaction item = listRecordTransactions.get(idxCurrentPosition);
 
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.raw_data))
@@ -268,73 +297,106 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                 .show();
     }
 
+    private void showExchangeRate() {
+        RecordTransaction recordTransaction = listRecordTransactions.get(idxCurrentPosition);
+        BtcExchangeRates loggedExchangeRate = new BtcExchangeRates(recordTransaction.getExchangeRate());
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_exchange_rates, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        ((TextView)view.findViewById(R.id.tv_dialog_exchange_rate_datetime))
+                .setText(((TextView)findViewById(R.id.tv_tx_info_datetime)).getText());
+        ((TextView)view.findViewById(R.id.tv_dialog_exhange_rate_amount_cny))
+                .setText(formattedFiatAmount(loggedExchangeRate.getRate_cny()));
+        ((TextView)view.findViewById(R.id.tv_dialog_exhange_rate_amount_eur))
+                .setText(formattedFiatAmount(loggedExchangeRate.getRate_eur()));
+        ((TextView)view.findViewById(R.id.tv_dialog_exhange_rate_amount_jpy))
+                .setText(formattedFiatAmount(loggedExchangeRate.getRate_jpy()));
+        ((TextView)view.findViewById(R.id.tv_dialog_exhange_rate_amount_twd))
+                .setText(formattedFiatAmount(loggedExchangeRate.getRate_twd()));
+        ((TextView)view.findViewById(R.id.tv_dialog_exhange_rate_amount_usd))
+                .setText(formattedFiatAmount(loggedExchangeRate.getRate_usd()));
+
+        new AlertDialog.Builder(this)
+                .setTitle("Exchange Rate")
+                .setView(view)
+                .setPositiveButton(R.string.ok, null)
+                .show();
+    }
+
     private void finishActivity() {
         Intent intent = new Intent();
         setResult(RESULT_OK, intent);
         finish();
     }
 
-    private void showTransactionInfo(final RecordTransaction item) {
+    private void showTransactionInfo(final RecordTransaction recordTransaction) {
+        BtcExchangeRates loggedExchangeRate = new BtcExchangeRates(recordTransaction.getExchangeRate());
+        logger.debug("loggedExchangeRate: {}", loggedExchangeRate);
+
         TextView tvDateTime = findViewById(R.id.tv_tx_info_datetime);
         TextView tvResult = findViewById(R.id.tv_tx_info_result);
-        TextView tvFrom = findViewById(R.id.tv_tx_info_from);
-        TextView tvTo = findViewById(R.id.tv_tx_info_to);
-        TextView tvAmount = findViewById(R.id.tv_tx_info_amount);
-        TextView tvAmountUnit = findViewById(R.id.tv_tx_info_amount_unit);
-        TextView tvFee = findViewById(R.id.tv_tx_info_fees);
-        TextView tvFeeUnit = findViewById(R.id.tv_tx_info_fees_unit);
-        TextView tvTransactionId = findViewById(R.id.tv_tx_info_id);
+        TextView tvSender = findViewById(R.id.tv_tx_info_sender);
+        TextView tvSendAmount = findViewById(R.id.tv_tx_info_send_amount);
+        TextView tvSendAmountUnit = findViewById(R.id.label_tx_info_send_amount_unit);
+        TextView tvRecipient = findViewById(R.id.tv_tx_info_recipient);
+        TextView tvRecvAmount = findViewById(R.id.tv_tx_info_recv_amount);
+        TextView tvRecvAmountUnit = findViewById(R.id.label_tx_info_recv_amount_unit);
+        TextView tvFees = findViewById(R.id.tv_tx_info_fees);
+        TextView tvFeesUnit = findViewById(R.id.label_tx_info_fees_unit);
+        TextView tvHash = findViewById(R.id.tv_tx_info_hash);
 
-//        if (0 == item.getStatus()) {
-//            // Transaction status is successful
-//            btnViewOnLine.setVisibility(View.VISIBLE);
-//            // append confirmation number
-//            int confirmations = item.getConfirmations();
-//            String c;
-//            if (confirmations < 1) {
-//                c = "0 " + getString(R.string.confirmation);
-//            } else {
-//                ivHelpIcon.setVisibility(View.INVISIBLE);
-//                ivResultIcon.setImageResource(R.drawable.ic_success_24dp);
-//                c = confirmations + " " + getString(R.string.confirmation);
-//
-////                if (confirmations > 6){
-////                    c = "> 144 " + getString(R.string.confirmation);
-////                }
-//            }
-//
-//            tvResult.setText(c);
-//            tvTransactionId.setText(item.getHash());
-//        } else {
-//            // Transaction status is fail
-//            ivHelpIcon.setVisibility(View.VISIBLE);
-//            ivResultIcon.setImageResource(R.drawable.ic_fail_24dp);
-//            btnViewOnLine.setVisibility(View.INVISIBLE);
-//            tvResult.setText(R.string.fail);
-//            tvTransactionId.setText("N/A");
-//            ivHelpIcon.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    showFailReasonDialog(item.getComment());
-//                }
-//            });
-//        }
+        tvSendAmountUnit.setText(getString(R.string._unit_btc));
+        tvRecvAmountUnit.setText(getString(R.string._unit_btc));
+        tvFeesUnit.setText(getString(R.string._unit_btc));
 
-//        tvDateTime.setText(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(
-//                item.getTimestamp()));
-//        tvFrom.setText(item.getPayer());
-//        tvTo.setText(item.getPayee());
-//        tvAmount.setText(formattedAmount(item.getAmount()));
-//        tvAmountUnit.setText(item.getAmountUnitString());
-//        tvFee.setText(formattedAmount(item.getFee()));
-//        tvFeeUnit.setText(item.getFeeUnitString());
+        long confirmations = MainActivity.getBlockHeight() - recordTransaction.getBlockHeight();
+        if (recordTransaction.getBlockHeight() < 0 || confirmations < 0) {
+            tvResult.setText("Unconfirmed");
+        }
+        else {
+            tvResult.setText((MainActivity.getBlockHeight() - recordTransaction.getBlockHeight()) +
+                    " " + getString(R.string.confirmation));
+        }
 
-        // Update button
+        Double amountSent = recordTransaction.getAmountSent();
+        Double amountRecv = recordTransaction.getAmountRecv();
+        Double fees = amountSent - amountRecv;
+
+        if (switchShowLocalCurrency.isChecked()) {
+            String strUnit = Preferences.getLocalCurrency().toString();
+            amountSent = BtcUtils.btcToLocalCurrency(loggedExchangeRate, Preferences.getLocalCurrency(), amountSent);
+            amountRecv = BtcUtils.btcToLocalCurrency(loggedExchangeRate, Preferences.getLocalCurrency(), amountRecv);
+            fees = amountSent - amountRecv;
+
+            tvSendAmountUnit.setText(strUnit);
+            tvRecvAmountUnit.setText(strUnit);
+            tvFeesUnit.setText(strUnit);
+        }
+
+        ivViewOnline.setVisibility(View.VISIBLE);
+
+        tvDateTime.setText(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(
+                recordTransaction.getTimestamp()));
+        tvSender.setText(recordTransaction.getPayer());
+        tvSendAmount.setText(switchShowLocalCurrency.isChecked() ?
+                formattedFiatAmount(amountSent) : formattedBtcAmount(amountSent));
+
+        tvRecipient.setText(recordTransaction.getPayee());
+        tvRecvAmount.setText(switchShowLocalCurrency.isChecked() ?
+                formattedFiatAmount(amountRecv) : formattedBtcAmount(amountRecv));
+
+        tvFees.setText(switchShowLocalCurrency.isChecked() ?
+                formattedFiatAmount(fees) : formattedBtcAmount(fees));
+
+        tvHash.setText(recordTransaction.getHash());
+
         updatePageChangeBtn();
     }
 
     private void updatePageChangeBtn() {
-        if (mCurrentPosition < (mTransactionDataSet.size() - 1)) {
+        if (idxCurrentPosition < (listRecordTransactions.size() - 1)) {
             btnNext.setEnabled(true);
             if (null != btnNext.getDrawable()) {
                 btnNext.getDrawable().setColorFilter(null);
@@ -345,7 +407,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                 btnNext.getDrawable().setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
             }
         }
-        if (0 == mCurrentPosition) {
+        if (0 == idxCurrentPosition) {
             btnPrevious.setEnabled(false);
             if (null != btnPrevious.getDrawable()) {
                 btnPrevious.getDrawable().setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
@@ -358,16 +420,21 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         }
     }
 
-    private String formattedAmount(double src) {
+    private String formattedBtcAmount(double src) {
         String result = String.format(Locale.getDefault(), "%.8f", src);
         return (result.substring(0, result.length() - 4) + " " +
                 result.substring(result.length() - 4));
     }
 
-    private void getDatasetFromDB() {
-        mTransactionDataSet = OpenturnkeyDB.getAllTransactions();
+    private String formattedFiatAmount(double src) {
+        NumberFormat formatter = new DecimalFormat("#,###.###");
+        return formatter.format(src);
+    }
 
-        Collections.sort(mTransactionDataSet, new Comparator<RecordTransaction>() {
+    private void getDatasetFromDB() {
+        listRecordTransactions = OpenturnkeyDB.getAllTransactions();
+
+        Collections.sort(listRecordTransactions, new Comparator<RecordTransaction>() {
             @Override
             public int compare(RecordTransaction o1, RecordTransaction o2) {
                 Date dt1 = new Date(o1.getTimestamp());
@@ -386,5 +453,29 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         MainActivity.setCurrentActivity(getClass().getName());
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch(event.getAction())
+        {
+            case MotionEvent.ACTION_DOWN:
+                x1 = event.getX();
+                break;
+            case MotionEvent.ACTION_UP:
+                float x2 = event.getX();
+                float deltaX = x2 - x1;
+                if (Math.abs(deltaX) > MIN_DISTANCE)
+                {
+                    if (x2 > x1) {
+                        btnPrevious.callOnClick();
+                    }
+                    else {
+                        btnNext.callOnClick();
+                    }
+                }
+                break;
+        }
+        return super.onTouchEvent(event);
     }
 }
