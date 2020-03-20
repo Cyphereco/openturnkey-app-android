@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.db.DBTransItem;
+import com.cyphereco.openturnkey.db.RecordTransaction;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 
 import java.util.Collections;
@@ -37,7 +37,7 @@ public class FragmentHistory extends FragmentExtendOtkViewPage {
             @Override
             public void onClickTransItem(int position) {
                 /* Show transaction detail in another activity */
-                DBTransItem item = mItemViewAdapter.getTransItemByPosition(position);
+                RecordTransaction item = mItemViewAdapter.getTransItemByPosition(position);
 
                 if (null != item) {
                     Intent intent = new Intent(getContext(), ActivityTransactionInfo.class);
@@ -54,13 +54,13 @@ public class FragmentHistory extends FragmentExtendOtkViewPage {
     }
 
     private void updateTransactionDataset() {
-        List<DBTransItem> dataset = OpenturnkeyDB.getAllTransaction();
+        List<RecordTransaction> dataset = OpenturnkeyDB.getAllTransactions();
 
-        Collections.sort(dataset, new Comparator<DBTransItem>() {
+        Collections.sort(dataset, new Comparator<RecordTransaction>() {
             @Override
-            public int compare(DBTransItem o1, DBTransItem o2) {
-                Date dt1 = new Date(o1.getDatetime());
-                Date dt2 = new Date(o2.getDatetime());
+            public int compare(RecordTransaction o1, RecordTransaction o2) {
+                Date dt1 = new Date(o1.getTimestamp());
+                Date dt2 = new Date(o2.getTimestamp());
                 if (dt1.before(dt2)) {
                     return 1;
                 } else if (dt1.equals(dt2)) {

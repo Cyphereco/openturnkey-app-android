@@ -90,7 +90,7 @@
     <string name="please_wait">You can remove OpenTurnKey now. \n Please wait a moment.</string>
     <string name="use_all_funds">Use All Funds</string>
     <string name="operation_timeout">Operation Timeout</string>
-    <string name="do_not_remove_otk">Please approach to OpenTurnKey to complete singing transaction.\nDo not remove OpenTurnKey until it\'s done.</string>
+    <string name="do_not_remove_otk">Please approach to OpenTurnKey to complete singing transactionHelper.\nDo not remove OpenTurnKey until it\'s done.</string>
     <string name="confirm_payment">Confirm Payment</string>
     <string name="subject_text_estimated_time">"Est. Time to Complete (Min): "</string>
     <string name="subject_fees_in_satoshi">Fees(SAT):</string>
@@ -111,7 +111,7 @@
     <string name="subject_transaction_id">Transaction ID:</string>
     <string name="view_online">View Online</string>
     <string name="resend_payment">Resend Payment</string>
-    <string name="delete_transaction_record">Delete transaction record</string>
+    <string name="delete_transaction_record">Delete transactionHelper record</string>
     <string name="transaction_execution_status">Transaction Processing Status</string>
     <string name="failure_reason">Failure reason</string>
     <string name="previous_transaction_record">Previous Transaction Record</string>
@@ -126,7 +126,7 @@
     <string name="not_supported">Not supported</string>
     <string name="transaction_not_found">Transaction Not Found</string>
     <string name="failed_to_delete">Delete Failed</string>
-    <string name="delete_this_transaction_record">Delete this transaction record?</string>
+    <string name="delete_this_transaction_record">Delete this transactionHelper record?</string>
     <string name="otk_is_not_locked">OpenTurnKey is not locked</string>
     <string name="unlock_success">Unlock Successfully</string>
     <string name="unlock_failed">Unlock Failed</string>
@@ -221,13 +221,15 @@
     <string name="update_addr_fail">Update address failed</string>
     <string name="add_new_addr_fail">Add new address failed</string>
     <string name="amount_received">Received Amount:</string>
-    <string name="amount_less_than_fees">Amount is less than transaction fee</string>
+    <string name="amount_less_than_fees">Amount is less than transactionHelper fee</string>
     <string name="sign">Sign</string>
     <string name="verify">Verify</string>
-    <string name="error_cannot_create_tx">Error! Cannot create transaction</string>
+    <string name="error_cannot_create_tx">Error! Cannot create transactionHelper</string>
     <string name="public_key_information">Public Key Information</string>
     <string name="reapproach_openturnkey">Move OpenTurnKey away, then approach again.</string>
     <string name="incorrect_openturnkey">Incorrect OpenTurnKey</string>
     <string name="create_transaction">Create Transaction</string>
+    <string name="sending_transaction">Sending Transaction</string>
+    <string name="send_tx_fail">Send Transaction Fail</string>
 
 </resources>

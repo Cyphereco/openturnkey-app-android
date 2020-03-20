@@ -18,7 +18,7 @@ import android.widget.ImageView;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.OtkData;
-import com.cyphereco.openturnkey.db.DBAddrItem;
+import com.cyphereco.openturnkey.db.RecordAddress;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.AddressUtils;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
@@ -276,16 +276,16 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
         }
 
         if (!alias.isEmpty()) {
-            DBAddrItem item = new DBAddrItem(address, alias);
-            DBAddrItem existItem = OpenturnkeyDB.getAddressItemByAlias(alias);
+            RecordAddress item = new RecordAddress(address, alias);
+            RecordAddress existItem = OpenturnkeyDB.getAddressByAlias(alias);
             if (mAddrDBId > 0) {
-                if ((existItem != null) && (existItem.getDbId() != mAddrDBId)) {
+                if ((existItem != null) && (existItem.getId() != mAddrDBId)) {
                     // Show dialog
                     showAliasDuplicateDialog();
                     return;
                 }
                 // Update database
-                item.setDbId(mAddrDBId);
+                item.setId(mAddrDBId);
                 if (!OpenturnkeyDB.updateAddressbook(item)) {
                     AlertPrompt.alert(this, getString(R.string.update_addr_fail));
                 }
@@ -295,7 +295,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
                     showAliasDuplicateDialog();
                     return;
                 }
-                if (!OpenturnkeyDB.addAddress(item)) {
+                if (OpenturnkeyDB.insertAddress(item) == null) {
                     AlertPrompt.alert(this, getString(R.string.add_new_addr_fail));
                 }
             }

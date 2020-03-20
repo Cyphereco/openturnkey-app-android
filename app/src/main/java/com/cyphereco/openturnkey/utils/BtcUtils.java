@@ -250,8 +250,8 @@ public class BtcUtils {
         return txFee;
     }
 
-    static public ExchangeRate getCurrencyExchangeRate() {
-        ExchangeRate ret = null;
+    static public BtcExchangeRates getCurrencyExchangeRate() {
+        BtcExchangeRates ret = null;
         HttpURLConnection httpConn = null;
 
         // Read text input stream.
@@ -300,14 +300,14 @@ public class BtcUtils {
 
             String in = readTextBuf.toString();
             JSONObject reader = new JSONObject(in);
+            String cny = reader.getJSONObject("CNY").getString("last");
+            String eur = reader.getJSONObject("EUR").getString("last");
+            String jpy = reader.getJSONObject("JPY").getString("last");
             String twd = reader.getJSONObject("TWD").getString("last");
             String usd = reader.getJSONObject("USD").getString("last");
-            String cny = reader.getJSONObject("CNY").getString("last");
-            String jpy = reader.getJSONObject("JPY").getString("last");
-            String eur = reader.getJSONObject("EUR").getString("last");
 
-            ret = new ExchangeRate(Double.parseDouble(twd), Double.parseDouble(usd), Double.parseDouble(jpy),
-                    Double.parseDouble(eur), Double.parseDouble(cny));
+            ret = new BtcExchangeRates(Double.parseDouble(cny), Double.parseDouble(eur), Double.parseDouble(jpy),
+                    Double.parseDouble(twd), Double.parseDouble(usd));
 
 
         } catch (IOException | JSONException | NumberFormatException e) {
@@ -345,40 +345,40 @@ public class BtcUtils {
         return ((double) satoshi / 100000000.0);
     }
 
-    static public double localCurrencyToBtc(ExchangeRate rate, LocalCurrency lc, double amount) {
+    static public double localCurrencyToBtc(BtcExchangeRates rate, LocalCurrency lc, double amount) {
         if (rate == null) {
             return 0;
         }
         switch (lc) {
-            case LOCAL_CURRENCY_TWD:
-                return amount / rate.getTWD();
-            case LOCAL_CURRENCY_USD:
-                return amount / rate.getUSD();
             case LOCAL_CURRENCY_CNY:
-                return amount / rate.getCNY();
+                return amount / rate.getRate_cny();
             case LOCAL_CURRENCY_EUR:
-                return amount / rate.getEUR();
+                return amount / rate.getRate_eur();
             case LOCAL_CURRENCY_JPY:
-                return amount / rate.getJPY();
+                return amount / rate.getRate_jpy();
+            case LOCAL_CURRENCY_TWD:
+                return amount / rate.getRate_twd();
+            case LOCAL_CURRENCY_USD:
+                return amount / rate.getRate_usd();
         }
         return 0;
     }
 
-    static public double btcToLocalCurrency(ExchangeRate rate, LocalCurrency lc, double amount) {
+    static public double btcToLocalCurrency(BtcExchangeRates rate, LocalCurrency lc, double amount) {
         if (rate == null) {
             return 0;
         }
         switch (lc) {
-            case LOCAL_CURRENCY_TWD:
-                return rate.getTWD() * amount;
-            case LOCAL_CURRENCY_USD:
-                return rate.getUSD() * amount;
             case LOCAL_CURRENCY_CNY:
-                return rate.getCNY() * amount;
+                return rate.getRate_cny() * amount;
             case LOCAL_CURRENCY_EUR:
-                return rate.getEUR() * amount;
+                return rate.getRate_eur() * amount;
             case LOCAL_CURRENCY_JPY:
-                return rate.getJPY() * amount;
+                return rate.getRate_jpy() * amount;
+            case LOCAL_CURRENCY_TWD:
+                return rate.getRate_twd() * amount;
+            case LOCAL_CURRENCY_USD:
+                return rate.getRate_usd() * amount;
         }
         return 0;
     }

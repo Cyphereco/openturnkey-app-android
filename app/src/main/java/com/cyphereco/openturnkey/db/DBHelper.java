@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 6;
     private static final String DB_NAME = "OpenTurnKey.db";
 
     private static SQLiteDatabase database = null;
@@ -19,21 +19,17 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         // Create transaction table
-        db.execSQL(OpenturnkeyDB.CREATE_TRANS_TABLE_SQL);
+        db.execSQL(OpenturnkeyDB.CREATE_TRANSACTION_TABLE_SQL);
         // Create address book table
         db.execSQL(OpenturnkeyDB.CREATE_ADDRBOOK_TABLE_SQL);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion == 4 && newVersion == 5) {
-            //Add confirmations
-            String sql = "alter table " + OpenturnkeyDB.TRANS_TABLE_NAME + " add COLUMN confirmations INTEGER";
-            db.execSQL(sql);
-        } else {
+        if (oldVersion < 6) {
             // Drop original tables
-            db.execSQL("DROP TABLE IF EXISTS " + OpenturnkeyDB.TRANS_TABLE_NAME);
-            db.execSQL("DROP TABLE IF EXISTS " + OpenturnkeyDB.ADDR_BOOK_TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + OpenturnkeyDB.TABLE_TRANSACTION);
+            db.execSQL("DROP TABLE IF EXISTS " + OpenturnkeyDB.TABLE_ADDRESSBOOK);
             // Create new version tables
             onCreate(db);
         }
@@ -42,8 +38,8 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop original tables
-        db.execSQL("DROP TABLE IF EXISTS " + OpenturnkeyDB.TRANS_TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + OpenturnkeyDB.ADDR_BOOK_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + OpenturnkeyDB.TABLE_TRANSACTION);
+        db.execSQL("DROP TABLE IF EXISTS " + OpenturnkeyDB.TABLE_ADDRESSBOOK);
         // Create new version tables
         onCreate(db);
     }

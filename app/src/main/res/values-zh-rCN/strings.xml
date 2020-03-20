@@ -211,4 +211,6 @@
     <string name="reapproach_openturnkey">请暂时移开OpenTurnKey，再靠近一次。</string>
     <string name="create_transaction">创建交易</string>
     <string name="incorrect_openturnkey">不是正确的OpenTurnKey</string>
+    <string name="sending_transaction">发送交易</string>
+    <string name="send_tx_fail">发送交易失败</string>
 </resources>

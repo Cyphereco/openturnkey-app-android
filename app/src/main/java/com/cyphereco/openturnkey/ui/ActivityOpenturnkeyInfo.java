@@ -181,7 +181,7 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
                     }
                     double btc = BtcUtils.satoshiToBtc(balance.longValue());
                     tvBalanceBtc.setText(String.format(Locale.ENGLISH, "%.8f", btc));
-                    double lcAmount = BtcUtils.btcToLocalCurrency(MainActivity.getExchangeRate(), localCurrency, btc);
+                    double lcAmount = BtcUtils.btcToLocalCurrency(MainActivity.getBtcExchangeRates(), localCurrency, btc);
                     tvBalanceFiat.setText(String.format(Locale.ENGLISH, "%.2f", lcAmount));
                     return false;
                 }

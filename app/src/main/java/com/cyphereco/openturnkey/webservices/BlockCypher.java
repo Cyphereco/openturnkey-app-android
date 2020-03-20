@@ -6,8 +6,8 @@ import com.blockcypher.model.address.Address;
 import com.blockcypher.model.transaction.Transaction;
 import com.blockcypher.model.transaction.intermediary.IntermediaryTransaction;
 import com.blockcypher.model.transaction.output.Output;
-import com.cyphereco.openturnkey.core.Tx;
 import com.cyphereco.openturnkey.core.UnsignedTx;
+import com.cyphereco.openturnkey.db.RecordTransaction;
 import com.cyphereco.openturnkey.ui.Preferences;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
@@ -148,7 +148,8 @@ public class BlockCypher {
         return null;
     }
 
-    public Tx completeSendBitcoin(String publicKey, List<String> sigList, String to) throws BlockCypherException, Exception {
+    public static RecordTransaction completeSendBitcoin(String publicKey,
+                List<String> sigList, String to) throws BlockCypherException, Exception {
         if (mBcCtx == null) newBlockCypherContext();
 
         if (mCachedUnsignedTx == null) {
@@ -161,6 +162,7 @@ public class BlockCypher {
             mCachedUnsignedTx = null;
             return null;
         }
+
         for (int i = 0; i < mCachedUnsignedTx.getTosign().size(); i++) {
             String sig = sigList.get(i);
             // Pushing Pub key for input
@@ -178,13 +180,18 @@ public class BlockCypher {
         try {
             trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
             logger.debug("TX Sent: " + trans.toString());
-            mCachedUnsignedTx = null;
-            return new Tx("", to, trans, Tx.Status.STATUS_SUCCESS, "");
-        } catch (Exception e) {
-            logger.debug("e:" + e.toString());
-            Tx tx = new Tx(Tx.Status.STATUS_UNKNOWN_FAILURE, mCachedUnsignedTx.getTx().getHash(), "");
-            mCachedUnsignedTx = null;
-            return tx;
+            RecordTransaction recordTransaction = new RecordTransaction();
+            recordTransaction.setHash(trans.getHash());
+            return recordTransaction;
         }
+        catch (BlockCypherException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            logger.debug("e:" + e.toString());
+        }
+
+        mCachedUnsignedTx = null;
+        return null;
     }
 }

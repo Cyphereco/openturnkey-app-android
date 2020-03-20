@@ -26,7 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.db.DBAddrItem;
+import com.cyphereco.openturnkey.db.RecordAddress;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
@@ -84,7 +84,7 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
             @Override
             public void onPay(int position) {
 //                logger.debug("onPay the position is: " + position);
-                DBAddrItem item = mAdapter.getAddressItemByPosition(position);
+                RecordAddress item = mAdapter.getAddressItemByPosition(position);
                 MainActivity.setPayToAddress(item.getAddress());
                 ViewPager viewPager = getActivity().findViewById(R.id.view_pager_main);
                 if (viewPager != null) {
@@ -145,13 +145,13 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
     }
 
     private void updateAddressDataset() {
-        List<DBAddrItem> addrDataset = OpenturnkeyDB.getAllAddressbook();
+        List<RecordAddress> addrDataset = OpenturnkeyDB.getAllAddresses();
 
         // Sort by alias
-        Collections.sort(addrDataset, new Comparator<DBAddrItem>() {
+        Collections.sort(addrDataset, new Comparator<RecordAddress>() {
             @Override
-            public int compare(DBAddrItem o1, DBAddrItem o2) {
-                return o1.getName().compareTo(o2.getName());
+            public int compare(RecordAddress o1, RecordAddress o2) {
+                return o1.getAlias().compareTo(o2.getAlias());
             }
         });
 
@@ -196,13 +196,13 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
     }
 
     private void processDeleteAddress(int position) {
-        final DBAddrItem item = mAdapter.getAddressItemByPosition(position);
+        final RecordAddress item = mAdapter.getAddressItemByPosition(position);
         Dialog dialog = new AlertDialog.Builder(getActivity())
                 .setMessage(R.string.delete_address_dialog_message)
                 .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (OpenturnkeyDB.deleteAddressbookByAlias(item.getName())) {
+                        if (OpenturnkeyDB.deleteAddressbookByAlias(item.getAlias())) {
                             updateAddressDataset();
                         }
                     }
@@ -218,11 +218,11 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
     }
 
     private void processEditAddress(int position) {
-        DBAddrItem item = mAdapter.getAddressItemByPosition(position);
+        RecordAddress item = mAdapter.getAddressItemByPosition(position);
         Intent intent = new Intent(getContext(), ActivityAddressEditor.class);
 
-        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_DB_ID, item.getDbId());
-        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ALIAS, item.getName());
+        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_DB_ID, item.getId());
+        intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ALIAS, item.getAlias());
         intent.putExtra(ActivityAddressEditor.KEY_EDITOR_CONTACT_ADDR, item.getAddress());
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         if (null != getActivity()) {
@@ -231,14 +231,14 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
     }
 
     private void processShowQRCode(int position) {
-        final DBAddrItem item = mAdapter.getAddressItemByPosition(position);
+        final RecordAddress item = mAdapter.getAddressItemByPosition(position);
         final View v = View.inflate(getContext(), R.layout.dialog_address_item_qrcode, null);
         TextView tvAlias = v.findViewById(R.id.textView_addrbook_item_dialog_alias);
         TextView tvAddress = v.findViewById(R.id.textView_addrbook_item_dialog_address);
         ImageView ivQRCode = v.findViewById(R.id.imageView_addrbook_item_address_qrcode);
         final String address = item.getAddress();
 
-        tvAlias.setText(item.getName());
+        tvAlias.setText(item.getAlias());
         tvAddress.setText(item.getAddress());
         BitcoinPaymentURI uri = new BitcoinPaymentURI.Builder().address(item.getAddress()).build();
         if (uri != null) {

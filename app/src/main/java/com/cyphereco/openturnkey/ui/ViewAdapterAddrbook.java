@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.db.DBAddrItem;
+import com.cyphereco.openturnkey.db.RecordAddress;
 import com.cyphereco.openturnkey.utils.AddressUtils;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class ViewAdapterAddrbook extends RecyclerView.Adapter<ViewAdapterAddrboo
 
     private Context mContext;
     private AdapterListener mAdapterListener = null;
-    private List<DBAddrItem> mAddressbookDataset = new ArrayList<>();
+    private List<RecordAddress> mAddressbookDataset = new ArrayList<>();
     private AddressFilter mAddressFilter;
 
     public interface AdapterListener {
@@ -36,7 +36,7 @@ public class ViewAdapterAddrbook extends RecyclerView.Adapter<ViewAdapterAddrboo
         void onPay(int position);
     }
 
-    public void setData(List<DBAddrItem> data) {
+    public void setData(List<RecordAddress> data) {
         if (null != mAddressbookDataset) {
             this.mAddressbookDataset.clear();
         }
@@ -62,7 +62,7 @@ public class ViewAdapterAddrbook extends RecyclerView.Adapter<ViewAdapterAddrboo
             return;
         }
         viewHolder.mTVAlias.setText(
-                AddressUtils.getShortAlias(mAddressbookDataset.get(position).getName()));
+                AddressUtils.getShortAlias(mAddressbookDataset.get(position).getAlias()));
         viewHolder.mTVAddress.setText(
                 AddressUtils.getShortAddress(mAddressbookDataset.get(position).getAddress()));
     }
@@ -79,7 +79,7 @@ public class ViewAdapterAddrbook extends RecyclerView.Adapter<ViewAdapterAddrboo
         mAdapterListener = listener;
     }
 
-    DBAddrItem getAddressItemByPosition(final int position) {
+    RecordAddress getAddressItemByPosition(final int position) {
         if (null == mAddressbookDataset) {
             return null;
         }
@@ -156,10 +156,10 @@ public class ViewAdapterAddrbook extends RecyclerView.Adapter<ViewAdapterAddrboo
     private static class AddressFilter extends Filter {
 
         private final ViewAdapterAddrbook mAdapter;
-        private final List<DBAddrItem> mOriginalList;
-        private final List<DBAddrItem> mFilteredList;
+        private final List<RecordAddress> mOriginalList;
+        private final List<RecordAddress> mFilteredList;
 
-        private AddressFilter(ViewAdapterAddrbook adapter, List<DBAddrItem> originalList) {
+        private AddressFilter(ViewAdapterAddrbook adapter, List<RecordAddress> originalList) {
             super();
             this.mAdapter = adapter;
             this.mOriginalList = new LinkedList<>(originalList);
@@ -175,8 +175,8 @@ public class ViewAdapterAddrbook extends RecyclerView.Adapter<ViewAdapterAddrboo
                 mFilteredList.addAll(mOriginalList);
             } else {
                 final String filterPattern = constraint.toString().toLowerCase().trim();
-                for (DBAddrItem item : mOriginalList) {
-                    if (item.getName().toLowerCase().contains(filterPattern)) {
+                for (RecordAddress item : mOriginalList) {
+                    if (item.getAlias().toLowerCase().contains(filterPattern)) {
                         mFilteredList.add(item);
                     }
                 }
@@ -190,7 +190,7 @@ public class ViewAdapterAddrbook extends RecyclerView.Adapter<ViewAdapterAddrboo
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             mAdapter.mAddressbookDataset.clear();
-            mAdapter.mAddressbookDataset.addAll((List<DBAddrItem>) results.values);
+            mAdapter.mAddressbookDataset.addAll((List<RecordAddress>) results.values);
             mAdapter.notifyDataSetChanged();
         }
     }

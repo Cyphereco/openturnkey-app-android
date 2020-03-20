@@ -2,6 +2,7 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -40,19 +41,7 @@
         app:layout_constraintTop_toTopOf="@+id/tv_label_tx_info_datetime" />
 
     <ImageView
-        android:id="@+id/iv_icon_tx_info_resend"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:contentDescription="@string/resend_payment"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_icon_tx_info_delete"
-        app:layout_constraintEnd_toStartOf="@+id/iv_icon_tx_info_delete"
-        app:layout_constraintTop_toTopOf="@+id/iv_icon_tx_info_delete"
-        app:srcCompat="@drawable/ic_send_black_24dp" />
-
-    <ImageView
-        android:id="@+id/iv_icon_tx_info_delete"
+        android:id="@+id/iv_tx_delete"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginTop="16dp"
@@ -82,29 +71,6 @@
         app:layout_constraintBottom_toBottomOf="@+id/tv_label_tx_info_result"
         app:layout_constraintStart_toEndOf="@+id/tv_label_tx_info_result"
         app:layout_constraintTop_toTopOf="@+id/tv_label_tx_info_result" />
-
-    <ImageView
-        android:id="@+id/iv_icon_tx_info_help"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:contentDescription="@string/failure_reason"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_tx_info_result"
-        app:layout_constraintStart_toEndOf="@+id/tv_tx_info_result"
-        app:layout_constraintTop_toTopOf="@+id/tv_tx_info_result"
-        app:srcCompat="@drawable/ic_help_outline_black_24dp" />
-
-    <ImageView
-        android:id="@+id/iv_icon_tx_info_result"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:contentDescription="@string/transaction_execution_status"
-        android:src="@drawable/ic_success_24dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_tx_info_result"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_tx_info_result" />
 
     <TextView
         android:id="@+id/tv_label_tx_info_from"
@@ -237,42 +203,6 @@
         app:layout_constraintStart_toStartOf="@+id/tv_label_tx_info_id"
         app:layout_constraintTop_toBottomOf="@+id/tv_label_tx_info_id" />
 
-    <Button
-        android:id="@+id/btn_tx_info_export_raw_data"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/custom_toast_info_round"
-        android:backgroundTint="#90CAF9"
-        android:enabled="true"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:text="@string/export_raw_data"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_tx_info_id" />
-
-    <Button
-        android:id="@+id/btn_tx_info_view_online"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/custom_toast_info_round"
-        android:backgroundTint="#90CAF9"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:text="@string/view_online"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_tx_info_export_raw_data" />
-
     <ImageButton
         android:id="@+id/btn_tx_info_previous_item"
         android:layout_width="0dp"
@@ -292,5 +222,26 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/btn_tx_info_previous_item" />
+
+    <ImageView
+        android:id="@+id/iv_raw_data"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="8dp"
+        android:tint="#00ACC1"
+        app:layout_constraintEnd_toStartOf="@+id/iv_tx_delete"
+        app:layout_constraintTop_toTopOf="@+id/iv_tx_delete"
+        app:srcCompat="@drawable/ic_raw_file" />
+
+    <ImageView
+        android:id="@+id/iv_view_online"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_label_tx_info_id"
+        app:layout_constraintStart_toEndOf="@+id/tv_label_tx_info_id"
+        app:layout_constraintTop_toTopOf="@+id/tv_label_tx_info_id"
+        app:srcCompat="@drawable/ic_remove_red_eye_black_24dp" />
 
 </android.support.constraint.ConstraintLayout>

@@ -21,12 +21,15 @@ import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcUtils;
-import com.cyphereco.openturnkey.utils.ExchangeRate;
+import com.cyphereco.openturnkey.utils.BtcExchangeRates;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.TxFee;
+import com.cyphereco.openturnkey.webservices.BlockChainInfo;
 
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -50,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
 
     public enum PAGE {PAY, OTK, HISTORY, ADDRBOOK}
 
-    private static ExchangeRate exchangeRate;
+    private static int blockHeight = 0;
+    private static BtcExchangeRates btcExchangeRates;
     private static TxFee txFee;
     private static Handler pageSwitchHandler;
 
@@ -72,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private static FragmentExtendOtkViewPage selectedFragment = null;
     private static String currentActivity = "";
 
-    private static OnlineDataUpdateListener onlineDataUpdateListener;
+    private static List<OnlineDataUpdateListener> listOnlineDataUpdateListener = new ArrayList<>();
 
     public static String getCurrentActivity() {
         return currentActivity;
@@ -338,21 +342,38 @@ public class MainActivity extends AppCompatActivity {
         return BtcUtils.validateAddress(true, addr) || BtcUtils.validateAddress(false, addr);
     }
 
-    public static ExchangeRate getExchangeRate() {
-        return exchangeRate;
+    public static BtcExchangeRates getBtcExchangeRates() {
+        return btcExchangeRates;
     }
 
-    public void setExchangeRate(ExchangeRate exchangeRate) {
-        logger.debug("Update ExchangeRate: {}", exchangeRate.toString());
-        if (MainActivity.exchangeRate == null) MainActivity.exchangeRate = exchangeRate;
-        if (onlineDataUpdateListener != null)
-            onlineDataUpdateListener.onExchangeRateUpdated(exchangeRate);
+    public void setExchangeRate(BtcExchangeRates btcExchangeRates) {
+        if (MainActivity.btcExchangeRates == null) MainActivity.btcExchangeRates = btcExchangeRates;
+        for (OnlineDataUpdateListener listener : listOnlineDataUpdateListener
+             ) {
+            listener.onExchangeRateUpdated(btcExchangeRates);
+        }
     }
 
     public void setTxFee(TxFee txFee) {
         logger.debug("Update TxFee: {}", txFee.toString());
         if (MainActivity.txFee != null) MainActivity.txFee = txFee;
-        if (onlineDataUpdateListener != null) onlineDataUpdateListener.onTxFeeUpdated(txFee);
+        for (OnlineDataUpdateListener listener : listOnlineDataUpdateListener
+        ) {
+            listener.onTxFeeUpdated(txFee);
+        }
+    }
+
+    public static int getBlockHeight() {
+        return blockHeight;
+    }
+
+    public static void setBlockHeight(int blockHeight) {
+        logger.debug("Current block height: {}", blockHeight);
+        MainActivity.blockHeight = blockHeight;
+        for (OnlineDataUpdateListener listener : listOnlineDataUpdateListener
+        ) {
+            listener.onBlockHeightUpdated(blockHeight);
+        }
     }
 
     public static FragmentExtendOtkViewPage getSelectedFragment() {
@@ -374,7 +395,9 @@ public class MainActivity extends AppCompatActivity {
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-                ExchangeRate r = BtcUtils.getCurrencyExchangeRate();
+                setBlockHeight(BlockChainInfo.getLatestBlockHeight());
+
+                BtcExchangeRates r = BtcUtils.getCurrencyExchangeRate();
                 if (r == null) {
                     t.cancel();
                     t.purge();
@@ -387,14 +410,18 @@ public class MainActivity extends AppCompatActivity {
         }, 1000, 1000 * 60 * Configurations.INTERVAL_EXCHANGE_RATE_UPDATE);
     }
 
-    public static void setOnlineDataUpdateListener(OnlineDataUpdateListener listener) {
-        MainActivity.onlineDataUpdateListener = listener;
+    public static void addToListOnlineDataUpdateListener(OnlineDataUpdateListener listener) {
+        if (listener != null) {
+            MainActivity.listOnlineDataUpdateListener.add(listener);
+        }
     }
 
     public interface OnlineDataUpdateListener {
-        void onExchangeRateUpdated(ExchangeRate xrate);
+        void onExchangeRateUpdated(BtcExchangeRates xrate);
 
         void onTxFeeUpdated(TxFee txFee);
+
+        void onBlockHeightUpdated(int height);
     }
 }
 

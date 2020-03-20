@@ -211,4 +211,6 @@
     <string name="reapproach_openturnkey">OpenTurnKeyを一度離れて、再び近づいてください。</string>
     <string name="create_transaction">トランザクションを作成</string>
     <string name="incorrect_openturnkey">誤ったOpenTurnKey</string>
+    <string name="sending_transaction">トランザクションを送信</string>
+    <string name="send_tx_fail">トランザクションの送信に失敗しました</string>
 </resources>
