@@ -220,4 +220,5 @@
     <string name="could_not_get_exchange_rate">無法更新匯率</string>
     <string name="pay_fail">支付失敗</string>
     <string name="is_copied">已複製</string>
+    <string name="check_opentunrkey_balance">查詢OpenTurnKey餘額</string>
 </resources>

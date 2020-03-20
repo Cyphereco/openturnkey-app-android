@@ -3,6 +3,8 @@ package com.cyphereco.openturnkey.ui;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.NfcHandler;
@@ -265,6 +267,20 @@ public class FragmentExtendOtkViewPage extends Fragment {
     protected void disableReadOtk() {
         MainActivity.disableReadOtk();
         logger.debug("ReadOtk disabled");
+    }
+
+    protected void showDialogReadOtk(String title, String desc, final Handler handler) {
+        dialogReadOtk = new DialogReadOtk()
+                .updateReadOtkTitle(title)
+                .updateReadOtkDesc(desc)
+                .setOnCanelListener(new DialogReadOtk.DialogReadOtkListener() {
+                    @Override
+                    public void onCancel() {
+                        clearRequest();
+                        if (handler != null) handler.sendMessage(new Message());
+                    }
+                });
+        dialogReadOtk.show(getFragmentManager(), "ReadOtk");
     }
 
     protected void showDialogReadOtk(String title, String desc) {

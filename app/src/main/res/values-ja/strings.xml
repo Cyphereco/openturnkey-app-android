@@ -220,4 +220,5 @@
     <string name="could_not_get_exchange_rate">為替レートを更新できませんでした</string>
     <string name="pay_fail">支払い失敗</string>
     <string name="is_copied">コピーされた</string>
+    <string name="check_opentunrkey_balance">OpenTurnKeyバランスを確認する</string>
 </resources>

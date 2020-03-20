@@ -306,7 +306,13 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
                     signPayment = true;
 
-                    showDialogReadOtk(null, null);
+                    showDialogReadOtk(getString(R.string.check_opentunrkey_balance), null, new Handler(new Handler.Callback() {
+                        @Override
+                        public boolean handleMessage(Message msg) {
+                            signPayment = false;
+                            return false;
+                        }
+                    }));
                 } catch (NullPointerException | NumberFormatException e) {
                     e.printStackTrace();
                     makeToastMessage(getString(R.string.incorrect_recipient_amount));
@@ -483,6 +489,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
             if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
                 if (signPayment) {
+                    signPayment = false;
                     final String from = otkData.getSessionData().getAddress();
                     final String to = tvAddress.getText().toString();
                     logger.debug("Pay to ({}) for {} / {} (btc/{}) with tx fee ({}) included: {}",
@@ -559,7 +566,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                             listSignatures.addAll(otkData.getSessionData().getRequestSigList());
                             logger.debug("listSignatures: {}", listSignatures);
 
-                            // if all signature collected
+                            // if all signature collected, TODO: unfinished job, need to handle mulit-requests for multi-signatures
                             completeTransaction();
 //                            MainActivity.switchToPage(MainActivity.PAGE.HISTORY.ordinal());
                         } else {

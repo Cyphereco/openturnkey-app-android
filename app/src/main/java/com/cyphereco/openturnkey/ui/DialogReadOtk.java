@@ -157,12 +157,14 @@ public class DialogReadOtk extends AppCompatDialogFragment {
         return this;
     }
 
-    public void endingDialogReadOtkWithReason(int flag) {
+    public void endingDialogReadOtkWithReason(final int flag) {
         disableCancelTimer();
 
         textTitle.setVisibility(View.INVISIBLE);
         cancelButton.setVisibility(View.INVISIBLE);
         iconHint.setVisibility(View.INVISIBLE);
+
+        final DialogReadOtk dialog = this;
 
         switch (flag) {
             case READ_SUCCESS:
@@ -183,7 +185,16 @@ public class DialogReadOtk extends AppCompatDialogFragment {
             }
 
             public void onFinish() {
-                cancelButton.callOnClick();
+                if (READ_SUCCESS == flag) {
+                    // read success, dismiss normally without calling onCancel listener
+                    dialogTImer.cancel();
+                    MainActivity.disableReadOtk();
+                    if (getDialog() != null) dismissAnimation(getDialog().getWindow().getDecorView());
+                    dialog.dismiss();
+                }
+                else {
+                    cancelButton.callOnClick();
+                }
             }
         }.start();
     }
