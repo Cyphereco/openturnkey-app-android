@@ -14,7 +14,6 @@ public class OtkData implements Serializable {
     private OtkState mOtkState;
     private String mPublicKey;
     private SessionData mSessionData;
-    private String mFailureReason = "";
 
     public SessionData getSessionData() {
         return mSessionData;
@@ -28,10 +27,6 @@ public class OtkData implements Serializable {
         return mPublicKey;
     }
 
-    public String getFailureReason() {
-        return mFailureReason;
-    }
-
     public MintInfo getMintInfo() {
         return mMintInfo;
     }
@@ -43,15 +38,13 @@ public class OtkData implements Serializable {
         mPublicKey = pubKey;
     }
 
-    @NotNull
     @Override
     public String toString() {
         return "OtkData{" +
-                ", mMintInfo=" + mMintInfo +
+                "mMintInfo=" + mMintInfo +
                 ", mOtkState=" + mOtkState +
                 ", mPublicKey='" + mPublicKey + '\'' +
                 ", mSessionData=" + mSessionData +
-                ", mFailureReason='" + mFailureReason + '\'' +
                 '}';
     }
 }

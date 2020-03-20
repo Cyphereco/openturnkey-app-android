@@ -584,7 +584,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         }
                     } else {
                         AlertPrompt.alert(getContext(), getString(R.string.pay_fail) + CRLF
-                                + getString(R.string.reason) + ": " + otkData.getFailureReason());
+                                + getString(R.string.reason) + ": " +
+                                parseFailureReason(otkData.getOtkState().getFailureReason().getValue()));
                     }
                 } else {
                     AlertPrompt.alert(getContext(), getString(R.string.communication_error) + CRLF

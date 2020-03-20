@@ -46,8 +46,8 @@ public class AlertPrompt {
         tv.setTextColor(Color.BLACK);
         tv.setGravity(Gravity.CENTER);
         tv.setTextSize(20);
-        tv.setMinWidth(300);
-        tv.setTypeface(tv.getTypeface(), Typeface.BOLD);
+        tv.setPadding(36, 12, 36, 12);
+//        tv.setTypeface(tv.getTypeface(), Typeface.BOLD);
         toast.getView().setBackgroundResource(decor);
         toast.show();
     }

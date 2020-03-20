@@ -159,7 +159,7 @@
     <string name="derivative_key_paths">导出路径</string>
     <string name="failed_to_clear_history">清除交易记录失败</string>
     <string name="how_to_validate">如何验证?</string>
-    <string name="master_public_key">主公钥:</string>
+    <string name="master_public_key">主公钥</string>
     <string name="pin_unset_msg">PIN码未设定, 请先使用指纹验证完成PIN码设定!</string>
     <string name="need_fp_preauth">PIN码未设定, 请先使用指纹认证完成PIN码设定!</string>
     <string name="wallet_import_format_key">钱包导入格式密钥</string>
@@ -189,7 +189,7 @@
     <string name="cannot_change_addr">无法变更地址</string>
     <string name="alias_exists">此别名已使用，请输入不同别名。</string>
     <string name="make_request">发送请求</string>
-    <string name="processing_request">请求处理中…\\n请勿移动OpenTurnKey.</string>
+    <string name="processing_request">请求处理中…\n请勿移动OpenTurnKey.</string>
     <string name="fail_reason">失败原因</string>
     <string name="read_openturnkey">读取OpenTurnKey</string>
     <string name="approach_openturnkey_to_the_nfc_reader">将OpenTurnKey靠近NFC读写器</string>

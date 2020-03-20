@@ -175,7 +175,7 @@
     <string name="export_private_key_wif_success">Export Successfully</string>
     <string name="reset_fail">Reset Command Not Sent</string>
     <string name="reset_success">Reset Command Sent</string>
-    <string name="master_public_key">Master Public Key:</string>
+    <string name="master_public_key">Master Public Key</string>
     <string name="derivative_public_key">Derivative Public Key</string>
     <string name="derivative_key_paths">Derivative Path:</string>
     <string name="how_to_validate">How to Validate?</string>

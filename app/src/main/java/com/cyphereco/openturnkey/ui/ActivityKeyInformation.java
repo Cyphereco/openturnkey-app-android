@@ -122,7 +122,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TextView tv = findViewById(R.id.ki_tv_master_pk_content);
-                copyText("MasterKey", tv.getText().toString());
+                copyText(getString(R.string.master_public_key), tv.getText().toString());
             }
         });
 
@@ -132,7 +132,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TextView tv = findViewById(R.id.ki_tv_derivative_pk_content);
-                copyText("DerivativeKey", tv.getText().toString());
+                copyText(getString(R.string.derivative_public_key), tv.getText().toString());
             }
         });
 
@@ -141,7 +141,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                copyText("KeyPath", getKeyPathString());
+                copyText(getString(R.string.derivative_key_paths), getKeyPathString());
             }
         });
 
@@ -151,7 +151,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TextView tv = findViewById(R.id.ki_tv_master_pk_content);
-                showQRCode("Master Key", tv.getText().toString());
+                showQRCode(getString(R.string.master_public_key), tv.getText().toString());
             }
         });
 
@@ -161,7 +161,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TextView tv = findViewById(R.id.ki_tv_derivative_pk_content);
-                showQRCode("Derivative Key", tv.getText().toString());
+                showQRCode(getString(R.string.derivative_public_key), tv.getText().toString());
             }
         });
 
@@ -170,7 +170,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showQRCode("Key Path", getKeyPathString());
+                showQRCode(getString(R.string.derivative_key_paths), getKeyPathString());
             }
         });
     }

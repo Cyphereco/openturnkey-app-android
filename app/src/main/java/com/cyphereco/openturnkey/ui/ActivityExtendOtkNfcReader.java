@@ -112,13 +112,13 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
                                 // request failed, clear request and prompt failure reason
                                 clearRequest();
                                 dialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.REQUEST_FAIL);
-
+                                final String strDesc = otkData.getOtkState().getFailureReason().getValue();
                                 delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
                                     @Override
                                     public void postProcess() {
                                         AlertPrompt.alert(getApplicationContext(), getString(R.string.request_fail) +
                                                 "\n" + getString(R.string.reason) + ": " +
-                                                parseFailureReason(otkData.getFailureReason()));
+                                                parseFailureReason(strDesc));
                                     }
                                 });
                             }
@@ -131,13 +131,13 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
                             // OpenTurnKey is not locked, request cannot be made
                             clearRequest();
                             dialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.REQUEST_FAIL);
-
+                            final String strDesc = otkData.getOtkState().getFailureReason().getValue();
                             delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
                                 @Override
                                 public void postProcess() {
                                     AlertPrompt.alert(getApplicationContext(), getString(R.string.request_fail) +
                                             "\n" + getString(R.string.reason) + ": " +
-                                            parseFailureReason(otkData.getFailureReason()));
+                                            parseFailureReason(strDesc));
                                 }
                             });
                             return;

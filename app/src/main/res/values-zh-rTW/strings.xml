@@ -159,7 +159,7 @@
     <string name="derivative_key_paths">導出路徑</string>
     <string name="failed_to_clear_history">清除交易記錄失敗</string>
     <string name="how_to_validate">如何驗證?</string>
-    <string name="master_public_key">主公鑰:</string>
+    <string name="master_public_key">主公鑰</string>
     <string name="pin_unset_msg">PIN碼未設定, 請先使用指紋驗證完成PIN碼設定!</string>
     <string name="need_fp_preauth">PIN碼未設定, 請先使用指紋認證完成PIN碼設定!</string>
     <string name="wallet_import_format_key">錢包導入格式密鑰</string>
