@@ -74,7 +74,7 @@
     <string name="operation_timeout">操作タイムアウト</string>
     <string name="do_not_remove_otk">Openturnkeyに近づいてください.\nサイン完了する前にOpenTurnKey外さないでください</string>
     <string name="confirm_payment">支払いを確認する</string>
-    <string name="subject_text_estimated_time">推定所要時間(分):</string>
+    <string name="subject_text_estimated_time">推定所要時間:</string>
     <string name="subject_fees_in_satoshi">手数料(SAT):</string>
     <string name="unknown_reason">不明な理由</string>
     <string name="signing_transaction">トランザクションをサインする</string>
@@ -221,4 +221,5 @@
     <string name="pay_fail">支払い失敗</string>
     <string name="is_copied">コピーされた</string>
     <string name="check_opentunrkey_balance">OpenTurnKeyバランスを確認する</string>
+    <string name="minute">分</string>
 </resources>

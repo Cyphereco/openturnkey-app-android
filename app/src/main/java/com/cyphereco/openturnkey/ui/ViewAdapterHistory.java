@@ -10,19 +10,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
+import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.db.RecordTransaction;
 import com.cyphereco.openturnkey.utils.AddressUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
+import com.cyphereco.openturnkey.webservices.BlockChainInfo;
 
 import org.slf4j.Logger;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.ViewHolder> {
     private final static String TAG = ViewAdapterHistory.class.getSimpleName();
@@ -68,6 +69,23 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
         // by any miners. Such transaction should indicate a question mark symbol
         // for its uncertainty. If still not confirmed after 144 blocks (1 day)
         // the transaction should be considered failed.
+
+        final RecordTransaction transaction = mTransDataset.get(position);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int height =  BlockChainInfo.getTxBlockHeight(transaction.getHash());
+                if (transaction.getBlockHeight() != height) {
+                    transaction.setBlockHeight(height);
+                    OpenturnkeyDB.updateTransaction(transaction);
+                }
+                long time = BlockChainInfo.getTxTime(transaction.getHash());
+                if (transaction.getTimestamp() != (time * 1000)) {
+                    transaction.setBlockHeight(time * 1000);
+                    OpenturnkeyDB.updateTransaction(transaction);
+                }
+            }
+        }).start();
 
         long confirmations = MainActivity.getBlockHeight() - mTransDataset.get(position).getBlockHeight() + 1;
 

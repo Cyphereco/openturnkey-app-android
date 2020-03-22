@@ -137,14 +137,13 @@
 
     <ImageView
         android:id="@+id/icon_mint_information"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginStart="16dp"
-        android:layout_marginBottom="16dp"
         android:contentDescription="@string/mint_information"
         android:tint="#FFB300"
-        app:layout_constraintBottom_toBottomOf="@+id/user_note_context"
         app:layout_constraintStart_toEndOf="@+id/user_note_context"
+        app:layout_constraintTop_toTopOf="@+id/note"
         app:srcCompat="@android:drawable/ic_dialog_info" />
 
     <TextView

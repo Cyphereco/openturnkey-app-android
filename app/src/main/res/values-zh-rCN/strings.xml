@@ -74,7 +74,7 @@
     <string name="operation_timeout">操作逾时</string>
     <string name="do_not_remove_otk">请靠近OpenTurnKey完成交易签署.\n完成前请勿移开OpenTurnKey.</string>
     <string name="confirm_payment">确认支付</string>
-    <string name="subject_text_estimated_time">預計交易完成時間(分钟):</string>
+    <string name="subject_text_estimated_time">預計交易完成時間:</string>
     <string name="subject_fees_in_satoshi">手续费(SAT):</string>
     <string name="unknown_reason">不明原因</string>
     <string name="signing_transaction">签署交易</string>
@@ -221,4 +221,5 @@
     <string name="pay_fail">支付失败</string>
     <string name="is_copied">已复制</string>
     <string name="check_opentunrkey_balance">查询OpenTurnKey余额</string>
+    <string name="minute">分钟</string>
 </resources>

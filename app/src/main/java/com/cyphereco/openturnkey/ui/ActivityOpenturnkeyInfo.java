@@ -201,6 +201,11 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
                 }
 
                 @Override
+                public void onTxTimeUpdated(long time) {
+
+                }
+
+                @Override
                 public void onTxBlockHeightUpdated(int height) {
 
                 }

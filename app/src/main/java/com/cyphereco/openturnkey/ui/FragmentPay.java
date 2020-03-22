@@ -73,11 +73,12 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     private boolean mIsAmountConverting = false;
     private double mBtc = 0.0;
 
-    private EditText mEtCc;
-    private EditText mEtLc;
+    private EditText tvAmountBtc;
+    private EditText tvAmountFiat;
     private TextView tvAddress;
     private TextView tvCurrency;
     private CheckBox cbUseAllFunds;
+    private CheckBox cbAuthByPin;
     private Menu mMenu;
     private Handler xrateHandler;
     private Handler txHandler;
@@ -100,7 +101,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         xrateHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
-                mEtLc.setText("");
+                tvAmountFiat.setText("");
                 btcExchangeRates = (BtcExchangeRates) msg.obj;
                 convertCurrency();
                 return false;
@@ -170,19 +171,20 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             }
         });
 
-        cbUseAllFunds = view.findViewById(R.id.checkBox_use_all_funds);
-        mEtCc = view.findViewById(R.id.input_crypto_currency);
-        mEtCc.setSelectAllOnFocus(true);
-        mEtLc = view.findViewById(R.id.input_local_currency);
-        mEtLc.setSelectAllOnFocus(true);
-        mEtLc.setText("-.-");
-        mEtLc.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        cbUseAllFunds = view.findViewById(R.id.cb_fragment_pay_use_all_funds);
+        cbAuthByPin = view.findViewById(R.id.cb_fragment_pay_auth_by_pin);
+        tvAmountBtc = view.findViewById(R.id.tv_fragment_pay_amount_btc);
+        tvAmountBtc.setSelectAllOnFocus(true);
+        tvAmountFiat = view.findViewById(R.id.tv_fragment_pay_amount_fiat);
+        tvAmountFiat.setSelectAllOnFocus(true);
+        tvAmountFiat.setText("-.-");
+        tvAmountFiat.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus && btcExchangeRates == null) {
                     AlertPrompt.alert(getContext(), getString(R.string.could_not_get_exchange_rate));
-                    mEtLc.clearFocus();
-                    mEtCc.requestFocus();
+                    tvAmountFiat.clearFocus();
+                    tvAmountBtc.requestFocus();
                 }
             }
         });
@@ -223,15 +225,15 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mEtCc.setText("");
-                mEtLc.setText("");
+                tvAmountBtc.setText("");
+                tvAmountFiat.setText("");
             }
         });
 
-        mEtCc.addTextChangedListener(new TextWatcherCurrency(mEtCc) {
+        tvAmountBtc.addTextChangedListener(new TextWatcherCurrency(tvAmountBtc) {
             @Override
             public void afterTextChanged(Editable editable) {
-                if (mIsAmountConverting || !mEtCc.isFocused()) {
+                if (mIsAmountConverting || !tvAmountBtc.isFocused()) {
                     // It's updated by changing of lc
                     return;
                 }
@@ -239,20 +241,20 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 mIsCryptoCurrencySet = true;
                 mIsAmountConverting = true;
                 try {
-                    double cc = Double.parseDouble(mEtCc.getText().toString());
-                    mEtLc.setText(String.format(Locale.ENGLISH, "%.2f", btcToFiat(cc)));
+                    double cc = Double.parseDouble(tvAmountBtc.getText().toString());
+                    tvAmountFiat.setText(String.format(Locale.ENGLISH, "%.2f", btcToFiat(cc)));
                     mBtc = cc;
                 } catch (NumberFormatException e) {
-                    mEtLc.setText("");
+                    tvAmountFiat.setText("");
                 }
                 mIsAmountConverting = false;
             }
         });
 
-        mEtLc.addTextChangedListener(new TextWatcherCurrency(mEtLc) {
+        tvAmountFiat.addTextChangedListener(new TextWatcherCurrency(tvAmountFiat) {
             @Override
             public void afterTextChanged(Editable editable) {
-                if (mIsAmountConverting || !mEtLc.isFocused()) {
+                if (mIsAmountConverting || !tvAmountFiat.isFocused()) {
                     // It's updated by changing of cc or back to this fragment from somewhere
                     return;
                 }
@@ -260,12 +262,12 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 mIsCryptoCurrencySet = false;
                 mIsAmountConverting = true;
                 try {
-                    double lc = Double.parseDouble(mEtLc.getText().toString());
+                    double lc = Double.parseDouble(tvAmountFiat.getText().toString());
                     mBtc = fiatToBtc(lc);
-                    mEtCc.setText(String.format(Locale.ENGLISH, "%.8f", mBtc));
+                    tvAmountBtc.setText(String.format(Locale.ENGLISH, "%.8f", mBtc));
 
                 } catch (NumberFormatException e) {
-                    mEtCc.setText("");
+                    tvAmountBtc.setText("");
                 }
                 mIsAmountConverting = false;
             }
@@ -295,7 +297,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         makeToastMessage(getString(R.string.invalid_address));
                         return;
                     }
-                    if (!cbUseAllFunds.isChecked() && mEtCc.length() == 0) {
+                    if (!cbUseAllFunds.isChecked() && tvAmountBtc.length() == 0) {
                         makeToastMessage(getString(R.string.amount_empty));
                         return;
                     }
@@ -324,24 +326,24 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    mEtCc.setText("");
-                    mEtCc.setEnabled(false);
-                    mEtLc.setText("");
-                    mEtLc.setEnabled(false);
+                    tvAmountBtc.setText("");
+                    tvAmountBtc.setEnabled(false);
+                    tvAmountFiat.setText("");
+                    tvAmountFiat.setEnabled(false);
                 } else {
-                    mEtCc.setEnabled(true);
-                    mEtLc.setEnabled(true);
+                    tvAmountBtc.setEnabled(true);
+                    tvAmountFiat.setEnabled(true);
                 }
             }
         });
 
         // Use All Fund might be checked already, update amount field if it's editable
         if (cbUseAllFunds.isChecked()) {
-            mEtCc.setEnabled(false);
-            mEtLc.setEnabled(false);
+            tvAmountBtc.setEnabled(false);
+            tvAmountFiat.setEnabled(false);
         } else {
-            mEtCc.setEnabled(true);
-            mEtLc.setEnabled(true);
+            tvAmountBtc.setEnabled(true);
+            tvAmountFiat.setEnabled(true);
         }
 
         return view;
@@ -424,9 +426,10 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         super.onPageUnselected();
 
         if (!Preferences.getUseFixAddressChecked()) tvAddress.setText("");
-        mEtCc.setText("");
-        mEtLc.setText("");
+        tvAmountBtc.setText("");
+        tvAmountFiat.setText("");
         cbUseAllFunds.setChecked(false);
+        cbAuthByPin.setChecked(false);
     }
 
     @Override
@@ -493,7 +496,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     final String from = otkData.getSessionData().getAddress();
                     final String to = tvAddress.getText().toString();
                     logger.debug("Pay to ({}) for {} / {} (btc/{}) with tx fee ({}) included: {}",
-                            to, mEtCc.getText(), mEtLc.getText(),
+                            to, tvAmountBtc.getText(), tvAmountFiat.getText(),
                             Preferences.getLocalCurrency().toString(), getTxFees(),
                             Preferences.getFeeIncluded());
                     // prepare to make payment
@@ -527,6 +530,11 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
                         @Override
                         public void onBlockHeightUpdated(int height) {
+                        }
+
+                        @Override
+                        public void onTxTimeUpdated(long time) {
+
                         }
 
                         @Override
@@ -810,19 +818,19 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 // update local currency
                 mIsAmountConverting = true;
                 try {
-                    mEtLc.setText(String.format(Locale.ENGLISH, "%.2f", btcToFiat(mBtc)));
+                    tvAmountFiat.setText(String.format(Locale.ENGLISH, "%.2f", btcToFiat(mBtc)));
                 } catch (NumberFormatException e) {
-                    mEtLc.setText("");
+                    tvAmountFiat.setText("");
                 }
                 mIsAmountConverting = false;
             } else {
                 mIsAmountConverting = true;
                 try {
-                    double lc = Double.parseDouble(mEtLc.getText().toString());
+                    double lc = Double.parseDouble(tvAmountFiat.getText().toString());
                     mBtc = fiatToBtc(lc);
-                    mEtCc.setText(String.format(Locale.ENGLISH, "%.8f", mBtc));
+                    tvAmountBtc.setText(String.format(Locale.ENGLISH, "%.8f", mBtc));
                 } catch (NumberFormatException e) {
-                    mEtCc.setText("");
+                    tvAmountBtc.setText("");
                 }
                 mIsAmountConverting = false;
             }
@@ -851,8 +859,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         if (cbUseAllFunds.isChecked()) return -1;
 
         long total = 0;
-        if (mEtCc.getText().length() != 0) {
-            total = (long) (Double.parseDouble(mEtCc.getText().toString()) * 100000000);
+        if (tvAmountBtc.getText().length() != 0) {
+            total = (long) (Double.parseDouble(tvAmountBtc.getText().toString()) * 100000000);
         }
         if (!Preferences.getFeeIncluded()) {
             total += getTxFees();
@@ -864,8 +872,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         if (cbUseAllFunds.isChecked()) return -(getTxFees());
 
         long total = 0;
-        if (mEtCc.getText().length() != 0) {
-            total = (long) (Double.parseDouble(mEtCc.getText().toString()) * 100000000);
+        if (tvAmountBtc.getText().length() != 0) {
+            total = (long) (Double.parseDouble(tvAmountBtc.getText().toString()) * 100000000);
         }
         if (Preferences.getFeeIncluded()) {
             total -= getTxFees();
@@ -873,7 +881,13 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         return total;
     }
 
-    private void paymentConfirmed(final String from, final String to, final long amountReceived, final long fees) {
+    private void paymentConfirmed(final String from, final String to,
+                                  final long amountReceived, final long fees) {
+        paymentConfirmed(from, to, amountReceived, fees, null);
+    }
+
+    private void paymentConfirmed(final String from, final String to,
+                                  final long amountReceived, final long fees, final  String pin) {
         logger.debug("payment confirmed");
 
         final Dialog dialog = dialogFullscreenAlert(getString(R.string.create_transaction));
@@ -896,13 +910,15 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         hashesCounter++;
 
                         if (hashesCounter > 9) {
-                            pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()).setPin("99999999").setMore(i + 1 < list.size()));
+                            pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()).setMore(i + 1 < list.size()));
+                            if (pin != null) peekRequest().setPin(pin);
                             hashes = new StringBuilder();
                             hashesCounter = 0;
                         }
                     }
                     if (hashesCounter > 0) {
-                        pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()).setPin("99999999"));
+                        pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()));
+                        if (pin != null) peekRequest().setPin(pin);
                     }
                     logger.debug("Request Number: {}", numOfRequest());
 
@@ -984,7 +1000,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         String strFiatFess = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(btcExchangeRates, lc, btcTxfees));
 
         // confirmation summary string
-        String msg = getString(R.string.subject_text_estimated_time) + estTime + CRLF + CRLF +
+        String msg = getString(R.string.subject_text_estimated_time) + " " + estTime + " " + getString(R.string.minute) + CRLF + CRLF +
                 getString(R.string.amount_sent) + CRLF + strBtcAmountSent + " / " +
                 strFiatAmountSent + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")" + CRLF +
                 getString(R.string.sender) + ":" + CRLF + from + CRLF + CRLF +
@@ -1007,7 +1023,20 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        paymentConfirmed(from, to, amountReceived, fees);
+                        if (cbAuthByPin.isChecked()) {
+                            DialogAuthByPin dialogAuthByPin = new DialogAuthByPin();
+                            dialogAuthByPin.setListener(new DialogAuthByPin.DialogAuthByPinListener() {
+                                @Override
+                                public void setPin(String pin) {
+                                    paymentConfirmed(from, to, amountReceived, fees, pin);
+                                }
+                            });
+                            dialogAuthByPin.show(getFragmentManager(), "AuthByPin");
+                            cbAuthByPin.setChecked(false);
+                        }
+                        else {
+                            paymentConfirmed(from, to , amountReceived, fees, null);
+                        }
                     }
                 })
                 .setCancelable(true)

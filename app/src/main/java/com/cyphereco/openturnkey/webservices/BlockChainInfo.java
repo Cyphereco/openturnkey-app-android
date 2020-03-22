@@ -108,6 +108,30 @@ public class BlockChainInfo {
         }
     }
 
+    public static long getTxTime(String txHash) {
+        long ret = 0;
+        try {
+            Client webClient = ClientBuilder.newClient();
+            Response response = webClient.target(URI).path(PATH_RAWTX).path(txHash)
+                    .request().get();
+            String body = response.readEntity(String.class);
+            JSONObject json = new JSONObject(body);
+            String time = json.getString("time");
+            ret = Long.parseLong(time);
+            webClient.close();
+        } catch (Exception e) {
+            logger.error("e:{}", e.toString());
+        }
+//        logger.info("getTxTime ({}): {}", txHash, ret);
+        return ret;
+    }
+
+    public static void getTxTime(String txHash, WebResultHandler handler) {
+        if (handler != null) {
+            handler.onTxTimeUpdated(getTxTime(txHash));
+        }
+    }
+
     public static int getTxBlockHeight(String txHash) {
         int ret = 0;
         try {
@@ -145,7 +169,7 @@ public class BlockChainInfo {
         } catch (Exception e) {
             logger.error("e:{}", e.toString());
         }
-        logger.info("getRawTx ({}): {}", txHash, rawTx);
+//        logger.info("getRawTx ({}): {}", txHash, rawTx);
         return rawTx;
     }
 
@@ -169,6 +193,8 @@ public class BlockChainInfo {
         void onBalanceUpdated(BigDecimal balance);
 
         void onBlockHeightUpdated(int height);
+
+        void onTxTimeUpdated(long time);
 
         void onTxBlockHeightUpdated(int height);
 
