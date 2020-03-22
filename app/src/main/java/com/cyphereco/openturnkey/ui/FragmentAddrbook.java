@@ -242,7 +242,7 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
         tvAddress.setText(item.getAddress());
         BitcoinPaymentURI uri = new BitcoinPaymentURI.Builder().address(item.getAddress()).build();
         if (uri != null) {
-            Bitmap bitmap = QRCodeUtils.encodeAsBitmap(uri.getURI(),
+            Bitmap bitmap = QRCodeUtils.encodeAsBitmap(uri.getURI().replace("bitcoin:", ""),
                     ivQRCode.getDrawable().getIntrinsicWidth(),
                     ivQRCode.getDrawable().getIntrinsicHeight());
             ivQRCode.setImageBitmap(bitmap);

@@ -168,7 +168,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
 
                 if (MainActivity.isAddressValid(addr)) {
                     mAddress = addr;
-                    mInputAddress.setText(mAddress);
+                    mInputAddress.setText(mAddress.replace("bitcoin:", ""));
                 } else {
                     if (BtcUtils.isSegWitAddress(!Preferences.isTestnet(), addr)) {
                         AlertPrompt.alert(this, getString(R.string.seg_wit_address_is_not_supported));
