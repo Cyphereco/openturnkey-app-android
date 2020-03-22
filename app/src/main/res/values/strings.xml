@@ -245,5 +245,7 @@
     <string name="mid">Mid</string>
     <string name="low">Low</string>
     <string name="customized">Customized</string>
+    <string name="included">Included</string>
+    <string name="excluded">Excluded</string>
 
 </resources>

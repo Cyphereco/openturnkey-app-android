@@ -460,6 +460,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 return true;
             case R.id.menu_pay_fee_included:
                 Preferences.setFeeIncluded(item.setChecked(!item.isChecked()).isChecked());
+                updateEstFees();
                 return true;
             case R.id.menu_pay_use_fix_address:
                 mUseFixAddress = onFixAddressChecked(!item.isChecked());
@@ -1224,8 +1225,12 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
     private void updateEstFees() {
         if (this.getContext() == null) return;;
+
+        String feesInc = getString(R.string.excluded);
+        if(Preferences.getFeeIncluded()) feesInc = getString(R.string.included);
+
         lblEstFees.setText(getString(R.string.estimated_fees) + " (" +
-                strTxFeeType(Preferences.getTxFeeType()) + "):");
+                strTxFeeType(Preferences.getTxFeeType()) + " - " + feesInc + "):");
         tvEstFees.setText(formattedBtcAmount(getTxFees() / 100000000d)  + " / " +
                 formattedFiatAmount(BtcUtils.btcToLocalCurrency(btcExchangeRates,
                         Preferences.getLocalCurrency(),

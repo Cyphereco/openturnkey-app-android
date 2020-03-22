@@ -227,4 +227,6 @@
     <string name="high">高</string>
     <string name="mid">中</string>
     <string name="low">低</string>
+    <string name="excluded">抜き</string>
+    <string name="included">込み</string>
 </resources>
