@@ -222,4 +222,9 @@
     <string name="is_copied">コピーされた</string>
     <string name="check_opentunrkey_balance">OpenTurnKeyバランスを確認する</string>
     <string name="minute">分</string>
+    <string name="estimated_fees">推定手数料</string>
+    <string name="customized">限定</string>
+    <string name="high">高</string>
+    <string name="mid">中</string>
+    <string name="low">低</string>
 </resources>

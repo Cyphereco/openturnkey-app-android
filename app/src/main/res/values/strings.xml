@@ -240,5 +240,10 @@
     <string name="is_copied">" is copied"</string>
     <string name="check_opentunrkey_balance">Check OpenTurnKey Balance</string>
     <string name="minute">Min.</string>
+    <string name="estimated_fees">Estimated Fees</string>
+    <string name="high">High</string>
+    <string name="mid">Mid</string>
+    <string name="low">Low</string>
+    <string name="customized">Customized</string>
 
 </resources>

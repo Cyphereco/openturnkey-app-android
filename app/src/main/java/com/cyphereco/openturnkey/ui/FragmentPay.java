@@ -49,6 +49,8 @@ import com.cyphereco.openturnkey.webservices.BlockChainInfo;
 import com.cyphereco.openturnkey.webservices.BlockCypher;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -77,6 +79,9 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     private EditText tvAmountFiat;
     private TextView tvAddress;
     private TextView tvCurrency;
+    private TextView lblEstFees;
+    private TextView tvEstFees;
+    private TextView lblEstFeesUnit;
     private CheckBox cbUseAllFunds;
     private CheckBox cbAuthByPin;
     private Menu mMenu;
@@ -101,9 +106,12 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         xrateHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
-                tvAmountFiat.setText("");
-                btcExchangeRates = (BtcExchangeRates) msg.obj;
-                convertCurrency();
+                if (msg.obj != null) {
+                    tvAmountFiat.setText("");
+                    btcExchangeRates = (BtcExchangeRates) msg.obj;
+                    convertCurrency();
+                }
+                updateEstFees();
                 return false;
             }
         });
@@ -140,6 +148,11 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         tvAddress = view.findViewById(R.id.input_recipient_address);
         tvAddress.setFocusable(false);
         tvCurrency = view.findViewById(R.id.text_local_currency);
+
+        lblEstFees = view.findViewById(R.id.label_fragment_pay_est_fees);
+        tvEstFees = view.findViewById(R.id.tv_fragment_pay_est_fees);
+        lblEstFeesUnit = view.findViewById(R.id.label_fragment_pay_est_fees_unit);
+        updateEstFees();
 
         ImageView iv;
         iv = view.findViewById(R.id.icon_scan_qrcode);
@@ -200,7 +213,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
             @Override
             public void onTxFeeUpdated(TxFee txFee) {
-
+                Message msg = new Message();
+                xrateHandler.sendMessage(msg);
             }
 
             @Override
@@ -419,6 +433,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         mLocalCurrency = Preferences.getLocalCurrency();
         tvCurrency.setText(mLocalCurrency.toString());
+        updateEstFees();
     }
 
     @Override
@@ -694,11 +709,15 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         if (menuItem != null) {
             menuItem.setChecked(Preferences.getUseFixAddressChecked());
         }
+
+        updateEstFees();
     }
 
     private void updateLocalCurrency(LocalCurrency localCurrency) {
         mLocalCurrency = localCurrency;
         tvCurrency.setText(mLocalCurrency.toString());
+        lblEstFeesUnit.setText(getString(R.string._unit_btc) + " / " + Preferences.getLocalCurrency().toString());
+
         boolean cache = mIsCryptoCurrencySet;
         mIsCryptoCurrencySet = true;
         convertCurrency();
@@ -1177,6 +1196,41 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             recordTransaction.setExchangeRate(MainActivity.getBtcExchangeRates().toString());
         }
         return recordTransaction;
+    }
+
+    private String formattedBtcAmount(double src) {
+        String result = String.format(Locale.getDefault(), "%.8f", src);
+        return (result.substring(0, result.length() - 4) + " " +
+                result.substring(result.length() - 4));
+    }
+
+    private String formattedFiatAmount(double src) {
+        NumberFormat formatter = new DecimalFormat("#,###.###");
+        return formatter.format(src);
+    }
+
+    private String strTxFeeType(Configurations.TxFeeType type) {
+        switch (type) {
+            case CUSTOMIZED:
+                return getString(R.string.customized);
+            case LOW:
+                return getString(R.string.low);
+            case MID:
+                return getString(R.string.mid);
+            default:
+                return getString(R.string.high);
+        }
+    }
+
+    private void updateEstFees() {
+        if (this.getContext() == null) return;;
+        lblEstFees.setText(getString(R.string.estimated_fees) + " (" +
+                strTxFeeType(Preferences.getTxFeeType()) + "):");
+        tvEstFees.setText(formattedBtcAmount(getTxFees() / 100000000d)  + " / " +
+                formattedFiatAmount(BtcUtils.btcToLocalCurrency(btcExchangeRates,
+                        Preferences.getLocalCurrency(),
+                        getTxFees() / 100000000d)));
+        lblEstFeesUnit.setText(getString(R.string._unit_btc) + " / " + Preferences.getLocalCurrency().toString());
     }
 }
 

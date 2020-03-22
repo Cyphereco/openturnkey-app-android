@@ -198,4 +198,29 @@
         app:layout_constraintBottom_toTopOf="@+id/button_sign_payment"
         app:layout_constraintEnd_toEndOf="@+id/button_sign_payment" />
 
+    <TextView
+        android:id="@+id/tv_fragment_pay_est_fees"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0.00 / 0.00"
+        app:layout_constraintStart_toStartOf="@+id/label_fragment_pay_est_fees"
+        app:layout_constraintTop_toBottomOf="@+id/label_fragment_pay_est_fees" />
+
+    <TextView
+        android:id="@+id/label_fragment_pay_est_fees"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/estimated_fees"
+        app:layout_constraintStart_toStartOf="@+id/textInputLayout"
+        app:layout_constraintTop_toTopOf="@+id/icon_paste_clipboard" />
+
+    <TextView
+        android:id="@+id/label_fragment_pay_est_fees_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BTC/USD"
+        app:layout_constraintEnd_toEndOf="@+id/tv_fragment_pay_est_fees"
+        app:layout_constraintTop_toBottomOf="@+id/tv_fragment_pay_est_fees" />
+
 </android.support.constraint.ConstraintLayout>

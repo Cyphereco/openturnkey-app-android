@@ -357,6 +357,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void setTxFee(TxFee txFee) {
         logger.debug("Update TxFee: {}", txFee.toString());
+        Preferences.setTxFee(txFee);
         if (MainActivity.txFee != null) MainActivity.txFee = txFee;
         for (OnlineDataUpdateListener listener : listOnlineDataUpdateListener
         ) {

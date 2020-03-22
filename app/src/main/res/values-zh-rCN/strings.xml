@@ -222,4 +222,9 @@
     <string name="is_copied">已复制</string>
     <string name="check_opentunrkey_balance">查询OpenTurnKey余额</string>
     <string name="minute">分钟</string>
+    <string name="estimated_fees">预估手续费</string>
+    <string name="customized">自订</string>
+    <string name="high">高</string>
+    <string name="mid">中</string>
+    <string name="low">低</string>
 </resources>
