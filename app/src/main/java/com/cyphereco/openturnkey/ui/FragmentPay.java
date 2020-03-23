@@ -565,8 +565,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         public void onConfirmationsUpdated(int confirmations) {
                         }
                     });
-                    // construct transaction
-                    // show confirmation dialog
                 } else {
                     // read OTK general information, must be getting the OTK address
                     if (MainActivity.isAddressValid(addr)) {
