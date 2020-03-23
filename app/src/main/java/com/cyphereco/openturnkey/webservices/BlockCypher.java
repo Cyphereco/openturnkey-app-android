@@ -28,15 +28,17 @@ public class BlockCypher {
     public static final String TAG = BlockCypher.class.getSimpleName();
     private static Logger logger = Log4jHelper.getLogger(TAG);
 
-    private static final String token = "7744d177ce1e4ef48c7431fcb55531b9";
+    private static final String TOKEN = "7744d177ce1e4ef48c7431fcb55531b9";
     private static BlockCypherContext mBcCtx;
     private static IntermediaryTransaction mCachedUnsignedTx = null;
+    private static final boolean useToken = false;
 
     private static void newBlockCypherContext() {
-        String network = Preferences.isTestnet() ? "text3" : "main";
+        String network = Preferences.isTestnet() ? "test3" : "main";
 
         // BlockCypherContext with token
-        mBcCtx = new BlockCypherContext("v1", "btc", network, "");
+        String token = useToken ? TOKEN : "";
+        mBcCtx = new BlockCypherContext("v1", "btc", network, token);
     }
 
     public static void reInit() {
