@@ -208,7 +208,7 @@
 
     <TextView
         android:id="@+id/label_fragment_pay_est_fees"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="@string/estimated_fees"
