@@ -134,6 +134,8 @@ public class FragmentHistory extends FragmentExtendOtkViewPage {
     @Override
     public void onPageSelected() {
         super.onPageSelected();
+        // fragment has not been attached, do not update
+        if (this.getContext() == null) return;;
 
         logger.debug("refresh history");
         updateTransactionDataset();
