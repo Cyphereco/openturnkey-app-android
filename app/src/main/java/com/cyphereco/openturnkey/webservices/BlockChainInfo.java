@@ -1,5 +1,6 @@
 package com.cyphereco.openturnkey.webservices;
 
+import com.cyphereco.openturnkey.ui.Preferences;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
@@ -74,7 +75,12 @@ public class BlockChainInfo {
                 @Override
                 public void run() {
                     synchronized (this) {
-                        handler.onBalanceUpdated(getBalance(address));
+                        if (Preferences.isTestnet()) {
+                            handler.onBalanceUpdated(BlockCypher.getBalance(address));
+                        }
+                        else {
+                            handler.onBalanceUpdated(getBalance(address));
+                        }
                     }
                 }
             }.start();
