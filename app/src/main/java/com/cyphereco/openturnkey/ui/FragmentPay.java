@@ -408,7 +408,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 dialogFixAddressEnabled();
             }
 
-            if (BtcUtils.validateAddress(!Preferences.isTestnet(), Preferences.getUseFixAddressAddrString())) {
+            // if fix address does not match to current network preference, clear fix address configuration
+            if (!BtcUtils.validateAddress(!Preferences.isTestnet(), Preferences.getUseFixAddressAddrString())) {
                 Preferences.setUseFixAddress(false, "");
                 tvAddress.setText("");
                 mUseFixAddress = false;
