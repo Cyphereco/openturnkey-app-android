@@ -243,7 +243,8 @@ public class FragmentExtendOtkViewPage extends Fragment {
     protected OtkRequest peekRequest() {
         OtkRequest request = otkRequestQueue.peek();
         assert request != null;
-        logger.debug("peek request: {}", request);
+        logger.debug("peek request: {} / {} / {} / {}",
+                request.getSessionId(), request.getRequestId(), request.getCommand(), request.getOption());
         return request;
     }
 

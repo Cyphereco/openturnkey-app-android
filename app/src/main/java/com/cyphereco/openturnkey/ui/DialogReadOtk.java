@@ -108,11 +108,11 @@ public class DialogReadOtk extends AppCompatDialogFragment {
         ObjectAnimator animation = ObjectAnimator.ofPropertyValuesHolder(view,
                 PropertyValuesHolder.ofFloat("translationY", 0, 1200f),
                 PropertyValuesHolder.ofFloat("alpha", 1.0f, 0.0f));
-
+        final DialogReadOtk dialog = this;
         animation.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                dismiss();
+                if (dialog != null) dialog.dismiss();
             }
 
             @Override
