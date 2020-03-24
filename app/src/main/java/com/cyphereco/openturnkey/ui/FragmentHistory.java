@@ -119,7 +119,7 @@ public class FragmentHistory extends FragmentExtendOtkViewPage {
             }
 
             @Override
-            public void onBlockHeightUpdated(int height) {
+            public void onBlockHeightUpdated(long height) {
                 if (isSelected()) {
                     // switch page quickly to refresh adapter items confirmation icon
                     MainActivity.switchToPage(MainActivity.PAGE.PAY.ordinal());
