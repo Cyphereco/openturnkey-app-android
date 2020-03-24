@@ -62,6 +62,7 @@ public class BlockCypher {
             return a.getFinalBalance();
         } catch (Exception e) {
             logger.error("e:" + e.toString());
+            semaphoreWebRequest.release();
         }
         return BigDecimal.valueOf(-1);
     }
@@ -78,6 +79,7 @@ public class BlockCypher {
         }
         catch (Exception e) {
             logger.error("Error: {}", e.toString());
+            semaphoreWebRequest.release();
         }
         return 0;
     }
@@ -92,6 +94,7 @@ public class BlockCypher {
             return tx;
         } catch (Exception e) {
             logger.error("Error: {}", e.toString());
+            semaphoreWebRequest.release();
         }
         return null;
     }
@@ -137,6 +140,7 @@ public class BlockCypher {
             return new UnsignedTx(from, to, a, txFees, unsignedTx.getTosign());
         } catch (Exception e) {
             logger.error("e:" + e.toString());
+            semaphoreWebRequest.release();
             throw e;
         }
     }
@@ -214,10 +218,12 @@ public class BlockCypher {
             return recordTransaction;
         }
         catch (BlockCypherException e) {
+            semaphoreWebRequest.release();
             throw e;
         }
         catch (Exception e) {
             logger.debug("e:" + e.toString());
+            semaphoreWebRequest.release();
         }
 
         mCachedUnsignedTx = null;
