@@ -59,8 +59,16 @@ public class OtkRequest implements Serializable {
         return requestId;
     }
 
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
     public String getCommand() {
         return command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
     }
 
     public String getData() {
@@ -112,6 +120,7 @@ public class OtkRequest implements Serializable {
     }
 
     public OtkRequest setPin(String pin) {
+        if (pin == null) return this;
         if (!option.contains("pin=")) setOption(getOption() + ",pin=" + pin);
         return this;
     }

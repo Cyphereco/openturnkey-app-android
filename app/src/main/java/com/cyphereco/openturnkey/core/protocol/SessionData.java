@@ -37,6 +37,7 @@ public class SessionData implements Serializable {
     private List<String> sigList = new ArrayList<>();
 
     public SessionData(String sessData) {
+        logger.debug("DEBUG SessionData: {}", sessData);
         // Session id
         int labelSsessIdStart = sessData.indexOf(OTK_LABEL_SESSION_ID);
         if (labelSsessIdStart != -1) {
@@ -58,7 +59,7 @@ public class SessionData implements Serializable {
             int crlf = sessData.indexOf(CRLF, reqSigStart);
             String requestSig = sessData.substring(reqSigStart, crlf);
             while (true) {
-                logger.debug("requestSig:" + requestSig);
+//                logger.debug("requestSig:" + requestSig);
                 // Find delim that separate signatures
                 int delim = requestSig.indexOf(OTK_REQUEST_SIGNATURE_DELIM);
                 String sig;
