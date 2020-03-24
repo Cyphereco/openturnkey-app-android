@@ -31,6 +31,7 @@ import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcExchangeRates;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
+import com.cyphereco.openturnkey.webservices.BlockCypher;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -236,6 +237,9 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         RecordTransaction item = listRecordTransactions.get(idxCurrentPosition);
 
         uriString = "https://www.blockchain.com/btc/tx/" + item.getHash();
+        if (Preferences.isTestnet()) {
+            uriString = "https://live.blockcypher.com/btc-testnet/tx/" + item.getHash();
+        }
         browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriString));
         startActivity(browserIntent);
     }
@@ -319,6 +323,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     }
 
     private void showTransactionInfo(final RecordTransaction recordTransaction) {
+        logger.debug("Tx block height: {}", recordTransaction.getBlockHeight());
         BtcExchangeRates loggedExchangeRate = new BtcExchangeRates(recordTransaction.getExchangeRate());
         logger.debug("loggedExchangeRate: {}", loggedExchangeRate);
 
