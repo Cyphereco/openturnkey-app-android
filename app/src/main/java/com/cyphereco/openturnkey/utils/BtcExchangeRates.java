@@ -19,6 +19,11 @@ public class BtcExchangeRates {
     }
 
     public BtcExchangeRates(String strBtcExchangeRate) {
+        if (strBtcExchangeRate == null) {
+            new BtcExchangeRates(0, 0, 0, 0, 0);
+            return;
+        }
+
         Pattern pattern = Pattern.compile("BtcExchangeRates[{]rate_cny=.*, rate_eur=.*, rate_jpy=.*, rate_twd=.*, rate_usd=.*[}]");
         if (pattern.matcher(strBtcExchangeRate).matches()) {
             String[] listExchagneRates = strBtcExchangeRate.replace("BtcExchangeRates{", "")
