@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONException;
@@ -419,21 +420,30 @@ public class BtcUtils {
 
     static public long convertDateTimeStringToLong(String dateTime) {
         if (dateTime == null) return 0;
+
+        logger.debug("Time string to convert: {}", dateTime);
+        String regexDateFormat = "\\b[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.*Z\\b";
+        if (!dateTime.matches(regexDateFormat)) return 0;
+
+        // remove milliseconds string if exists
+        String regexReplacement = "\\..*Z";
+        String timeFormatted = dateTime.replaceAll(regexReplacement, "Z");
         try {
             //2019-09-15T16:49:49.584902078Z
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'", Locale.getDefault());
-            Date d = format.parse(dateTime);
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date d = format.parse(timeFormatted);
             return d.getTime();
         } catch (ParseException e) {
-            logger.error(String.format("Failed to parse {}. Exception:{}%s", e));
+            logger.error("Exception: {}", e);
             return 0;
         }
     }
 
     static public String convertDateTimeStringFromLong(long time) {
         Date date = new Date(time);
-        //2019-09-15T16:49:49.584902078Z
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'", Locale.getDefault());
+        //2019-09-15T16:49:49Z
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ'", Locale.getDefault());
         return format.format(date);
     }
 
