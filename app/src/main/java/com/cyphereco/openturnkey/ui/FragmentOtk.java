@@ -27,6 +27,7 @@ import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkRequest;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
+import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
 
 import java.util.Objects;
@@ -101,6 +102,11 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
     @Override
     protected void preRequestSend(OtkRequest request, OtkData otkData) {
         super.preRequestSend(request, otkData);
+        if (!BtcUtils.validateAddress(!Preferences.isTestnet(), otkData.getSessionData().getAddress())) {
+            // address check, request command can only be made with correct corresponding network preference
+            clearRequest();
+            return;
+        }
     }
 
     @Override
@@ -110,6 +116,12 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
         // process received otk data
         if (otkData != null) {
             Intent intent = null;
+
+            if (!BtcUtils.validateAddress(!Preferences.isTestnet(), otkData.getSessionData().getAddress())) {
+                // address check, request command can only be made with correct corresponding network preference
+                AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
+                return;
+            }
 
             if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
                 // no particular request command, display general information

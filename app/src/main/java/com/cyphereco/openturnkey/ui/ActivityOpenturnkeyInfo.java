@@ -116,7 +116,9 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
             tvAddress.setMovementMethod(LinkMovementMethod.getInstance());
             tvAddress.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    String url = "https://bitref.com/" + tvAddress.getText().toString();
+                    String url = !Preferences.isTestnet() ?
+                            "https://www.blockchain.com/btc/address/" + address :
+                            "https://live.blockcypher.com/btc-testnet/address/" + address;
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     startActivity(browserIntent);
                 }
