@@ -5,6 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cyphereco.openturnkey.ui.Preferences;
+import com.cyphereco.openturnkey.utils.BtcUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -217,7 +220,11 @@ public class OpenturnkeyDB {
         try (Cursor cursor = otkDB.query(TABLE_TRANSACTION, null, null,
                 null, null, null, null, null)) {
             while (cursor.moveToNext()) {
-                result.add(generateTransItemByQueryResult(cursor));
+                // output transactions only matched current network preference
+                if (BtcUtils.validateAddress(!Preferences.isTestnet(),
+                        generateTransItemByQueryResult(cursor).getPayer())) {
+                    result.add(generateTransItemByQueryResult(cursor));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -327,7 +334,11 @@ public class OpenturnkeyDB {
         Cursor cursor = otkDB.query(TABLE_ADDRESSBOOK, null, null,
                 null, null, null, null, null);
         while (cursor.moveToNext()) {
-            result.add(generateAddrbookItemByQueryResult(cursor));
+            // output address only matched current network preference
+            if (BtcUtils.validateAddress(!Preferences.isTestnet(),
+                    generateAddrbookItemByQueryResult(cursor).getAddress())) {
+                result.add(generateAddrbookItemByQueryResult(cursor));
+            }
         }
 
         cursor.close();

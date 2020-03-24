@@ -14,6 +14,7 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.db.RecordTransaction;
 import com.cyphereco.openturnkey.utils.AddressUtils;
+import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.webservices.BlockChainInfo;
 import com.cyphereco.openturnkey.webservices.BlockCypher;
@@ -73,6 +74,7 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
         // the transaction should be considered failed.
 
         final RecordTransaction recordTransaction = mTransDataset.get(position);
+
         // unmark below two lines to force records to be updated with online result
 //        recordTransaction.setBlockHeight(-1);
 //        OpenturnkeyDB.updateTransaction(recordTransaction);

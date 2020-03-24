@@ -386,7 +386,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 String addr = data.getStringExtra(KEY_QR_CODE);
                 logger.info("QR result: {}", addr);
 
-                if (MainActivity.isAddressValid(addr)) {
+                if (BtcUtils.validateAddress(!Preferences.isTestnet(), addr)) {
                     tvAddress.setText(addr);
                 } else {
                     if (BtcUtils.isSegWitAddress(!Preferences.isTestnet(), addr)) {
@@ -407,8 +407,16 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             if (MainActivity.getPayToAddress().length() > 0) {
                 dialogFixAddressEnabled();
             }
-            tvAddress.setText(Preferences.getUseFixAddressAddrString());
-            mUseFixAddress = true;
+
+            if (BtcUtils.validateAddress(!Preferences.isTestnet(), Preferences.getUseFixAddressAddrString())) {
+                Preferences.setUseFixAddress(false, "");
+                tvAddress.setText("");
+                mUseFixAddress = false;
+            }
+            else {
+                tvAddress.setText(Preferences.getUseFixAddressAddrString());
+                mUseFixAddress = true;
+            }
         } else {
             String addr = "";
 
@@ -423,7 +431,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             }
 
             if (addr.length() > 0) {
-                if (MainActivity.isAddressValid(addr)) {
+                if (BtcUtils.validateAddress(!Preferences.isTestnet(), addr)) {
                     tvAddress.setText(addr);
                 } else {
                     AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
@@ -509,65 +517,73 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
                 if (signPayment) {
                     signPayment = false;
-                    final String from = otkData.getSessionData().getAddress();
-                    final String to = tvAddress.getText().toString();
-                    logger.debug("Pay to ({}) for {} / {} (btc/{}) with tx fee ({}) included: {}",
-                            to, tvAmountBtc.getText(), tvAmountFiat.getText(),
-                            getLocalCurrency().toString(), getTxFees(),
-                            Preferences.getFeeIncluded());
-                    // prepare to make payment
-                    final Dialog dialog = dialogFullscreenAlert(getString(R.string.check_balance));
-                    dialog.show();
-                    // check balance from payer address
-                    logger.debug("checking balance");
-                    BlockChainInfo.getBalance(addr, new BlockChainInfo.WebResultHandler() {
-                        @Override
-                        public void onBalanceUpdated(BigDecimal balance) {
-                            logger.debug("Account ({}) balance: {}", otkData.getSessionData().getAddress(), balance);
-                            long amountSent = totalAmountSent();
-                            long amountReceived = totalAmountReceived();
-                            if (amountSent < 0) {
-                                amountSent = balance.longValue();
-                                amountReceived += amountSent;
+
+                    if (!BtcUtils.validateAddress(!Preferences.isTestnet(), addr)) {
+                        AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
+                    }
+                    else {
+                        // check balance from payer address
+                        logger.debug("checking balance");
+                        final String from = otkData.getSessionData().getAddress();
+                        final String to = tvAddress.getText().toString();
+                        logger.debug("Pay to ({}) for {} / {} (btc/{}) with tx fee ({}) included: {}",
+                                to, tvAmountBtc.getText(), tvAmountFiat.getText(),
+                                getLocalCurrency().toString(), getTxFees(),
+                                Preferences.getFeeIncluded());
+
+                        // prepare to make payment
+                        final Dialog dialog = dialogFullscreenAlert(getString(R.string.check_balance));
+                        dialog.show();
+
+                        BlockChainInfo.getBalance(addr, new BlockChainInfo.WebResultHandler() {
+                            @Override
+                            public void onBalanceUpdated(BigDecimal balance) {
+                                logger.debug("Account ({}) balance: {}", otkData.getSessionData().getAddress(), balance);
+                                long amountSent = totalAmountSent();
+                                long amountReceived = totalAmountReceived();
+                                if (amountSent < 0) {
+                                    amountSent = balance.longValue();
+                                    amountReceived += amountSent;
+                                }
+                                dialog.cancel();
+                                if (balance.longValue() < amountSent || amountReceived < 0) {
+                                    // balance not enough
+                                    // calling AlertPrompt from thread need Looper.prepare
+                                    AlertPrompt.threadSafeAlert(getContext(), getString(R.string.balance_insufficient));
+                                } else {
+                                    pubKeyPayer = otkData.getPublicKey();
+                                    // proceed final confirmation
+                                    logger.debug("Amount sent (include fees): {}, Amount received: {}",
+                                            amountSent, amountReceived);
+                                    dialogConfirmPayment(from, to, amountSent, amountReceived, getTxFees());
+                                }
                             }
-                            dialog.cancel();
-                            if (balance.longValue() < amountSent || amountReceived < 0) {
-                                // balance not enough
-                                // calling AlertPrompt from thread need Looper.prepare
-                                AlertPrompt.threadSafeAlert(getContext(), getString(R.string.balance_insufficient));
-                            } else {
-                                pubKeyPayer = otkData.getPublicKey();
-                                // proceed final confirmation
-                                logger.debug("Amount sent (include fees): {}, Amount received: {}",
-                                        amountSent, amountReceived);
-                                dialogConfirmPayment(from, to, amountSent, amountReceived, getTxFees());
+
+                            @Override
+                            public void onBlockHeightUpdated(long height) {
                             }
-                        }
 
-                        @Override
-                        public void onBlockHeightUpdated(long height) {
-                        }
+                            @Override
+                            public void onTxTimeUpdated(long time) {
 
-                        @Override
-                        public void onTxTimeUpdated(long time) {
+                            }
 
-                        }
+                            @Override
+                            public void onTxBlockHeightUpdated(long height) {
+                            }
 
-                        @Override
-                        public void onTxBlockHeightUpdated(long height) {
-                        }
+                            @Override
+                            public void onRawTxUpdated(String rawTx) {
+                            }
 
-                        @Override
-                        public void onRawTxUpdated(String rawTx) {
-                        }
-
-                        @Override
-                        public void onConfirmationsUpdated(long confirmations) {
-                        }
-                    });
+                            @Override
+                            public void onConfirmationsUpdated(long confirmations) {
+                            }
+                        });
+                    }
                 } else {
                     // read OTK general information, must be getting the OTK address
-                    if (MainActivity.isAddressValid(addr)) {
+                    if (BtcUtils.validateAddress(!Preferences.isTestnet(), addr)) {
                         tvAddress.setText(addr);
                     } else {
                         AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
@@ -649,7 +665,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 if (data != null && description != null) {
                     String addr = String.valueOf(data.getItemAt(0).coerceToText(getContext()));
 
-                    if (MainActivity.isAddressValid(addr)) {
+                    if (BtcUtils.validateAddress(!Preferences.isTestnet(), addr)) {
                         tvAddress.setText(addr);
                     } else {
                         AlertPrompt.alert(getContext(), getString(R.string.invalid_address));

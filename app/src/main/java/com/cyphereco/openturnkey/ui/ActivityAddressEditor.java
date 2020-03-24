@@ -97,7 +97,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
             logger.debug("got otkData: {}", otkData.toString());
             String addr = data.getSessionData().getAddress();
 
-            if (MainActivity.isAddressValid(addr)) {
+            if (BtcUtils.validateAddress(!Preferences.isTestnet(), addr)) {
                 mAddress = addr;
                 mInputAddress.setText(mAddress);
             } else {
@@ -166,7 +166,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
                 String addr = data.getStringExtra(KEY_QR_CODE);
                 logger.info("QR result: {}", addr);
 
-                if (MainActivity.isAddressValid(addr)) {
+                if (BtcUtils.validateAddress(!Preferences.isTestnet(), addr)) {
                     mAddress = addr;
                     mInputAddress.setText(mAddress.replace("bitcoin:", ""));
                 } else {
@@ -201,7 +201,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
                     if (data != null && description != null) {
                         String addr = data.getItemAt(0).getText().toString();
 
-                        if (MainActivity.isAddressValid(addr)) {
+                        if (BtcUtils.validateAddress(!Preferences.isTestnet(), addr)) {
                             mAddress = addr;
                             mInputAddress.setText(mAddress);
                         } else {

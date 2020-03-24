@@ -331,19 +331,6 @@ public class MainActivity extends AppCompatActivity {
         MainActivity.qrScanText = qrScanText;
     }
 
-    public static boolean isAddressValid(String addr) {
-        if (addr.contains(":")) {
-            // contents might be a uri
-            String[] strLists = addr.split(":");
-
-            if (strLists.length > 1 && strLists[0].contentEquals("bitcoin")) {
-                addr = strLists[1];
-            }
-        }
-
-        return BtcUtils.validateAddress(true, addr) || BtcUtils.validateAddress(false, addr);
-    }
-
     public static BtcExchangeRates getBtcExchangeRates() {
         return btcExchangeRates;
     }
