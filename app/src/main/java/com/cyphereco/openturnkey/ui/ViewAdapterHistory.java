@@ -9,12 +9,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.blockcypher.model.transaction.Transaction;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
 import com.cyphereco.openturnkey.db.RecordTransaction;
 import com.cyphereco.openturnkey.utils.AddressUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.webservices.BlockChainInfo;
+import com.cyphereco.openturnkey.webservices.BlockCypher;
 
 import org.slf4j.Logger;
 
@@ -70,23 +72,36 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
         // for its uncertainty. If still not confirmed after 144 blocks (1 day)
         // the transaction should be considered failed.
 
-        final RecordTransaction transaction = mTransDataset.get(position);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int height =  BlockChainInfo.getTxBlockHeight(transaction.getHash());
-                if (transaction.getBlockHeight() != height) {
-                    transaction.setBlockHeight(height);
-                    OpenturnkeyDB.updateTransaction(transaction);
-                }
-                long time = BlockChainInfo.getTxTime(transaction.getHash());
-                if (transaction.getTimestamp() != (time * 1000)) {
-                    transaction.setBlockHeight(time * 1000);
-                    OpenturnkeyDB.updateTransaction(transaction);
-                }
-            }
-        }).start();
+        final RecordTransaction recordTransaction = mTransDataset.get(position);
+        // unmark below two lines to force records to be updated with online result
+//        recordTransaction.setBlockHeight(-1);
+//        OpenturnkeyDB.updateTransaction(recordTransaction);
 
+        if (recordTransaction.getBlockHeight() <= 0) {
+            // transaction has not been confirmed, need to update (block height, confirmed time, rawTx) from network
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (recordTransaction.getRawData() == null || recordTransaction.getRawData().length() == 0) {
+                        Transaction tx = BlockCypher.getTransaction(recordTransaction.getHash(), true);
+                        if (tx != null && tx.getHex().length() > 0) {
+                            recordTransaction.setRawData(tx.getHex());
+                            OpenturnkeyDB.updateTransaction(recordTransaction);
+                        }
+                    }
+
+                    if (recordTransaction.getBlockHeight() < 0){
+                        long height = BlockChainInfo.getTxBlockHeight(recordTransaction.getHash());
+                        if (height < 0) return;
+
+                        recordTransaction.setBlockHeight(height);
+                        recordTransaction.setTimestamp(BlockChainInfo.getTxTime(recordTransaction.getHash()));
+                        OpenturnkeyDB.updateTransaction(recordTransaction);
+                        logger.debug("Transaction accepted: {}", recordTransaction.toString());
+                    }
+                }
+            }).start();
+        }
         long confirmations = MainActivity.getBlockHeight() - mTransDataset.get(position).getBlockHeight() + 1;
 
         if (mTransDataset.get(position).getBlockHeight() < 0 || confirmations < 0) {
