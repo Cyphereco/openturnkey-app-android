@@ -346,7 +346,10 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         long confirmations = MainActivity.getBlockHeight() - recordTransaction.getBlockHeight() + 1;
         if (recordTransaction.getBlockHeight() < 0 || confirmations < 0) {
             tvResult.setText(R.string.unconfirmed);
-        } else {
+        } else if (confirmations > 1440) {
+            tvResult.setText("1440+" + getString(R.string.confirmation));
+        }
+        else {
             tvResult.setText(String.format(Locale.getDefault(), "%d %s", confirmations, getString(R.string.confirmation)));
         }
 
