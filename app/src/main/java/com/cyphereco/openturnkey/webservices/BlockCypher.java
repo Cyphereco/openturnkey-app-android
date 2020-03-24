@@ -32,7 +32,7 @@ public class BlockCypher {
     private static final String TOKEN = "7744d177ce1e4ef48c7431fcb55531b9";
     private static BlockCypherContext mBcCtx;
     private static IntermediaryTransaction mCachedUnsignedTx = null;
-    private static final boolean useToken = false;
+    private static boolean useToken = false;
 
     private static final int MAX_AVAILABLE = 2;
     private static final Semaphore semaphoreWebRequest = new Semaphore(MAX_AVAILABLE, true);
@@ -63,6 +63,10 @@ public class BlockCypher {
         } catch (Exception e) {
             logger.error("e:" + e.toString());
             semaphoreWebRequest.release();
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
+            }
         }
         return BigDecimal.valueOf(-1);
     }
@@ -80,6 +84,10 @@ public class BlockCypher {
         catch (Exception e) {
             logger.error("Error: {}", e.toString());
             semaphoreWebRequest.release();
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
+            }
         }
         return 0;
     }
@@ -94,6 +102,10 @@ public class BlockCypher {
             return tx;
         } catch (Exception e) {
             logger.error("Error: {}", e.toString());
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
+            }
             semaphoreWebRequest.release();
         }
         return null;
@@ -140,6 +152,10 @@ public class BlockCypher {
             return new UnsignedTx(from, to, a, txFees, unsignedTx.getTosign());
         } catch (Exception e) {
             logger.error("e:" + e.toString());
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
+            }
             semaphoreWebRequest.release();
             throw e;
         }
@@ -219,11 +235,19 @@ public class BlockCypher {
         }
         catch (BlockCypherException e) {
             semaphoreWebRequest.release();
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
+            }
             throw e;
         }
         catch (Exception e) {
             logger.debug("e:" + e.toString());
             semaphoreWebRequest.release();
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
+            }
         }
 
         mCachedUnsignedTx = null;

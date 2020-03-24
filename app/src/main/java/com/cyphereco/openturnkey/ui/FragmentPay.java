@@ -126,6 +126,10 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 fsDialogSendingBtc.cancel();
 
                 if (recordTransaction != null) {
+                    if (totalAmountReceived() > 0) {
+                        recordTransaction.setAmountRecv(totalAmountReceived() / 100000000d);
+                        recordTransaction.setAmountSent(totalAmountSent() / 100000000d);
+                    }
                     RecordTransaction item = addTxToDb(recordTransaction);
                     MainActivity.switchToPage(MainActivity.PAGE.HISTORY.ordinal());
 
