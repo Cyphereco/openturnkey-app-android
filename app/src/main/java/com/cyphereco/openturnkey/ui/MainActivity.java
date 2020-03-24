@@ -27,6 +27,7 @@ import com.cyphereco.openturnkey.utils.BtcExchangeRates;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.TxFee;
 import com.cyphereco.openturnkey.webservices.BlockChainInfo;
+import com.cyphereco.openturnkey.webservices.BlockCypher;
 
 import org.slf4j.Logger;
 
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
     public enum PAGE {PAY, OTK, HISTORY, ADDRBOOK}
 
-    private static int blockHeight = 0;
+    private static long blockHeight = 0;
     private static BtcExchangeRates btcExchangeRates;
     private static TxFee txFee;
     private static Handler pageSwitchHandler;
@@ -367,11 +368,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static int getBlockHeight() {
+    public static long getBlockHeight() {
         return blockHeight;
     }
 
-    public static void setBlockHeight(int blockHeight) {
+    public static void setBlockHeight(long blockHeight) {
         logger.debug("Current block height: {}", blockHeight);
         MainActivity.blockHeight = blockHeight;
         for (OnlineDataUpdateListener listener : listOnlineDataUpdateListener
@@ -430,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
 
         void onTxFeeUpdated(TxFee txFee);
 
-        void onBlockHeightUpdated(int height);
+        void onBlockHeightUpdated(long height);
     }
 }
 
