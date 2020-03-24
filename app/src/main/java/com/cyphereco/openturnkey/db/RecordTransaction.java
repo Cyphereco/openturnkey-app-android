@@ -1,5 +1,10 @@
 package com.cyphereco.openturnkey.db;
 
+import com.blockcypher.model.transaction.Transaction;
+import com.cyphereco.openturnkey.webservices.BlockCypher;
+
+import static com.cyphereco.openturnkey.utils.BtcUtils.convertDateTimeStringToLong;
+
 public class RecordTransaction implements java.io.Serializable {
     private long id;
     private long timestamp;
@@ -22,6 +27,19 @@ public class RecordTransaction implements java.io.Serializable {
         amountRecv = 0;
         rawData = "";
         blockHeight = -1;
+        exchangeRate = null;
+    }
+
+    public RecordTransaction(Transaction transaction) {
+        id = 0;
+        timestamp = convertDateTimeStringToLong(transaction.getReceived());
+        hash = transaction.getHash();
+        payer = transaction.getAddresses().get(0);
+        payee = (transaction.getAddresses().size() > 1) ? transaction.getAddresses().get(1) : transaction.getAddresses().get(0);
+        amountSent = (transaction.getTotal().longValue() + transaction.getFees().longValue()) / 100000000d;
+        amountRecv = transaction.getTotal().longValue() / 100000000d;
+        rawData = transaction.getHex();
+        blockHeight = transaction.getBlockHeight();
         exchangeRate = null;
     }
 
