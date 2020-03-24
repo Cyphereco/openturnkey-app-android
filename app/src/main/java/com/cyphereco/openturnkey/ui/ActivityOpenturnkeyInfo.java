@@ -196,7 +196,7 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
                 }
 
                 @Override
-                public void onBlockHeightUpdated(int height) {
+                public void onBlockHeightUpdated(long height) {
 
                 }
 
@@ -206,7 +206,7 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
                 }
 
                 @Override
-                public void onTxBlockHeightUpdated(int height) {
+                public void onTxBlockHeightUpdated(long height) {
 
                 }
 
@@ -216,7 +216,7 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
                 }
 
                 @Override
-                public void onConfirmationsUpdated(int confirmations) {
+                public void onConfirmationsUpdated(long confirmations) {
 
                 }
             });
