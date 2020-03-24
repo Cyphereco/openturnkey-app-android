@@ -70,7 +70,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
     boolean mUseFixAddress = false;
     boolean mIsCryptoCurrencySet = true;
-    private LocalCurrency mLocalCurrency = LocalCurrency.LOCAL_CURRENCY_USD;
+    private LocalCurrency localCurrency = null;
     private BtcExchangeRates btcExchangeRates;
     private boolean mIsAmountConverting = false;
     private double mBtc = 0.0;
@@ -107,8 +107,10 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             @Override
             public boolean handleMessage(Message msg) {
                 if (msg.obj != null) {
-                    tvAmountFiat.setText("");
                     btcExchangeRates = (BtcExchangeRates) msg.obj;
+                    if (tvAmountFiat.getText() != null && tvAmountFiat.getText().toString().contains("-")) {
+                        tvAmountFiat.setText("");
+                    }
                     convertCurrency();
                 }
                 updateEstFees();
@@ -124,10 +126,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 fsDialogSendingBtc.cancel();
 
                 if (recordTransaction != null) {
-                    logger.debug("Tx Record: {}", recordTransaction);
-
-                    MainActivity.switchToPage(MainActivity.PAGE.HISTORY.ordinal());
                     RecordTransaction item = addTxToDb(recordTransaction);
+                    MainActivity.switchToPage(MainActivity.PAGE.HISTORY.ordinal());
 
                     Intent intent = new Intent(getContext(), ActivityTransactionInfo.class);
                     intent.putExtra(ActivityTransactionInfo.KEY_CURRENT_TRANS_ID, item.getId());
@@ -201,7 +201,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 }
             }
         });
-        updateLocalCurrency(Preferences.getLocalCurrency());
+        updateLocalCurrencyUI();
 
         MainActivity.addToListOnlineDataUpdateListener(new MainActivity.OnlineDataUpdateListener() {
             @Override
@@ -218,7 +218,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             }
 
             @Override
-            public void onBlockHeightUpdated(int height) {
+            public void onBlockHeightUpdated(long height) {
 
             }
         });
@@ -431,8 +431,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             }
         }
 
-        mLocalCurrency = Preferences.getLocalCurrency();
-        tvCurrency.setText(mLocalCurrency.toString());
+        updateLocalCurrencyUI();
         updateEstFees();
     }
 
@@ -445,6 +444,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         tvAmountFiat.setText("");
         cbUseAllFunds.setChecked(false);
         cbAuthByPin.setChecked(false);
+        mBtc = 0;
     }
 
     @Override
@@ -513,7 +513,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     final String to = tvAddress.getText().toString();
                     logger.debug("Pay to ({}) for {} / {} (btc/{}) with tx fee ({}) included: {}",
                             to, tvAmountBtc.getText(), tvAmountFiat.getText(),
-                            Preferences.getLocalCurrency().toString(), getTxFees(),
+                            getLocalCurrency().toString(), getTxFees(),
                             Preferences.getFeeIncluded());
                     // prepare to make payment
                     final Dialog dialog = dialogFullscreenAlert(getString(R.string.check_balance));
@@ -545,7 +545,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         }
 
                         @Override
-                        public void onBlockHeightUpdated(int height) {
+                        public void onBlockHeightUpdated(long height) {
                         }
 
                         @Override
@@ -554,7 +554,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         }
 
                         @Override
-                        public void onTxBlockHeightUpdated(int height) {
+                        public void onTxBlockHeightUpdated(long height) {
                         }
 
                         @Override
@@ -562,7 +562,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         }
 
                         @Override
-                        public void onConfirmationsUpdated(int confirmations) {
+                        public void onConfirmationsUpdated(long confirmations) {
                         }
                     });
                 } else {
@@ -580,17 +580,19 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         logger.debug("num of request: {}", numOfRequest());
 
                         if (otkData.getSessionData().getRequestSigList().size() > 0) {
-                            logger.debug("Got signatures: {}", otkData.getSessionData().getRequestSigList());
-
-                            fsDialogSendingBtc = dialogFullscreenAlert(getString(R.string.sending_transaction));
-                            fsDialogSendingBtc.show();
-
+//                            logger.debug("Got signatures: {}", otkData.getSessionData().getRequestSigList());
                             listSignatures.addAll(otkData.getSessionData().getRequestSigList());
-                            logger.debug("listSignatures: {}", listSignatures);
+                            logger.debug("listSignatures add signatures: {}", listSignatures);
 
-                            // if all signature collected, TODO: unfinished job, need to handle mulit-requests for multi-signatures
-                            completeTransaction();
-//                            MainActivity.switchToPage(MainActivity.PAGE.HISTORY.ordinal());
+                            if (hasRequest() && peekRequest().hasMore()) {
+                                // request not all processed
+                            }
+                            else {
+                                // all requests processed, send the transaction with signatures
+                                fsDialogSendingBtc = dialogFullscreenAlert(getString(R.string.sending_transaction));
+                                fsDialogSendingBtc.show();
+                                completeTransaction();
+                            }
                         } else {
                             // we are expecting signed signatures, something wrong, stop
                             clearRequest();
@@ -662,6 +664,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             logger.error("addTxToDb(): tx is null");
             return null;
         }
+        if (btcExchangeRates != null) recordTransaction.setExchangeRate(btcExchangeRates.toString());
         logger.info("addTxToDb() tx:\n{}", recordTransaction.toString());
 
         // Get timezone offset
@@ -684,10 +687,9 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         MenuItem menuItem;
 
         menuItem = menu.findItem(R.id.menu_pay_local_curreny);
-        LocalCurrency lc = Preferences.getLocalCurrency();
         if (menuItem != null) {
             str = getString(R.string.local_currency) +
-                    " (" + lc.toString() + ")";
+                    " (" + getLocalCurrency().toString() + ")";
             menuItem.setTitle(str);
         }
 
@@ -712,10 +714,18 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         updateEstFees();
     }
 
-    private void updateLocalCurrency(LocalCurrency localCurrency) {
-        mLocalCurrency = localCurrency;
-        tvCurrency.setText(mLocalCurrency.toString());
-        lblEstFeesUnit.setText(getString(R.string._unit_btc) + " / " + Preferences.getLocalCurrency().toString());
+    private LocalCurrency getLocalCurrency() {
+        if (localCurrency == null) {
+            localCurrency = Preferences.getLocalCurrency();
+        }
+        return localCurrency;
+    }
+
+    private void updateLocalCurrencyUI() {
+        if (this.getContext() == null) return;
+
+        tvCurrency.setText(getLocalCurrency().toString());
+        lblEstFeesUnit.setText(getString(R.string._unit_btc) + " / " + getLocalCurrency().toString());
 
         boolean cache = mIsCryptoCurrencySet;
         mIsCryptoCurrencySet = true;
@@ -790,7 +800,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
     private double btcToFiat(double amount) {
         if (amount > 0 && btcExchangeRates != null) {
-            switch (mLocalCurrency) {
+            switch (getLocalCurrency()) {
                 case LOCAL_CURRENCY_CNY:
                     return (btcExchangeRates.getRate_cny() * amount);
                 case LOCAL_CURRENCY_EUR:
@@ -811,7 +821,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         if (btcExchangeRates == null) {
             return 0;
         }
-        switch (mLocalCurrency) {
+        switch (getLocalCurrency()) {
             case LOCAL_CURRENCY_CNY:
                 return lc / btcExchangeRates.getRate_cny();
             case LOCAL_CURRENCY_EUR:
@@ -928,15 +938,21 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         hashesCounter++;
 
                         if (hashesCounter > 9) {
-                            pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()).setMore(i + 1 < list.size()));
-                            if (pin != null) peekRequest().setPin(pin);
+                            OtkRequest request = new OtkRequest(Command.SIGN.toString(), hashes.toString()).setPin(pin);
+                            // A request with more=1 has been set, follow the same reuqest ID (Not necessarily but may be better for future)
+                            if (hasRequest() && peekRequest().hasMore()) request.setRequestId(peekRequest().getRequestId());
+                            // signatures not fully processed, set more=1
+                            if (i + 1 < list.size()) request.setMore(true);
+                            pushRequest(request);
                             hashes = new StringBuilder();
                             hashesCounter = 0;
                         }
                     }
                     if (hashesCounter > 0) {
-                        pushRequest(new OtkRequest(Command.SIGN.toString(), hashes.toString()));
-                        if (pin != null) peekRequest().setPin(pin);
+                        // there are signatures (< 10) not added to request,  add them now
+                        OtkRequest request = new OtkRequest(Command.SIGN.toString(), hashes.toString()).setPin(pin);
+                        if (hasRequest() && peekRequest().hasMore()) request.setRequestId(peekRequest().getRequestId());
+                        pushRequest(request);
                     }
                     logger.debug("Request Number: {}", numOfRequest());
 
@@ -976,9 +992,10 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 synchronized (this) {
                     try {
                         Message msg = new Message();
-                        msg.obj = _newyDummyTransaction();
-                        logger.debug("listSignatures: {}", listSignatures);
-//                        msg.obj = BlockCypher.completeSendBitcoin(pubKeyPayer, listSignatures, tvAddress.getText().toString());
+//                        msg.obj = _newyDummyTransaction();
+                        logger.debug("completeTransaction: Got listSignatures ({})", listSignatures.size());
+                        msg.obj = BlockCypher.completeSendBitcoin(pubKeyPayer, listSignatures, tvAddress.getText().toString());
+                        logger.debug("Sent transaction output: {})", msg.obj);
                         txHandler.sendMessage(msg);
                     }
 //                    catch (BlockCypherException e) {
@@ -1007,7 +1024,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         double btcAmountSent = BtcUtils.satoshiToBtc(amountSent);
         double btcAmountRecv = BtcUtils.satoshiToBtc(amountReceived);
 
-        LocalCurrency lc = Preferences.getLocalCurrency();
+        LocalCurrency lc = getLocalCurrency();
 
         // format amount Strings
         String strBtcAmountSent = String.format(Locale.ENGLISH, "%.8f", btcAmountSent);
@@ -1077,7 +1094,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         DialogLocalCurrency dialog = new DialogLocalCurrency();
         int localCurrencyId;
 
-        LocalCurrency lc = Preferences.getLocalCurrency();
+        LocalCurrency lc = getLocalCurrency();
         if (lc == LocalCurrency.LOCAL_CURRENCY_CNY) {
             localCurrencyId = R.id.radio_cny;
         } else if (lc == LocalCurrency.LOCAL_CURRENCY_EUR) {
@@ -1089,15 +1106,19 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         } else {
             localCurrencyId = R.id.radio_twd;
         }
+
+        // reset local currency to null, will be updated later
+        localCurrency = null;
+
         Bundle bundle = new Bundle();
         bundle.putInt("localCurrency", localCurrencyId);
         dialog.setArguments(bundle);
         dialog.setDialogLocalCurrecyListener(new DialogLocalCurrency.DialogLocalCurrecyListener() {
             @Override
-            public void setLocalCurrency(int localCurrency) {
-                LocalCurrency lc = optionToLocalCurrency(localCurrency);
+            public void setLocalCurrency(int option) {
+                LocalCurrency lc = optionToLocalCurrency(option);
                 Preferences.setLocalCurrency(lc);
-                updateLocalCurrency(lc);
+                updateLocalCurrencyUI();
                 updatePayConfig(mMenu);
             }
         });
@@ -1231,9 +1252,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 strTxFeeType(Preferences.getTxFeeType()) + " - " + feesInc + "):");
         tvEstFees.setText(formattedBtcAmount(getTxFees() / 100000000d)  + " / " +
                 formattedFiatAmount(BtcUtils.btcToLocalCurrency(btcExchangeRates,
-                        Preferences.getLocalCurrency(),
-                        getTxFees() / 100000000d)));
-        lblEstFeesUnit.setText(getString(R.string._unit_btc) + " / " + Preferences.getLocalCurrency().toString());
+                        getLocalCurrency(), getTxFees() / 100000000d)));
+        lblEstFeesUnit.setText(getString(R.string._unit_btc) + " / " + getLocalCurrency().toString());
     }
 }
 
