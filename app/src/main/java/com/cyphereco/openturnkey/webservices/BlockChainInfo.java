@@ -1,5 +1,6 @@
 package com.cyphereco.openturnkey.webservices;
 
+import com.blockcypher.model.transaction.Transaction;
 import com.cyphereco.openturnkey.ui.Preferences;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
@@ -12,6 +13,8 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 import org.json.*;
+
+import static com.cyphereco.openturnkey.utils.BtcUtils.convertDateTimeStringToLong;
 
 /*
  * References:
@@ -47,7 +50,7 @@ public class BlockChainInfo {
 
     private static String URI = "https://blockchain.info/";
     private static String PATH_RAWTX = "rawtx";
-    private static int latestBlockHeight = -1;
+    private static long latestBlockHeight = -1;
 
     public static BigDecimal getBalance(String address) {
         BigDecimal ret = new BigDecimal(0);
@@ -87,10 +90,11 @@ public class BlockChainInfo {
         }
     }
 
-    public static int getLatestBlockHeight() {
+    public static long getLatestBlockHeight() {
         String PATH_LATESTBLOCK = "latestblock";
-        if (latestBlockHeight > 0) return latestBlockHeight;
-
+        if (Preferences.isTestnet()) {
+            return BlockCypher.getBlockHeight();
+        }
         try {
             Client webClient = ClientBuilder.newClient();
             Response response = webClient.target(URI)
@@ -99,7 +103,7 @@ public class BlockChainInfo {
                     .get();
             JSONObject json = new JSONObject(response.readEntity(String.class));
             String height = json.getString("height");
-            latestBlockHeight = Integer.parseInt(height);
+            latestBlockHeight = Long.parseLong(height);
             webClient.close();
         } catch (Exception e) {
             logger.error("e:{}", e.toString());
@@ -116,6 +120,9 @@ public class BlockChainInfo {
 
     public static long getTxTime(String txHash) {
         long ret = 0;
+        if (Preferences.isTestnet()) {
+            return convertDateTimeStringToLong(BlockCypher.getTransaction(txHash, false).getReceived());
+        }
         try {
             Client webClient = ClientBuilder.newClient();
             Response response = webClient.target(URI).path(PATH_RAWTX).path(txHash)
@@ -138,8 +145,12 @@ public class BlockChainInfo {
         }
     }
 
-    public static int getTxBlockHeight(String txHash) {
-        int ret = 0;
+    public static long getTxBlockHeight(String txHash) {
+        long ret = 0;
+        if (Preferences.isTestnet()) {
+            Transaction tx = BlockCypher.getTransaction(txHash, false);
+            return (tx == null) ? -1 : tx.getBlockHeight();
+        }
         try {
             Client webClient = ClientBuilder.newClient();
             Response response = webClient.target(URI).path(PATH_RAWTX).path(txHash)
@@ -147,7 +158,7 @@ public class BlockChainInfo {
             String body = response.readEntity(String.class);
             JSONObject json = new JSONObject(body);
             String height = json.getString("block_height");
-            ret = Integer.parseInt(height);
+            ret = Long.parseLong(height);
             webClient.close();
         } catch (Exception e) {
             logger.error("e:{}", e.toString());
@@ -185,8 +196,8 @@ public class BlockChainInfo {
         }
     }
 
-    public static int getConfirmations(String tx) {
-        return getLatestBlockHeight() - getTxBlockHeight(tx) + 1;
+    public static long getConfirmations(String tx) {
+        return (latestBlockHeight < 0) ? latestBlockHeight : latestBlockHeight - getTxBlockHeight(tx) + 1;
     }
 
     public static void getConfirmations(String tx, WebResultHandler handler) {
@@ -198,14 +209,14 @@ public class BlockChainInfo {
     public interface WebResultHandler {
         void onBalanceUpdated(BigDecimal balance);
 
-        void onBlockHeightUpdated(int height);
+        void onBlockHeightUpdated(long height);
 
         void onTxTimeUpdated(long time);
 
-        void onTxBlockHeightUpdated(int height);
+        void onTxBlockHeightUpdated(long height);
 
         void onRawTxUpdated(String rawTx);
 
-        void onConfirmationsUpdated(int confirmations);
+        void onConfirmationsUpdated(long confirmations);
     }
 }
