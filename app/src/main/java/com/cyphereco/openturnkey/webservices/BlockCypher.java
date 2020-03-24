@@ -60,14 +60,25 @@ public class BlockCypher {
         return BigDecimal.valueOf(-1);
     }
 
-    public static Transaction getTransaction(String hash, boolean includeHex) {
+    public static long getBlockHeight() {
         if (mBcCtx == null) newBlockCypherContext();
 
+        try{
+            return mBcCtx.getInfoService().getInfo().getHeight();
+        }
+        catch (Exception e) {
+            logger.error("Error: {}", e.toString());
+        }
+        return 0;
+    }
+
+    public static Transaction getTransaction(String hash, boolean includeHex) {
+        if (mBcCtx == null) newBlockCypherContext();
         Transaction tx = null;
         try {
             tx = mBcCtx.getTransactionService().getTransaction(hash, includeHex);
         } catch (Exception e) {
-            logger.error("e:" + e.toString());
+            logger.error("Error: {}", e.toString());
         }
         return tx;
     }
@@ -181,9 +192,8 @@ public class BlockCypher {
 
         try {
             trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
-            logger.debug("TX Sent: " + trans.toString());
-            RecordTransaction recordTransaction = new RecordTransaction();
-            recordTransaction.setHash(trans.getHash());
+            logger.debug("TX Sent, Hash({}) ", trans.getHash());
+            RecordTransaction recordTransaction = new RecordTransaction(trans);
             return recordTransaction;
         }
         catch (BlockCypherException e) {
