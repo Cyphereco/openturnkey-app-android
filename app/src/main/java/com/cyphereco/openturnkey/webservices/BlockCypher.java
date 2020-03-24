@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 public class BlockCypher {
     public static final String TAG = BlockCypher.class.getSimpleName();
@@ -32,6 +33,9 @@ public class BlockCypher {
     private static BlockCypherContext mBcCtx;
     private static IntermediaryTransaction mCachedUnsignedTx = null;
     private static final boolean useToken = false;
+
+    private static final int MAX_AVAILABLE = 2;
+    private static final Semaphore semaphoreWebRequest = new Semaphore(MAX_AVAILABLE, true);
 
     private static void newBlockCypherContext() {
         String network = Preferences.isTestnet() ? "test3" : "main";
@@ -51,7 +55,9 @@ public class BlockCypher {
 
         logger.debug("getBalance");
         try {
+            semaphoreWebRequest.acquire();
             Address a = mBcCtx.getAddressService().getAddress(address);
+            semaphoreWebRequest.release();
             logger.debug("address:" + address + " balance:" + a.getBalance() + " final:" + a.getFinalBalance());
             return a.getFinalBalance();
         } catch (Exception e) {
@@ -64,7 +70,11 @@ public class BlockCypher {
         if (mBcCtx == null) newBlockCypherContext();
 
         try{
-            return mBcCtx.getInfoService().getInfo().getHeight();
+            semaphoreWebRequest.acquire();
+            long height = mBcCtx.getInfoService().getInfo().getHeight();
+            semaphoreWebRequest.release();
+
+            return height;
         }
         catch (Exception e) {
             logger.error("Error: {}", e.toString());
@@ -74,21 +84,25 @@ public class BlockCypher {
 
     public static Transaction getTransaction(String hash, boolean includeHex) {
         if (mBcCtx == null) newBlockCypherContext();
-        Transaction tx = null;
+
         try {
-            tx = mBcCtx.getTransactionService().getTransaction(hash, includeHex);
+            semaphoreWebRequest.acquire();
+            Transaction tx = mBcCtx.getTransactionService().getTransaction(hash, includeHex);
+            semaphoreWebRequest.release();
+            return tx;
         } catch (Exception e) {
             logger.error("Error: {}", e.toString());
         }
-        return tx;
+        return null;
     }
 
-    public static UnsignedTx newTransaction(String from, String to, long amount, long txFees) throws BlockCypherException {
+    public static UnsignedTx newTransaction(String from, String to, long amount, long txFees) throws BlockCypherException, InterruptedException {
         if (mBcCtx == null) newBlockCypherContext();
 
 //        logger.debug("sendBitcoin() from:{} to:{} amount:{} fee:{} feeIncluded:{}", from, to, amount, txFees, feeIncluded);
         try {
             IntermediaryTransaction unsignedTx;
+            semaphoreWebRequest.acquire();
             if (txFees == 0) {
                 // set "prefrence":"zero"
                 unsignedTx = mBcCtx.getTransactionService().newTransaction(
@@ -97,6 +111,7 @@ public class BlockCypher {
                 unsignedTx = mBcCtx.getTransactionService().newTransaction(
                         new ArrayList<>(Collections.singletonList(from)), new ArrayList<>(Collections.singletonList(to)), amount, txFees);
             }
+            semaphoreWebRequest.release();;
             if ((unsignedTx == null) || unsignedTx.getTosign().size() == 0) {
                 logger.debug("unsignedTx is null or toSign is empty");
                 return null;
@@ -191,7 +206,9 @@ public class BlockCypher {
         Transaction trans;
 
         try {
+            semaphoreWebRequest.acquire();
             trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
+            semaphoreWebRequest.release();
             logger.debug("TX Sent, Hash({}) ", trans.getHash());
             RecordTransaction recordTransaction = new RecordTransaction(trans);
             return recordTransaction;
