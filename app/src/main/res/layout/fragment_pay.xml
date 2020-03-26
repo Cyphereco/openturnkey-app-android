@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <ImageView
+        android:id="@+id/clear_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:tint="#AAAAAA"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_fragment_pay_amount_btc"
+        app:layout_constraintEnd_toStartOf="@+id/tv_fragment_pay_amount_btc"
+        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
+
+    <ImageView
         android:id="@+id/icon_scan_qrcode"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:clickable="true"
@@ -22,10 +31,10 @@
 
     <ImageView
         android:id="@+id/icon_read_nfc"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="10dp"
         android:clickable="true"
         android:contentDescription="@string/read_nfc"
         android:focusable="true"
@@ -36,10 +45,10 @@
 
     <ImageView
         android:id="@+id/icon_paste_clipboard"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="6dp"
+        android:layout_marginEnd="8dp"
         android:clickable="true"
         android:contentDescription="@string/paste_clipboard"
         android:focusable="true"
@@ -55,8 +64,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/clear_recipient_address"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -69,7 +77,7 @@
     </android.support.design.widget.TextInputLayout>
 
     <EditText
-        android:id="@+id/input_crypto_currency"
+        android:id="@+id/tv_fragment_pay_amount_btc"
         android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="144dp"
@@ -79,11 +87,12 @@
         android:hint="@string/_numerical_zero"
         android:inputType="numberDecimal"
         android:textAlignment="viewEnd"
-        app:layout_constraintEnd_toStartOf="@+id/input_local_currency"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" tools:targetApi="o" />
+        app:layout_constraintEnd_toStartOf="@+id/tv_fragment_pay_amount_fiat"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
+        tools:targetApi="o" />
 
     <EditText
-        android:id="@+id/input_local_currency"
+        android:id="@+id/tv_fragment_pay_amount_fiat"
         android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -93,7 +102,8 @@
         android:inputType="numberDecimal"
         android:textAlignment="viewEnd"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/input_crypto_currency" tools:targetApi="o" />
+        app:layout_constraintTop_toTopOf="@+id/tv_fragment_pay_amount_btc"
+        tools:targetApi="o" />
 
     <TextView
         android:id="@+id/text_cyrpto_currency"
@@ -103,8 +113,8 @@
         android:layout_marginEnd="24dp"
         android:text="@string/_unit_btc"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintEnd_toStartOf="@+id/input_local_currency"
-        app:layout_constraintTop_toBottomOf="@+id/input_crypto_currency" />
+        app:layout_constraintEnd_toStartOf="@+id/tv_fragment_pay_amount_fiat"
+        app:layout_constraintTop_toBottomOf="@+id/tv_fragment_pay_amount_btc" />
 
     <TextView
         android:id="@+id/text_local_currency"
@@ -115,7 +125,7 @@
         android:text="@string/currency_twd"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/input_local_currency" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_fragment_pay_amount_fiat" />
 
     <TextView
         android:id="@+id/text_equal"
@@ -125,8 +135,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/_symbol_equal"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintStart_toEndOf="@+id/input_crypto_currency"
-        app:layout_constraintTop_toTopOf="@+id/input_crypto_currency" />
+        app:layout_constraintStart_toEndOf="@+id/tv_fragment_pay_amount_btc"
+        app:layout_constraintTop_toTopOf="@+id/tv_fragment_pay_amount_btc" />
 
     <TextView
         android:id="@+id/text_amount"
@@ -136,11 +146,11 @@
         android:layout_marginBottom="8dp"
         android:text="@string/amount"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintBottom_toTopOf="@+id/input_crypto_currency"
+        app:layout_constraintBottom_toTopOf="@+id/tv_fragment_pay_amount_btc"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <CheckBox
-        android:id="@+id/checkBox_use_all_funds"
+        android:id="@+id/cb_fragment_pay_use_all_funds"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -154,9 +164,63 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
+        android:background="@drawable/custom_toast_alert_round"
+        android:backgroundTint="#90CAF9"
         android:drawableStart="@drawable/ic_fingerprint_black_24dp"
+        android:paddingLeft="20dp"
+        android:paddingTop="5dp"
+        android:paddingRight="20dp"
+        android:paddingBottom="5dp"
         android:text="@string/sign_payment"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/clear_recipient_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:tint="#AAAAAA"
+        app:layout_constraintBottom_toBottomOf="@+id/textInputLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
+
+    <CheckBox
+        android:id="@+id/cb_fragment_pay_auth_by_pin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/auth_with_pin"
+        app:layout_constraintBottom_toTopOf="@+id/button_sign_payment"
+        app:layout_constraintEnd_toEndOf="@+id/button_sign_payment" />
+
+    <TextView
+        android:id="@+id/tv_fragment_pay_est_fees"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0.00 / 0.00"
+        app:layout_constraintStart_toStartOf="@+id/label_fragment_pay_est_fees"
+        app:layout_constraintTop_toBottomOf="@+id/label_fragment_pay_est_fees" />
+
+    <TextView
+        android:id="@+id/label_fragment_pay_est_fees"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/estimated_fees"
+        app:layout_constraintStart_toStartOf="@+id/textInputLayout"
+        app:layout_constraintTop_toTopOf="@+id/icon_paste_clipboard" />
+
+    <TextView
+        android:id="@+id/label_fragment_pay_est_fees_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BTC/USD"
+        app:layout_constraintEnd_toEndOf="@+id/tv_fragment_pay_est_fees"
+        app:layout_constraintTop_toBottomOf="@+id/tv_fragment_pay_est_fees" />
 
 </android.support.constraint.ConstraintLayout>

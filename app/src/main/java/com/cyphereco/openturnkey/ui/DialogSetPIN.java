@@ -1,30 +1,32 @@
 package com.cyphereco.openturnkey.ui;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatDialogFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+
 public class DialogSetPIN extends AppCompatDialogFragment {
     public DialogSetPINListener listener;
 
+    @NotNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        final View view = inflater.inflate(R.layout.dialog_set_pin, null);
+        LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
+        @SuppressLint("InflateParams") final View view = inflater.inflate(R.layout.dialog_set_pin, null);
 
         builder.setView(view)
                 .setTitle(R.string.title_set_pin)
@@ -36,17 +38,16 @@ public class DialogSetPIN extends AppCompatDialogFragment {
             @Override
             public void onClick(View v) {
                 TextInputEditText pin = view.findViewById(R.id.textInputSetPin);
-                TextInputEditText pinConfirm = view.findViewById(R.id.textInputSetPinConfirm);;
-                if (pin.getText().toString().length() != 8) {
-                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.pin_length_incorrect), Toast.LENGTH_LONG).show();
+                TextInputEditText pinConfirm = view.findViewById(R.id.textInputSetPinConfirm);
+                if (Objects.requireNonNull(pin.getText()).toString().length() != 8) {
+                    Toast.makeText(Objects.requireNonNull(getActivity()).getApplicationContext(), getString(R.string.pin_length_incorrect), Toast.LENGTH_LONG).show();
                     return;
                 }
-                if ((pin.getText().toString().equals(pinConfirm.getText().toString()))) {
-                    listener.setPIN(pin.getText().toString());
+                if ((pin.getText().toString().equals(Objects.requireNonNull(pinConfirm.getText()).toString()))) {
+                    listener.setPin(pin.getText().toString());
                     dismiss();
-                }
-                else {
-                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.pin_confirmation_doesnt_match), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(Objects.requireNonNull(getActivity()).getApplicationContext(), getString(R.string.pin_confirmation_not_match), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -55,28 +56,20 @@ public class DialogSetPIN extends AppCompatDialogFragment {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.cancelSetPIN();
                 dismiss();
             }
         });
-        return builder.create();
+        Dialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(false);
+
+        return dialog;
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        try {
-            listener = (DialogSetPINListener) context;
-        } catch (Exception e) {
-            throw new ClassCastException(context.toString() +
-                    "must implement DialogLocalCurrecyListener");
-        }
-
+    public void setListener(DialogSetPINListener listener) {
+        this.listener = listener;
     }
 
     public interface DialogSetPINListener {
-        void setPIN(String note);
-        void cancelSetPIN();
+        void setPin(String pin);
     }
 }

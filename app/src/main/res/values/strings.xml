@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="_app_name" translatable="false">Crypto Economy</string>
     <string name="history">History</string>
     <string name="addresses">Addresses</string>
@@ -24,7 +24,7 @@
     <string name="amount">Amount</string>
     <string name="sign_payment">Sign Payment</string>
     <string name="tap_openturnkey">Tap OpenTurnKey</string>
-    <string name="no_freq_addr">No Fequent Addresses</string>
+    <string name="no_freq_addr">No Frequent Addresses</string>
     <string name="no_payment_records">No Payment Records</string>
     <string name="_by" translatable="false">BY</string>
     <string name="_cyphereco" translatable="false">CYPHERECO</string>
@@ -35,21 +35,21 @@
     <string name="search">Search</string>
     <string name="auth_with_pin">Authorization with PIN Code</string>
     <string name="set_pin_code">Set PIN Code</string>
-    <string name="full_pubkey_information">Full Public Key Information</string>
+    <string name="full_pubkey_information">Show Full Public Key Information</string>
     <string name="about">About</string>
-    <string name="use_fix_addresss">Use Fix Addresss</string>
+    <string name="use_fix_address">Use Fix Address</string>
     <string name="set_key">Choose Key</string>
     <string name="unlock">Unlock</string>
     <string name="software_version">Software Version</string>
     <string name="ok">OK</string>
-    <string name="cancel">CANCEL</string>
+    <string name="cancel" tools:ignore="ButtonCase">CANCEL</string>
     <string name="clear_all_payment_history">Clear all payment history?</string>
     <string name="_left_bracket" translatable="false">(</string>
     <string name="_right_bracket" translatable="false">)</string>
     <string name="read_general_information">Read General Information</string>
     <string name="customized_fees">Customized Fees</string>
     <string name="_0_00001" translatable="false">0.00001</string>
-    <string name="command_executed_successfuly">Command Executed Successfuly!</string>
+    <string name="command_executed_successfully">Command Executed Successfully!</string>
     <string name="suggested">Suggested</string>
     <string name="nfc_unavailable">NFC is Not Available</string>
     <string name="title_activity_qrcode_scan">Scan QR Code</string>
@@ -58,16 +58,16 @@
     <string name="_dummy_content" translatable="false">DUMMY\nCONTENT</string>
     <string name="qr_code_scan_cancelled">QR Code Scan Cancelled</string>
     <string name="get_recipient_address">Get Recipient Address</string>
-    <string name="operation_cancelled">Operartion cancelled</string>
+    <string name="operation_cancelled">Operation cancelled</string>
     <string name="transaction_not_executed">Transaction Not Executed</string>
-    <string name="transaction_reciept">Transaction Reciept</string>
+    <string name="transaction_receipt">Transaction Receipt</string>
     <string name="subject_reason">Reason:</string>
-    <string name="processing">Processing Transaction</string>
+    <string name="processing_transaction">Processing Transaction</string>
     <string name="recipient_is_empty">Recipient Address is Empty</string>
-    <string name="incorrect_amount">Incorrect Amount</string>
+    <string name="amount_empty">Amount is not entered</string>
     <string name="incorrect_recipient_amount">Incorrect Recipient Address or Amount</string>
-    <string name="subject_sender">Sender:</string>
-    <string name="subject_recipient">Recipient:</string>
+    <string name="sender">Sender</string>
+    <string name="recipient">Recipient</string>
     <string name="subject_amount">Amount:</string>
     <string name="subject_time">Time:</string>
     <string name="user_guide">User Guide</string>
@@ -81,18 +81,18 @@
     <string name="btc_qr_code">BTC QR Code</string>
     <string name="lock_state">Lock State</string>
     <string name="battery_state">Battery State</string>
-    <string name="mint_inforamtion">Mint Inforamtion</string>
+    <string name="mint_information">Mint Information</string>
     <string name="subject_account_balance">Account Balance:</string>
     <string name="add_address">Add Address</string>
     <string name="openturnkey_information">OpenTurnKey Information</string>
-    <string name="fetching">Fetching...</string>
+    <string name="fetching">Fetching…</string>
     <string name="address_copied">Address copied</string>
     <string name="please_wait">You can remove OpenTurnKey now. \n Please wait a moment.</string>
     <string name="use_all_funds">Use All Funds</string>
     <string name="operation_timeout">Operation Timeout</string>
-    <string name="do_not_remove_otk">Pleaes appraoch to OpenTurnKey to complete singing transaction.\nDo not remove OpenTurnKey until it\'s done.</string>
+    <string name="do_not_remove_otk">Please approach to OpenTurnKey to complete singing transactionHelper.\nDo not remove OpenTurnKey until it\'s done.</string>
     <string name="confirm_payment">Confirm Payment</string>
-    <string name="subject_text_estimated_time">"Est. Time to Complete (Min): "</string>
+    <string name="subject_text_estimated_time">"Est. Time to Complete: "</string>
     <string name="subject_fees_in_satoshi">Fees(SAT):</string>
     <string name="unknown_reason">Unknown Reason</string>
     <string name="signing_transaction">Signing Transaction</string>
@@ -103,7 +103,6 @@
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="delete_address_dialog_message">Delete this address?</string>
-    <string name="success">SUCCESS</string>
     <string name="fail">FAIL</string>
     <string name="copy">Copy</string>
     <string name="subject_date_time">Date/Time:</string>
@@ -112,7 +111,7 @@
     <string name="subject_transaction_id">Transaction ID:</string>
     <string name="view_online">View Online</string>
     <string name="resend_payment">Resend Payment</string>
-    <string name="delete_transaction_record">Delete transaction record</string>
+    <string name="delete_transaction_record">Delete transactionHelper record</string>
     <string name="transaction_execution_status">Transaction Processing Status</string>
     <string name="failure_reason">Failure reason</string>
     <string name="previous_transaction_record">Previous Transaction Record</string>
@@ -127,16 +126,16 @@
     <string name="not_supported">Not supported</string>
     <string name="transaction_not_found">Transaction Not Found</string>
     <string name="failed_to_delete">Delete Failed</string>
-    <string name="delete_this_transaction_record">Delete this transaction record?</string>
+    <string name="delete_this_transaction_record">Delete this transactionHelper record?</string>
     <string name="otk_is_not_locked">OpenTurnKey is not locked</string>
     <string name="unlock_success">Unlock Successfully</string>
-    <string name="unlock_failed">Unclock Failed</string>
+    <string name="unlock_failed">Unlock Failed</string>
     <string name="otk_is_unlocked">OpenTurnKey unlocked</string>
     <string name="write_note_success">Write Note Successfully</string>
-    <string name="write_note_fail">Wirte Note Failed</string>
+    <string name="write_note_fail">Write Note Failed</string>
     <string name="title_set_pin">Set PIN</string>
     <string name="pin_length_incorrect">PIN code should be 8 digits</string>
-    <string name="pin_confirmation_doesnt_match">PIN codes do not match</string>
+    <string name="pin_confirmation_not_match">PIN codes do not match</string>
     <string name="enter_pin_code">"Please Enter a 8-digits Number "</string>
     <string name="write_note">Write Note</string>
     <string name="_unit_usd" translatable="false">USD</string>
@@ -146,7 +145,7 @@
     <string name="_unit_cny" translatable="false">CNY</string>
     <string name="currency_btc">BTC (Bitcoin)</string>
     <string name="write_note_hint">Note (Less than 64 characters)</string>
-    <string name="check_balance">Checking Balance</string>
+    <string name="check_balance">Checking balance, please wait …</string>
     <string name="set_pin_success">Set PIN Code Successfully</string>
     <string name="set_pin_fail">Set PIN Code Failed</string>
     <string name="_choose_key_hint" translatable="false">0~2147483647</string>
@@ -176,7 +175,7 @@
     <string name="export_private_key_wif_success">Export Successfully</string>
     <string name="reset_fail">Reset Command Not Sent</string>
     <string name="reset_success">Reset Command Sent</string>
-    <string name="master_public_key">Master Public Key:</string>
+    <string name="master_public_key">Master Public Key</string>
     <string name="derivative_public_key">Derivative Public Key</string>
     <string name="derivative_key_paths">Derivative Path:</string>
     <string name="how_to_validate">How to Validate?</string>
@@ -186,7 +185,7 @@
     <string name="understood">I Understood!</string>
     <string name="reset_warning_message">Reset OpenTurnKey will erase the enrolled fingerprint. unset the PIN code, and choose a new random key. If you don\'t have a backup to the current key, you will lose the access to the current funds. Please be careful!</string>
     <string name="export_wif_warning_message">If it is not necessary, DO  NOT export the WIF key!  A WIF key is the private key that has the full access to the current funds. If you export a WIF key, make sure you keep the exported key in a safe deposit, or your funds may be stolen.</string>
-    <string name="pin_code_warning_message">PIN code setting gaurantee an alternavie backup access to the key when OpenTurnKey fingerprint authentication run into problem. In the most cases, we recommend you to use fingerprint authentication if possible. If PIN code authorization is to be used, make sure you use it only on trusted secure devices.</string>
+    <string name="pin_code_warning_message">PIN code setting guarantee an alternative backup access to the key when OpenTurnKey fingerprint authentication run into problem. In the most cases, we recommend you to use fingerprint authentication if possible. If PIN code authorization is to be used, make sure you use it only on trusted secure devices.</string>
     <string name="full_pubkey_info_warning">The full public key information is for you to validate the authenticity of OpenTurnKey. An authentic OpenTurnKey should allow user to choose any level 5 derivative non-hardened key which can be validated with external tools. A public key itself cannot be used for signing payment or derive private key, however, it is recommended to keep this information only in a safe deposit.</string>
     <string name="reset_step_intro">To complete the reset process, please press and hold the fingerprint sensor on OpenTurnKey for 8 seconds.</string>
     <string name="session_timeout">Session Timeout</string>
@@ -201,5 +200,52 @@
     <string name="missing_params">Missing Parameters</string>
     <string name="communication_error">Communication Error</string>
     <string name="fees_excluded">Fees excluded</string>
+    <string name="not_openturnkey">Not a valid OpenTurnKey! Do not remove OpenTurnKey until reading completed.</string>
+    <string name="confirmation">confirmation</string>
+    <string name="amount_sent">Send Amount:</string>
+    <string name="disable_fix_addr_first">Please disable using fix address first.</string>
+    <string name="cannot_change_addr">Cannot Change Address</string>
+    <string name="fail_reason">Fail Reason</string>
+    <string name="alias_exists">Alias exists already, please enter different alias.</string>
+    <string name="make_request">Make Request</string>
+    <string name="processing_request">Processing Request…\nDo Not Move OpenTurnKey!</string>
+    <string name="read_openturnkey">Read OpenTurnKey</string>
+    <string name="approach_openturnkey_to_the_nfc_reader">Approach OpenTurnKey to the NFC reader.</string>
+    <string name="request_sent">Request has been sent.</string>
+    <string name="not_valid_openturnkey">Not a valid OpenTurnKey! Do not remove OpenTurnKey until reading completed.</string>
+    <string name="request_fail">Request Fail</string>
+    <string name="reason">Reason</string>
+    <string name="signature_valid">Valid Signature!</string>
+    <string name="signature_invalid">Invalid Signature!</string>
+    <string name="unlock_warning">Unlock OpenTurnKey will erase enrolled fingerprint and clear PIN coe setting. It is highly recommend to move your funds to another address or back up the private key before unlock to avoid the risk of losing access to your crypto assets.</string>
+    <string name="update_addr_fail">Update address failed</string>
+    <string name="add_new_addr_fail">Add new address failed</string>
+    <string name="amount_received">Received Amount:</string>
+    <string name="amount_less_than_fees">Amount is less than transactionHelper fee</string>
+    <string name="sign">Sign</string>
+    <string name="verify">Verify</string>
+    <string name="error_cannot_create_tx">Error! Cannot create transactionHelper</string>
+    <string name="public_key_information">Public Key Information</string>
+    <string name="reapproach_openturnkey">Move OpenTurnKey away, then approach again.</string>
+    <string name="incorrect_openturnkey">Incorrect OpenTurnKey</string>
+    <string name="create_transaction">Create Transaction</string>
+    <string name="sending_transaction">Sending Transaction</string>
+    <string name="send_tx_fail">Send Transaction Fail</string>
+    <string name="no_internet">No Internet Connection</string>
+    <string name="unconfirmed">Unconfirmed</string>
+    <string name="exchange_rate">Exchange Rate</string>
+    <string name="show_local_currency">Show Local Currency</string>
+    <string name="could_not_get_exchange_rate">Could not update exchange rate.</string>
+    <string name="pay_fail">Pay Fail</string>
+    <string name="is_copied">" is copied"</string>
+    <string name="check_opentunrkey_balance">Check OpenTurnKey Balance</string>
+    <string name="minute">Min.</string>
+    <string name="estimated_fees">Estimated Fees</string>
+    <string name="high">High</string>
+    <string name="mid">Mid</string>
+    <string name="low">Low</string>
+    <string name="customized">Customized</string>
+    <string name="included">Included</string>
+    <string name="excluded">Excluded</string>
 
 </resources>

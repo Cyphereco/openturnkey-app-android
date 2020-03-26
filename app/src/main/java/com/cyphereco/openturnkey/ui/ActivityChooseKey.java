@@ -13,24 +13,28 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
 
+import java.util.Objects;
 
-public class ChooseKeyActivity extends AppCompatActivity {
-    public static final String TAG = ChooseKeyActivity.class.getSimpleName();
+
+public class ActivityChooseKey extends AppCompatActivity {
+    public static final String TAG = ActivityChooseKey.class.getSimpleName();
     Logger logger = Log4jHelper.getLogger(TAG);
 
     private static final int ZXING_CAMERA_PERMISSION = 1;
     public static final int REQUEST_CODE_QR_CODE = 0;
+    public static final String KEY_PATH = "KEY_PATH";
 
     private boolean isValidL1 = false;
     private boolean isValidL2 = false;
@@ -39,7 +43,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
     private boolean isValidL5 = false;
 
     private boolean isAllPathValid() {
-        return (isValidL1 && isValidL2 && isValidL3 && isValidL4 &&isValidL5);
+        return (isValidL1 && isValidL2 && isValidL3 && isValidL4 && isValidL5);
     }
 
     private void processKeyPathChanged() {
@@ -47,8 +51,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
         if (isAllPathValid()) {
             btn.setEnabled(true);
             btn.setAlpha(1.0f);
-        }
-        else {
+        } else {
             btn.setEnabled(false);
             btn.setAlpha(.5f);
         }
@@ -60,22 +63,18 @@ public class ChooseKeyActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA}, ZXING_CAMERA_PERMISSION);
         } else {
-            Intent intent = new Intent(getApplicationContext(), QRcodeScanActivity.class);
-            startActivityForResult(intent, ChooseKeyActivity.REQUEST_CODE_QR_CODE);
+            Intent intent = new Intent(getApplicationContext(), ActivityQRcodeScan.class);
+            startActivityForResult(intent, ActivityChooseKey.REQUEST_CODE_QR_CODE);
         }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        logger.info("onActivityResult:" + requestCode + " resultCode:" + resultCode);
+        logger.debug("onActivityResult:" + requestCode + " resultCode:" + resultCode);
         if (requestCode == MainActivity.REQUEST_CODE_QR_CODE) {
             if (resultCode == RESULT_OK) {
                 // Handle successful scan
                 String contents = intent.getStringExtra(MainActivity.KEY_QR_CODE);
                 updateKeyPathData(contents);
-            }
-            else if (resultCode == RESULT_CANCELED) {
-                //Handle cancel
-                Toast.makeText(this, getString(R.string.qr_code_scan_cancelled), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -83,11 +82,11 @@ public class ChooseKeyActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        logger.debug("onCreate");
+        logger.info("onCreate");
         setContentView(R.layout.activity_choose_key);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         ImageView iv;
         iv = findViewById(R.id.imageChooseKeyScanQRCode);
@@ -115,83 +114,53 @@ public class ChooseKeyActivity extends AppCompatActivity {
         });
 
         EditText etL1 = findViewById(R.id.editTextChooseKeyL1);
-        etL1.addTextChangedListener(new KeyPathTextWatcher(etL1) {
+        etL1.addTextChangedListener(new TextWatcherKeyPath(etL1) {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
-                if (isKeyPathValid()) {
-                    isValidL1 = true;
-                }
-                else {
-                    isValidL1 = false;
-                }
+                isValidL1 = isKeyPathValid();
                 processKeyPathChanged();
             }
-
         });
 
         EditText etL2 = findViewById(R.id.editTextChooseKeyL2);
-        etL2.addTextChangedListener(new KeyPathTextWatcher(etL2) {
+        etL2.addTextChangedListener(new TextWatcherKeyPath(etL2) {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
-                if (isKeyPathValid()) {
-                    isValidL2 = true;
-                }
-                else {
-                    isValidL2 = false;
-                }
+                isValidL2 = isKeyPathValid();
                 processKeyPathChanged();
             }
-
         });
 
         EditText etL3 = findViewById(R.id.editTextChooseKeyL3);
-        etL3.addTextChangedListener(new KeyPathTextWatcher(etL3) {
+        etL3.addTextChangedListener(new TextWatcherKeyPath(etL3) {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
-                if (isKeyPathValid()) {
-                    isValidL3 = true;
-                }
-                else {
-                    isValidL3 = false;
-                }
+                isValidL3 = isKeyPathValid();
                 processKeyPathChanged();
             }
-
         });
 
         EditText etL4 = findViewById(R.id.editTextChooseKeyL4);
-        etL4.addTextChangedListener(new KeyPathTextWatcher(etL4) {
+        etL4.addTextChangedListener(new TextWatcherKeyPath(etL4) {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
-                if (isKeyPathValid()) {
-                    isValidL4 = true;
-                }
-                else {
-                    isValidL4 = false;
-                }
+                isValidL4 = isKeyPathValid();
                 processKeyPathChanged();
             }
-
         });
 
         EditText etL5 = findViewById(R.id.editTextChooseKeyL5);
-        etL5.addTextChangedListener(new KeyPathTextWatcher(etL5) {
+        etL5.addTextChangedListener(new TextWatcherKeyPath(etL5) {
             @Override
             public void afterTextChanged(Editable editable) {
                 super.afterTextChanged(editable);
-                if (isKeyPathValid()) {
-                    isValidL5 = true;
-                }
-                else {
-                    isValidL5 = false;
-                }
+                isValidL5 = isKeyPathValid();
                 processKeyPathChanged();
             }
-
         });
 
         Button btnOk = findViewById(R.id.buttonChooseKeyOk);
@@ -214,8 +183,8 @@ public class ChooseKeyActivity extends AppCompatActivity {
                 EditText etL5 = findViewById(R.id.editTextChooseKeyL5);
                 String l5 = etL5.getText().toString();
                 String path = l1 + "," + l2 + "," + l3 + "," + l4 + "," + l5;
-                logger.info("Choose key:{}", path);
-                intent.putExtra(MainActivity.KEY_CHOOSE_KEY, path);
+                logger.debug("Choose key:{}", path);
+                intent.putExtra(KEY_PATH, path);
                 setResult(RESULT_OK, intent);
                 finish();
             }
@@ -227,6 +196,15 @@ public class ChooseKeyActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (android.R.id.home == item.getItemId()) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void showFmtErrorDialog(String contents) {
@@ -242,7 +220,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
     }
 
     private void updateKeyPathData(String contents) {
-        logger.debug("path:{}", contents);
+        logger.info("path:{}", contents);
         // parse path
         int prefixStart = contents.indexOf("m/");
         if (prefixStart != 0) {
@@ -273,8 +251,7 @@ public class ChooseKeyActivity extends AppCompatActivity {
             Long.parseLong(l3);
             Long.parseLong(l4);
             Long.parseLong(l5);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             showFmtErrorDialog(contents);
             return;
         }
@@ -289,5 +266,11 @@ public class ChooseKeyActivity extends AppCompatActivity {
         etL4.setText(l4);
         EditText etL5 = findViewById(R.id.editTextChooseKeyL5);
         etL5.setText(l5);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MainActivity.setCurrentActivity(getClass().getName());
     }
 }

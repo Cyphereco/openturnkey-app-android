@@ -7,15 +7,15 @@
 
     <ImageView
         android:id="@+id/iv_trans_item_ret_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:src="@drawable/ic_success_24dp"
         app:layout_constraintBottom_toBottomOf="@+id/tv_trans_item_time"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_trans_item_date" />
+        app:layout_constraintTop_toTopOf="@+id/tv_trans_item_date"
+        app:srcCompat="@drawable/ic_unconfirmed" />
 
     <TextView
         android:id="@+id/tv_trans_item_date"

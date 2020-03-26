@@ -12,30 +12,31 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.db.DBAddrItem;
+import com.cyphereco.openturnkey.db.RecordAddress;
 import com.cyphereco.openturnkey.utils.AddressUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-
-public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapter.ViewHolder> implements Filterable {
-//    private final static String TAG = AddrbookViewAdapter.class.getSimpleName();
+public class ViewAdapterAddrbook extends RecyclerView.Adapter<ViewAdapterAddrbook.ViewHolder> implements Filterable {
 
     private Context mContext;
     private AdapterListener mAdapterListener = null;
-    private List<DBAddrItem> mAddressbookDataset;
+    private List<RecordAddress> mAddressbookDataset = new ArrayList<>();
     private AddressFilter mAddressFilter;
 
     public interface AdapterListener {
         void onDeleteAddress(int position);
+
         void onEditAddress(int position);
+
         void onShowQRCode(int position);
+
         void onPay(int position);
     }
 
-    public void setData(List<DBAddrItem> data) {
+    public void setData(List<RecordAddress> data) {
         if (null != mAddressbookDataset) {
             this.mAddressbookDataset.clear();
         }
@@ -43,26 +44,25 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
         notifyDataSetChanged();
     }
 
-    AddrbookViewAdapter(Context context) {
-        this.mContext = context;
-        mAddressbookDataset = new ArrayList<>();
+    ViewAdapterAddrbook(Context context) {
+        mContext = context;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(mContext).inflate(
-                R.layout.listitem_address , parent ,false);
-        return (new ViewHolder(v));
+                R.layout.listitem_address, parent, false);
+        return (new ViewAdapterAddrbook.ViewHolder(v));
     }
 
-   @Override
+    @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
         if (null == mAddressbookDataset) {
             return;
         }
         viewHolder.mTVAlias.setText(
-                AddressUtils.getShortAlias(mAddressbookDataset.get(position).getName()));
+                AddressUtils.getShortAlias(mAddressbookDataset.get(position).getAlias()));
         viewHolder.mTVAddress.setText(
                 AddressUtils.getShortAddress(mAddressbookDataset.get(position).getAddress()));
     }
@@ -79,7 +79,7 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
         mAdapterListener = listener;
     }
 
-    DBAddrItem getAddressItemByPosition(final int position) {
+    RecordAddress getAddressItemByPosition(final int position) {
         if (null == mAddressbookDataset) {
             return null;
         }
@@ -95,7 +95,6 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
             mTVAlias = itemView.findViewById(R.id.textView_addrbook_item_alias);
             mTVAddress = itemView.findViewById(R.id.textView_addrbook_item_address);
             ImageView ivDeleteBtn = itemView.findViewById(R.id.imageView_addrbook_item_delete);
-            ImageView ivEditBtn = itemView.findViewById(R.id.imageView_addrbook_item_edit);
             ImageView ivQRCodeBtn = itemView.findViewById(R.id.imageView_addrbook_item_qrcode);
             ImageView ivPayBtn = itemView.findViewById(R.id.imageView_addrbook_item_pay);
 
@@ -108,7 +107,16 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
                 }
             });
 
-            ivEditBtn.setOnClickListener(new View.OnClickListener() {
+            mTVAlias.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (null != mAdapterListener) {
+                        mAdapterListener.onEditAddress(getAdapterPosition());
+                    }
+                }
+            });
+
+            mTVAddress.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (null != mAdapterListener) {
@@ -147,11 +155,11 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
 
     private static class AddressFilter extends Filter {
 
-        private final AddrbookViewAdapter mAdapter;
-        private final List<DBAddrItem> mOriginalList;
-        private final List<DBAddrItem> mFilteredList;
+        private final ViewAdapterAddrbook mAdapter;
+        private final List<RecordAddress> mOriginalList;
+        private final List<RecordAddress> mFilteredList;
 
-        private AddressFilter(AddrbookViewAdapter adapter, List<DBAddrItem> originalList) {
+        private AddressFilter(ViewAdapterAddrbook adapter, List<RecordAddress> originalList) {
             super();
             this.mAdapter = adapter;
             this.mOriginalList = new LinkedList<>(originalList);
@@ -165,11 +173,10 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
 
             if (0 == constraint.length()) {
                 mFilteredList.addAll(mOriginalList);
-            }
-            else {
+            } else {
                 final String filterPattern = constraint.toString().toLowerCase().trim();
-                for (DBAddrItem item : mOriginalList) {
-                    if (item.getName().toLowerCase().contains(filterPattern)) {
+                for (RecordAddress item : mOriginalList) {
+                    if (item.getAlias().toLowerCase().contains(filterPattern)) {
                         mFilteredList.add(item);
                     }
                 }
@@ -183,7 +190,7 @@ public class AddrbookViewAdapter extends RecyclerView.Adapter<AddrbookViewAdapte
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             mAdapter.mAddressbookDataset.clear();
-            mAdapter.mAddressbookDataset.addAll((List<DBAddrItem>) results.values);
+            mAdapter.mAddressbookDataset.addAll((List<RecordAddress>) results.values);
             mAdapter.notifyDataSetChanged();
         }
     }

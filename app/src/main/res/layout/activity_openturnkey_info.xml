@@ -117,7 +117,7 @@
         android:autoLink="web"
         android:gravity="center"
         android:maxLength="34"
-        android:text="1LG9fDp3do4X2tEf4k7V4uCYhNUmSq6vL8"
+        android:text="@string/communication_error"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -126,24 +126,25 @@
 
     <ImageView
         android:id="@+id/icon_copy"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
         android:contentDescription="@android:string/copyUrl"
-        app:layout_constraintEnd_toEndOf="@+id/btc_address_context"
-        app:layout_constraintStart_toStartOf="@+id/btc_address_context"
-        app:layout_constraintTop_toBottomOf="@+id/btc_address_context"
+        app:layout_constraintBottom_toBottomOf="@+id/btc_address_context"
+        app:layout_constraintStart_toEndOf="@+id/btc_address_context"
+        app:layout_constraintTop_toTopOf="@+id/btc_address_context"
         app:srcCompat="@drawable/ic_content_copy_black_24dp" />
 
     <ImageView
         android:id="@+id/icon_mint_information"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:contentDescription="@string/mint_inforamtion"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:contentDescription="@string/mint_information"
+        android:tint="#FFB300"
         app:layout_constraintStart_toEndOf="@+id/user_note_context"
-        app:layout_constraintTop_toTopOf="@+id/user_note_context"
-        app:srcCompat="@drawable/ic_info_outline_black_24dp" />
+        app:layout_constraintTop_toTopOf="@+id/note"
+        app:srcCompat="@android:drawable/ic_dialog_info" />
 
     <TextView
         android:id="@+id/text_balance_fiat"

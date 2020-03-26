@@ -5,12 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cyphereco.openturnkey.ui.Preferences;
+import com.cyphereco.openturnkey.utils.BtcUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * OpenturnkeyDB.java - This is used to operate database of OpenTurnKey
- *
  */
 public class OpenturnkeyDB {
     // private static final String TAG = OpenturnkeyDB.class.getSimpleName();
@@ -18,104 +20,96 @@ public class OpenturnkeyDB {
     /**
      * This is transaction log table name of database
      */
-    static final String TRANS_TABLE_NAME = "transactionLog";
+    static final String TABLE_TRANSACTION = "transactionLog";
     /**
      * This is address book table name of database
      */
-    static final String ADDR_BOOK_TABLE_NAME = "addrBook";
+    static final String TABLE_ADDRESSBOOK = "addrBook";
 
     // Columns of transaction table
-    private static final String TRANS_KEY_ID_COL = "_id";
-    private static final String TRANS_DATETIME_COL = "datetime";
-    private static final String TRANS_HASH_COL = "hash";
-    private static final String TRANS_PAYER_ADDR_COL = "payerAddr";
-    private static final String TRANS_PAYEE_ADDR_COL = "payeeAddr";
-    private static final String TRANS_AMOUNT_COL = "amount";
-    private static final String TRANS_AMOUNT_UNIT_STR_COL = "amountTypeStr";
-    private static final String TRANS_FEE_COL = "fee";
-    private static final String TRANS_FEE_UNIT_STR_COL = "feeTypeStr";
-    private static final String TRANS_STATUS_COL = "status";
-    private static final String TRANS_COMMENTS_COL = "comments";
-    private static final String TRANS_RAW_DATA_COL = "rawData";
-    private static final String TRANS_CONFIRMATIONS_COL = "confirmations";
+    private static final String TX_KEY_ID = "_id";
+    private static final String TX_HASH = "hash";
+    private static final String TX_TIMESTAMP = "timestamp";
+    private static final String TX_PAYER_ADDR = "payerAddr";
+    private static final String TX_PAYEE_ADDR = "payeeAddr";
+    private static final String TX_AMOUNT_SENT = "amountSent";
+    private static final String TX_AMOUNT_RECV = "amountRecv";
+    private static final String TX_RAW = "rawData";
+    private static final String TX_BLOCK_HEIGHT = "blockHeight";
+    private static final String TX_EXCHANGE_RATE = "exchangeRate";
 
     // Columns of address book
-    private static final String ADDRBOOK_ADDR_KEY_ID_COL = "_id";
-    private static final String ADDRBOOK_ADDR_COL = "address";
-    private static final String ADDRBOOK_USR_NAME_COL = "userName";
+    private static final String ADDR_KEY_ID = "_id";
+    private static final String ADDR_ADDRESS = "address";
+    private static final String ADDR_ALIAS = "alias";
 
     /**
      * SQL command of creating transaction table
      */
-    static final String CREATE_TRANS_TABLE_SQL = "CREATE TABLE " + TRANS_TABLE_NAME + " (" +
-            TRANS_KEY_ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            TRANS_DATETIME_COL + " DateTime NOT NULL, " +
-            TRANS_HASH_COL + " VARCHAR(128), " +
-            TRANS_PAYER_ADDR_COL + " VARCHAR(64) NOT NULL, " +
-            TRANS_PAYEE_ADDR_COL + " VARCHAR(64) NOT NULL, " +
-            TRANS_AMOUNT_COL + " DOUBLE, " +
-            TRANS_AMOUNT_UNIT_STR_COL + " VARCHAR(32), " +
-            TRANS_FEE_COL + " DOUBLE, " +
-            TRANS_FEE_UNIT_STR_COL + " VARCHAR(32), " +
-            TRANS_STATUS_COL + " INTEGER, " +
-            TRANS_COMMENTS_COL + " TEXT, " +
-            TRANS_RAW_DATA_COL + " TEXT, " +
-            TRANS_CONFIRMATIONS_COL + " INTEGER " +
+    static final String CREATE_TRANSACTION_TABLE_SQL = "CREATE TABLE " + TABLE_TRANSACTION + " (" +
+            TX_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            TX_TIMESTAMP + " DateTime NOT NULL, " +
+            TX_HASH + " TEXT, " +
+            TX_PAYER_ADDR + " TEXT NOT NULL, " +
+            TX_PAYEE_ADDR + " TEXT NOT NULL, " +
+            TX_AMOUNT_SENT + " DOUBLE, " +
+            TX_AMOUNT_RECV + " DOUBLE, " +
+            TX_RAW + " TEXT, " +
+            TX_BLOCK_HEIGHT + " LONG," +
+            TX_EXCHANGE_RATE + " TEXT " +
             ");";
 
     /**
      * SQL command of creating address book table
      */
     static final String CREATE_ADDRBOOK_TABLE_SQL = "CREATE TABLE " +
-            ADDR_BOOK_TABLE_NAME + " (" +
-            ADDRBOOK_ADDR_KEY_ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            ADDRBOOK_USR_NAME_COL + " VARCHAR(128) UNIQUE NOT NULL, " +
-            ADDRBOOK_ADDR_COL + " VARCHAR(64) NOT NULL " +
+            TABLE_ADDRESSBOOK + " (" +
+            ADDR_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            ADDR_ALIAS + " VARCHAR(128) UNIQUE NOT NULL, " +
+            ADDR_ADDRESS + " VARCHAR(64) NOT NULL " +
             ");";
 
     // Database object
-    private SQLiteDatabase otkDB;
+    private static SQLiteDatabase otkDB;
 
-    private DBTransItem generateTransItemByQueryResult(Cursor cursor) {
-        DBTransItem item = new DBTransItem();
+    private static RecordTransaction generateTransItemByQueryResult(Cursor cursor) {
+        RecordTransaction recordTransaction = new RecordTransaction();
 
-        item.setId(cursor.getLong(0));
-        item.setDatetime(cursor.getLong(1));
-        item.setHash(cursor.getString(2));
-        item.setPayerAddr(cursor.getString(3));
-        item.setPayeeAddr(cursor.getString(4));
-        item.setAmount(cursor.getDouble(5));
-        item.setAmountUnitString(cursor.getString(6));
-        item.setFee(cursor.getDouble(7));
-        item.setFeeUnitString(cursor.getString(8));
-        item.setStatus(cursor.getInt(9));
-        item.setComment(cursor.getString(10));
-        item.setRawData(cursor.getString(11));
-        item.setConfrimations(cursor.getInt(12));
+        recordTransaction.setId(cursor.getLong(0));
+        recordTransaction.setTimestamp(cursor.getLong(1));
+        recordTransaction.setHash(cursor.getString(2));
+        recordTransaction.setPayer(cursor.getString(3));
+        recordTransaction.setPayee(cursor.getString(4));
+        recordTransaction.setAmountSent(cursor.getDouble(5));
+        recordTransaction.setAmountRecv(cursor.getDouble(6));
+        recordTransaction.setRawData(cursor.getString(7));
+        recordTransaction.setBlockHeight(cursor.getLong(8));
+        recordTransaction.setExchangeRate(cursor.getString(9));
 
-        return item;
+        return recordTransaction;
     }
 
-    private DBAddrItem generateAddrbookItemByQueryResult(Cursor cursor) {
-        DBAddrItem item = new DBAddrItem();
+    private static RecordAddress generateAddrbookItemByQueryResult(Cursor cursor) {
+        RecordAddress item = new RecordAddress();
 
-        item.setDbId(cursor.getLong(0));
-        item.setName(cursor.getString(1));
+        item.setId(cursor.getLong(0));
+        item.setAlias(cursor.getString(1));
         item.setAddress(cursor.getString(2));
 
         return item;
     }
 
-    public OpenturnkeyDB(Context context) {
-        otkDB = DBHelper.getDatabase(context);
-
+    public static void init(Context context) {
+        if (otkDB == null) {
+            otkDB = DBHelper.getDatabase(context);
+        }
     }
 
-    public int getTransactionCount() {
+    public static int getTransactionCount() {
         int ret = 0;
 
         try (Cursor cursor = otkDB.rawQuery(
-                "SELECT COUNT(*) FROM " + TRANS_TABLE_NAME,null)) {
+                "SELECT COUNT(*) FROM " + TABLE_TRANSACTION, null)) {
             if (cursor.moveToNext()) {
                 ret = cursor.getInt(0);
             }
@@ -125,68 +119,90 @@ public class OpenturnkeyDB {
         return ret;
     }
 
-    public DBTransItem addTransaction(DBTransItem item) {
+    public static RecordTransaction insertTransaction(RecordTransaction recordTransaction) {
+        RecordTransaction r = getTransactionByHash(recordTransaction.getHash());
+        if (r != null) return r;
+
         ContentValues cv = new ContentValues();
 
-        cv.put(TRANS_DATETIME_COL, item.getDatetime());
-        cv.put(TRANS_HASH_COL, item.getHash());
-        cv.put(TRANS_PAYER_ADDR_COL, item.getPayerAddr());
-        cv.put(TRANS_PAYEE_ADDR_COL, item.getPayeeAddr());
-        cv.put(TRANS_AMOUNT_COL, item.getAmount());
-        cv.put(TRANS_AMOUNT_UNIT_STR_COL, item.getAmountUnitString());
-        cv.put(TRANS_FEE_COL, item.getFee());
-        cv.put(TRANS_FEE_UNIT_STR_COL, item.getFeeUnitString());
-        cv.put(TRANS_STATUS_COL, item.getStatus());
-        cv.put(TRANS_COMMENTS_COL, item.getComment());
-        cv.put(TRANS_RAW_DATA_COL, item.getRawData());
-        cv.put(TRANS_CONFIRMATIONS_COL, item.getConfirmations());
+        cv.put(TX_TIMESTAMP, recordTransaction.getTimestamp());
+        cv.put(TX_HASH, recordTransaction.getHash());
+        cv.put(TX_PAYER_ADDR, recordTransaction.getPayer());
+        cv.put(TX_PAYEE_ADDR, recordTransaction.getPayee());
+        cv.put(TX_AMOUNT_SENT, recordTransaction.getAmountSent());
+        cv.put(TX_AMOUNT_RECV, recordTransaction.getAmountRecv());
+        cv.put(TX_RAW, recordTransaction.getRawData());
+        cv.put(TX_BLOCK_HEIGHT, recordTransaction.getBlockHeight());
+        cv.put(TX_EXCHANGE_RATE, recordTransaction.getExchangeRate());
 
-        long id = otkDB.insert(TRANS_TABLE_NAME, null, cv);
-        item.setId(id);
+        long id = otkDB.insert(TABLE_TRANSACTION, null, cv);
 
+        // something wrong, insert failed
+        if (id < 0) return null;
+
+        recordTransaction.setId(id);
+        return recordTransaction;
+    }
+
+    public static boolean updateTransaction(RecordTransaction recordTransaction) {
+        ContentValues cv = new ContentValues();
+
+        cv.put(TX_TIMESTAMP, recordTransaction.getTimestamp());
+        cv.put(TX_HASH, recordTransaction.getHash());
+        cv.put(TX_PAYER_ADDR, recordTransaction.getPayer());
+        cv.put(TX_PAYEE_ADDR, recordTransaction.getPayee());
+        cv.put(TX_AMOUNT_SENT, recordTransaction.getAmountSent());
+        cv.put(TX_AMOUNT_RECV, recordTransaction.getAmountRecv());
+        cv.put(TX_RAW, recordTransaction.getRawData());
+        cv.put(TX_BLOCK_HEIGHT, recordTransaction.getBlockHeight());
+        cv.put(TX_EXCHANGE_RATE, recordTransaction.getExchangeRate());
+
+        String where = TX_KEY_ID + "=" + recordTransaction.getId();
+
+        try {
+            // should be only 1 record affected, if return not 1, must be something wrong
+            return (otkDB.update(TABLE_TRANSACTION, cv, where, null) == 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean deleteTransactionById(long id) {
+        String where = TX_KEY_ID + "=" + id;
+
+        try {
+            return (otkDB.delete(TABLE_TRANSACTION, where, null) == 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean deleteTransaction(RecordTransaction recordTransaction) {
+        return deleteTransactionById(recordTransaction.getId());
+    }
+
+    public static RecordTransaction getTransactionByHash(String hash) {
+        RecordTransaction item = null;
+        try (Cursor cursor = otkDB.query(TABLE_TRANSACTION, null,
+                TX_HASH + "=?", new String[]{String.valueOf(hash)},
+                null, null, null, null)) {
+            if (1 == cursor.getCount()) {
+                cursor.moveToNext();
+                item = generateTransItemByQueryResult(cursor);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
         return item;
     }
 
-    public boolean updateTransaction(DBTransItem item) {
-        ContentValues cv = new ContentValues();
-
-        cv.put(TRANS_DATETIME_COL, item.getDatetime());
-        cv.put(TRANS_PAYER_ADDR_COL, item.getPayeeAddr());
-        cv.put(TRANS_PAYEE_ADDR_COL, item.getPayeeAddr());
-        cv.put(TRANS_AMOUNT_COL, item.getAmount());
-        cv.put(TRANS_FEE_COL, item.getFee());
-        cv.put(TRANS_STATUS_COL, item.getStatus());
-        cv.put(TRANS_COMMENTS_COL, item.getComment());
-        cv.put(TRANS_RAW_DATA_COL, item.getRawData());
-        cv.put(TRANS_CONFIRMATIONS_COL, item.getConfirmations());
-
-        String where = TRANS_KEY_ID_COL + "=" + item.getId();
-
-        try {
-            return (otkDB.update(TRANS_TABLE_NAME, cv, where, null) > 0);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean deleteTransactionById(long id) {
-        String where = TRANS_KEY_ID_COL + "=" + id;
-
-        try {
-            return (otkDB.delete(TRANS_TABLE_NAME, where, null) > 0);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public DBTransItem getTransactionItemById(long id) {
-        DBTransItem item = null;
-        try (Cursor cursor = otkDB.query(TRANS_TABLE_NAME, null,
-                TRANS_KEY_ID_COL + "=?", new String[]{String.valueOf(id)},
+    public static RecordTransaction getTransactionById(long id) {
+        RecordTransaction item = null;
+        try (Cursor cursor = otkDB.query(TABLE_TRANSACTION, null,
+                TX_KEY_ID + "=?", new String[]{String.valueOf(id)},
                 null, null, null, null)) {
             if (1 == cursor.getCount()) {
                 cursor.moveToNext();
@@ -198,13 +214,17 @@ public class OpenturnkeyDB {
         return item;
     }
 
-    public List<DBTransItem> getAllTransaction() {
-        List<DBTransItem> result = new ArrayList<>();
+    public static List<RecordTransaction> getAllTransactions() {
+        List<RecordTransaction> result = new ArrayList<>();
 
-        try (Cursor cursor = otkDB.query(TRANS_TABLE_NAME, null, null,
+        try (Cursor cursor = otkDB.query(TABLE_TRANSACTION, null, null,
                 null, null, null, null, null)) {
             while (cursor.moveToNext()) {
-                result.add(generateTransItemByQueryResult(cursor));
+                // output transactions only matched current network preference
+                if (BtcUtils.validateAddress(!Preferences.isTestnet(),
+                        generateTransItemByQueryResult(cursor).getPayer())) {
+                    result.add(generateTransItemByQueryResult(cursor));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -212,10 +232,10 @@ public class OpenturnkeyDB {
         return result;
     }
 
-    public boolean clearTransactionTable() {
+    public static boolean clearTransactionTable() {
         try {
-            otkDB.execSQL("DROP TABLE IF EXISTS " + TRANS_TABLE_NAME);
-            otkDB.execSQL(CREATE_TRANS_TABLE_SQL);
+            otkDB.execSQL("DROP TABLE IF EXISTS " + TABLE_TRANSACTION);
+            otkDB.execSQL(CREATE_TRANSACTION_TABLE_SQL);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -223,11 +243,11 @@ public class OpenturnkeyDB {
         return true;
     }
 
-    public int getAddrbookCount() {
+    public static int getAddrbookCount() {
         int ret = 0;
 
         try (Cursor cursor = otkDB.rawQuery(
-                "SELECT COUNT(*) FROM " + ADDR_BOOK_TABLE_NAME, null)) {
+                "SELECT COUNT(*) FROM " + TABLE_ADDRESSBOOK, null)) {
             if (cursor.moveToNext()) {
                 ret = cursor.getInt(0);
             }
@@ -237,84 +257,49 @@ public class OpenturnkeyDB {
         return ret;
     }
 
-    public boolean addAddress(DBAddrItem item) {
-        if (item.getDbId() > 0) {
-            return updateAddressbook(item);
+    public static RecordAddress insertAddress(RecordAddress recordAddress) {
+        if (recordAddress.getId() > 0) {
+            // exist recordAddress, update instead of insert new
+            updateAddressbook(recordAddress);
+            return recordAddress;
         }
-        else {
+
+        ContentValues cv = new ContentValues();
+
+        cv.put(ADDR_ADDRESS, recordAddress.getAddress());
+        cv.put(ADDR_ALIAS, recordAddress.getAlias());
+
+        long id = otkDB.insert(TABLE_ADDRESSBOOK, null, cv);
+
+        if (id < 0) return null;
+
+        recordAddress.setId(id);
+        return recordAddress;
+    }
+
+    public static boolean updateAddressbook(RecordAddress item) {
+        if (item.getId() > 0) {
             ContentValues cv = new ContentValues();
 
-            cv.put(ADDRBOOK_ADDR_COL, item.getAddress());
-            cv.put(ADDRBOOK_USR_NAME_COL, item.getName());
+            cv.put(ADDR_ADDRESS, item.getAddress());
+            cv.put(ADDR_ALIAS, item.getAlias());
+            String where = ADDR_KEY_ID + "=" + item.getId();
 
             try {
-                return (otkDB.insert(ADDR_BOOK_TABLE_NAME, null, cv) > 0);
-            }
-            catch (Exception e) {
+                return (otkDB.update(TABLE_ADDRESSBOOK, cv, where, null) > 0);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return false;
         }
-    }
-
-    public boolean updateAddressbook(DBAddrItem item) {
-        if (item.getDbId() > 0) {
-            ContentValues cv = new ContentValues();
-
-            cv.put(ADDRBOOK_ADDR_COL, item.getAddress());
-            cv.put(ADDRBOOK_USR_NAME_COL, item.getName());
-            String where = ADDRBOOK_ADDR_KEY_ID_COL + "=" + item.getDbId();
-
-            try {
-                return (otkDB.update(ADDR_BOOK_TABLE_NAME, cv, where, null) > 0);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-            return false;
-        }
-        else {
-            return addAddress(item);
-        }
-    }
-
-    public boolean deleteAddressbookByAddr(String address) {
-        try {
-            return (otkDB.delete(ADDR_BOOK_TABLE_NAME, ADDRBOOK_ADDR_COL + "=?" , new String[]{address}) > 0);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
         return false;
     }
 
-    public boolean deleteAddressbookByAlias(String alias) {
-        try {
-            return (otkDB.delete(ADDR_BOOK_TABLE_NAME, ADDRBOOK_USR_NAME_COL + "=?", new String[]{alias}) > 0);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
+    public static RecordAddress getAddressByAlias(String alias) {
+        RecordAddress item = null;
 
-    public List<DBAddrItem> getAllAddressbook() {
-        List<DBAddrItem> result = new ArrayList<>();
-        Cursor cursor = otkDB.query(ADDR_BOOK_TABLE_NAME, null,null,
-                null, null,null,null,null);
-        while (cursor.moveToNext()) {
-            result.add(generateAddrbookItemByQueryResult(cursor));
-        }
-
-        cursor.close();
-        return result;
-    }
-
-    public DBAddrItem getAddressItemByAlias(String alias) {
-        DBAddrItem item = null;
-
-        try (Cursor cursor = otkDB.query(ADDR_BOOK_TABLE_NAME, null,
-                ADDRBOOK_USR_NAME_COL + "=?", new String[]{alias},
+        try (Cursor cursor = otkDB.query(TABLE_ADDRESSBOOK, null,
+                ADDR_ALIAS + "=?", new String[]{alias},
                 null, null, null, null)) {
             if (1 == cursor.getCount()) {
                 cursor.moveToNext();
@@ -324,5 +309,39 @@ public class OpenturnkeyDB {
             e.printStackTrace();
         }
         return item;
+    }
+
+    public static boolean deleteAddressByAddr(String address) {
+        try {
+            return (otkDB.delete(TABLE_ADDRESSBOOK, ADDR_ADDRESS + "=?", new String[]{address}) > 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean deleteAddressbookByAlias(String alias) {
+        try {
+            return (otkDB.delete(TABLE_ADDRESSBOOK, ADDR_ALIAS + "=?", new String[]{alias}) > 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static List<RecordAddress> getAllAddresses() {
+        List<RecordAddress> result = new ArrayList<>();
+        Cursor cursor = otkDB.query(TABLE_ADDRESSBOOK, null, null,
+                null, null, null, null, null);
+        while (cursor.moveToNext()) {
+            // output address only matched current network preference
+            if (BtcUtils.validateAddress(!Preferences.isTestnet(),
+                    generateAddrbookItemByQueryResult(cursor).getAddress())) {
+                result.add(generateAddrbookItemByQueryResult(cursor));
+            }
+        }
+
+        cursor.close();
+        return result;
     }
 }

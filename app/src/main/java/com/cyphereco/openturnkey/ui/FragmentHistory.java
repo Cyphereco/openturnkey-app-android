@@ -1,46 +1,45 @@
 package com.cyphereco.openturnkey.ui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.db.DBTransItem;
+import com.cyphereco.openturnkey.db.RecordTransaction;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
+import com.cyphereco.openturnkey.utils.BtcExchangeRates;
+import com.cyphereco.openturnkey.utils.TxFee;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-public class FragmentHistory extends Fragment {
-    private final static String TAG = FragmentHistory.class.getSimpleName();
+public class FragmentHistory extends FragmentExtendOtkViewPage {
 
     private TextView mTVNoHistoryMessage;
     private RecyclerView mRVHistory;
-
-    private OpenturnkeyDB mOtkDB = null;
-    private HistoryViewAdapter mItemViewAdapter;
+    private ViewAdapterHistory mItemViewAdapter;
 
     private void setAdapterListener() {
         if (null == mItemViewAdapter) {
             return;
         }
-        mItemViewAdapter.setAdapterListener(new HistoryViewAdapter.AdapterListener() {
+        mItemViewAdapter.setAdapterListener(new ViewAdapterHistory.AdapterListener() {
             @Override
             public void onClickTransItem(int position) {
                 /* Show transaction detail in another activity */
-                DBTransItem item = mItemViewAdapter.getTransItemByPosition(position);
+                RecordTransaction item = mItemViewAdapter.getTransItemByPosition(position);
 
                 if (null != item) {
                     Intent intent = new Intent(getContext(), ActivityTransactionInfo.class);
@@ -49,26 +48,24 @@ public class FragmentHistory extends Fragment {
                         getActivity().startActivityForResult(intent,
                                 MainActivity.REQUEST_CODE_TRANSACTION_INFO);
                     }
-                }
-                else {
-                    Log.e(TAG, "Cannot find transaction item. Position: " + position);
+                } else {
+                    logger.error("Cannot find transaction item. Position: " + position);
                 }
             }
         });
     }
 
     private void updateTransactionDataset() {
-        List<DBTransItem> dataset = mOtkDB.getAllTransaction();
+        List<RecordTransaction> dataset = OpenturnkeyDB.getAllTransactions();
 
-        Collections.sort(dataset, new Comparator<DBTransItem>() {
+        Collections.sort(dataset, new Comparator<RecordTransaction>() {
             @Override
-            public int compare(DBTransItem o1, DBTransItem o2) {
-                Date dt1 = new Date(o1.getDatetime());
-                Date dt2 = new Date(o2.getDatetime());
+            public int compare(RecordTransaction o1, RecordTransaction o2) {
+                Date dt1 = new Date(o1.getTimestamp());
+                Date dt2 = new Date(o2.getTimestamp());
                 if (dt1.before(dt2)) {
                     return 1;
-                }
-                else if (dt1.equals(dt2)) {
+                } else if (dt1.equals(dt2)) {
                     return 0;
                 }
                 return -1;
@@ -80,11 +77,16 @@ public class FragmentHistory extends Fragment {
             mRVHistory.setVisibility(View.VISIBLE);
 
             mItemViewAdapter.setData(dataset);
-        }
-        else {
+        } else {
             mTVNoHistoryMessage.setVisibility(View.VISIBLE);
             mRVHistory.setVisibility(View.INVISIBLE);
         }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -92,17 +94,12 @@ public class FragmentHistory extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.fragment_history, container, false);
-
-        if (null == mOtkDB) {
-            mOtkDB = new OpenturnkeyDB(getContext());
-        }
 
         mTVNoHistoryMessage = view.findViewById(R.id.text_no_history);
         mRVHistory = view.findViewById(R.id.recyclerView_history);
 
-        mItemViewAdapter = new HistoryViewAdapter(getContext());
+        mItemViewAdapter = new ViewAdapterHistory(getContext());
         this.setAdapterListener();
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -110,30 +107,61 @@ public class FragmentHistory extends Fragment {
         mRVHistory.setLayoutManager(layoutManager);
         mRVHistory.setAdapter(mItemViewAdapter);
 
+        MainActivity.addToListOnlineDataUpdateListener(new MainActivity.OnlineDataUpdateListener() {
+            @Override
+            public void onExchangeRateUpdated(BtcExchangeRates xrate) {
+
+            }
+
+            @Override
+            public void onTxFeeUpdated(TxFee txFee) {
+
+            }
+
+            @Override
+            public void onBlockHeightUpdated(long height) {
+                if (isSelected()) {
+                    // switch page quickly to refresh adapter items confirmation icon
+                    MainActivity.switchToPage(MainActivity.PAGE.PAY.ordinal());
+                    MainActivity.switchToPage(MainActivity.PAGE.HISTORY.ordinal());
+                }
+            }
+        });
+
         return view;
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        Log.d(TAG, "onAttach");
-    }
+    public void onPageSelected() {
+        super.onPageSelected();
+        // fragment has not been attached, do not update
+        if (this.getContext() == null) return;;
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        Log.d(TAG, "onDetach");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume");
+        logger.debug("refresh history");
         updateTransactionDataset();
     }
 
-    public void refresh() {
-        Log.d(TAG, "refresh()");
-        updateTransactionDataset();
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.menu_history, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.menu_history_clear_history) {
+            DialogClearHistory dialog = new DialogClearHistory();
+            dialog.setDialogClearHistoryListener(new DialogClearHistory.DialogClearHistoryListener() {
+                @Override
+                public void onHistoryCleared() {
+                    updateTransactionDataset();
+                }
+            });
+            assert getFragmentManager() != null;
+            dialog.show(getFragmentManager(), "dialog");
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

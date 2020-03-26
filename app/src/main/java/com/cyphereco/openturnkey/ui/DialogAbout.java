@@ -1,24 +1,25 @@
 package com.cyphereco.openturnkey.ui;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import com.cyphereco.openturnkey.BuildConfig;
-
-
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.Configurations;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.webservices.BlockCypher;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+
+import java.util.Objects;
 
 public class DialogAbout extends AppCompatDialogFragment {
     public static final String TAG = DialogAbout.class.getSimpleName();
@@ -30,24 +31,19 @@ public class DialogAbout extends AppCompatDialogFragment {
         TextView tvVersion = v.findViewById(R.id.version_number);
         String ver = BuildConfig.VERSION_NAME;
         tvVersion.setText(ver);
-        if (Preferences.isTestnet(getContext())) {
+        if (Preferences.isTestnet()) {
             // Add postfix 't' to version number
             tvVersion.setText(String.format("%s%s", tvVersion.getText(), TESTNET_POSTFIX));
         }
-        else {
-            // Remove (t)
-            if (ver.substring((ver.length() - TESTNET_POSTFIX.length()), ver.length()).equals(TESTNET_POSTFIX)) {
-                tvVersion.setText(ver.substring(0, ver.length() - TESTNET_POSTFIX.length()));
-            }
-        }
     }
 
+    @NotNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.dialog_about, null);
+        LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
+        @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.dialog_about, null);
 
         builder.setView(view)
                 .setTitle(R.string.about)
@@ -62,17 +58,16 @@ public class DialogAbout extends AppCompatDialogFragment {
         tvVersion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logger.info("onClick:{}", ++clickCount);
+                logger.debug("onClick:{}", ++clickCount);
                 if (clickCount >= 3) {
                     // toggle mode
-                    if (Preferences.isTestnet(getContext())) {
-                        Preferences.setNetwork(getContext(), Configurations.Network.MAINNET);
-                        BlockCypher.getInstance(getContext()).reInit();
+                    if (Preferences.isTestnet()) {
+                        Preferences.setNetwork(Configurations.Network.MAINNET);
+                        BlockCypher.reInit();
                         setVersion(v);
-                    }
-                    else {
-                        Preferences.setNetwork(getContext(), Configurations.Network.TESTNET);
-                        BlockCypher.getInstance(getContext()).reInit();
+                    } else {
+                        Preferences.setNetwork(Configurations.Network.TESTNET);
+                        BlockCypher.reInit();
                         setVersion(v);
                     }
                     clickCount = 0;

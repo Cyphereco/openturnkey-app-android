@@ -4,7 +4,7 @@ public class AddressUtils {
     private static final int ALIAS_SHORT_MAX_LENGTH = 10;
     private static final int ADDRESS_SHORT_MAX_LENGTH = 8;
     private static final int ADDRESS_SHORT_HEAD_LENGTH = 4;
-    private static final int ADDRESS_SHORT_TIAL_LENGTH = 4;
+    private static final int ADDRESS_SHORT_TAIL_LENGTH = 4;
     private static final String ADDRESS_SHORT_MASK_STR = "****";
 
     private AddressUtils() {
@@ -19,7 +19,7 @@ public class AddressUtils {
             if (srcAddress.length() > ADDRESS_SHORT_MAX_LENGTH) {
                 retAddress = srcAddress.substring(0, ADDRESS_SHORT_HEAD_LENGTH) +
                         ADDRESS_SHORT_MASK_STR +
-                        srcAddress.substring((srcAddress.length() - ADDRESS_SHORT_TIAL_LENGTH));
+                        srcAddress.substring((srcAddress.length() - ADDRESS_SHORT_TAIL_LENGTH));
             }
         }
         return retAddress;

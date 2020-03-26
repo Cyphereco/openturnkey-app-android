@@ -1,8 +1,7 @@
 package com.cyphereco.openturnkey.webservices;
 
-import android.content.Context;
-
-import com.cyphereco.openturnkey.core.Tx;
+import com.blockcypher.model.transaction.Transaction;
+import com.cyphereco.openturnkey.ui.Preferences;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 
 import org.slf4j.Logger;
@@ -14,6 +13,8 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 import org.json.*;
+
+import static com.cyphereco.openturnkey.utils.BtcUtils.convertDateTimeStringToLong;
 
 /*
  * References:
@@ -39,122 +40,183 @@ import org.json.*;
  * https://blockchain.info/rawtx/74d350ca44c324f4643274b98801f9a023b2b8b72e8e895879fd9070a68f7f1f?format=hex
  *
  * -Get confirmations for a tx:
- * Current block hight - "block_height" for the tx + 1
+ * Current block height - "block_height" for the tx + 1
  *
  *
  */
-public class BlockChainInfo extends BtcBase {
+public class BlockChainInfo {
     public static final String TAG = BlockChainInfo.class.getSimpleName();
     static Logger logger = Log4jHelper.getLogger(TAG);
-    private static BlockChainInfo mBci = null;
 
-    private Client webClient = ClientBuilder.newClient();
+    private static String URI = "https://blockchain.info/";
+    private static String PATH_RAWTX = "rawtx";
+    private static long latestBlockHeight = -1;
 
-    private String URI = "https://blockchain.info/";
-    private String PATH_ADDRESS_BALANCE = "balance";
-    private String PARAMETER_ACTIVE = "active";
-    private String PATH_RAWTX = "rawtx";
-    private String PATH_LATESTBLOCK = "latestblock";
-    private String PARAMETER_FORMAT = "format";
-    private String PARAMETER_VALUE_HEX = "hex";
+    public static BigDecimal getBalance(String address) {
+        BigDecimal ret = new BigDecimal(0);
+        String PATH_ADDRESS_BALANCE = "balance";
+        String PARAMETER_ACTIVE = "active";
 
-    private class Address {
-
-    }
-
-    public BlockChainInfo () {
-
-    }
-
-    /**
-     * Singleton retrieval of the BlockCypher.
-     *
-     * @return The singleton.
-     */
-    public static synchronized BlockChainInfo getInstance(Context ctx) {
-        if (null == mBci) {
-            mBci = new BlockChainInfo();
-        }
-        return mBci;
-    }
-    /**
-     * Get balance in satoshi
-     * @param address
-     * @return
-     */
-     public BigDecimal getBalance(String address) {
-        logger.info("getBalance:{}", address);
         try {
-            Response response  = webClient.target(URI).path(PATH_ADDRESS_BALANCE).queryParam(PARAMETER_ACTIVE, address)
+            Client webClient = ClientBuilder.newClient();
+            Response response = webClient.target(URI).path(PATH_ADDRESS_BALANCE).queryParam(PARAMETER_ACTIVE, address)
                     .request().get();
             JSONObject json = new JSONObject(response.readEntity(String.class));
             String finalBalance = json.getJSONObject(address).getString("final_balance");
-            return new BigDecimal(finalBalance);
-        }
-        catch (Exception e ) {
+            ret = new BigDecimal(finalBalance);
+            webClient.close();
+        } catch (Exception e) {
             logger.error("e:{}", e.toString());
         }
-        return BigDecimal.valueOf(-1);
+        logger.debug("getBalance ({}): {}", address, ret);
+        return ret;
     }
 
-    public int getLatestBlochHight() {
-         int ret = -1;
+    public static void getBalance(final String address, final WebResultHandler handler) {
+        if (handler != null) {
+            new Thread() {
+                @Override
+                public void run() {
+                    synchronized (this) {
+                        if (Preferences.isTestnet()) {
+                            handler.onBalanceUpdated(BlockCypher.getBalance(address));
+                        }
+                        else {
+                            handler.onBalanceUpdated(getBalance(address));
+                        }
+                    }
+                }
+            }.start();
+        }
+    }
 
-        logger.debug("getLatestBlochHight");
+    public static long getLatestBlockHeight() {
+        String PATH_LATESTBLOCK = "latestblock";
+        if (Preferences.isTestnet()) {
+            return BlockCypher.getBlockHeight();
+        }
         try {
-            Response response  = webClient.target(URI).path(PATH_LATESTBLOCK)
-                .request().get();
+            Client webClient = ClientBuilder.newClient();
+            Response response = webClient.target(URI)
+                    .path(PATH_LATESTBLOCK)
+                    .request()
+                    .get();
             JSONObject json = new JSONObject(response.readEntity(String.class));
-            String hight = json.getString("height");
-            return Integer.parseInt(hight);
-        }
-        catch (Exception e ) {
+            String height = json.getString("height");
+            latestBlockHeight = Long.parseLong(height);
+            webClient.close();
+        } catch (Exception e) {
             logger.error("e:{}", e.toString());
         }
-        return ret;
+        logger.debug("Update latest block height: {}", latestBlockHeight);
+        return latestBlockHeight;
     }
 
-    public int getTxBlockHight(String txHash) {
-        int ret = -1;
+    public static void getLatestBlockHeight(WebResultHandler handler) {
+        if (handler != null) {
+            handler.onBlockHeightUpdated(getLatestBlockHeight());
+        }
+    }
 
-        logger.debug("getTxBlockHight:{}", txHash);
+    public static long getTxTime(String txHash) {
+        long ret = 0;
+        if (Preferences.isTestnet()) {
+            return convertDateTimeStringToLong(BlockCypher.getTransaction(txHash, false).getReceived());
+        }
         try {
-
-            Response response  = webClient.target(URI).path(PATH_RAWTX).path(txHash)
-                .request().get();
+            Client webClient = ClientBuilder.newClient();
+            Response response = webClient.target(URI).path(PATH_RAWTX).path(txHash)
+                    .request().get();
             String body = response.readEntity(String.class);
-            logger.debug("body:{}", body);
             JSONObject json = new JSONObject(body);
-            String hight = json.getString("block_height");
-            return Integer.parseInt(hight);
-        }
-        catch (Exception e ) {
+            String time = json.getString("time");
+            ret = Long.parseLong(time);
+            webClient.close();
+        } catch (Exception e) {
             logger.error("e:{}", e.toString());
         }
+//        logger.info("getTxTime ({}): {}", txHash, ret);
         return ret;
     }
 
-    public String getRawTx(String txHash) {
-         String raw = null;
-         logger.debug("getRawTx:{}", txHash);
-         try {
-
-             Response response  = webClient.target(URI).path(PATH_RAWTX).path(txHash).queryParam(PARAMETER_FORMAT, PARAMETER_VALUE_HEX)
-                     .request().get();
-             raw = response.readEntity(String.class);
-             return raw;
-         }
-         catch (Exception e ) {
-             logger.error("e:{}", e.toString());
-         }
-         return raw;
+    public static void getTxTime(String txHash, WebResultHandler handler) {
+        if (handler != null) {
+            handler.onTxTimeUpdated(getTxTime(txHash));
+        }
     }
 
-    public int getConfirmations(String tx) {
-         return getLatestBlochHight() - getTxBlockHight(tx) + 1;
+    public static long getTxBlockHeight(String txHash) {
+        long ret = 0;
+        if (Preferences.isTestnet()) {
+            Transaction tx = BlockCypher.getTransaction(txHash, false);
+            return (tx == null) ? -1 : tx.getBlockHeight();
+        }
+        try {
+            Client webClient = ClientBuilder.newClient();
+            Response response = webClient.target(URI).path(PATH_RAWTX).path(txHash)
+                    .request().get();
+            String body = response.readEntity(String.class);
+            JSONObject json = new JSONObject(body);
+            String height = json.getString("block_height");
+            ret = Long.parseLong(height);
+            webClient.close();
+        } catch (Exception e) {
+            logger.error("e:{}", e.toString());
+        }
+//        logger.info("getTxBlockHeight ({}): {}", txHash, ret);
+        return ret;
     }
 
-    public Tx getTx(String hash) {
-        return null;
+    public static void getTxBlockHeight(String txHash, WebResultHandler handler) {
+        if (handler != null) {
+            handler.onTxBlockHeightUpdated(getTxBlockHeight(txHash));
+        }
+    }
+
+    public static String getRawTx(String txHash) {
+        String rawTx = null;
+        String PARAMETER_FORMAT = "format";
+        String PARAMETER_VALUE_HEX = "hex";
+        try {
+            Client webClient = ClientBuilder.newClient();
+            Response response = webClient.target(URI).path(PATH_RAWTX).path(txHash).queryParam(PARAMETER_FORMAT, PARAMETER_VALUE_HEX)
+                    .request().get();
+            rawTx = response.readEntity(String.class);
+            webClient.close();
+        } catch (Exception e) {
+            logger.error("e:{}", e.toString());
+        }
+//        logger.info("getRawTx ({}): {}", txHash, rawTx);
+        return rawTx;
+    }
+
+    public static void getRawTx(String txHash, WebResultHandler handler) {
+        if (handler != null) {
+            handler.onRawTxUpdated(getRawTx(txHash));
+        }
+    }
+
+    public static long getConfirmations(String tx) {
+        return (latestBlockHeight < 0) ? latestBlockHeight : latestBlockHeight - getTxBlockHeight(tx) + 1;
+    }
+
+    public static void getConfirmations(String tx, WebResultHandler handler) {
+        if (handler != null) {
+            handler.onConfirmationsUpdated(getConfirmations(tx));
+        }
+    }
+
+    public interface WebResultHandler {
+        void onBalanceUpdated(BigDecimal balance);
+
+        void onBlockHeightUpdated(long height);
+
+        void onTxTimeUpdated(long time);
+
+        void onTxBlockHeightUpdated(long height);
+
+        void onRawTxUpdated(String rawTx);
+
+        void onConfirmationsUpdated(long confirmations);
     }
 }

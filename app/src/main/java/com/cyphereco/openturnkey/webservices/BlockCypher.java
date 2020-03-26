@@ -1,18 +1,13 @@
 package com.cyphereco.openturnkey.webservices;
 
-
-import android.content.Context;
-import android.util.Log;
-
 import com.blockcypher.context.BlockCypherContext;
 import com.blockcypher.exception.BlockCypherException;
 import com.blockcypher.model.address.Address;
 import com.blockcypher.model.transaction.Transaction;
 import com.blockcypher.model.transaction.intermediary.IntermediaryTransaction;
 import com.blockcypher.model.transaction.output.Output;
-import com.cyphereco.openturnkey.core.Configurations;
-import com.cyphereco.openturnkey.core.Tx;
 import com.cyphereco.openturnkey.core.UnsignedTx;
+import com.cyphereco.openturnkey.db.RecordTransaction;
 import com.cyphereco.openturnkey.ui.Preferences;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
@@ -26,121 +21,118 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
-public class BlockCypher extends BtcBase {
+public class BlockCypher {
     public static final String TAG = BlockCypher.class.getSimpleName();
-    static Logger logger = Log4jHelper.getLogger(TAG);
+    private static Logger logger = Log4jHelper.getLogger(TAG);
 
-    private static BlockCypher mBc = null;
+    private static final String TOKEN = "7744d177ce1e4ef48c7431fcb55531b9";
     private static BlockCypherContext mBcCtx;
-    private final Context mCtx;
-    IntermediaryTransaction mCachedUnsignedTx = null;
+    private static IntermediaryTransaction mCachedUnsignedTx = null;
+    private static boolean useToken = false;
 
-    private void newBlockCypherContext(Context ctx) {
-        String network;
-        if (Preferences.isTestnet(ctx)) {
-            network = "test3";
-        }
-        else {
-            network = "main";
-        }
-        logger.info("newBlockCypherContext:{}", network);
-        // Don't use the token for now.
-        mBcCtx = new BlockCypherContext("v1", "btc", network, "7744d177ce1e4ef48c7431fcb55531b9");
-        //mBcCtx = new BlockCypherContext("v1", "btc", network, "");
+    private static final int MAX_AVAILABLE = 2;
+    private static final Semaphore semaphoreWebRequest = new Semaphore(MAX_AVAILABLE, true);
+
+    private static void newBlockCypherContext() {
+        String network = Preferences.isTestnet() ? "test3" : "main";
+
+        // BlockCypherContext with token
+        String token = useToken ? TOKEN : "";
+        mBcCtx = new BlockCypherContext("v1", "btc", network, token);
     }
 
-    private BlockCypher(Context ctx) {
-        mCtx = ctx;
-        newBlockCypherContext(ctx);
+    public static void reInit() {
+        mBcCtx = null;
+        newBlockCypherContext();
     }
 
-    /**
-     * Singleton retrieval of the BlockCypher.
-     *
-     * @return The singleton.
-     */
-    public static synchronized BlockCypher getInstance(Context ctx) {
-        if (null == mBc) {
-            mBc = new BlockCypher(ctx);
-        }
-        return mBc;
-    }
+    public static BigDecimal getBalance(String address) {
+        if (mBcCtx == null) newBlockCypherContext();
 
-    public void reInit() {
-        logger.info("reInit");
-        if (mBc == null) {
-            logger.error("Should not be here!!!");
-            getInstance(mCtx);
-            return;
-        }
-        // only renew BlockCypherContext
-        newBlockCypherContext(mCtx);
-        return;
-    }
-
-    public BigDecimal getBalance(String address) {
-        logger.info("getBalance");
+        logger.debug("getBalance");
         try {
+            semaphoreWebRequest.acquire();
             Address a = mBcCtx.getAddressService().getAddress(address);
-            logger.info("address:" + address + " balance:" + a.getBalance() + " final:" + a.getFinalBalance());
-            BigDecimal d = a.getFinalBalance();
-            return d;
+            semaphoreWebRequest.release();
+            logger.debug("address:" + address + " balance:" + a.getBalance() + " final:" + a.getFinalBalance());
+            return a.getFinalBalance();
         } catch (Exception e) {
             logger.error("e:" + e.toString());
+            semaphoreWebRequest.release();
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
+            }
         }
         return BigDecimal.valueOf(-1);
     }
 
-    public Transaction getTransaction(String hash, boolean includeHex) {
-        Transaction tx = null;
-        try {
-            tx = mBcCtx.getTransactionService().getTransaction(hash, includeHex);
-        }
-        catch (BlockCypherException e) {
-            logger.error("e:" + e.toString());
+    public static long getBlockHeight() {
+        if (mBcCtx == null) newBlockCypherContext();
+
+        try{
+            semaphoreWebRequest.acquire();
+            long height = mBcCtx.getInfoService().getInfo().getHeight();
+            semaphoreWebRequest.release();
+
+            return height;
         }
         catch (Exception e) {
-            logger.error("e:" + e.toString());
+            logger.error("Error: {}", e.toString());
+            semaphoreWebRequest.release();
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
+            }
         }
-        return tx;
+        return 0;
     }
 
-    /**
-     * Send bitcoin.
-     * @param from From address
-     * @param to To address
-     * @param amount Amount to send in satoshis
-     * @param feeIncluded
-     * @param txFees
-     * @return List of unsigned tx
-     * @throws BlockCypherException
-     */
-    public UnsignedTx sendBitcoin(String from, String to, long amount, long txFees, boolean feeIncluded) throws BlockCypherException {
-        logger.info("sendBitcoin() from:{} to:{} amount:{} fee:{} feeIncluded:{}", from, to, amount, txFees, feeIncluded);
+    public static Transaction getTransaction(String hash, boolean includeHex) {
+        if (mBcCtx == null) newBlockCypherContext();
+
         try {
-            if (feeIncluded) {
-                amount -= txFees;
-                logger.info("Fee included. Amount:{}, fee:{}", amount, txFees);
+            semaphoreWebRequest.acquire();
+            Transaction tx = mBcCtx.getTransactionService().getTransaction(hash, includeHex);
+            semaphoreWebRequest.release();
+            return tx;
+        } catch (Exception e) {
+            logger.error("Error: {}", e.toString());
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
             }
+            semaphoreWebRequest.release();
+        }
+        return null;
+    }
+
+    public static UnsignedTx newTransaction(String from, String to, long amount, long txFees) throws BlockCypherException, InterruptedException {
+        if (mBcCtx == null) newBlockCypherContext();
+
+//        logger.debug("sendBitcoin() from:{} to:{} amount:{} fee:{} feeIncluded:{}", from, to, amount, txFees, feeIncluded);
+        try {
             IntermediaryTransaction unsignedTx;
+            semaphoreWebRequest.acquire();
             if (txFees == 0) {
                 // set "prefrence":"zero"
                 unsignedTx = mBcCtx.getTransactionService().newTransaction(
-                        new ArrayList<String>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, "zero");
-            }
-            else {
+                        new ArrayList<>(Collections.singletonList(from)), new ArrayList<>(Collections.singletonList(to)), amount, "zero");
+            } else {
                 unsignedTx = mBcCtx.getTransactionService().newTransaction(
-                        new ArrayList<String>(Arrays.asList(from)), new ArrayList<String>(Arrays.asList(to)), amount, txFees);
+                        new ArrayList<>(Collections.singletonList(from)), new ArrayList<>(Collections.singletonList(to)), amount, txFees);
             }
+            semaphoreWebRequest.release();;
             if ((unsignedTx == null) || unsignedTx.getTosign().size() == 0) {
-                logger.info("unsignedTx is null or toSign is empty");
+                logger.debug("unsignedTx is null or toSign is empty");
                 return null;
             }
             // Cache unsignedTx
-            logger.info("unsignedTx:" + unsignedTx.toString());
+//            logger.debug("unsignedTx:" + unsignedTx.toString());
             mCachedUnsignedTx = unsignedTx;
             double a = 0.0;
             Transaction trans = unsignedTx.getTx();
@@ -157,15 +149,14 @@ public class BlockCypher extends BtcBase {
                 // Should not be here
                 a = amount;
             }
-            UnsignedTx utx = new UnsignedTx(from, to, a, txFees, unsignedTx.getTosign());
-            return utx;
-        }
-        catch (BlockCypherException e) {
+            return new UnsignedTx(from, to, a, txFees, unsignedTx.getTosign());
+        } catch (Exception e) {
             logger.error("e:" + e.toString());
-            throw e;
-        }
-        catch (Exception e) {
-            logger.error("e:" + e.toString());
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
+            }
+            semaphoreWebRequest.release();
             throw e;
         }
     }
@@ -177,8 +168,8 @@ public class BlockCypher extends BtcBase {
         return error.substring(13, len - 2);
     }
 
-    public static String bytesToHexString(byte[] bytes) {
-        StringBuffer buf = new StringBuffer(bytes.length * 2);
+    private static String bytesToHexString(byte[] bytes) {
+        StringBuilder buf = new StringBuilder(bytes.length * 2);
         for (byte b : bytes) {
             String sT = Integer.toString(0xFF & b, 16);
             if (sT.length() < 2)
@@ -190,8 +181,8 @@ public class BlockCypher extends BtcBase {
 
     private static byte[] toDER(BigInteger r, BigInteger s) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(72);
-        DERSequenceGenerator seq = null;
-        byte[] res = new byte[0];
+        DERSequenceGenerator seq;
+        byte[] res;
         try {
             seq = new DERSequenceGenerator(bos);
             seq.addObject(new DERInteger(r));
@@ -200,60 +191,66 @@ public class BlockCypher extends BtcBase {
             res = bos.toByteArray();
             return res;
         } catch (IOException e) {
-            logger.info("Exception while toDER()" + e.toString());
+            logger.debug("Exception while toDER()" + e.toString());
         }
         return null;
     }
 
-    public Tx completeSendBitcoin(String publicKey, List<String> sigList, String to) throws BlockCypherException, Exception {
+    public static RecordTransaction completeSendBitcoin(String publicKey,
+                List<String> sigList, String to) throws BlockCypherException, Exception {
+        if (mBcCtx == null) newBlockCypherContext();
+
         if (mCachedUnsignedTx == null) {
-            logger.info("mCachedUnsignedTx is null");
+            logger.debug("mCachedUnsignedTx is null");
             return null;
         }
 
         if (mCachedUnsignedTx.getTosign().size() != sigList.size()) {
-            logger.info("toSign number:" + mCachedUnsignedTx.getTosign().size() + " sig number:" + sigList.size());
+            logger.debug("toSign number:" + mCachedUnsignedTx.getTosign().size() + " sig number:" + sigList.size());
             mCachedUnsignedTx = null;
             return null;
         }
+
         for (int i = 0; i < mCachedUnsignedTx.getTosign().size(); i++) {
             String sig = sigList.get(i);
             // Pushing Pub key for input
             mCachedUnsignedTx.addPubKeys(publicKey);
-            BigInteger r = new BigInteger(sig.substring(0, 64),16);
-            BigInteger s = new BigInteger(sig.substring(64, 128),16);
+            BigInteger r = new BigInteger(sig.substring(0, 64), 16);
+            BigInteger s = new BigInteger(sig.substring(64, 128), 16);
             // To ensure low S values for BIP 62
             s = BtcUtils.lowSValue(s);
             String signedString = bytesToHexString(toDER(r, s));
             mCachedUnsignedTx.addSignature(signedString);
         }
 
-        Transaction trans = null;
+        Transaction trans;
 
         try {
+            semaphoreWebRequest.acquire();
             trans = mBcCtx.getTransactionService().sendTransaction(mCachedUnsignedTx);
-            logger.info("TX Sent: " + trans.toString());
-            mCachedUnsignedTx = null;
-            Tx tx = new Tx("", to, trans, Tx.Status.STATUS_SUCCESS, "");
-            return tx;
+            semaphoreWebRequest.release();
+            logger.debug("TX Sent, Hash({}) ", trans.getHash());
+            RecordTransaction recordTransaction = new RecordTransaction(trans);
+            return recordTransaction;
         }
         catch (BlockCypherException e) {
-            logger.info("e:" + e.toString());
-            Tx tx = new Tx(Tx.Status.STATUS_UNKNOWN_FAILURE, mCachedUnsignedTx.getTx().getHash(), "");
-            mCachedUnsignedTx = null;
-            return tx;
-
+            semaphoreWebRequest.release();
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
+            }
+            throw e;
         }
         catch (Exception e) {
-            logger.info("e:" + e.toString());
-            Tx tx = new Tx(Tx.Status.STATUS_UNKNOWN_FAILURE, mCachedUnsignedTx.getTx().getHash(), "");
-            mCachedUnsignedTx = null;
-            return tx;
+            logger.debug("e:" + e.toString());
+            semaphoreWebRequest.release();
+            if (e.toString().contains("429")) {
+                useToken = !(useToken);
+                mBcCtx = null;
+            }
         }
-    }
 
-    public Tx getTx(String hash) {
-        Tx tx = null;
-        return tx;
+        mCachedUnsignedTx = null;
+        return null;
     }
 }

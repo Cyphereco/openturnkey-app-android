@@ -18,7 +18,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/Base.ThemeOverlay.AppCompat.Light"
-        app:title="Key Information" />
+        app:title="@string/public_key_information" />
 
     <TextView
         android:id="@+id/ki_lable_master_pk"
@@ -223,7 +223,13 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:background="@drawable/custom_toast_info_round"
+        android:backgroundTint="#90CAF9"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:text="@string/ok"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

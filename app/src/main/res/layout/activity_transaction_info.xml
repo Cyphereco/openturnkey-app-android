@@ -2,11 +2,12 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_tx_info_info"
+        android:id="@+id/toolbar_tx_info_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
@@ -18,7 +19,7 @@
         app:title="@string/transaction_info" />
 
     <TextView
-        android:id="@+id/tv_label_tx_info_datetime"
+        android:id="@+id/label_tx_info_datetime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -27,236 +28,234 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_tx_info_info" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_tx_info_title" />
 
     <TextView
         android:id="@+id/tv_tx_info_datetime"
-        android:layout_width="wrap_content"
+        android:layout_width="180dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_label_tx_info_datetime"
-        app:layout_constraintStart_toEndOf="@+id/tv_label_tx_info_datetime"
-        app:layout_constraintTop_toTopOf="@+id/tv_label_tx_info_datetime" />
+        app:layout_constraintBottom_toBottomOf="@+id/label_tx_info_datetime"
+        app:layout_constraintStart_toEndOf="@+id/label_tx_info_datetime"
+        app:layout_constraintTop_toTopOf="@+id/label_tx_info_datetime" />
 
     <ImageView
-        android:id="@+id/iv_icon_tx_info_resend"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/iv_tx_info_raw_data"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="8dp"
-        android:contentDescription="@string/resend_payment"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_icon_tx_info_delete"
-        app:layout_constraintEnd_toStartOf="@+id/iv_icon_tx_info_delete"
-        app:layout_constraintTop_toTopOf="@+id/iv_icon_tx_info_delete"
-        app:srcCompat="@drawable/ic_replay_black_24dp" />
+        android:tint="#00ACC1"
+        app:layout_constraintEnd_toStartOf="@+id/iv_tx_info_delete"
+        app:layout_constraintTop_toTopOf="@+id/iv_tx_info_delete"
+        app:srcCompat="@drawable/ic_raw_file" />
 
     <ImageView
-        android:id="@+id/iv_icon_tx_info_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/iv_tx_info_delete"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:contentDescription="@string/delete_transaction_record"
+        android:tint="#571A08"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_tx_info_info"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_tx_info_title"
         app:srcCompat="@drawable/ic_delete_black_24dp" />
 
     <TextView
-        android:id="@+id/tv_label_tx_info_result"
+        android:id="@+id/label_tx_info_result"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/subject_result"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/tv_label_tx_info_datetime"
-        app:layout_constraintTop_toBottomOf="@+id/tv_label_tx_info_datetime" />
+        app:layout_constraintEnd_toEndOf="@+id/label_tx_info_datetime"
+        app:layout_constraintTop_toBottomOf="@+id/label_tx_info_datetime" />
 
     <TextView
         android:id="@+id/tv_tx_info_result"
-        android:layout_width="wrap_content"
+        android:layout_width="180dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_label_tx_info_result"
-        app:layout_constraintStart_toEndOf="@+id/tv_label_tx_info_result"
-        app:layout_constraintTop_toTopOf="@+id/tv_label_tx_info_result" />
-
-    <ImageView
-        android:id="@+id/iv_icon_tx_info_help"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:contentDescription="@string/failure_reason"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_tx_info_result"
-        app:layout_constraintStart_toEndOf="@+id/tv_tx_info_result"
-        app:layout_constraintTop_toTopOf="@+id/tv_tx_info_result"
-        app:srcCompat="@drawable/ic_help_outline_black_24dp" />
-
-    <ImageView
-        android:id="@+id/iv_icon_tx_info_result"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:contentDescription="@string/transaction_execution_status"
-        android:src="@drawable/ic_success_24dp"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_tx_info_result"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_tx_info_result" />
+        app:layout_constraintBottom_toBottomOf="@+id/label_tx_info_result"
+        app:layout_constraintStart_toEndOf="@+id/label_tx_info_result"
+        app:layout_constraintTop_toTopOf="@+id/label_tx_info_result" />
 
     <TextView
-        android:id="@+id/tv_label_tx_info_from"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/subject_sender"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/tv_label_tx_info_result"
-        app:layout_constraintTop_toBottomOf="@+id/tv_label_tx_info_result" />
-
-    <TextView
-        android:id="@+id/tv_tx_info_from"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="16dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textIsSelectable="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tv_label_tx_info_from"
-        app:layout_constraintTop_toTopOf="@+id/tv_label_tx_info_from" />
-
-    <TextView
-        android:id="@+id/tv_label_tx_info_to"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:text="@string/subject_recipient"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/tv_label_tx_info_from"
-        app:layout_constraintTop_toBottomOf="@+id/tv_tx_info_from" />
-
-    <TextView
-        android:id="@+id/tv_tx_info_to"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="16dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textIsSelectable="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tv_label_tx_info_to"
-        app:layout_constraintTop_toTopOf="@+id/tv_label_tx_info_to" />
-
-    <TextView
-        android:id="@+id/tv_label_tx_info_amount"
+        android:id="@+id/label_tx_info_sender"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginTop="32dp"
-        android:text="@string/subject_amount"
+        android:text="@string/sender"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/tv_label_tx_info_to"
-        app:layout_constraintTop_toBottomOf="@+id/tv_label_tx_info_to" />
+        app:layout_constraintEnd_toEndOf="@+id/label_tx_info_result"
+        app:layout_constraintTop_toBottomOf="@+id/label_tx_info_result" />
 
     <TextView
-        android:id="@+id/tv_tx_info_amount"
-        android:layout_width="wrap_content"
+        android:id="@+id/tv_tx_info_sender"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_label_tx_info_amount"
-        app:layout_constraintStart_toEndOf="@+id/tv_label_tx_info_amount"
-        app:layout_constraintTop_toTopOf="@+id/tv_label_tx_info_amount" />
+        android:textIsSelectable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/label_tx_info_sender"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/label_tx_info_sender" />
 
     <TextView
-        android:id="@+id/tv_tx_info_amount_unit"
+        android:id="@+id/label_tx_info_send_amount"
+        android:layout_width="100dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/amount_sent"
+        android:textAlignment="textEnd"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/label_tx_info_sender"
+        app:layout_constraintTop_toBottomOf="@+id/tv_tx_info_sender" />
+
+    <TextView
+        android:id="@+id/tv_tx_info_send_amount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/label_tx_info_send_amount"
+        app:layout_constraintEnd_toStartOf="@+id/label_tx_info_send_amount_unit" />
+
+    <TextView
+        android:id="@+id/label_tx_info_send_amount_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:text="@string/_unit_btc"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_tx_info_amount"
-        app:layout_constraintStart_toEndOf="@+id/tv_tx_info_amount"
-        app:layout_constraintTop_toTopOf="@+id/tv_tx_info_amount" />
+        app:layout_constraintBottom_toBottomOf="@+id/tv_tx_info_send_amount"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
-        android:id="@+id/tv_label_tx_info_fees"
+        android:id="@+id/label_tx_info_recipient"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
+        android:layout_marginTop="48dp"
+        android:text="@string/recipient"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/label_tx_info_send_amount"
+        app:layout_constraintTop_toBottomOf="@+id/label_tx_info_send_amount" />
+
+    <TextView
+        android:id="@+id/tv_tx_info_recipient"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textIsSelectable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/label_tx_info_recipient"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/label_tx_info_recipient" />
+
+    <TextView
+        android:id="@+id/label_tx_info_recv_amount"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/amount_received"
+        android:textAlignment="textEnd"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/label_tx_info_recipient"
+        app:layout_constraintTop_toBottomOf="@+id/tv_tx_info_recipient" />
+
+    <TextView
+        android:id="@+id/tv_tx_info_recv_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/label_tx_info_recv_amount"
+        app:layout_constraintEnd_toStartOf="@+id/label_tx_info_recv_amount_unit" />
+
+    <TextView
+        android:id="@+id/label_tx_info_recv_amount_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="@string/_unit_btc"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_tx_info_recv_amount"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/label_tx_info_fees"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="48dp"
         android:text="@string/subject_fees"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/tv_label_tx_info_amount"
-        app:layout_constraintTop_toBottomOf="@+id/tv_label_tx_info_amount" />
+        app:layout_constraintEnd_toEndOf="@+id/label_tx_info_recv_amount"
+        app:layout_constraintTop_toBottomOf="@+id/label_tx_info_recv_amount" />
 
     <TextView
         android:id="@+id/tv_tx_info_fees"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_label_tx_info_fees"
-        app:layout_constraintStart_toEndOf="@+id/tv_label_tx_info_fees"
-        app:layout_constraintTop_toTopOf="@+id/tv_label_tx_info_fees" />
+        app:layout_constraintBottom_toBottomOf="@+id/label_tx_info_fees"
+        app:layout_constraintEnd_toStartOf="@+id/label_tx_info_fees_unit"
+        app:layout_constraintTop_toTopOf="@+id/label_tx_info_fees" />
 
     <TextView
-        android:id="@+id/tv_tx_info_fees_unit"
+        android:id="@+id/label_tx_info_fees_unit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
         android:text="@string/_unit_btc"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintBottom_toBottomOf="@+id/tv_tx_info_fees"
-        app:layout_constraintStart_toEndOf="@+id/tv_tx_info_fees"
-        app:layout_constraintTop_toTopOf="@+id/tv_tx_info_fees" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
-        android:id="@+id/tv_label_tx_info_id"
+        android:id="@+id/label_tx_info_hash"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/subject_transaction_id"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_label_tx_info_fees" />
+        app:layout_constraintBottom_toTopOf="@+id/tv_tx_info_hash"
+        app:layout_constraintStart_toStartOf="@+id/tv_tx_info_hash" />
+
+    <ImageView
+        android:id="@+id/iv_tx_info_view_online"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        android:tint="#7CB342"
+        app:layout_constraintBottom_toBottomOf="@+id/label_tx_info_hash"
+        app:layout_constraintStart_toEndOf="@+id/label_tx_info_hash"
+        app:layout_constraintTop_toTopOf="@+id/label_tx_info_hash"
+        app:srcCompat="@drawable/ic_remove_red_eye_black_24dp" />
 
     <TextView
-        android:id="@+id/tv_tx_info_id"
+        android:id="@+id/tv_tx_info_hash"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:textIsSelectable="true"
+        app:layout_constraintBottom_toTopOf="@+id/btn_tx_info_previous_item"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/tv_label_tx_info_id"
-        app:layout_constraintTop_toBottomOf="@+id/tv_label_tx_info_id" />
-
-    <Button
-        android:id="@+id/btn_tx_info_export_raw_data"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:enabled="true"
-        android:text="@string/export_raw_data"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_tx_info_id" />
-
-    <Button
-        android:id="@+id/btn_tx_info_view_online"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="@string/view_online"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_tx_info_export_raw_data" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
         android:id="@+id/btn_tx_info_previous_item"
@@ -277,5 +276,60 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/btn_tx_info_previous_item" />
+
+    <Switch
+        android:id="@+id/switch_tx_info_show_local_currency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/show_local_currency"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/label_tx_info_fees_unit" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/label_tx_info_send_amount"
+        app:layout_constraintTop_toBottomOf="@+id/label_tx_info_send_amount" />
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/label_tx_info_recv_amount"
+        app:layout_constraintTop_toBottomOf="@+id/label_tx_info_recv_amount" />
+
+    <View
+        android:id="@+id/divider3"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginStart="96dp"
+        android:layout_marginEnd="16dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/label_tx_info_fees"
+        app:layout_constraintTop_toBottomOf="@+id/label_tx_info_fees" />
+
+    <ImageView
+        android:id="@+id/iv_tx_info_exchange_rate"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="8dp"
+        android:tint="#FFB300"
+        app:layout_constraintBottom_toBottomOf="@+id/switch_tx_info_show_local_currency"
+        app:layout_constraintEnd_toStartOf="@+id/switch_tx_info_show_local_currency"
+        app:layout_constraintTop_toTopOf="@+id/switch_tx_info_show_local_currency"
+        app:srcCompat="@drawable/ic_payment_on_black_24dp" />
 
 </android.support.constraint.ConstraintLayout>

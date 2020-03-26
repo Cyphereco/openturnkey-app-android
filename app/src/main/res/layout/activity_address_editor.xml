@@ -104,8 +104,14 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
+        android:background="@drawable/custom_toast_info_round"
+        android:backgroundTint="#90CAF9"
         android:enabled="false"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:text="@string/save"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/icon_scan_qrcode_edit_addr"
         app:layout_constraintTop_toBottomOf="@+id/icon_read_nfc_edit_addr" />
 

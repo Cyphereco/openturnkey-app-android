@@ -16,7 +16,7 @@ public class Log4jHelper {
         // For BlockCypher API logger
         org.apache.log4j.BasicConfigurator.configure();
         final org.apache.log4j.Logger l = org.apache.log4j.Logger.getRootLogger();
-        l.setLevel(Level.DEBUG);
+        l.setLevel(Level.OFF);
 
         if (!Configurations.writeLogToFile) {
             // Overwrite settings from logback.xml
@@ -27,7 +27,7 @@ public class Log4jHelper {
     private static void configureLogbackDirectly() {
         // reset the default context (which may already have been initialized)
         // since we want to reconfigure it
-        LoggerContext lc = (LoggerContext)LoggerFactory.getILoggerFactory();
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         lc.stop();
 
@@ -49,7 +49,6 @@ public class Log4jHelper {
     }
 
     public static Logger getLogger(String name) {
-        Logger logger = LoggerFactory.getLogger(name);
-        return logger;
+        return LoggerFactory.getLogger(name);
     }
 }

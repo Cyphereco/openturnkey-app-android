@@ -1,14 +1,13 @@
 package com.cyphereco.openturnkey.ui;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
-
 import android.view.ViewGroup;
 
 import com.google.zxing.BarcodeFormat;
@@ -17,9 +16,12 @@ import com.google.zxing.Result;
 import java.util.ArrayList;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
+
 import com.cyphereco.openturnkey.R;
 
-public class QRcodeScanActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler {
+public class ActivityQRcodeScan extends AppCompatActivity implements ZXingScannerView.ResultHandler {
+
+    private static final int ZXING_CAMERA_PERMISSION = 1;
 
     private ZXingScannerView mScannerView;
 
@@ -28,17 +30,32 @@ public class QRcodeScanActivity extends AppCompatActivity implements ZXingScanne
         super.onCreate(state);
         setContentView(R.layout.activity_qrcode_scan);
 
-        ViewGroup contentFrame = (ViewGroup) findViewById(R.id.content_frame);
+        ViewGroup contentFrame = findViewById(R.id.content_frame);
         mScannerView = new ZXingScannerView(this);
         contentFrame.addView(mScannerView);
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            this.finish();
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA}, ZXING_CAMERA_PERMISSION);
+        }
+
         mScannerView.setResultHandler(this);
         mScannerView.setSquareViewFinder(true);
-        ArrayList<BarcodeFormat> l = new ArrayList();
+        ArrayList l = new ArrayList();
         l.add(BarcodeFormat.QR_CODE);
         mScannerView.setFormats(l);
         mScannerView.startCamera();

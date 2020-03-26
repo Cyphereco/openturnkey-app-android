@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tv_dialog_exchange_rate_datetime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_dialog_exhange_rate_amount_btc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="1"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/label_dialog_exhange_rate_btc"
+        app:layout_constraintEnd_toStartOf="@+id/label_dialog_exhange_rate_btc"
+        app:layout_constraintTop_toTopOf="@+id/label_dialog_exhange_rate_btc"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/label_dialog_exhange_rate_btc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/_unit_btc"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/label_dialog_exhange_rate_cny"
+        app:layout_constraintTop_toBottomOf="@+id/tv_dialog_exchange_rate_datetime" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:text="="
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/label_dialog_exhange_rate_btc" />
+
+    <TextView
+        android:id="@+id/tv_dialog_exhange_rate_amount_cny"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="1"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/label_dialog_exhange_rate_cny"
+        app:layout_constraintEnd_toStartOf="@+id/label_dialog_exhange_rate_cny"
+        app:layout_constraintTop_toTopOf="@+id/label_dialog_exhange_rate_cny" />
+
+    <TextView
+        android:id="@+id/label_dialog_exhange_rate_cny"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/_unit_cny"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/label_dialog_exhange_rate_eur"
+        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+    <TextView
+        android:id="@+id/tv_dialog_exhange_rate_amount_eur"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="1"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/label_dialog_exhange_rate_eur"
+        app:layout_constraintEnd_toStartOf="@+id/label_dialog_exhange_rate_eur"
+        app:layout_constraintTop_toTopOf="@+id/label_dialog_exhange_rate_eur" />
+
+    <TextView
+        android:id="@+id/label_dialog_exhange_rate_eur"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/_unit_eur"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/label_dialog_exhange_rate_jpy"
+        app:layout_constraintTop_toBottomOf="@+id/label_dialog_exhange_rate_cny" />
+
+    <TextView
+        android:id="@+id/tv_dialog_exhange_rate_amount_jpy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="1"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/label_dialog_exhange_rate_jpy"
+        app:layout_constraintEnd_toStartOf="@+id/label_dialog_exhange_rate_jpy"
+        app:layout_constraintTop_toTopOf="@+id/label_dialog_exhange_rate_jpy" />
+
+    <TextView
+        android:id="@+id/label_dialog_exhange_rate_jpy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/_unit_jpy"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/label_dialog_exhange_rate_twd"
+        app:layout_constraintTop_toBottomOf="@+id/label_dialog_exhange_rate_eur" />
+
+    <TextView
+        android:id="@+id/tv_dialog_exhange_rate_amount_twd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="1"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/label_dialog_exhange_rate_twd"
+        app:layout_constraintEnd_toStartOf="@+id/label_dialog_exhange_rate_twd"
+        app:layout_constraintTop_toTopOf="@+id/label_dialog_exhange_rate_twd" />
+
+    <TextView
+        android:id="@+id/label_dialog_exhange_rate_twd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/_unit_twd"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/label_dialog_exhange_rate_jpy" />
+
+    <TextView
+        android:id="@+id/tv_dialog_exhange_rate_amount_usd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="1"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/label_dialog_exhange_rate_usd"
+        app:layout_constraintEnd_toStartOf="@+id/label_dialog_exhange_rate_usd"
+        app:layout_constraintTop_toTopOf="@+id/label_dialog_exhange_rate_usd" />
+
+    <TextView
+        android:id="@+id/label_dialog_exhange_rate_usd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/_unit_usd"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/label_dialog_exhange_rate_twd"
+        app:layout_constraintTop_toBottomOf="@+id/label_dialog_exhange_rate_twd" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/subject_date_time"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_dialog_exchange_rate_datetime"
+        app:layout_constraintEnd_toStartOf="@+id/tv_dialog_exchange_rate_datetime"
+        app:layout_constraintTop_toTopOf="@+id/tv_dialog_exchange_rate_datetime" />
+
+</android.support.constraint.ConstraintLayout>

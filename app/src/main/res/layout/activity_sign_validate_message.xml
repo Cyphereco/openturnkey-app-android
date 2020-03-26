@@ -18,7 +18,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/Base.ThemeOverlay.AppCompat.Light"
-        app:title="Sign/Verify Message" />
+        app:title="@string/message_sign_validate" />
 
     <android.support.design.widget.TabLayout
         android:id="@+id/tabLayoutSignVerify"
@@ -31,7 +31,7 @@
         <android.support.design.widget.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sign" >
+            android:text="@string/sign">
 
 
         </android.support.design.widget.TabItem>
@@ -39,7 +39,7 @@
         <android.support.design.widget.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Verify" />
+            android:text="@string/verify" />
 
     </android.support.design.widget.TabLayout>
 

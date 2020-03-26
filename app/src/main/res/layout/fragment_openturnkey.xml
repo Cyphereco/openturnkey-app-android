@@ -10,32 +10,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="32dp"
         android:contentDescription="@string/read_nfc"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.4"
-        app:srcCompat="@drawable/ic_read_nfc_foreground" />
+        app:layout_constraintVertical_bias="0.35000002"
+        app:srcCompat="@mipmap/ic_cyphereco_logo_foreground" />
 
     <TextView
-        android:id="@+id/text_tap_otk"
+        android:id="@+id/text_openturnkey"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:text="@string/tap_openturnkey"
+        android:text="@string/_openturnkey"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/icon_read_nfc" />
 
     <TextView
-        android:id="@+id/text_nfc_comm_type"
+        android:id="@+id/text_request_desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -45,73 +45,49 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_tap_otk" />
+        app:layout_constraintTop_toBottomOf="@+id/text_openturnkey" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/_left_bracket"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintEnd_toStartOf="@+id/text_nfc_comm_type"
-        app:layout_constraintTop_toTopOf="@+id/text_nfc_comm_type" />
+        app:layout_constraintEnd_toStartOf="@+id/text_request_desc"
+        app:layout_constraintTop_toTopOf="@+id/text_request_desc" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/_right_bracket"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintStart_toEndOf="@+id/text_nfc_comm_type"
-        app:layout_constraintTop_toTopOf="@+id/text_nfc_comm_type" />
-
-    <TextView
-        android:id="@+id/count_down_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="15"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display3"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_nfc_comm_type" />
-
-    <ImageView
-        android:id="@+id/icon_success"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="32dp"
-        android:contentDescription="@string/command_executed_successfuly"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_nfc_comm_type"
-        app:srcCompat="@drawable/ic_check_circle_green_24dp" />
-
-    <TextView
-        android:id="@+id/nfc_write_result"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/command_executed_successfuly"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/icon_success" />
+        app:layout_constraintStart_toEndOf="@+id/text_request_desc"
+        app:layout_constraintTop_toTopOf="@+id/text_request_desc" />
 
     <Button
-        android:id="@+id/button_otk_cancel"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:id="@+id/btn_nfc_read"
+        android:layout_width="320dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/custom_toast_info_round"
+        android:backgroundTint="#90CAF9"
+        android:text="@string/make_request"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_request_desc" />
+
+    <CheckBox
+        android:id="@+id/otk_request_use_pin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/cancel"
-        android:textSize="16sp"
+        android:layout_marginTop="24dp"
+        android:text="@string/auth_with_pin"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_nfc_comm_type" />
+        app:layout_constraintTop_toBottomOf="@+id/text_request_desc" />
 
 </android.support.constraint.ConstraintLayout>

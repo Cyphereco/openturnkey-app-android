@@ -14,8 +14,14 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
+        android:background="@drawable/custom_toast_info_round"
+        android:backgroundTint="#90CAF9"
         android:drawableStart="@drawable/ic_fingerprint_black_24dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:text="@string/sign_message"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -50,40 +56,38 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="8dp"
         android:text="@string/signed_message"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/checkBoxUsingMasterKey" />
+        app:layout_constraintTop_toBottomOf="@+id/signMessageGenerateQRcode" />
 
     <ImageView
         android:id="@+id/signMessageGenerateQRcode"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:contentDescription="@android:string/copyUrl"
-        app:layout_constraintEnd_toStartOf="@+id/signMessageCopy"
-        app:layout_constraintTop_toTopOf="@+id/textViewSignedMessage"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextMessageToBeSign"
         app:srcCompat="@drawable/ic_action_qr_code" />
 
     <ImageView
         android:id="@+id/signMessageCopy"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
         android:contentDescription="@android:string/copyUrl"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textViewSignedMessage"
+        app:layout_constraintStart_toEndOf="@+id/signMessageGenerateQRcode"
+        app:layout_constraintTop_toTopOf="@+id/signMessageGenerateQRcode"
         app:srcCompat="@drawable/ic_content_copy_black_24dp" />
 
     <EditText
         android:id="@+id/editTextSignedMessage"
         android:layout_width="0dp"
-        android:layout_height="300dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:editable="false"
         android:ems="10"
@@ -92,7 +96,6 @@
         android:inputType="none"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewSignedMessage" />
 
@@ -104,5 +107,14 @@
         android:text="@string/using_master_key"
         app:layout_constraintEnd_toEndOf="@+id/editTextMessageToBeSign"
         app:layout_constraintTop_toBottomOf="@+id/editTextMessageToBeSign" />
+
+    <CheckBox
+        android:id="@+id/sign_msg_use_pin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/auth_with_pin"
+        app:layout_constraintBottom_toTopOf="@+id/buttonSignMessage"
+        app:layout_constraintEnd_toEndOf="@+id/buttonSignMessage" />
 
 </android.support.constraint.ConstraintLayout>

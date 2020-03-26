@@ -10,22 +10,25 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.method.LinkMovementMethod;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.OtkData;
 import com.cyphereco.openturnkey.core.protocol.SessionData;
+import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
 import com.cyphereco.openturnkey.utils.QRCodeUtils;
-import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
 
 import org.slf4j.Logger;
+
+import java.util.Objects;
 
 public class ActivityKeyInformation extends AppCompatActivity {
     public static final String TAG = ActivityKeyInformation.class.getSimpleName();
@@ -35,6 +38,10 @@ public class ActivityKeyInformation extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_keys);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -51,7 +58,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
         updateInfo(otkData);
         setButtonListener();
 
-        TextView txt = (TextView) findViewById(R.id.how_to_validate);
+        TextView txt = findViewById(R.id.how_to_validate);
         txt.setMovementMethod(LinkMovementMethod.getInstance());
         txt.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -62,20 +69,29 @@ public class ActivityKeyInformation extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void updateInfo(final OtkData otkData) {
-        SessionData otkSessData;
+        SessionData sessionData;
         TextView tv;
         EditText et;
 
-        otkSessData = otkData.getSessionData();
+        sessionData = otkData.getSessionData();
         /* Set master public key */
         tv = findViewById(R.id.ki_tv_master_pk_content);
-        tv.setText(otkSessData.getMasterExtKey());
+        tv.setText(sessionData.getMasterExtKey());
         /* Set derivative public key */
         tv = findViewById(R.id.ki_tv_derivative_pk_content);
-        tv.setText(otkSessData.getDerivativeExtKey());
+        tv.setText(sessionData.getDerivativeExtKey());
         /* Get key path */
-        String[] keyPath = otkSessData.getDerivativePath().split("/");
+        String[] keyPath = sessionData.getDerivativePath().split("/");
         et = findViewById(R.id.ki_tx_derivative_key_path_l1);
         et.setText(keyPath[1]);
         et = findViewById(R.id.ki_tx_derivative_key_path_l2);
@@ -106,7 +122,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TextView tv = findViewById(R.id.ki_tv_master_pk_content);
-                copyText("MasterKey", tv.getText().toString());
+                copyText(getString(R.string.master_public_key), tv.getText().toString());
             }
         });
 
@@ -116,7 +132,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TextView tv = findViewById(R.id.ki_tv_derivative_pk_content);
-                copyText("DerivativeKey", tv.getText().toString());
+                copyText(getString(R.string.derivative_public_key), tv.getText().toString());
             }
         });
 
@@ -125,7 +141,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                copyText("KeyPath", getKeyPathString());
+                copyText(getString(R.string.derivative_key_paths), getKeyPathString());
             }
         });
 
@@ -135,7 +151,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TextView tv = findViewById(R.id.ki_tv_master_pk_content);
-                showQRCode("Master Key", tv.getText().toString());
+                showQRCode(getString(R.string.master_public_key), tv.getText().toString());
             }
         });
 
@@ -145,7 +161,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TextView tv = findViewById(R.id.ki_tv_derivative_pk_content);
-                showQRCode("Derivative Key", tv.getText().toString());
+                showQRCode(getString(R.string.derivative_public_key), tv.getText().toString());
             }
         });
 
@@ -154,7 +170,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showQRCode("Key Path", getKeyPathString());
+                showQRCode(getString(R.string.derivative_key_paths), getKeyPathString());
             }
         });
     }
@@ -183,8 +199,10 @@ public class ActivityKeyInformation extends AppCompatActivity {
         }
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
-        clipboard.setPrimaryClip(clip);
-        Toast.makeText(getApplicationContext(), label + " is copied", Toast.LENGTH_SHORT).show();
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(clip);
+        }
+        AlertPrompt.info(getApplicationContext(), label + getString(R.string.is_copied));
     }
 
     private void showQRCode(String dialogTitle, String text) {
@@ -206,5 +224,11 @@ public class ActivityKeyInformation extends AppCompatActivity {
                     }
                 })
                 .show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MainActivity.setCurrentActivity(getClass().getName());
     }
 }
