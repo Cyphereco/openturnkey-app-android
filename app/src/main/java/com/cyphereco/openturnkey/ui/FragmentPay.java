@@ -60,7 +60,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class FragmentPay extends FragmentExtendOtkViewPage {
 
-    final String CRLF = "\n";
+    final String LF = "\n";
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
 
     private boolean signPayment = false;
@@ -601,7 +601,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         logger.debug("num of request: {}", numOfRequest());
 
                         if (otkData.getSessionData().getRequestSigList().size() > 0) {
-//                            logger.debug("Got signatures: {}", otkData.getSessionData().getRequestSigList());
+                            logger.debug("Got signatures: ({})", otkData.getSessionData().getRequestSigList().size());
                             listSignatures.addAll(otkData.getSessionData().getRequestSigList());
                             logger.debug("listSignatures add signatures: {}", listSignatures);
 
@@ -628,12 +628,12 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                             });
                         }
                     } else {
-                        AlertPrompt.alert(getContext(), getString(R.string.pay_fail) + CRLF
+                        AlertPrompt.alert(getContext(), getString(R.string.pay_fail) + LF
                                 + getString(R.string.reason) + ": " +
                                 parseFailureReason(otkData.getOtkState().getFailureReason().getValue()));
                     }
                 } else {
-                    AlertPrompt.alert(getContext(), getString(R.string.communication_error) + CRLF
+                    AlertPrompt.alert(getContext(), getString(R.string.communication_error) + LF
                             + getString(R.string.reason) + ": " + getString(R.string.not_valid_openturnkey));
                 }
             }
@@ -955,7 +955,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     StringBuilder hashes = new StringBuilder();
                     int hashesCounter = 0;
                     for (int i = 0; i < list.size(); i++) {
-                        hashes.append(hashes.length() > 0 ? "\n" : "").append(list.get(i));
+                        hashes.append(list.get(i));
+                        if (i+1 < list.size()) hashes.append(LF);
                         hashesCounter++;
 
                         if (hashesCounter > 9) {
@@ -1016,7 +1017,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 //                        msg.obj = _newyDummyTransaction();
                         logger.debug("completeTransaction: Got listSignatures ({})", listSignatures.size());
                         msg.obj = BlockCypher.completeSendBitcoin(pubKeyPayer, listSignatures, tvAddress.getText().toString());
-                        logger.debug("Sent transaction output: {})", msg.obj);
+                        logger.debug("Sent transaction output: {}", msg.obj);
                         txHandler.sendMessage(msg);
                     }
 //                    catch (BlockCypherException e) {
@@ -1056,14 +1057,14 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         String strFiatFess = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(btcExchangeRates, lc, btcTxfees));
 
         // confirmation summary string
-        String msg = getString(R.string.subject_text_estimated_time) + " " + estTime + " " + getString(R.string.minute) + CRLF + CRLF +
-                getString(R.string.amount_sent) + CRLF + strBtcAmountSent + " / " +
-                strFiatAmountSent + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")" + CRLF +
-                getString(R.string.sender) + ":" + CRLF + from + CRLF + CRLF +
-                getString(R.string.amount_received) + CRLF + strBtcAmountRecv + " / " +
-                strFiatAmountRecv + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")" + CRLF +
-                getString(R.string.recipient) + ":" + CRLF + to + CRLF + CRLF +
-                getString(R.string.transaction_fee) + ":" + CRLF + strBtcFees + " / " +
+        String msg = getString(R.string.subject_text_estimated_time) + " " + estTime + " " + getString(R.string.minute) + LF + LF +
+                getString(R.string.amount_sent) + LF + strBtcAmountSent + " / " +
+                strFiatAmountSent + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")" + LF +
+                getString(R.string.sender) + ":" + LF + from + LF + LF +
+                getString(R.string.amount_received) + LF + strBtcAmountRecv + " / " +
+                strFiatAmountRecv + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")" + LF +
+                getString(R.string.recipient) + ":" + LF + to + LF + LF +
+                getString(R.string.transaction_fee) + ":" + LF + strBtcFees + " / " +
                 strFiatFess + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")";
 
         if (Looper.myLooper() == null) Looper.prepare();
