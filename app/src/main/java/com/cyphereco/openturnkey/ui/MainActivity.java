@@ -392,7 +392,12 @@ public class MainActivity extends AppCompatActivity {
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-                setBlockHeight(BlockChainInfo.getLatestBlockHeight());
+                if (!Preferences.isTestnet()) {
+                    setBlockHeight(BlockChainInfo.getLatestBlockHeight());
+                }
+                else {
+                    setBlockHeight(BlockCypher.getBlockHeight());
+                }
 
                 BtcExchangeRates r = BtcUtils.getCurrencyExchangeRate();
                 if (r == null) {

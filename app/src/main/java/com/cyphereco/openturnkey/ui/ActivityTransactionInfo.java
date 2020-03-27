@@ -323,9 +323,10 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     }
 
     private void showTransactionInfo(final RecordTransaction recordTransaction) {
-        logger.debug("Tx block height: {}", recordTransaction.getBlockHeight());
+        logger.debug("Dump recordTransaction: {}", recordTransaction.toString());
+//        logger.debug("Tx block height: {}", recordTransaction.getBlockHeight());
         BtcExchangeRates loggedExchangeRate = new BtcExchangeRates(recordTransaction.getExchangeRate());
-        logger.debug("loggedExchangeRate: {}", loggedExchangeRate);
+//        logger.debug("loggedExchangeRate: {}", loggedExchangeRate);
 
         TextView tvDateTime = findViewById(R.id.tv_tx_info_datetime);
         TextView tvResult = findViewById(R.id.tv_tx_info_result);
@@ -344,7 +345,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         tvFeesUnit.setText(getString(R.string._unit_btc));
 
         long confirmations = MainActivity.getBlockHeight() - recordTransaction.getBlockHeight() + 1;
-        if (recordTransaction.getBlockHeight() < 0 || confirmations < 0) {
+        if (recordTransaction.getBlockHeight() <= 0 || confirmations < 0) {
             tvResult.setText(R.string.unconfirmed);
         } else if (confirmations > 1440) {
             tvResult.setText("1440+" + getString(R.string.confirmation));

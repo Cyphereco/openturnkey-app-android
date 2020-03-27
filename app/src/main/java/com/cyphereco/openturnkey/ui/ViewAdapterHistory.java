@@ -1,6 +1,7 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.content.Context;
+import android.print.PageRange;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -84,21 +85,38 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
             new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    Transaction tx = null;
                     if (recordTransaction.getRawData() == null || recordTransaction.getRawData().length() == 0) {
-                        Transaction tx = BlockCypher.getTransaction(recordTransaction.getHash(), true);
+                        tx = BlockCypher.getTransaction(recordTransaction.getHash(), true);
                         if (tx != null && tx.getHex().length() > 0) {
                             recordTransaction.setRawData(tx.getHex());
                             OpenturnkeyDB.updateTransaction(recordTransaction);
                         }
                     }
 
-                    if (recordTransaction.getBlockHeight() < 0){
-                        long height = BlockChainInfo.getTxBlockHeight(recordTransaction.getHash());
+                    if (recordTransaction.getBlockHeight() <= 0){
+                        long height = -1;
+                        if (!Preferences.isTestnet()) {
+                            height = BlockChainInfo.getTxBlockHeight(recordTransaction.getHash());
+                        }
+                        else {
+                            tx = BlockCypher.getTransaction(recordTransaction.getHash(), true);
+                            height = tx == null ? -1 : tx.getBlockHeight();
+                        }
                         if (height < 0) return;
 
                         recordTransaction.setBlockHeight(height);
-                        recordTransaction.setTimestamp(BlockChainInfo.getTxTime(recordTransaction.getHash()));
+                        if (!Preferences.isTestnet()) {
+                            recordTransaction.setTimestamp(BlockChainInfo.getTxTime(recordTransaction.getHash()));
+                        }
+                        else {
+                            recordTransaction.setTimestamp(
+                                    BtcUtils.convertDateTimeStringToLong(tx.getReceived()));
+                        }
                         OpenturnkeyDB.updateTransaction(recordTransaction);
+                        logger.debug("Current Time: {} / {}", System.currentTimeMillis(),
+                                new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(
+                                        System.currentTimeMillis()));
                         logger.debug("Transaction accepted: {}", recordTransaction.toString());
                     }
                 }
@@ -106,7 +124,7 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
         }
         long confirmations = MainActivity.getBlockHeight() - mTransDataset.get(position).getBlockHeight() + 1;
 
-        if (mTransDataset.get(position).getBlockHeight() < 0 || confirmations < 0) {
+        if (mTransDataset.get(position).getBlockHeight() <= 0 || confirmations < 0) {
             viewHolder.mIVTransResult.setImageResource(R.drawable.ic_unconfirmed);
         } else if (confirmations < 1) {
             viewHolder.mIVTransResult.setImageResource(R.drawable.ic_confirm0);
