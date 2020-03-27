@@ -76,6 +76,10 @@ public class RecordTransaction implements java.io.Serializable {
     }
 
     public void setTimestamp(long timestamp) {
+        int curTimeLength = String.valueOf(System.currentTimeMillis()).length();
+        int inTimeLength = String.valueOf(timestamp).length();
+        if (inTimeLength - curTimeLength == 3) timestamp /= 1000;
+        if (curTimeLength - inTimeLength == 3) timestamp *= 1000;
         this.timestamp = timestamp;
     }
 
