@@ -43,6 +43,7 @@ public class BlockCypher {
         // BlockCypherContext with token
         String token = useToken ? TOKEN : "";
         mBcCtx = new BlockCypherContext("v1", "btc", network, token);
+        logger.debug("Re-Init BlcokCypher ({}) with Token: {}", network, useToken);
     }
 
     public static void reInit() {
@@ -60,10 +61,10 @@ public class BlockCypher {
             semaphoreWebRequest.release();
             logger.debug("address:" + address + " balance:" + a.getBalance() + " final:" + a.getFinalBalance());
             return a.getFinalBalance();
-        } catch (Exception e) {
-            logger.error("e:" + e.toString());
+        }
+        catch (Exception e) {
             semaphoreWebRequest.release();
-            if (e.toString().contains("429")) {
+            if (e != null && e.toString().contains("429")) {
                 useToken = !(useToken);
                 mBcCtx = null;
             }
@@ -82,9 +83,8 @@ public class BlockCypher {
             return height;
         }
         catch (Exception e) {
-            logger.error("Error: {}", e.toString());
             semaphoreWebRequest.release();
-            if (e.toString().contains("429")) {
+            if (e != null && e.toString().contains("429")) {
                 useToken = !(useToken);
                 mBcCtx = null;
             }
@@ -100,13 +100,13 @@ public class BlockCypher {
             Transaction tx = mBcCtx.getTransactionService().getTransaction(hash, includeHex);
             semaphoreWebRequest.release();
             return tx;
-        } catch (Exception e) {
-            logger.error("Error: {}", e.toString());
-            if (e.toString().contains("429")) {
+        }
+        catch (Exception e) {
+            semaphoreWebRequest.release();
+            if (e != null && e.toString().contains("429")) {
                 useToken = !(useToken);
                 mBcCtx = null;
             }
-            semaphoreWebRequest.release();
         }
         return null;
     }
@@ -150,13 +150,13 @@ public class BlockCypher {
                 a = amount;
             }
             return new UnsignedTx(from, to, a, txFees, unsignedTx.getTosign());
-        } catch (Exception e) {
-            logger.error("e:" + e.toString());
-            if (e.toString().contains("429")) {
+        }
+        catch (Exception e) {
+            semaphoreWebRequest.release();
+            if (e != null && e.toString().contains("429")) {
                 useToken = !(useToken);
                 mBcCtx = null;
             }
-            semaphoreWebRequest.release();
             throw e;
         }
     }
@@ -233,24 +233,13 @@ public class BlockCypher {
             RecordTransaction recordTransaction = new RecordTransaction(trans);
             return recordTransaction;
         }
-        catch (BlockCypherException e) {
+        catch (Exception e) {
             semaphoreWebRequest.release();
-            if (e.toString().contains("429")) {
+            if (e != null && e.toString().contains("429")) {
                 useToken = !(useToken);
                 mBcCtx = null;
             }
             throw e;
         }
-        catch (Exception e) {
-            logger.debug("e:" + e.toString());
-            semaphoreWebRequest.release();
-            if (e.toString().contains("429")) {
-                useToken = !(useToken);
-                mBcCtx = null;
-            }
-        }
-
-        mCachedUnsignedTx = null;
-        return null;
     }
 }
