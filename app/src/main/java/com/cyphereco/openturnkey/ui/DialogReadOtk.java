@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -67,9 +68,6 @@ public class DialogReadOtk extends AppCompatDialogFragment {
             @Override
             public void onClick(View view) {
                 dialogTImer.cancel();
-                // turn off the nfc reading for otk
-                MainActivity.disableReadOtk();
-                if (dialogListner != null) dialogListner.onCancel();
                 if (getDialog() != null) dismissAnimation(getDialog().getWindow().getDecorView());
             }
         });
@@ -85,6 +83,15 @@ public class DialogReadOtk extends AppCompatDialogFragment {
         MainActivity.enableReadOtk();
     }
 
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        // turn off the nfc reading for otk
+        MainActivity.disableReadOtk();
+        // call onCancel handler
+        if (dialogListner != null) dialogListner.onCancel();
+    }
+
     private void setCancelTimer() {
         dialogTImer = new CountDownTimer(DIALOG_LIFETIME, 1000) {
             public void onTick(long millisUntilFinished) {
@@ -97,8 +104,6 @@ public class DialogReadOtk extends AppCompatDialogFragment {
                 } else {
                     // dialog has been closed, finish cancel operations
                     dialogTImer.cancel();
-                    MainActivity.disableReadOtk();
-                    if (dialogListner != null) dialogListner.onCancel();
                 }
             }
         }.start();
@@ -187,14 +192,10 @@ public class DialogReadOtk extends AppCompatDialogFragment {
             public void onFinish() {
                 if (READ_SUCCESS == flag) {
                     // read success, dismiss normally without calling onCancel listener
-                    dialogTImer.cancel();
-                    MainActivity.disableReadOtk();
-                    if (getDialog() != null) dismissAnimation(getDialog().getWindow().getDecorView());
-                    dialog.dismiss();
+                    dialogListner = null;
                 }
-                else {
-                    cancelButton.callOnClick();
-                }
+                dialogTImer.cancel();
+                cancelButton.callOnClick();
             }
         }.start();
     }
