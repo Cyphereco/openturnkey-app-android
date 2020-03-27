@@ -63,9 +63,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     final String LF = "\n";
     public static final String KEY_QR_CODE = "KEY_QR_CODE";
 
-    private boolean signPayment = false;
+    private boolean checkBalance = false;
     private String pubKeyPayer = "";
-    private int numOfSignaturesToSign = 0;
     private List<String> listSignatures;
 
     boolean mUseFixAddress = false;
@@ -130,6 +129,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         recordTransaction.setAmountRecv(totalAmountReceived() / 100000000d);
                         recordTransaction.setAmountSent(totalAmountSent() / 100000000d);
                     }
+                    if (recordTransaction.getBlockHeight() <= 0) recordTransaction.setBlockHeight(-1);
+                    recordTransaction.setTimestamp(System.currentTimeMillis());
                     RecordTransaction item = addTxToDb(recordTransaction);
                     MainActivity.switchToPage(MainActivity.PAGE.HISTORY.ordinal());
 
@@ -324,12 +325,14 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         return;
                     }
 
-                    signPayment = true;
-
+                    // check balance first
+                    checkBalance = true;
                     showDialogReadOtk(getString(R.string.check_opentunrkey_balance), null, new Handler(new Handler.Callback() {
                         @Override
                         public boolean handleMessage(Message msg) {
-                            signPayment = false;
+                            checkBalance = false;
+                            pubKeyPayer = "";
+                            listSignatures.clear();
                             return false;
                         }
                     }));
@@ -520,8 +523,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             final String addr = otkData.getSessionData().getAddress();
 
             if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
-                if (signPayment) {
-                    signPayment = false;
+                if (checkBalance) {
+                    checkBalance = false;
 
                     if (!BtcUtils.validateAddress(!Preferences.isTestnet(), addr)) {
                         AlertPrompt.alert(getContext(), getString(R.string.invalid_address));
@@ -596,7 +599,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 }
             } else {
                 // otkData contains request result, process with proper indications
-                if (otkData.getOtkState().getCommand() == Command.SIGN) {
+                if (otkData.getPublicKey() == pubKeyPayer && otkData.getOtkState().getCommand() == Command.SIGN) {
                     if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
                         logger.debug("num of request: {}", numOfRequest());
 
@@ -951,7 +954,6 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     UnsignedTx unsignedTx = (UnsignedTx) msg.obj;
                     // create OTK request for signatures
                     List list = unsignedTx.getToSign();
-                    numOfSignaturesToSign = list.size();
                     StringBuilder hashes = new StringBuilder();
                     int hashesCounter = 0;
                     for (int i = 0; i < list.size(); i++) {
@@ -978,7 +980,15 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     }
                     logger.debug("Request Number: {}", numOfRequest());
 
-                    showDialogReadOtk(getString(R.string.signing_transaction), null);
+                    showDialogReadOtk(getString(R.string.check_opentunrkey_balance), null, new Handler(new Handler.Callback() {
+                        @Override
+                        public boolean handleMessage(Message msg) {
+                            checkBalance = false;
+                            pubKeyPayer = "";
+                            listSignatures.clear();
+                            return false;
+                        }
+                    }));
                 }
                 return false;
             }
@@ -1019,6 +1029,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         msg.obj = BlockCypher.completeSendBitcoin(pubKeyPayer, listSignatures, tvAddress.getText().toString());
                         logger.debug("Sent transaction output: {}", msg.obj);
                         txHandler.sendMessage(msg);
+                        clearRequest();
                     }
 //                    catch (BlockCypherException e) {
 //                        // parse error
@@ -1265,7 +1276,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     }
 
     private void updateEstFees() {
-        if (this.getContext() == null) return;;
+        if (this.getContext() == null) return;
 
         String feesInc = getString(R.string.excluded);
         if(Preferences.getFeeIncluded()) feesInc = getString(R.string.included);
