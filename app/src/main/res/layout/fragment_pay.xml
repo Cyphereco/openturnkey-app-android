@@ -80,7 +80,6 @@
         android:id="@+id/tv_fragment_pay_amount_btc"
         android:layout_width="160dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="144dp"
         android:layout_marginEnd="24dp"
         android:autofillHints=""
         android:ems="10"
@@ -88,7 +87,7 @@
         android:inputType="numberDecimal"
         android:textAlignment="viewEnd"
         app:layout_constraintEnd_toStartOf="@+id/tv_fragment_pay_amount_fiat"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
+        app:layout_constraintTop_toBottomOf="@+id/text_amount"
         tools:targetApi="o" />
 
     <EditText
@@ -143,28 +142,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         android:text="@string/amount"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintBottom_toTopOf="@+id/tv_fragment_pay_amount_btc"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cb_fragment_pay_use_all_funds" />
 
     <CheckBox
         android:id="@+id/cb_fragment_pay_use_all_funds"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginTop="48dp"
         android:text="@string/use_all_funds"
         app:layout_constraintEnd_toEndOf="@+id/text_local_currency"
-        app:layout_constraintTop_toBottomOf="@+id/text_local_currency" />
+        app:layout_constraintTop_toBottomOf="@+id/icon_scan_qrcode" />
 
     <Button
         android:id="@+id/button_sign_payment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/custom_toast_alert_round"
         android:backgroundTint="#90CAF9"
         android:drawableStart="@drawable/ic_fingerprint_black_24dp"

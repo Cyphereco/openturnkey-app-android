@@ -54,6 +54,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
         tvRequestDesc = view.findViewById(R.id.text_request_desc);
         cbUsePin = view.findViewById(R.id.otk_request_use_pin);
 
+        btnNfcRead.setCompoundDrawablePadding(20);
         btnNfcRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

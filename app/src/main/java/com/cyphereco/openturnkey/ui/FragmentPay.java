@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -294,6 +295,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         // Sign payment button
         Button btn = view.findViewById(R.id.button_sign_payment);
+        btn.setCompoundDrawablePadding(20);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -355,6 +357,20 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     tvAmountBtc.setEnabled(true);
                     tvAmountFiat.setEnabled(true);
                 }
+            }
+        });
+        final Button btnSign = btn;
+        cbAuthByPin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Drawable img = getContext().getResources().getDrawable(R.drawable.ic_fingerprint_black_24dp);
+
+                if (isChecked) {
+                    img = getContext().getResources().getDrawable(R.drawable.ic_enter_pin);
+                }
+
+                img.setBounds(0,0,60,60);
+                btnSign.setCompoundDrawables(img, null, null, null);
             }
         });
 
