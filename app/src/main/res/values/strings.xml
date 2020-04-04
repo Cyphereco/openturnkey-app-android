@@ -111,7 +111,7 @@
     <string name="subject_transaction_id">Transaction ID:</string>
     <string name="view_online">View Online</string>
     <string name="resend_payment">Resend Payment</string>
-    <string name="delete_transaction_record">Delete transactionHelper record</string>
+    <string name="delete_transaction_record">Delete transaction record</string>
     <string name="transaction_execution_status">Transaction Processing Status</string>
     <string name="failure_reason">Failure reason</string>
     <string name="previous_transaction_record">Previous Transaction Record</string>
@@ -126,7 +126,7 @@
     <string name="not_supported">Not supported</string>
     <string name="transaction_not_found">Transaction Not Found</string>
     <string name="failed_to_delete">Delete Failed</string>
-    <string name="delete_this_transaction_record">Delete this transactionHelper record?</string>
+    <string name="delete_this_transaction_record">Delete this transaction record?</string>
     <string name="otk_is_not_locked">OpenTurnKey is not locked</string>
     <string name="unlock_success">Unlock Successfully</string>
     <string name="unlock_failed">Unlock Failed</string>

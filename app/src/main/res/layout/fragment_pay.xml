@@ -66,7 +66,7 @@
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toStartOf="@+id/clear_recipient_address"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/tv_fragment_pay_est_fees">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/input_recipient_address"
@@ -154,6 +154,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:text="@string/use_all_funds"
         app:layout_constraintEnd_toEndOf="@+id/text_local_currency"
         app:layout_constraintTop_toBottomOf="@+id/text_local_currency" />
@@ -203,17 +204,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="0.00 / 0.00"
-        app:layout_constraintStart_toStartOf="@+id/label_fragment_pay_est_fees"
+        app:layout_constraintEnd_toEndOf="@+id/label_fragment_pay_est_fees"
         app:layout_constraintTop_toBottomOf="@+id/label_fragment_pay_est_fees" />
 
     <TextView
         android:id="@+id/label_fragment_pay_est_fees"
-        android:layout_width="200dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         android:text="@string/estimated_fees"
-        app:layout_constraintStart_toStartOf="@+id/textInputLayout"
-        app:layout_constraintTop_toTopOf="@+id/icon_paste_clipboard" />
+        android:textAlignment="textEnd"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/label_fragment_pay_est_fees_unit"
