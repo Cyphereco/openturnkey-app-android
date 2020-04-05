@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class DialogReadOtk extends AppCompatDialogFragment {
-    public static final int DIALOG_LIFETIME = 15000;
+    public static final int DIALOG_LIFETIME = 30000;
     public static final int SHOW_RESULT_DELAY = 2000;
     public static final int DISMISS_ANIMATION_TIME = 250;
 
