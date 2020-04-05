@@ -47,6 +47,7 @@
         android:gravity="start|top"
         android:hint="@string/message_to_be_signed_hint"
         android:inputType="textMultiLine"
+        android:maxLines="6"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView17" />
@@ -94,6 +95,7 @@
         android:enabled="false"
         android:gravity="start|top"
         android:inputType="none"
+        android:maxLines="8"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

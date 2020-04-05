@@ -27,4 +27,12 @@
     <style name="ShowReadOtkAnimation">
         <item name="android:windowEnterAnimation">@xml/slide_in_bottom</item>
     </style>
+
+    <style name="AlertDialogRemindStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:textColorPrimary">#0E0E7E</item>
+    </style>
+
+    <style name="AlertDialogWarningStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:textColorPrimary">#f31010</item>
+    </style>
 </resources>

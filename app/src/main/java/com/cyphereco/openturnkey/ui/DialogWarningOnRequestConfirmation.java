@@ -9,19 +9,28 @@ import android.support.annotation.Nullable;
 
 import com.cyphereco.openturnkey.R;
 
-public class DialogConfirmationRequest {
+public class DialogWarningOnRequestConfirmation {
     private AlertDialog.Builder builder;
     private Dialog dialog;
+    private Context dialogContext;
+    private String dialogTitle;
+    private String dialogMessage;
+    private boolean dialogCancelable;
 
-    DialogConfirmationRequest(@NonNull Context context,
-                              String title,
-                              String message,
-                              boolean cancelable) {
-        builder = new AlertDialog.Builder(context)
-                .setTitle(title)
-                .setMessage(message);
+    DialogWarningOnRequestConfirmation(@NonNull Context context,
+                                       String title,
+                                       String message,
+                                       boolean cancelable) {
+        dialogContext = context;
+        dialogTitle = title;
+        dialogMessage = message;
+        dialogCancelable = cancelable;
 
-        if (cancelable) {
+        builder = new AlertDialog.Builder(dialogContext, R.style.AlertDialogWarningStyle)
+                .setTitle(dialogTitle)
+                .setMessage(dialogMessage);
+
+        if (dialogCancelable) {
             builder.setNegativeButton(R.string.cancel, null)
                     .setCancelable(true);
         }

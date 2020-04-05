@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,10 +36,11 @@ import java.util.Objects;
 
 public class FragmentOtk extends FragmentExtendOtkViewPage {
 
-    private final int AUTO_DISMISS_MILLIS = 30 * 1000;
+    private final int AUTO_DISMISS_MILLIS = 60 * 1000;
     private static CountDownTimer timerRequestDismiss = null;
     private TextView tvRequestDesc;
     private CheckBox cbUsePin;
+    private ImageView ivAuthType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,19 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
         Button btnNfcRead = view.findViewById(R.id.btn_nfc_read);
         tvRequestDesc = view.findViewById(R.id.text_request_desc);
         cbUsePin = view.findViewById(R.id.otk_request_use_pin);
+        ivAuthType = view.findViewById(R.id.iv_fragement_otk_auth_type);
+        cbUsePin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            Drawable img = getContext().getResources().getDrawable(R.drawable.ic_fingerprint_black_24dp);
+
+            if (isChecked) {
+                img = getContext().getResources().getDrawable(R.drawable.ic_enter_pin);
+            }
+            img.setBounds(0,0,60,60);
+            ivAuthType.setImageDrawable(img);
+            }
+        });
 
         btnNfcRead.setCompoundDrawablePadding(20);
         btnNfcRead.setOnClickListener(new View.OnClickListener() {
@@ -94,7 +110,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 if (request.getCommand().equals(Command.RESET.toString())) {
                     // a reset command needs no response, when it's sent, the request is completed
                     dialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.READ_SUCCESS);
-                    showStatusDialog(getString(R.string.reset_success), getString(R.string.reset_step_intro));
+                    dialogResetFollowUpGuide(getString(R.string.reset_success), getString(R.string.reset_step_intro));
                 }
             }
         }
@@ -216,6 +232,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 String[] strList = keyPath.split(",");
                 if (strList.length == 5) {
                     cbUsePin.setVisibility(View.VISIBLE);
+                    ivAuthType.setVisibility(View.VISIBLE);
                     tvRequestDesc.setText(R.string.choose_key);
                     pushRequest(new OtkRequest(Command.SET_KEY.toString(), keyPath));
                 }
@@ -239,9 +256,13 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
         clearRequest();
 
         cbUsePin.setVisibility(View.INVISIBLE);
+        ivAuthType.setVisibility(View.INVISIBLE);
         cbUsePin.setChecked(false);
 
-        DialogConfirmationRequest dialog = new DialogConfirmationRequest(
+        Drawable img = getContext().getResources().getDrawable(R.drawable.ic_fingerprint_black_24dp);
+        ivAuthType.setImageDrawable(img);
+
+        DialogWarningOnRequestConfirmation dialog = new DialogWarningOnRequestConfirmation(
                 Objects.requireNonNull(getContext()),
                 getString(R.string.warning),
                 "",
@@ -250,7 +271,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
         switch (optionId) {
             case R.id.menu_openturnkey_set_pin:
                 dialog.setMessage(getString(R.string.pin_code_warning_message));
-                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogWarningOnRequestConfirmation.OnConfirmedListener() {
                     @Override
                     public void onConfirmed() {
                         DialogSetPIN dialog = new DialogSetPIN();
@@ -258,6 +279,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                             @Override
                             public void setPin(String pin) {
                                 cbUsePin.setVisibility(View.VISIBLE);
+                                ivAuthType.setVisibility(View.VISIBLE);
                                 tvRequestDesc.setText(R.string.set_pin_code);
                                 pushRequest(new OtkRequest(Command.SET_PIN.toString(), pin));
                             }
@@ -269,10 +291,11 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 break;
             case R.id.menu_openturnkey_get_key:
                 dialog.setMessage(getString(R.string.full_pubkey_info_warning));
-                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogWarningOnRequestConfirmation.OnConfirmedListener() {
                     @Override
                     public void onConfirmed() {
                         cbUsePin.setVisibility(View.VISIBLE);
+                        ivAuthType.setVisibility(View.VISIBLE);
                         tvRequestDesc.setText(R.string.full_pubkey_information);
                         pushRequest(new OtkRequest(Command.SHOW_KEY.toString()));
                     }
@@ -285,6 +308,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                     @Override
                     public void addNote(String note) {
                         cbUsePin.setVisibility(View.VISIBLE);
+                        ivAuthType.setVisibility(View.VISIBLE);
                         tvRequestDesc.setText(R.string.write_note);
                         pushRequest(new OtkRequest(Command.SET_NOTE.toString(), note));
                     }
@@ -298,7 +322,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 break;
             case R.id.menu_openturnkey_choose_key:
                 dialog.setMessage(getString(R.string.choose_key_warning_message));
-                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogWarningOnRequestConfirmation.OnConfirmedListener() {
                     @Override
                     public void onConfirmed() {
                         Intent intent = new Intent(getContext(), ActivityChooseKey.class);
@@ -312,10 +336,14 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 break;
             case R.id.menu_openturnkey_unlock:
                 dialog.setMessage(getString(R.string.unlock_warning));
-                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogWarningOnRequestConfirmation.OnConfirmedListener() {
                     @Override
                     public void onConfirmed() {
                         tvRequestDesc.setText(R.string.unlock);
+                        Drawable img = getContext().getResources().getDrawable(R.drawable.ic_enter_pin);
+                        ivAuthType.setImageDrawable(img);
+                        ivAuthType.setVisibility(View.VISIBLE);
+
                         pushRequest(new OtkRequest(Command.UNLOCK.toString()));
                     }
                 });
@@ -323,7 +351,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 break;
             case R.id.menu_openturnkey_reset:
                 dialog.setMessage(getString(R.string.reset_warning_message));
-                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogWarningOnRequestConfirmation.OnConfirmedListener() {
                     @Override
                     public void onConfirmed() {
                         tvRequestDesc.setText(R.string.reset);
@@ -334,10 +362,11 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                 break;
             case R.id.menu_openturnkey_export_wif_key:
                 dialog.setMessage(getString(R.string.export_wif_warning_message));
-                dialog.setConfirmedButton(getString(R.string.understood), new DialogConfirmationRequest.OnConfirmedListener() {
+                dialog.setConfirmedButton(getString(R.string.understood), new DialogWarningOnRequestConfirmation.OnConfirmedListener() {
                     @Override
                     public void onConfirmed() {
                         tvRequestDesc.setText(R.string.export_private_key);
+                        ivAuthType.setVisibility(View.VISIBLE);
                         pushRequest(new OtkRequest(Command.EXPORT_WIF_KEY.toString()));
                     }
                 });
@@ -374,6 +403,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
     protected void clearRequest() {
         super.clearRequest();
         cbUsePin.setVisibility(View.INVISIBLE);
+        ivAuthType.setVisibility(View.INVISIBLE);
         cbUsePin.setChecked(false);
         tvRequestDesc.setText(R.string.read_general_information);
     }
@@ -395,8 +425,8 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
         timerRequestDismiss.start();
     }
 
-    private void showStatusDialog(String title, String message) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+    private void dialogResetFollowUpGuide(String title, String message) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext(), R.style.AlertDialogRemindStyle);
 
         alertDialogBuilder.setTitle(title)
                 .setMessage(message)

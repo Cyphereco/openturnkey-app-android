@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -24,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -238,11 +240,16 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         }
 
         private void updateSignMessageButton(View view, String msgToSign) {
+            CheckBox cbUsePin = view.findViewById(R.id.sign_msg_use_pin);
             Button btn = view.findViewById(R.id.buttonSignMessage);
+
             if (msgToSign.length() > 0) {
+                cbUsePin.setEnabled(true);
                 btn.setEnabled(true);
                 btn.setAlpha(1.0f);
             } else {
+                cbUsePin.setChecked(false);
+                cbUsePin.setEnabled(false);
                 btn.setEnabled(false);
                 btn.setAlpha(.5f);
             }
@@ -287,7 +294,9 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
             });
 
             final CheckBox cbUsePin = view.findViewById(R.id.sign_msg_use_pin);
+
             Button btnSignMsg = view.findViewById(R.id.buttonSignMessage);
+            btnSignMsg.setCompoundDrawablePadding(20);
             btnSignMsg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -319,6 +328,21 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                         pushRequest(request);
                         showDialogReadOtk(null, null);
                     }
+                }
+            });
+
+            final Button btn = btnSignMsg;
+            cbUsePin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    Drawable img = getApplication().getResources().getDrawable(R.drawable.ic_fingerprint_black_24dp);
+
+                    if (isChecked) {
+                        img = getApplication().getResources().getDrawable(R.drawable.ic_enter_pin);
+                    }
+
+                    img.setBounds(0,0,60,60);
+                    btn.setCompoundDrawables(img, null, null, null);
                 }
             });
         }
