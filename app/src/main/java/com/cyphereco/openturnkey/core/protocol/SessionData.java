@@ -21,6 +21,7 @@ public class SessionData implements Serializable {
     private static final String OTK_LABEL_PUBLIC_KEY = "<Public_Key>\r\n";
     private static final String OTK_LABEL_MASTER_EXT_KEY = "<Master_Extended_Key>\r\n";
     private static final String OTK_LABEL_DERIVATIVE_EXT_KEY = "<Derivative_Extended_Key>\r\n";
+    private static final String OTK_LABEL_DERIVATIVE_EXT_KEY_OLD = "<Derivative_Exteded_Key>\r\n"; // there was a typo which has been fixed, but to keep thing working with the old firmware
     private static final String OTK_LABEL_DERIVATIVE_PATH = "<Derivative_Path>\r\n";
     private static final String OTK_LABEL_WIF_KEY = "<WIF_Key>\r\n";
     private static final String OTK_REQUEST_SIGNATURE_DELIM = "\n";
@@ -111,6 +112,14 @@ public class SessionData implements Serializable {
         int labelDerivativeExtKeyStart = sessData.indexOf(OTK_LABEL_DERIVATIVE_EXT_KEY);
         if (labelDerivativeExtKeyStart != -1) {
             int derivativeExtKeyStart = labelDerivativeExtKeyStart + OTK_LABEL_DERIVATIVE_EXT_KEY.length();
+            int crlf = sessData.indexOf(CRLF, derivativeExtKeyStart);
+            derivativeExtKey = sessData.substring(derivativeExtKeyStart, crlf);
+        }
+
+        // for backward compatible
+        int labelDerivativeExtKeyStartOld = sessData.indexOf(OTK_LABEL_DERIVATIVE_EXT_KEY_OLD);
+        if (labelDerivativeExtKeyStartOld != -1) {
+            int derivativeExtKeyStart = labelDerivativeExtKeyStart + OTK_LABEL_DERIVATIVE_EXT_KEY_OLD.length();
             int crlf = sessData.indexOf(CRLF, derivativeExtKeyStart);
             derivativeExtKey = sessData.substring(derivativeExtKeyStart, crlf);
         }
