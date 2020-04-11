@@ -20,7 +20,7 @@ public class SessionData implements Serializable {
     private static final String OTK_LABEL_REQUEST_ID = "<Request_ID>\r\n";
     private static final String OTK_LABEL_PUBLIC_KEY = "<Public_Key>\r\n";
     private static final String OTK_LABEL_MASTER_EXT_KEY = "<Master_Extended_Key>\r\n";
-    private static final String OTK_LABEL_DERIVATIVE_EXT_KEY = "<Derivative_Exteded_Key>\r\n";
+    private static final String OTK_LABEL_DERIVATIVE_EXT_KEY = "<Derivative_Extended_Key>\r\n";
     private static final String OTK_LABEL_DERIVATIVE_PATH = "<Derivative_Path>\r\n";
     private static final String OTK_LABEL_WIF_KEY = "<WIF_Key>\r\n";
     private static final String OTK_REQUEST_SIGNATURE_DELIM = "\n";
