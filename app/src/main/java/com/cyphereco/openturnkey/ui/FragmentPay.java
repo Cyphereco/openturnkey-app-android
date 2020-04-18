@@ -415,6 +415,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 String addr = data.getStringExtra(KEY_QR_CODE);
                 logger.info("QR result: {}", addr);
 
+                addr = addr.replace("bitcoin:", "");
                 if (BtcUtils.validateAddress(!Preferences.isTestnet(), addr)) {
                     tvAddress.setText(addr);
                 } else {

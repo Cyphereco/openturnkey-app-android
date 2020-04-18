@@ -175,6 +175,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
                 String addr = data.getStringExtra(KEY_QR_CODE);
                 logger.info("QR result: {}", addr);
 
+                addr = addr.replace("bitcoin:","");
                 if (BtcUtils.validateAddress(!Preferences.isTestnet(), addr)) {
                     mAddress = addr;
                     mInputAddress.setText(mAddress.replace("bitcoin:", ""));
