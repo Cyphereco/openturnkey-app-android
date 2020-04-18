@@ -7,7 +7,7 @@
     <string name="local_currency">現地通貨</string>
     <string name="addresses">入金アドレス</string>
     <string name="no_freq_addr">入金アドレスなし</string>
-    <string name="use_fix_address">固定入金支払いアドレスを使用</string>
+    <string name="use_fixed_address">固定入金支払いアドレスを使用</string>
     <string name="unlock">ロック解除</string>
     <string name="transaction_fee">手数料</string>
     <string name="sign_payment">支払いに署名</string>
@@ -184,7 +184,7 @@
     <string name="not_openturnkey">有効なOpenTurnKeyではありません、読み取りが完了するまでOpenTurnKeyを離れないでください。</string>
     <string name="confirmation">確認</string>
     <string name="amount_sent">送金金額:</string>
-    <string name="disable_fix_addr_first">固定アドレスをオフにしてください</string>
+    <string name="disable_fixed_addr_first">固定アドレスをオフにしてください</string>
     <string name="cannot_change_addr">アドレスを変更できません</string>
     <string name="alias_exists">別称は既に存在します。別の別称を入力してください。</string>
     <string name="make_request">リクエストの送信</string>
@@ -228,4 +228,5 @@
     <string name="low">低</string>
     <string name="excluded">抜き</string>
     <string name="included">込み</string>
+    <string name="show_qr_code">QRコードを表示</string>
 </resources>

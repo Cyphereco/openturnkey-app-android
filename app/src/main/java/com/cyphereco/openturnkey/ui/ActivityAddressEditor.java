@@ -5,8 +5,10 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -51,6 +53,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
 
     private long mAddrDBId = DEFAULT_DB_ID;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,8 +69,14 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
         mInputAlias = findViewById(R.id.input_contact_alias);
         mInputAddress = findViewById(R.id.input_contact_address);
         mPasteClipboardBtn = findViewById(R.id.icon_paste_clipboard_edit_addr);
+        mPasteClipboardBtn.setTooltipText(getString(R.string.paste_clipboard));
+
         mQRCodeScanBtn = findViewById(R.id.icon_scan_qrcode_edit_addr);
+        mQRCodeScanBtn.setTooltipText(getString(R.string.scan_qr_code));
+
         mReadNFCBtn = findViewById(R.id.icon_read_nfc_edit_addr);
+        mReadNFCBtn.setTooltipText(getString(R.string.read_nfc));
+
         mSaveBtn = findViewById(R.id.button_save_edit_addr);
 
         Intent intent = this.getIntent();

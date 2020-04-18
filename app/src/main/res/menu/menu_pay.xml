@@ -15,10 +15,10 @@
             android:checked="false"
             android:title="@string/fees_included" />
         <item
-            android:id="@+id/menu_pay_use_fix_address"
+            android:id="@+id/menu_pay_use_fixed_address"
             android:checkable="true"
             android:checked="false"
-            android:title="@string/use_fix_address" />
+            android:title="@string/use_fixed_address" />
     </group>
     <item
         android:id="@+id/menu_pay_user_guide"

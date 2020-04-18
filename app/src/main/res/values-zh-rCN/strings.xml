@@ -25,7 +25,7 @@
     <string name="sign_payment">签名支付</string>
     <string name="transaction_fee">交易手续费</string>
     <string name="unlock">解锁</string>
-    <string name="use_fix_address">使用固定收款地址</string>
+    <string name="use_fixed_address">使用固定收款地址</string>
     <string name="fees_high">高 (5~15分钟)</string>
     <string name="fees_low">低 (大於60分钟)</string>
     <string name="fees_mid">中 (15~35分钟)</string>
@@ -184,7 +184,7 @@
     <string name="not_openturnkey">不是有效的OpenTurnKey，读取完成前请勿移开OpenTurnKey.</string>
     <string name="confirmation">确认</string>
     <string name="amount_sent">发送金额:</string>
-    <string name="disable_fix_addr_first">请先停用固定地址功能。</string>
+    <string name="disable_fixed_addr_first">请先停用固定地址功能。</string>
     <string name="cannot_change_addr">无法变更地址</string>
     <string name="alias_exists">此别名已使用，请输入不同别名。</string>
     <string name="make_request">发送请求</string>
@@ -228,4 +228,5 @@
     <string name="low">低</string>
     <string name="excluded">外加</string>
     <string name="included">内含</string>
+    <string name="show_qr_code">显示二維碼</string>
 </resources>

@@ -27,8 +27,8 @@ public class Preferences {
     private static final String CUSTOMIZED_TX_FEE = "CUSTOMIZED_TX_FEE";
     private static final String NETWORK = "NETWORK";
     private static final String FEE_INCLUDED = "FEE_INCLUDED";
-    private static final String USE_FIX_ADDRESS_CHECKED = "USE_FIX_ADDRESS_CHECKED";
-    private static final String USE_FIX_ADDRESS_ADDR_STR = "USE_FIX_ADDRESS_ADDR_STR";
+    private static final String USE_FIXED_ADDRESS_CHECKED = "USE_FIXED_ADDRESS_CHECKED";
+    private static final String USE_FIXED_ADDRESS_ADDR_STR = "USE_FIXED_ADDRESS_ADDR_STR";
 
     Preferences(Context ctx) {
         prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -124,17 +124,17 @@ public class Preferences {
         return prefs.getBoolean(FEE_INCLUDED, false);
     }
 
-    static void setUseFixAddress(boolean isChecked, String address) {
-        prefs.edit().putBoolean(USE_FIX_ADDRESS_CHECKED, isChecked).apply();
-        prefs.edit().putString(USE_FIX_ADDRESS_ADDR_STR, address).apply();
+    static void setUseFixedAddress(boolean isChecked, String address) {
+        prefs.edit().putBoolean(USE_FIXED_ADDRESS_CHECKED, isChecked).apply();
+        prefs.edit().putString(USE_FIXED_ADDRESS_ADDR_STR, address).apply();
     }
 
-    static boolean getUseFixAddressChecked() {
-        return prefs.getBoolean(USE_FIX_ADDRESS_CHECKED, false);
+    static boolean getUseFixedAddressChecked() {
+        return prefs.getBoolean(USE_FIXED_ADDRESS_CHECKED, false);
     }
 
-    static String getUseFixAddressAddrString() {
-        return prefs.getString(USE_FIX_ADDRESS_ADDR_STR, "");
+    static String getUseFixedAddressAddrString() {
+        return prefs.getString(USE_FIXED_ADDRESS_ADDR_STR, "");
     }
 
     static void setNetwork(Configurations.Network network) {

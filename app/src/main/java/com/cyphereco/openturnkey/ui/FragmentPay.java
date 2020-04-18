@@ -9,12 +9,14 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.text.Editable;
 import android.view.Gravity;
@@ -68,7 +70,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     private String pubKeyPayer = "";
     private List<String> listSignatures;
 
-    boolean mUseFixAddress = false;
+    boolean mUseFixedAddress = false;
     boolean mIsCryptoCurrencySet = true;
     private LocalCurrency localCurrency = null;
     private BtcExchangeRates btcExchangeRates;
@@ -96,6 +98,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         listSignatures = new ArrayList<>();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -162,6 +165,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         ImageView iv;
         iv = view.findViewById(R.id.icon_scan_qrcode);
+        iv.setTooltipText(getString(R.string.scan_qr_code));
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -170,6 +174,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         });
 
         iv = view.findViewById(R.id.icon_paste_clipboard);
+        iv.setTooltipText(getString(R.string.paste_clipboard));
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -178,11 +183,12 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         });
 
         iv = view.findViewById(R.id.icon_read_nfc);
+        iv.setTooltipText(getString(R.string.read_nfc));
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mUseFixAddress) {
-                    dialogFixAddressEnabled();
+                if (mUseFixedAddress) {
+                    dialogFixedAddressEnabled();
                 } else {
                     clearRequest();
                     showDialogReadOtk(null, null);
@@ -233,10 +239,10 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!Preferences.getUseFixAddressChecked()) {
+                if (!Preferences.getUseFixedAddressChecked()) {
                     tvAddress.setText("");
                 } else {
-                    dialogFixAddressEnabled();
+                    dialogFixedAddressEnabled();
                 }
             }
         });
@@ -426,20 +432,20 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     public void onPageSelected() {
         super.onPageSelected();
 
-        if (Preferences.getUseFixAddressChecked()) {
+        if (Preferences.getUseFixedAddressChecked()) {
             if (MainActivity.getPayToAddress().length() > 0) {
-                dialogFixAddressEnabled();
+                dialogFixedAddressEnabled();
             }
 
-            // if fix address does not match to current network preference, clear fix address configuration
-            if (!BtcUtils.validateAddress(!Preferences.isTestnet(), Preferences.getUseFixAddressAddrString())) {
-                Preferences.setUseFixAddress(false, "");
+            // if fixed address does not match to current network preference, clear fixed address configuration
+            if (!BtcUtils.validateAddress(!Preferences.isTestnet(), Preferences.getUseFixedAddressAddrString())) {
+                Preferences.setUseFixedAddress(false, "");
                 tvAddress.setText("");
-                mUseFixAddress = false;
+                mUseFixedAddress = false;
             }
             else {
-                tvAddress.setText(Preferences.getUseFixAddressAddrString());
-                mUseFixAddress = true;
+                tvAddress.setText(Preferences.getUseFixedAddressAddrString());
+                mUseFixedAddress = true;
             }
         } else {
             String addr = "";
@@ -471,7 +477,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     public void onPageUnselected() {
         super.onPageUnselected();
 
-        if (!Preferences.getUseFixAddressChecked()) tvAddress.setText("");
+        if (!Preferences.getUseFixedAddressChecked()) tvAddress.setText("");
         tvAmountBtc.setText("");
         tvAmountFiat.setText("");
         cbUseAllFunds.setChecked(false);
@@ -494,10 +500,10 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 Preferences.setFeeIncluded(item.setChecked(!item.isChecked()).isChecked());
                 updateEstFees();
                 return true;
-            case R.id.menu_pay_use_fix_address:
-                mUseFixAddress = onFixAddressChecked(!item.isChecked());
-                item.setChecked(mUseFixAddress);
-                Preferences.setUseFixAddress(mUseFixAddress, tvAddress.getText().toString());
+            case R.id.menu_pay_use_fixed_address:
+                mUseFixedAddress = onFixedAddressChecked(!item.isChecked());
+                item.setChecked(mUseFixedAddress);
+                Preferences.setUseFixedAddress(mUseFixedAddress, tvAddress.getText().toString());
                 return true;
             case R.id.menu_pay_user_guide:
                 String url = "https://openturnkey.com/guide";
@@ -615,7 +621,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 }
             } else {
                 // otkData contains request result, process with proper indications
-                if (otkData.getPublicKey() == pubKeyPayer && otkData.getOtkState().getCommand() == Command.SIGN) {
+                if (otkData.getPublicKey().equals(pubKeyPayer) && otkData.getOtkState().getCommand() == Command.SIGN) {
                     if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_SUCCESS) {
                         logger.debug("num of request: {}", numOfRequest());
 
@@ -670,8 +676,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     }
 
     private void launchQRcodeScanActivity() {
-        if (mUseFixAddress) {
-            dialogFixAddressEnabled();
+        if (mUseFixedAddress) {
+            dialogFixedAddressEnabled();
         } else {
             Intent intent = new Intent(getActivity(), ActivityQRcodeScan.class);
             startActivityForResult(intent, MainActivity.REQUEST_CODE_QR_CODE);
@@ -679,8 +685,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     }
 
     private void pasteAddressFromClipboard() {
-        if (mUseFixAddress) {
-            dialogFixAddressEnabled();
+        if (mUseFixedAddress) {
+            dialogFixedAddressEnabled();
         } else {
             ClipboardManager clipboard = (ClipboardManager) Objects.requireNonNull(getActivity()).getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null && clipboard.hasPrimaryClip()) {
@@ -746,9 +752,9 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             menuItem.setChecked(Preferences.getFeeIncluded());
         }
 
-        menuItem = menu.findItem(R.id.menu_pay_use_fix_address);
+        menuItem = menu.findItem(R.id.menu_pay_use_fixed_address);
         if (menuItem != null) {
-            menuItem.setChecked(Preferences.getUseFixAddressChecked());
+            menuItem.setChecked(Preferences.getUseFixedAddressChecked());
         }
 
         updateEstFees();
@@ -773,11 +779,11 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         mIsCryptoCurrencySet = cache;
     }
 
-    private boolean onFixAddressChecked(boolean isChecked) {
+    private boolean onFixedAddressChecked(boolean isChecked) {
         if (isChecked) {
             // If address editor is empty, prompt warning dialog
             if ((null == tvAddress.getText()) || (tvAddress.getText().toString().isEmpty())) {
-                mUseFixAddress = false;
+                mUseFixedAddress = false;
                 new AlertDialog.Builder(getActivity())
                         .setMessage(getString(R.string.recipient_is_empty))
                         .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -789,11 +795,11 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 return false;
             }
             // There is address
-            Preferences.setUseFixAddress(true, tvAddress.getText().toString());
-            mUseFixAddress = true;
+            Preferences.setUseFixedAddress(true, tvAddress.getText().toString());
+            mUseFixedAddress = true;
             return true;
         }
-        mUseFixAddress = false;
+        mUseFixedAddress = false;
         return false;
     }
 
@@ -1130,10 +1136,10 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         Looper.loop();
     }
 
-    private void dialogFixAddressEnabled() {
+    private void dialogFixedAddressEnabled() {
         new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.cannot_change_addr)
-                .setMessage(R.string.disable_fix_addr_first)
+                .setMessage(R.string.disable_fixed_addr_first)
                 .setNegativeButton(R.string.ok, null)
                 .show();
         MainActivity.setPayToAddress("");
