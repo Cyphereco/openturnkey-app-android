@@ -119,7 +119,7 @@ public class SessionData implements Serializable {
         // for backward compatible
         int labelDerivativeExtKeyStartOld = sessData.indexOf(OTK_LABEL_DERIVATIVE_EXT_KEY_OLD);
         if (labelDerivativeExtKeyStartOld != -1) {
-            int derivativeExtKeyStart = labelDerivativeExtKeyStart + OTK_LABEL_DERIVATIVE_EXT_KEY_OLD.length();
+            int derivativeExtKeyStart = labelDerivativeExtKeyStartOld + OTK_LABEL_DERIVATIVE_EXT_KEY_OLD.length();
             int crlf = sessData.indexOf(CRLF, derivativeExtKeyStart);
             derivativeExtKey = sessData.substring(derivativeExtKeyStart, crlf);
         }
