@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatDialogFragment;
@@ -12,6 +14,8 @@ import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
+
+import java.util.Objects;
 
 
 public class DialogClearHistory extends AppCompatDialogFragment {
@@ -43,7 +47,13 @@ public class DialogClearHistory extends AppCompatDialogFragment {
                     }
                 });
 
-        return builder.create();
+        Dialog dialog = builder.create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+//        dialog.setCanceledOnTouchOutside(false);
+
+        return dialog;
     }
 
     @Override

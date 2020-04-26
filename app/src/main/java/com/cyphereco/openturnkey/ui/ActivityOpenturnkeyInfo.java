@@ -1,12 +1,14 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -157,11 +159,16 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
                 public void onClick(View view) {
                     // Show dialog
                     AlertDialog.Builder builder = new AlertDialog.Builder(ActivityOpenturnkeyInfo.this);
-                    builder.setTitle(R.string.mint_information)
+                    Dialog dialog = builder.setTitle(R.string.mint_information)
                             .setMessage(otkData.getMintInfo().toString())
                             .setPositiveButton(R.string.ok, null)
                             .setCancelable(false)
-                            .show();
+                            .create();
+                    Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+                    dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+
+                    dialog.show();
                 }
             });
 

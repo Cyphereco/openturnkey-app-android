@@ -3,6 +3,8 @@ package com.cyphereco.openturnkey.ui;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatDialogFragment;
@@ -59,7 +61,11 @@ public class DialogSetPIN extends AppCompatDialogFragment {
                 dismiss();
             }
         });
+
         Dialog dialog = builder.create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
         dialog.setCanceledOnTouchOutside(false);
 
         return dialog;

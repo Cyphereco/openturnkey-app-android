@@ -1,12 +1,14 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -41,6 +43,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class ActivityTransactionInfo extends AppCompatActivity {
     private final static String TAG = ActivityTransactionInfo.class.getSimpleName();
@@ -169,7 +172,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
 
     private void onBtnDeleteClick() {
         logger.debug("processDeleteBtnClick");
-        new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this)
                 .setMessage(getString(R.string.delete_this_transaction_record))
                 .setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
@@ -227,7 +230,12 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                                 }
                             }
                         })
-                .show();
+                .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+
+        dialog.show();
     }
 
     private void onBtnViewOnlineClick() {
@@ -245,7 +253,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     }
 
     private void showEmptyTransactionDialog() {
-        new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this)
                 .setMessage(R.string.no_payment_records)
                 .setPositiveButton(R.string.ok,
                         new DialogInterface.OnClickListener() {
@@ -254,13 +262,18 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                                 finishActivity();
                             }
                         })
-                .show();
+                .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+
+        dialog.show();
     }
 
     private void showRawDataDialog() {
         final RecordTransaction item = listRecordTransactions.get(idxCurrentPosition);
 
-        new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.raw_data))
                 .setMessage(item.getRawData())
                 .setNegativeButton(R.string.cancel,
@@ -282,7 +295,12 @@ public class ActivityTransactionInfo extends AppCompatActivity {
                                 }
                             }
                         })
-                .show();
+                .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+
+        dialog.show();
     }
 
     private void showExchangeRate() {
@@ -305,11 +323,16 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         ((TextView) view.findViewById(R.id.tv_dialog_exhange_rate_amount_usd))
                 .setText(formattedFiatAmount(loggedExchangeRate.getRate_usd()));
 
-        new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.exchange_rate)
                 .setView(view)
                 .setPositiveButton(R.string.ok, null)
-                .show();
+                .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+
+        dialog.show();
     }
 
     private void finishActivity() {

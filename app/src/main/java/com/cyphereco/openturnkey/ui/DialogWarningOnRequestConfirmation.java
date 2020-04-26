@@ -4,10 +4,14 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.cyphereco.openturnkey.R;
+
+import java.util.Objects;
 
 public class DialogWarningOnRequestConfirmation {
     private AlertDialog.Builder builder;
@@ -55,6 +59,9 @@ public class DialogWarningOnRequestConfirmation {
 
     public void show() {
         dialog = builder.create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
     }

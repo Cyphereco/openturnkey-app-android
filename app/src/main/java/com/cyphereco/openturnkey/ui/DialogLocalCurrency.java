@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
@@ -11,6 +13,8 @@ import android.view.View;
 import android.widget.RadioGroup;
 
 import com.cyphereco.openturnkey.R;
+
+import java.util.Objects;
 
 public class DialogLocalCurrency extends AppCompatDialogFragment {
     private int selectedCurrency;
@@ -41,7 +45,13 @@ public class DialogLocalCurrency extends AppCompatDialogFragment {
             rgLocalCurrencies.check(selectedCurrency);
         }
 
-        return builder.create();
+        Dialog dialog = builder.create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+        dialog.setCanceledOnTouchOutside(false);
+
+        return dialog;
     }
 
     @Override

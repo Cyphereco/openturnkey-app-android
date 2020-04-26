@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.util.Log;
@@ -16,6 +18,7 @@ import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 
 import java.text.DecimalFormat;
+import java.util.Objects;
 
 public class DialogTransactionFee extends AppCompatDialogFragment {
     private int selectedFee;
@@ -66,8 +69,15 @@ public class DialogTransactionFee extends AppCompatDialogFragment {
         }
 
 
-        return builder.create();
+        Dialog dialog = builder.create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+        dialog.setCanceledOnTouchOutside(false);
+
+        return dialog;
     }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -562,13 +563,14 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                                 getLocalCurrency().toString(), getTxFees(),
                                 Preferences.getFeeIncluded());
 
+
                         // prepare to make payment
                         final Dialog dialog = dialogFullscreenAlert(getString(R.string.check_balance));
-                        dialog.show();
 
-                        BlockChainInfo.getBalance(addr, new BlockChainInfo.WebResultHandler() {
+                        final Handler handler = new Handler(new Handler.Callback() {
                             @Override
-                            public void onBalanceUpdated(BigDecimal balance) {
+                            public boolean handleMessage(Message msg) {
+                                BigDecimal balance = (BigDecimal) msg.obj;
                                 logger.debug("Account ({}) balance: {}", otkData.getSessionData().getAddress(), balance);
                                 long amountSent = totalAmountSent();
                                 long amountReceived = totalAmountReceived();
@@ -588,6 +590,17 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                                             amountSent, amountReceived);
                                     dialogConfirmPayment(from, to, amountSent, amountReceived, getTxFees());
                                 }
+                                return true;
+                            }
+                        });
+                        dialog.show();
+
+                        BlockChainInfo.getBalance(addr, new BlockChainInfo.WebResultHandler() {
+                            @Override
+                            public void onBalanceUpdated(BigDecimal balance) {
+                                Message msg = new Message();
+                                msg.obj = balance;
+                                handler.sendMessage(msg);
                             }
 
                             @Override
@@ -785,14 +798,18 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             // If address editor is empty, prompt warning dialog
             if ((null == tvAddress.getText()) || (tvAddress.getText().toString().isEmpty())) {
                 mUseFixedAddress = false;
-                new AlertDialog.Builder(getActivity())
+                Dialog dialog = new AlertDialog.Builder(getActivity())
                         .setMessage(getString(R.string.recipient_is_empty))
                         .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
-                        })
-                        .show();
+                        }).create();
+                Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+                dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+
+                dialog.show();
                 return false;
             }
             // There is address
@@ -1132,17 +1149,26 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 })
                 .setCancelable(true)
                 .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
         dialog.setCanceledOnTouchOutside(false);
+
         dialog.show();
         Looper.loop();
     }
 
     private void dialogFixedAddressEnabled() {
-        new AlertDialog.Builder(getActivity())
+        Dialog dialog = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.cannot_change_addr)
                 .setMessage(R.string.disable_fixed_addr_first)
                 .setNegativeButton(R.string.ok, null)
-                .show();
+                .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+
+        dialog.show();
         MainActivity.setPayToAddress("");
     }
 

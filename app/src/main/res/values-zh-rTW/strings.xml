@@ -36,7 +36,7 @@
     <string name="read_general_information">讀取一般資訊</string>
     <string name="customized_fees">自訂手續費</string>
     <string name="suggested">推薦</string>
-    <string name="command_executed_successfully">命令成功執行</string>
+    <string name="command_executed_successfully">命令執行成功</string>
     <string name="processing_transaction">交易處理中</string>
     <string name="operation_cancelled">操作取消</string>
     <string name="qr_code_scan_cancelled">取消二維碼掃描</string>

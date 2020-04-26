@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,6 +36,7 @@ import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class FragmentAddrbook extends FragmentExtendOtkViewPage {
 
@@ -213,7 +216,10 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
                     }
                 })
                 .create();
-        dialog.setCanceledOnTouchOutside(false);
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+
         dialog.show();
     }
 
@@ -266,13 +272,17 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
         Dialog dialog = new AlertDialog.Builder(getActivity())
                 .setTitle(getString(R.string.btc_qr_code))
                 .setView(v)
-                .setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 })
                 .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
         dialog.setCanceledOnTouchOutside(false);
+
         dialog.show();
     }
 }

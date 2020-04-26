@@ -1,11 +1,14 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -176,11 +179,17 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                             }
                         });
 
-                        new AlertDialog.Builder(getContext())
+                        Dialog dialog = new AlertDialog.Builder(getContext())
                                 .setTitle(getString(R.string.export_private_key))
                                 .setView(v)
                                 .setPositiveButton(R.string.ok, null)
-                                .show();
+                                .create();
+                        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+                        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+                        dialog.setCanceledOnTouchOutside(false);
+
+                        dialog.show();
                     } else {
                         String msg;
                         switch (cmd) {
@@ -278,7 +287,6 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                         dialog.setListener(new DialogSetPIN.DialogSetPINListener() {
                             @Override
                             public void setPin(String pin) {
-                                cbUsePin.setVisibility(View.VISIBLE);
                                 ivAuthType.setVisibility(View.VISIBLE);
                                 tvRequestDesc.setText(R.string.set_pin_code);
                                 pushRequest(new OtkRequest(Command.SET_PIN.toString(), pin));
@@ -428,10 +436,16 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
     private void dialogResetFollowUpGuide(String title, String message) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext(), R.style.AlertDialogRemindStyle);
 
-        alertDialogBuilder.setTitle(title)
+        Dialog dialog = alertDialogBuilder.setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(R.string.ok, null)
                 .setCancelable(false)
-                .show();
+                .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+        dialog.setCanceledOnTouchOutside(false);
+
+        dialog.show();
     }
 }

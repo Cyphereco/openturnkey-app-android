@@ -2,6 +2,8 @@ package com.cyphereco.openturnkey.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -107,6 +109,18 @@ public class FragmentHistory extends FragmentExtendOtkViewPage {
         mRVHistory.setLayoutManager(layoutManager);
         mRVHistory.setAdapter(mItemViewAdapter);
 
+        final Handler handler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                if (isSelected()) {
+                    // switch page quickly to refresh adapter items confirmation icon
+                    MainActivity.switchToPage(MainActivity.PAGE.PAY.ordinal());
+                    MainActivity.switchToPage(MainActivity.PAGE.HISTORY.ordinal());
+                }
+                return true;
+            }
+        });
+
         MainActivity.addToListOnlineDataUpdateListener(new MainActivity.OnlineDataUpdateListener() {
             @Override
             public void onExchangeRateUpdated(BtcExchangeRates xrate) {
@@ -120,11 +134,9 @@ public class FragmentHistory extends FragmentExtendOtkViewPage {
 
             @Override
             public void onBlockHeightUpdated(long height) {
-                if (isSelected()) {
-                    // switch page quickly to refresh adapter items confirmation icon
-                    MainActivity.switchToPage(MainActivity.PAGE.PAY.ordinal());
-                    MainActivity.switchToPage(MainActivity.PAGE.HISTORY.ordinal());
-                }
+                Message msg = new Message();
+                msg.obj = height;
+                handler.sendMessage(msg);
             }
         });
 

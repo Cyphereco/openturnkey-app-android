@@ -2,11 +2,14 @@ package com.cyphereco.openturnkey.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -208,7 +211,7 @@ public class ActivityChooseKey extends AppCompatActivity {
     }
 
     private void showFmtErrorDialog(String contents) {
-        new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.invalid_key_path)
                 .setMessage(contents)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -216,7 +219,12 @@ public class ActivityChooseKey extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 })
-                .show();
+                .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+
+        dialog.show();
     }
 
     private void updateKeyPathData(String contents) {

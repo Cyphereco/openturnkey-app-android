@@ -1,12 +1,15 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -215,7 +218,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
                 ivQRCode.getDrawable().getIntrinsicHeight());
         ivQRCode.setImageBitmap(bitmap);
         tv.setText(text);
-        new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this)
                 .setTitle(dialogTitle)
                 .setView(v)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -223,7 +226,12 @@ public class ActivityKeyInformation extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 })
-                .show();
+                .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+
+        dialog.show();
     }
 
     @Override

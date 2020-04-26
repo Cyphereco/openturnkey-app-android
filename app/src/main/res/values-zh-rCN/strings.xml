@@ -36,7 +36,7 @@
     <string name="read_general_information">读取一般信息</string>
     <string name="customized_fees">自订手续费</string>
     <string name="suggested">推荐</string>
-    <string name="command_executed_successfully">命令成功执行</string>
+    <string name="command_executed_successfully">命令执行成功</string>
     <string name="processing_transaction">交易处理中</string>
     <string name="operation_cancelled">操作取消</string>
     <string name="qr_code_scan_cancelled">取消二维码扫描</string>

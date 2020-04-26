@@ -36,7 +36,7 @@
     <string name="read_general_information">一般情報を読む</string>
     <string name="customized_fees">限定手数料</string>
     <string name="suggested">おすすめ</string>
-    <string name="command_executed_successfully">コマンドが正常に実行された</string>
+    <string name="command_executed_successfully">コマンド実行成功</string>
     <string name="processing_transaction">送金処理中</string>
     <string name="transaction_receipt">取引領収書</string>
     <string name="get_recipient_address">入金アドレスを取得</string>
