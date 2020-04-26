@@ -51,7 +51,6 @@ public class DialogClearHistory extends AppCompatDialogFragment {
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
         dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
-//        dialog.setCanceledOnTouchOutside(false);
 
         return dialog;
     }

@@ -55,7 +55,7 @@ public class ActivityQRcodeScan extends AppCompatActivity implements ZXingScanne
 
         mScannerView.setResultHandler(this);
         mScannerView.setSquareViewFinder(true);
-        ArrayList l = new ArrayList();
+        ArrayList<BarcodeFormat> l = new ArrayList<>();
         l.add(BarcodeFormat.QR_CODE);
         mScannerView.setFormats(l);
         mScannerView.startCamera();

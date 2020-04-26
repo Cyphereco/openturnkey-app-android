@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDialogFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -17,20 +16,22 @@ import android.widget.RadioGroup;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.text.DecimalFormat;
 import java.util.Objects;
 
 public class DialogTransactionFee extends AppCompatDialogFragment {
-    private int selectedFee;
     RadioGroup rgTransactionFee = null;
     EditText et = null;
     public DialogTransactionFeeListener listener;
 
+    @NotNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_transaction_fee, null);
 
         builder.setView(view)
@@ -38,11 +39,11 @@ public class DialogTransactionFee extends AppCompatDialogFragment {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (listener == null) return;;
-                        View v = getView();
-                        int selected = rgTransactionFee.getCheckedRadioButtonId();
+                        if (listener == null) return;
+                        getView();
+                        rgTransactionFee.getCheckedRadioButtonId();
                         try {
-                            double txFee = Double.valueOf(et.getText().toString());
+                            double txFee = Double.parseDouble(et.getText().toString());
                             listener.setCustomizedTxFee(txFee);
                         }
                         catch (Exception e) {
@@ -58,7 +59,7 @@ public class DialogTransactionFee extends AppCompatDialogFragment {
         et = view.findViewById(R.id.transaction_fee);
 
         if (getArguments() != null) {
-            selectedFee = getArguments().getInt("transactionFee");
+            int selectedFee = getArguments().getInt("transactionFee");
             rgTransactionFee.check(selectedFee);
             double fee = BtcUtils.satoshiToBtc(getArguments().getLong("customizedFee"));
             if (fee >= 0) {

@@ -38,6 +38,7 @@ public class OtkData implements Serializable {
         mPublicKey = pubKey;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return "OtkData{" +

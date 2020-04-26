@@ -42,6 +42,7 @@ public class Preferences {
     static LocalCurrency getLocalCurrency() {
         String s = prefs.getString(LOCAL_CURRENCY, "");
 
+        assert s != null;
         if (s.length() == 0) {
             if (Locale.getDefault().getCountry().equals(Locale.TAIWAN.getCountry())) {
                 s = LocalCurrency.LOCAL_CURRENCY_TWD.name();
@@ -82,6 +83,7 @@ public class Preferences {
 
     public static Configurations.TxFeeType getTxFeeType() {
         String s = prefs.getString(TX_FEE_TYPE, "");
+        assert s != null;
         if (s.equals(Configurations.TxFeeType.HIGH.name())) {
             return Configurations.TxFeeType.HIGH;
         } else if (s.equals(Configurations.TxFeeType.MID.name())) {
@@ -145,6 +147,7 @@ public class Preferences {
 
     private static Configurations.Network getNetwork() {
         String s = prefs.getString(NETWORK, Configurations.network.name());
+        assert s != null;
         if (s.equals(Configurations.Network.MAINNET.name())) {
             return Configurations.Network.MAINNET;
         }

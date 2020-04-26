@@ -1,5 +1,7 @@
 package com.cyphereco.openturnkey.utils;
 
+import org.jetbrains.annotations.NotNull;
+
 public enum LocalCurrency {
     LOCAL_CURRENCY_CNY("CNY"),
     LOCAL_CURRENCY_EUR("EUR"),
@@ -13,6 +15,7 @@ public enum LocalCurrency {
         value = s;
     }
 
+    @NotNull
     public String toString() {
         return value;
     }

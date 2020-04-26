@@ -140,6 +140,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                     MainActivity.switchToPage(MainActivity.PAGE.HISTORY.ordinal());
 
                     Intent intent = new Intent(getContext(), ActivityTransactionInfo.class);
+                    assert item != null;
                     intent.putExtra(ActivityTransactionInfo.KEY_CURRENT_TRANS_ID, item.getId());
                     if (getActivity() != null) {
                         getActivity().startActivityForResult(intent,
@@ -308,7 +309,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             public void onClick(View view) {
                 // Check if recipient address is valid.
                 try {
-                    if (!((MainActivity)getActivity()).isNetworkConnected()) {
+                    if (!((MainActivity) Objects.requireNonNull(getActivity())).isNetworkConnected()) {
                         makeToastMessage(getString(R.string.no_internet));
                         return;
                     }
@@ -370,7 +371,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         cbAuthByPin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Drawable img = getContext().getResources().getDrawable(R.drawable.ic_fingerprint_black_24dp);
+                Drawable img = Objects.requireNonNull(getContext()).getResources().getDrawable(R.drawable.ic_fingerprint_black_24dp);
 
                 if (isChecked) {
                     img = getContext().getResources().getDrawable(R.drawable.ic_enter_pin);
@@ -1066,7 +1067,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                         Message msg = new Message();
 //                        msg.obj = _newyDummyTransaction();
                         logger.debug("completeTransaction: Got listSignatures ({})", listSignatures.size());
-                        msg.obj = BlockCypher.completeSendBitcoin(pubKeyPayer, listSignatures, tvAddress.getText().toString());
+                        msg.obj = BlockCypher.completeSendBitcoin(pubKeyPayer, listSignatures);
                         logger.debug("Sent transaction output: {}", msg.obj);
                         txHandler.sendMessage(msg);
                         clearRequest();
@@ -1139,6 +1140,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                                     paymentConfirmed(from, to, amountReceived, fees, pin);
                                 }
                             });
+                            assert getFragmentManager() != null;
                             dialogAuthByPin.show(getFragmentManager(), "AuthByPin");
                             cbAuthByPin.setChecked(false);
                         }

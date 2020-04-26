@@ -51,7 +51,7 @@ public class Utils {
     private static final BigInteger DISPLAY_1P = new BigInteger("1000000000000000");
 
     /** Bit masks (Low-order bit is bit 0 and high-order bit is bit 7) */
-    private static final int bitMask[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+    private static final int[] bitMask = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 
     /** Instance of a SHA-256 digest which we will use as needed */
     private static final MessageDigest digest;

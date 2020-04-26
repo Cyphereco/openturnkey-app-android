@@ -59,16 +59,16 @@ public class ActivitySplash extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        gotoAcitivity();
+        gotoActivity();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        gotoAcitivity();
+        gotoActivity();
     }
 
-    private void gotoAcitivity() {
+    private void gotoActivity() {
         if (MainActivity.getCurrentActivity() != null) {
             // app is already running, switch to current activity
             Class cls = null;

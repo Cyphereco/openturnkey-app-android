@@ -6,6 +6,7 @@
       <w>addressbook</w>
       <w>appenders</w>
       <w>bitcoin</w>
+      <w>blockchain</w>
       <w>cyphereco</w>
       <w>dataset</w>
       <w>mainnet</w>
@@ -19,6 +20,7 @@
       <w>rcode</w>
       <w>satoshi</w>
       <w>testnet</w>
+      <w>unmark</w>
       <w>utxo</w>
       <w>xrate</w>
       <w>zxing</w>

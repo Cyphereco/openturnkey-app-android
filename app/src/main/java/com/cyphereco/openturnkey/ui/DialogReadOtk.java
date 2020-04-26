@@ -68,7 +68,7 @@ public class DialogReadOtk extends AppCompatDialogFragment {
             @Override
             public void onClick(View view) {
                 dialogTImer.cancel();
-                if (getDialog() != null) dismissAnimation(getDialog().getWindow().getDecorView());
+                if (getDialog() != null) dismissAnimation(Objects.requireNonNull(getDialog().getWindow()).getDecorView());
             }
         });
 
@@ -117,7 +117,7 @@ public class DialogReadOtk extends AppCompatDialogFragment {
         animation.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (dialog != null) dialog.dismiss();
+                dialog.dismiss();
             }
 
             @Override
@@ -168,8 +168,6 @@ public class DialogReadOtk extends AppCompatDialogFragment {
         textTitle.setVisibility(View.INVISIBLE);
         cancelButton.setVisibility(View.INVISIBLE);
         iconHint.setVisibility(View.INVISIBLE);
-
-        final DialogReadOtk dialog = this;
 
         switch (flag) {
             case READ_SUCCESS:

@@ -13,9 +13,13 @@ import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
 import java.util.Objects;
 
 public class DialogSendBtcResult extends AppCompatDialogFragment {
+    @NotNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -35,7 +39,7 @@ public class DialogSendBtcResult extends AppCompatDialogFragment {
             reason = getArguments().getString("failureReason");
         }
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
         View view;
         if (resultStringId == R.string.transaction_receipt) {
             hash = getArguments().getString("hash");
@@ -52,9 +56,9 @@ public class DialogSendBtcResult extends AppCompatDialogFragment {
             tv = view.findViewById(R.id.to);
             tv.setText(to);
             tv = view.findViewById(R.id.amount);
-            tv.setText(String.format("%.8f", amount));
+            tv.setText(String.format(Locale.getDefault(), "%.8f", amount));
             tv = view.findViewById(R.id.fee);
-            tv.setText(String.format("%.8f", fee));
+            tv.setText(String.format(Locale.getDefault(), "%.8f", fee));
             tv = view.findViewById(R.id.hash);
             tv.setText(hash);
             tv = view.findViewById(R.id.time);

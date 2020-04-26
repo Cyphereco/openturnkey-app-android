@@ -13,9 +13,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-
-import org.slf4j.Logger;
-
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -27,13 +24,14 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
-import com.cyphereco.openturnkey.db.RecordTransaction;
 import com.cyphereco.openturnkey.db.OpenturnkeyDB;
+import com.cyphereco.openturnkey.db.RecordTransaction;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
 import com.cyphereco.openturnkey.utils.BtcExchangeRates;
 import com.cyphereco.openturnkey.utils.BtcUtils;
 import com.cyphereco.openturnkey.utils.Log4jHelper;
-import com.cyphereco.openturnkey.webservices.BlockCypher;
+
+import org.slf4j.Logger;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

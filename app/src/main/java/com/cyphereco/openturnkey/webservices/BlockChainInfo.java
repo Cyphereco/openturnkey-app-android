@@ -7,6 +7,7 @@ import com.cyphereco.openturnkey.utils.Log4jHelper;
 import org.slf4j.Logger;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -46,7 +47,7 @@ import static com.cyphereco.openturnkey.utils.BtcUtils.convertDateTimeStringToLo
  */
 public class BlockChainInfo {
     public static final String TAG = BlockChainInfo.class.getSimpleName();
-    static Logger logger = Log4jHelper.getLogger(TAG);
+    private static Logger logger = Log4jHelper.getLogger(TAG);
 
     private static String URI = "https://blockchain.info/";
     private static String PATH_RAWTX = "rawtx";
@@ -121,7 +122,7 @@ public class BlockChainInfo {
     public static long getTxTime(String txHash) {
         long ret = 0;
         if (Preferences.isTestnet()) {
-            return convertDateTimeStringToLong(BlockCypher.getTransaction(txHash, false).getReceived());
+            return convertDateTimeStringToLong(Objects.requireNonNull(BlockCypher.getTransaction(txHash, false)).getReceived());
         }
         try {
             Client webClient = ClientBuilder.newClient();

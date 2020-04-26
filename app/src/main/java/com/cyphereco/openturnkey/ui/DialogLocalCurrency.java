@@ -14,18 +14,20 @@ import android.widget.RadioGroup;
 
 import com.cyphereco.openturnkey.R;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 public class DialogLocalCurrency extends AppCompatDialogFragment {
-    private int selectedCurrency;
     RadioGroup rgLocalCurrencies = null;
     public DialogLocalCurrecyListener listener;
 
+    @NotNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_local_currency, null);
 
         builder.setView(view)
@@ -41,7 +43,7 @@ public class DialogLocalCurrency extends AppCompatDialogFragment {
         rgLocalCurrencies = view.findViewById(R.id.rg_local_currency);
 
         if (getArguments() != null) {
-            selectedCurrency = getArguments().getInt("localCurrency");
+            int selectedCurrency = getArguments().getInt("localCurrency");
             rgLocalCurrencies.check(selectedCurrency);
         }
 

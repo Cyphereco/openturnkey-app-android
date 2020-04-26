@@ -63,7 +63,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
         cbUsePin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            Drawable img = getContext().getResources().getDrawable(R.drawable.ic_fingerprint_black_24dp);
+            Drawable img = Objects.requireNonNull(getContext()).getResources().getDrawable(R.drawable.ic_fingerprint_black_24dp);
 
             if (isChecked) {
                 img = getContext().getResources().getDrawable(R.drawable.ic_enter_pin);
@@ -125,7 +125,6 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
         if (!BtcUtils.validateAddress(!Preferences.isTestnet(), otkData.getSessionData().getAddress())) {
             // address check, request command can only be made with correct corresponding network preference
             clearRequest();
-            return;
         }
     }
 
@@ -268,7 +267,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
         ivAuthType.setVisibility(View.INVISIBLE);
         cbUsePin.setChecked(false);
 
-        Drawable img = getContext().getResources().getDrawable(R.drawable.ic_fingerprint_black_24dp);
+        Drawable img = Objects.requireNonNull(getContext()).getResources().getDrawable(R.drawable.ic_fingerprint_black_24dp);
         ivAuthType.setImageDrawable(img);
 
         DialogWarningOnRequestConfirmation dialog = new DialogWarningOnRequestConfirmation(
@@ -348,7 +347,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                     @Override
                     public void onConfirmed() {
                         tvRequestDesc.setText(R.string.unlock);
-                        Drawable img = getContext().getResources().getDrawable(R.drawable.ic_enter_pin);
+                        Drawable img = Objects.requireNonNull(getContext()).getResources().getDrawable(R.drawable.ic_enter_pin);
                         ivAuthType.setImageDrawable(img);
                         ivAuthType.setVisibility(View.VISIBLE);
 

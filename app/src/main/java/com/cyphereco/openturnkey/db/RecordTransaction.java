@@ -1,7 +1,8 @@
 package com.cyphereco.openturnkey.db;
 
 import com.blockcypher.model.transaction.Transaction;
-import com.cyphereco.openturnkey.webservices.BlockCypher;
+
+import org.jetbrains.annotations.NotNull;
 
 import static com.cyphereco.openturnkey.utils.BtcUtils.convertDateTimeStringToLong;
 
@@ -147,6 +148,7 @@ public class RecordTransaction implements java.io.Serializable {
         this.exchangeRate = exchangeRate;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return "RecordTransaction{" +

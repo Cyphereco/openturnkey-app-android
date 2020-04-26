@@ -281,6 +281,7 @@ public class FragmentExtendOtkViewPage extends Fragment {
                         if (handler != null) handler.sendMessage(new Message());
                     }
                 });
+        assert getFragmentManager() != null;
         dialogReadOtk.show(getFragmentManager(), "ReadOtk");
     }
 
@@ -294,6 +295,7 @@ public class FragmentExtendOtkViewPage extends Fragment {
                         clearRequest();
                     }
                 });
+        assert getFragmentManager() != null;
         dialogReadOtk.show(getFragmentManager(), "ReadOtk");
     }
 

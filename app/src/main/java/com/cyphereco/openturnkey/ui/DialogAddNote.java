@@ -2,7 +2,6 @@ package com.cyphereco.openturnkey.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -14,16 +13,19 @@ import android.widget.TextView;
 
 import com.cyphereco.openturnkey.R;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 public class DialogAddNote extends AppCompatDialogFragment {
     public DialogAddNoteListener listener;
 
+    @NotNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
         final View view = inflater.inflate(R.layout.dialog_add_note, null);
 
         builder.setView(view)

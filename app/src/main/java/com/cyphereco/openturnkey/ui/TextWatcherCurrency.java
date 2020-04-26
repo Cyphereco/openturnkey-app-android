@@ -26,7 +26,7 @@ public class TextWatcherCurrency implements TextWatcher {
         if (now.isEmpty()) return;
         editText.removeTextChangedListener(this);
         try {
-            double parsed = Double.parseDouble(now);
+            Double.parseDouble(now);
             current = now;
 
         } catch (Exception e) {

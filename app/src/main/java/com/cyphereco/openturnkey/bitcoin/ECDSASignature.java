@@ -76,7 +76,7 @@ public class ECDSASignature {
      * @return                          DER-encoded byte stream
      */
     public byte[] encodeToDER() {
-        byte[] encodedBytes = null;
+        byte[] encodedBytes;
         try {
             try (ByteArrayOutputStream outStream = new ByteArrayOutputStream(80)) {
                 DERSequenceGenerator seq = new DERSequenceGenerator(outStream);

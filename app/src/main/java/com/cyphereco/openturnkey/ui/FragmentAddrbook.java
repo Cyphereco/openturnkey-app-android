@@ -89,7 +89,7 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
 //                logger.debug("onPay the position is: " + position);
                 RecordAddress item = mAdapter.getAddressItemByPosition(position);
                 MainActivity.setPayToAddress(item.getAddress());
-                ViewPager viewPager = getActivity().findViewById(R.id.view_pager_main);
+                ViewPager viewPager = Objects.requireNonNull(getActivity()).findViewById(R.id.view_pager_main);
                 if (viewPager != null) {
                     viewPager.setCurrentItem(0, true);
                 }

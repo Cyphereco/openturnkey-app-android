@@ -1,7 +1,6 @@
 package com.cyphereco.openturnkey.ui;
 
 import android.content.Context;
-import android.print.PageRange;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -22,7 +21,6 @@ import com.cyphereco.openturnkey.webservices.BlockCypher;
 
 import org.slf4j.Logger;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -77,8 +75,8 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
         final RecordTransaction recordTransaction = mTransDataset.get(position);
 
         // unmark below two lines to force records to be updated with online result
-//        recordTransaction.setBlockHeight(-1);
-//        OpenturnkeyDB.updateTransaction(recordTransaction);
+        // recordTransaction.setBlockHeight(-1);
+        // OpenturnkeyDB.updateTransaction(recordTransaction);
 
         if (recordTransaction.getBlockHeight() <= 0) {
             // transaction has not been confirmed, need to update (block height, confirmed time, rawTx) from network
@@ -95,7 +93,7 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
                     }
 
                     if (recordTransaction.getBlockHeight() <= 0){
-                        long height = -1;
+                        long height;
                         if (!Preferences.isTestnet()) {
                             height = BlockChainInfo.getTxBlockHeight(recordTransaction.getHash());
                         }
@@ -110,6 +108,7 @@ public class ViewAdapterHistory extends RecyclerView.Adapter<ViewAdapterHistory.
                             recordTransaction.setTimestamp(BlockChainInfo.getTxTime(recordTransaction.getHash()));
                         }
                         else {
+                            assert tx != null;
                             recordTransaction.setTimestamp(
                                     BtcUtils.convertDateTimeStringToLong(tx.getReceived()));
                         }

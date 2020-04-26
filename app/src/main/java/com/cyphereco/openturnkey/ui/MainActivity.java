@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setTxFee(TxFee txFee) {
-        if (txFee == null) return;;
+        if (txFee == null) return;
 
         logger.debug("Update TxFee: {}", txFee.toString());
         Preferences.setTxFee(txFee);
