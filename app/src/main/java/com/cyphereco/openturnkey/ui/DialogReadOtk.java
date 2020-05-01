@@ -117,7 +117,7 @@ public class DialogReadOtk extends AppCompatDialogFragment {
         animation.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                dialog.dismiss();
+                if (dialog != null) dialog.dismiss();
             }
 
             @Override

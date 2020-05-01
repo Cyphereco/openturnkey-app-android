@@ -180,7 +180,7 @@ public class FragmentExtendOtkViewPage extends Fragment {
                     }
                 } else {
                     // no request, just read openturnkey information
-                    dialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.READ_SUCCESS);
+                    if (dialogReadOtk != null) dialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.READ_SUCCESS);
 
                     delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
                         @Override

@@ -8,11 +8,13 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -263,7 +265,7 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         }
 
         private void updateVerifyMessageButton(View view, String msgToSign) {
-            Button btn = view.findViewById(R.id.buttonVerifyMessage);
+            Button btn = view.findViewById(R.id.buttonValidateMessage);
             if (msgToSign.length() > 0) {
                 btn.setEnabled(true);
                 btn.setAlpha(1.0f);
@@ -354,13 +356,34 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
             });
         }
 
-        private void initVerifyMessageTab(final View view) {
-            final EditText etMsgToBeVerified = view.findViewById(R.id.editTextMessageToBeVerified);
-
+        private void hideValidationResult() {
             ImageView ivGreen = findViewById(R.id.imageViewVerifyGreen);
             ImageView ivFail = findViewById(R.id.imageViewVerifyFail);
+            TextView tvValidation = findViewById(R.id.textView_signature_validation);
             ivGreen.setVisibility(View.INVISIBLE);
             ivFail.setVisibility(View.INVISIBLE);
+            tvValidation.setVisibility(View.INVISIBLE);
+        }
+        private void initVerifyMessageTab(final View view) {
+            final EditText etMsgToBeVerified = view.findViewById(R.id.editTextMessageToBeVerified);
+            etMsgToBeVerified.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    hideValidationResult();
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+
+            hideValidationResult();
 
             ImageView ivPaste = findViewById(R.id.imageViewVerifyPaste);
             ivPaste.setOnClickListener(new View.OnClickListener() {
@@ -404,7 +427,7 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                 }
             });
 
-            Button btnVerifyMsg = view.findViewById(R.id.buttonVerifyMessage);
+            Button btnVerifyMsg = view.findViewById(R.id.buttonValidateMessage);
             btnVerifyMsg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -412,21 +435,29 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                     SignedMessage sm = SignedMessage.parseSignedMessage(msgToBeVerified);
                     ImageView ivGreen = findViewById(R.id.imageViewVerifyGreen);
                     ImageView ivFail = findViewById(R.id.imageViewVerifyFail);
+                    TextView tvValidation = findViewById(R.id.textView_signature_validation);
 
                     if (sm != null) {
                         boolean isVerified = BtcUtils.verifySignature(sm.getAddress(), sm.getMessage(), sm.getSignature());
                         if (isVerified) {
                             ivGreen.setVisibility(View.VISIBLE);
                             ivFail.setVisibility(View.INVISIBLE);
-                            AlertPrompt.info(getApplicationContext(),getString(R.string.signature_valid));
+                            tvValidation.setVisibility(View.VISIBLE);
+                            tvValidation.setText(getString(R.string.signature_valid));
+                            tvValidation.setTextColor(0xFF40B040);
                         } else {
                             ivGreen.setVisibility(View.INVISIBLE);
                             ivFail.setVisibility(View.VISIBLE);
-                            AlertPrompt.alert(getApplicationContext(),getString(R.string.signature_invalid));
+                            tvValidation.setVisibility(View.VISIBLE);
+                            tvValidation.setText(getString(R.string.signature_invalid));
+                            tvValidation.setTextColor(Color.RED);
                         }
                     } else {
                         ivGreen.setVisibility(View.INVISIBLE);
                         ivFail.setVisibility(View.VISIBLE);
+                        tvValidation.setVisibility(View.VISIBLE);
+                        tvValidation.setText(getString(R.string.signature_invalid));
+                        tvValidation.setTextColor(Color.RED);
                     }
                 }
             });
@@ -441,7 +472,7 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                 initSignMessageTab(tabSignMessage);
                 return tabSignMessage;
             } else {
-                View tabVerifyMessage = getLayoutInflater().inflate(R.layout.layout_verify_message, container, false);
+                View tabVerifyMessage = getLayoutInflater().inflate(R.layout.layout_validate_message, container, false);
                 container.addView(tabVerifyMessage);
                 initVerifyMessageTab(tabVerifyMessage);
                 return tabVerifyMessage;

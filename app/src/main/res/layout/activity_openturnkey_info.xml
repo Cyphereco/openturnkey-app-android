@@ -55,21 +55,23 @@
         android:id="@+id/label_btc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="8dp"
         android:text="@string/_unit_btc"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintBottom_toBottomOf="@+id/text_balance_btc"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/text_balance_btc"
         app:layout_constraintTop_toTopOf="@+id/text_balance_btc" />
 
     <TextView
         android:id="@+id/label_fiat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:text="@string/_unit_usd"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/text_balance_fiat"
-        app:layout_constraintEnd_toStartOf="@+id/textView25"
+        app:layout_constraintStart_toEndOf="@+id/text_balance_fiat"
         app:layout_constraintTop_toTopOf="@+id/text_balance_fiat" />
 
     <TextView
@@ -126,13 +128,13 @@
 
     <ImageView
         android:id="@+id/icon_copy"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="16dp"
         android:contentDescription="@android:string/copyUrl"
-        app:layout_constraintBottom_toBottomOf="@+id/btc_address_context"
-        app:layout_constraintStart_toEndOf="@+id/btc_address_context"
-        app:layout_constraintTop_toTopOf="@+id/btc_address_context"
+        app:layout_constraintEnd_toEndOf="@+id/btc_address_context"
+        app:layout_constraintStart_toStartOf="@+id/btc_address_context"
+        app:layout_constraintTop_toBottomOf="@+id/btc_address_context"
         app:srcCompat="@drawable/ic_content_copy_black_24dp" />
 
     <ImageView
@@ -150,11 +152,13 @@
         android:id="@+id/text_balance_fiat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
         android:text="0.0"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintEnd_toStartOf="@+id/label_fiat"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/btc_address_qrcode"
+        app:layout_constraintStart_toStartOf="@+id/btc_address_qrcode"
         app:layout_constraintTop_toBottomOf="@+id/text_balance_btc" />
 
     <TextView
@@ -162,11 +166,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="72dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="32dp"
         android:gravity="right"
         android:text="0.0"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        app:layout_constraintEnd_toStartOf="@+id/label_btc"
+        app:layout_constraintEnd_toEndOf="@+id/btc_address_qrcode"
+        app:layout_constraintStart_toStartOf="@+id/btc_address_qrcode"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
     <TextView
@@ -174,6 +179,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="(~= "
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/text_balance_fiat"
         app:layout_constraintEnd_toStartOf="@+id/text_balance_fiat"
         app:layout_constraintTop_toTopOf="@+id/text_balance_fiat" />
@@ -182,10 +188,10 @@
         android:id="@+id/textView25"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:text=")"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/label_fiat"
-        app:layout_constraintEnd_toEndOf="@+id/label_btc"
+        app:layout_constraintStart_toEndOf="@+id/label_fiat"
         app:layout_constraintTop_toTopOf="@+id/label_fiat" />
 
 </android.support.constraint.ConstraintLayout>

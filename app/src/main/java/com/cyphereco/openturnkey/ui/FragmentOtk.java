@@ -144,7 +144,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
 
             if (otkData.getOtkState().getExecutionState() == OtkState.ExecutionState.NFC_CMD_EXEC_NA) {
                 // no particular request command, display general information
-                intent = new Intent(getContext(), ActivityOpenturnkeyInfo.class);
+                intent = new Intent(Objects.requireNonNull(getContext()), ActivityOpenturnkeyInfo.class);
             } else {
                 // otkData contains request result, process the result according to the request
                 Command cmd = otkData.getOtkState().getCommand();
