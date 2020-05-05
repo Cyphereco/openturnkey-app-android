@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_sign_verify_message"
+        android:id="@+id/toolbar_sign_validate_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
@@ -21,12 +21,12 @@
         app:title="@string/message_sign_validate" />
 
     <android.support.design.widget.TabLayout
-        android:id="@+id/tabLayoutSignVerify"
+        android:id="@+id/tabLayoutSignValidate"
         android:layout_width="395dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_sign_verify_message">
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_sign_validate_message">
 
         <android.support.design.widget.TabItem
             android:layout_width="wrap_content"
@@ -39,12 +39,12 @@
         <android.support.design.widget.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/verify" />
+            android:text="@string/validate" />
 
     </android.support.design.widget.TabLayout>
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/viewPagerSignVerify"
+        android:id="@+id/viewPagerSignValidate"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

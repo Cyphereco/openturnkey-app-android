@@ -35,4 +35,9 @@
     <style name="AlertDialogWarningStyle" parent="Theme.AppCompat.Light.Dialog">
         <item name="android:textColorPrimary">#f31010</item>
     </style>
+
+     <style name="AlertDialogNarrowWidth" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowMinWidthMajor">75%</item>
+        <item name="android:windowMinWidthMinor">75%</item>
+    </style>
 </resources>

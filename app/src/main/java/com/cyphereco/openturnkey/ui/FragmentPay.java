@@ -799,7 +799,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
             // If address editor is empty, prompt warning dialog
             if ((null == tvAddress.getText()) || (tvAddress.getText().toString().isEmpty())) {
                 mUseFixedAddress = false;
-                Dialog dialog = new AlertDialog.Builder(getActivity())
+                Dialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogNarrowWidth)
                         .setMessage(getString(R.string.recipient_is_empty))
                         .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
@@ -1108,21 +1108,24 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         String strBtcFees = String.format(Locale.ENGLISH, "%.8f", btcTxfees);
         String strFiatFess = String.format(Locale.ENGLISH, "%.3f", BtcUtils.btcToLocalCurrency(btcExchangeRates, lc, btcTxfees));
 
-        // confirmation summary string
-        String msg = getString(R.string.subject_text_estimated_time) + " " + estTime + " " + getString(R.string.minute) + LF + LF +
-                getString(R.string.amount_sent) + LF + strBtcAmountSent + " / " +
-                strFiatAmountSent + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")" + LF +
-                getString(R.string.sender) + ":" + LF + from + LF + LF +
-                getString(R.string.amount_received) + LF + strBtcAmountRecv + " / " +
-                strFiatAmountRecv + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")" + LF +
-                getString(R.string.recipient) + ":" + LF + to + LF + LF +
-                getString(R.string.transaction_fee) + ":" + LF + strBtcFees + " / " +
-                strFiatFess + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")";
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogNarrowWidth);
 
-        if (Looper.myLooper() == null) Looper.prepare();
-        AlertDialog dialog = new AlertDialog.Builder(getContext())
-                .setTitle(R.string.confirm_payment)
-                .setMessage(msg)
+        View view = View.inflate(getContext(), R.layout.dialog_payment_confirmation, null);
+
+        TextView tv = view.findViewById(R.id.tv_dialog_pf_sender_addr);
+        tv.setText(from);
+        tv = view.findViewById(R.id.tv_dialog_pf_recipient_addr);
+        tv.setText(to);
+        tv = view.findViewById(R.id.tv_dialog_pf_send_amount);
+        tv.setText(strBtcAmountSent + " / " + strFiatAmountSent + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")");
+        tv = view.findViewById(R.id.tv_dialog_pf_fees);
+        tv.setText(strBtcFees + " / " + strFiatFess + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")");
+        tv = view.findViewById(R.id.tv_dialog_pf_recv_amount);
+        tv.setText(strBtcAmountRecv + " / " + strFiatAmountRecv + " (" + getString(R.string._unit_btc) + "/" + lc.toString() + ")");
+        tv = view.findViewById(R.id.tv_dialog_pf_est_time);
+        tv.setText(estTime);
+
+        AlertDialog dialog = builder.setView(view)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -1151,6 +1154,9 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                 })
                 .setCancelable(true)
                 .create();
+
+        if (Looper.myLooper() == null) Looper.prepare();
+
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
         dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
@@ -1161,7 +1167,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
     }
 
     private void dialogFixedAddressEnabled() {
-        Dialog dialog = new AlertDialog.Builder(getActivity())
+        Dialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogNarrowWidth)
                 .setTitle(R.string.cannot_change_addr)
                 .setMessage(R.string.disable_fixed_addr_first)
                 .setNegativeButton(R.string.ok, null)

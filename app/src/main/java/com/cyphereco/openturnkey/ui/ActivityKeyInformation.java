@@ -218,7 +218,7 @@ public class ActivityKeyInformation extends AppCompatActivity {
                 ivQRCode.getDrawable().getIntrinsicHeight());
         ivQRCode.setImageBitmap(bitmap);
         tv.setText(text);
-        Dialog dialog = new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this, R.style.AlertDialogNarrowWidth)
                 .setTitle(dialogTitle)
                 .setView(v)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {

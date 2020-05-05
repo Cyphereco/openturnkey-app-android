@@ -319,7 +319,7 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
     }
 
     private void showAliasDuplicateDialog() {
-        new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this, R.style.AlertDialogNarrowWidth)
                 .setMessage(R.string.alias_exists)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override

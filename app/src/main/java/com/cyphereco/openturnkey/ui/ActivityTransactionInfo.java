@@ -170,7 +170,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
 
     private void onBtnDeleteClick() {
         logger.debug("processDeleteBtnClick");
-        Dialog dialog = new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this, R.style.AlertDialogNarrowWidth)
                 .setMessage(getString(R.string.delete_this_transaction_record))
                 .setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
@@ -251,7 +251,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     }
 
     private void showEmptyTransactionDialog() {
-        Dialog dialog = new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this, R.style.AlertDialogNarrowWidth)
                 .setMessage(R.string.no_payment_records)
                 .setPositiveButton(R.string.ok,
                         new DialogInterface.OnClickListener() {
@@ -271,7 +271,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
     private void showRawDataDialog() {
         final RecordTransaction item = listRecordTransactions.get(idxCurrentPosition);
 
-        Dialog dialog = new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this, R.style.AlertDialogNarrowWidth)
                 .setTitle(getString(R.string.raw_data))
                 .setMessage(item.getRawData())
                 .setNegativeButton(R.string.cancel,
@@ -321,7 +321,7 @@ public class ActivityTransactionInfo extends AppCompatActivity {
         ((TextView) view.findViewById(R.id.tv_dialog_exhange_rate_amount_usd))
                 .setText(formattedFiatAmount(loggedExchangeRate.getRate_usd()));
 
-        Dialog dialog = new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this, R.style.AlertDialogNarrowWidth)
                 .setTitle(R.string.exchange_rate)
                 .setView(view)
                 .setPositiveButton(R.string.ok, null)

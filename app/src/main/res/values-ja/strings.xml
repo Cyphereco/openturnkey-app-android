@@ -141,8 +141,8 @@
     <string name="message_to_be_signed">署名するメッセージ</string>
     <string name="message_to_be_signed_hint">メッセージ</string>
     <string name="signed_message">メッセージを署名された</string>
-    <string name="message_to_be_verified">署名されたメッセージ</string>
-    <string name="verify_signature">署名をチェックする</string>
+    <string name="message_to_be_validated">署名されたメッセージ</string>
+    <string name="validate_signature">署名をチェックする</string>
     <string name="using_master_key">マスターキーを使用して</string>
     <string name="export_private_key">私有鍵を輸出する</string>
     <string name="reset">リセット</string>
@@ -203,7 +203,7 @@
     <string name="add_new_addr_fail">新しい入金アドレスの追加に失敗しました</string>
     <string name="amount_less_than_fees">金額は手数料より低い</string>
     <string name="sign">サイン</string>
-    <string name="verify">チェック</string>
+    <string name="validate">チェック</string>
     <string name="error_cannot_create_tx">エラー！ トランザクションを作成できません</string>
     <string name="update_addr_fail">アドレスの更新に失敗しました</string>
     <string name="public_key_information">公開鍵の情報</string>

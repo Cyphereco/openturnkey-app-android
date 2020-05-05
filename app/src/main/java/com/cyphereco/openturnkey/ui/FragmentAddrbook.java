@@ -200,7 +200,8 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
 
     private void processDeleteAddress(int position) {
         final RecordAddress item = mAdapter.getAddressItemByPosition(position);
-        Dialog dialog = new AlertDialog.Builder(getActivity())
+
+        Dialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogNarrowWidth)
                 .setMessage(R.string.delete_address_dialog_message)
                 .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                     @Override
@@ -269,7 +270,7 @@ public class FragmentAddrbook extends FragmentExtendOtkViewPage {
             }
         });
 
-        Dialog dialog = new AlertDialog.Builder(getActivity())
+        Dialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogNarrowWidth)
                 .setTitle(getString(R.string.btc_qr_code))
                 .setView(v)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {

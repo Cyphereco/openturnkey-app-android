@@ -8,13 +8,11 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -56,7 +54,7 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
     Logger logger = Log4jHelper.getLogger(TAG);
 
     private ViewPager mViewPager;
-    private SignVerifyPagerAdapter mPageAdapter;
+    private SignValidatePagerAdapter mPageAdapter;
 
     private String mFormattedSignedMsg;
     private String mMsgToSign;
@@ -69,15 +67,15 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_validate_message);
 
-        Toolbar toolbar = findViewById(R.id.toolbar_sign_verify_message);
+        Toolbar toolbar = findViewById(R.id.toolbar_sign_validate_message);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        TabLayout mTabs = findViewById(R.id.tabLayoutSignVerify);
+        TabLayout mTabs = findViewById(R.id.tabLayoutSignValidate);
         mTabs.bringToFront();
 
-        mViewPager = findViewById(R.id.viewPagerSignVerify);
-        mPageAdapter = new SignVerifyPagerAdapter();
+        mViewPager = findViewById(R.id.viewPagerSignValidate);
+        mPageAdapter = new SignValidatePagerAdapter();
         mViewPager.setAdapter(mPageAdapter);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabs));
 
@@ -156,8 +154,8 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                 // Handle successful scan
                 assert data != null;
                 String contents = data.getStringExtra(MainActivity.KEY_QR_CODE);
-                EditText etMsgToBeVerified = findViewById(R.id.editTextMessageToBeVerified);
-                etMsgToBeVerified.setText(contents);
+                EditText etMsgToBeValidated = findViewById(R.id.editTextMessageToBeValidated);
+                etMsgToBeValidated.setText(contents);
             }
         }
     }
@@ -173,7 +171,7 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         }
     }
 
-    class SignVerifyPagerAdapter extends PagerAdapter {
+    class SignValidatePagerAdapter extends PagerAdapter {
         private View tabSignMessage;
 
         @Override
@@ -201,7 +199,9 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                         Bitmap bitmap = QRCodeUtils.encodeAsBitmap(mFormattedSignedMsg, size, size);
                         image.setImageBitmap(bitmap);
 
-                        Dialog dialog = new AlertDialog.Builder(ActivitySignValidateMessage.this)
+                        Dialog dialog = new AlertDialog.Builder(ActivitySignValidateMessage.this, R.style.AlertDialogNarrowWidth)
+                                .setTitle(getString(R.string.signed_message))
+                                .setPositiveButton(R.string.ok, null)
                                 .setCancelable(true)
                                 .setView(image).create();
                         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -264,7 +264,7 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
             }
         }
 
-        private void updateVerifyMessageButton(View view, String msgToSign) {
+        private void updateValidateMessageButton(View view, String msgToSign) {
             Button btn = view.findViewById(R.id.buttonValidateMessage);
             if (msgToSign.length() > 0) {
                 btn.setEnabled(true);
@@ -357,16 +357,16 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
         }
 
         private void hideValidationResult() {
-            ImageView ivGreen = findViewById(R.id.imageViewVerifyGreen);
-            ImageView ivFail = findViewById(R.id.imageViewVerifyFail);
+            ImageView ivGreen = findViewById(R.id.imageViewValidateGreen);
+            ImageView ivFail = findViewById(R.id.imageViewValidateFail);
             TextView tvValidation = findViewById(R.id.textView_signature_validation);
             ivGreen.setVisibility(View.INVISIBLE);
             ivFail.setVisibility(View.INVISIBLE);
             tvValidation.setVisibility(View.INVISIBLE);
         }
-        private void initVerifyMessageTab(final View view) {
-            final EditText etMsgToBeVerified = view.findViewById(R.id.editTextMessageToBeVerified);
-            etMsgToBeVerified.addTextChangedListener(new TextWatcher() {
+        private void initValidateMessageTab(final View view) {
+            final EditText etMsgToBeValidated = view.findViewById(R.id.editTextMessageToBeValidated);
+            etMsgToBeValidated.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -385,7 +385,7 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
 
             hideValidationResult();
 
-            ImageView ivPaste = findViewById(R.id.imageViewVerifyPaste);
+            ImageView ivPaste = findViewById(R.id.imageViewValidatePaste);
             ivPaste.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -396,14 +396,14 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                     }
                     try {
                         if (clip != null) {
-                            etMsgToBeVerified.setText(clip.getItemAt(0).getText());
+                            etMsgToBeValidated.setText(clip.getItemAt(0).getText());
                         }
                     } catch (Exception e) {
                         // Nothing to be pasted
                     }
                 }
             });
-            ImageView ivScanQR = findViewById(R.id.imageViewVerifyScanQR);
+            ImageView ivScanQR = findViewById(R.id.imageViewValidateScanQR);
             ivScanQR.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -411,11 +411,11 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                 }
             });
 
-            updateVerifyMessageButton(view, etMsgToBeVerified.getText().toString());
-            etMsgToBeVerified.addTextChangedListener(new TextWatcher() {
+            updateValidateMessageButton(view, etMsgToBeValidated.getText().toString());
+            etMsgToBeValidated.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void afterTextChanged(Editable arg0) {
-                    updateVerifyMessageButton(view, arg0.toString());
+                    updateValidateMessageButton(view, arg0.toString());
                 }
 
                 @Override
@@ -427,19 +427,19 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                 }
             });
 
-            Button btnVerifyMsg = view.findViewById(R.id.buttonValidateMessage);
-            btnVerifyMsg.setOnClickListener(new View.OnClickListener() {
+            Button btnValidateMsg = view.findViewById(R.id.buttonValidateMessage);
+            btnValidateMsg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String msgToBeVerified = etMsgToBeVerified.getText().toString();
-                    SignedMessage sm = SignedMessage.parseSignedMessage(msgToBeVerified);
-                    ImageView ivGreen = findViewById(R.id.imageViewVerifyGreen);
-                    ImageView ivFail = findViewById(R.id.imageViewVerifyFail);
+                    String msgToBeValidated = etMsgToBeValidated.getText().toString();
+                    SignedMessage sm = SignedMessage.parseSignedMessage(msgToBeValidated);
+                    ImageView ivGreen = findViewById(R.id.imageViewValidateGreen);
+                    ImageView ivFail = findViewById(R.id.imageViewValidateFail);
                     TextView tvValidation = findViewById(R.id.textView_signature_validation);
 
                     if (sm != null) {
-                        boolean isVerified = BtcUtils.verifySignature(sm.getAddress(), sm.getMessage(), sm.getSignature());
-                        if (isVerified) {
+                        boolean isValidated = BtcUtils.validateSignature(sm.getAddress(), sm.getMessage(), sm.getSignature());
+                        if (isValidated) {
                             ivGreen.setVisibility(View.VISIBLE);
                             ivFail.setVisibility(View.INVISIBLE);
                             tvValidation.setVisibility(View.VISIBLE);
@@ -472,10 +472,10 @@ public class ActivitySignValidateMessage extends ActivityExtendOtkNfcReader {
                 initSignMessageTab(tabSignMessage);
                 return tabSignMessage;
             } else {
-                View tabVerifyMessage = getLayoutInflater().inflate(R.layout.layout_validate_message, container, false);
-                container.addView(tabVerifyMessage);
-                initVerifyMessageTab(tabVerifyMessage);
-                return tabVerifyMessage;
+                View tabValidateMessage = getLayoutInflater().inflate(R.layout.layout_validate_message, container, false);
+                container.addView(tabValidateMessage);
+                initValidateMessageTab(tabValidateMessage);
+                return tabValidateMessage;
             }
         }
 

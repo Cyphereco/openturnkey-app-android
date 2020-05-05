@@ -162,7 +162,7 @@ public class BtcUtils {
         return Utils.doubleDigest(message);
     }
 
-    static public boolean verifySignature(String address, String message, String signature) {
+    static public boolean validateSignature(String address, String message, String signature) {
         try {
             return ECKey.verifyMessage(address, message, signature);
         } catch (VarInt.SignatureException e) {

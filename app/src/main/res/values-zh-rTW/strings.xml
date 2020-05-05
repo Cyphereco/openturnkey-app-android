@@ -141,8 +141,8 @@
     <string name="message_to_be_signed">待簽署消息</string>
     <string name="message_to_be_signed_hint">消息内容</string>
     <string name="signed_message">消息已簽署</string>
-    <string name="message_to_be_verified">已簽名消息</string>
-    <string name="verify_signature">驗證簽名</string>
+    <string name="message_to_be_validated">已簽名消息</string>
+    <string name="validate_signature">驗證簽名</string>
     <string name="using_master_key">使用主鑰</string>
     <string name="export_private_key">匯出密鑰</string>
     <string name="reset">重置</string>
@@ -203,7 +203,7 @@
     <string name="add_new_addr_fail">新增常用地址失敗</string>
     <string name="amount_less_than_fees">金額低於手續費</string>
     <string name="sign">簽名</string>
-    <string name="verify">驗證</string>
+    <string name="validate">驗證</string>
     <string name="error_cannot_create_tx">發生錯誤！無法創建交易</string>
     <string name="update_addr_fail">更新地址失敗</string>
     <string name="public_key_information">公鑰資訊</string>

@@ -14,10 +14,10 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/custom_toast_info_round"
         android:backgroundTint="#90CAF9"
-        android:drawableStart="@drawable/ic_verify_in_black_24dp"
+        android:drawableStart="@drawable/ic_validate_in_black_24dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
-        android:text="@string/verify_signature"
+        android:text="@string/validate_signature"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -30,13 +30,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="120dp"
-        android:text="@string/message_to_be_verified"
+        android:text="@string/message_to_be_validated"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/editTextMessageToBeVerified"
+        android:id="@+id/editTextMessageToBeValidated"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -52,7 +52,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView17" />
 
     <ImageView
-        android:id="@+id/imageViewVerifyScanQR"
+        android:id="@+id/imageViewValidateScanQR"
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:layout_marginEnd="16dp"
@@ -62,17 +62,17 @@
         app:srcCompat="@drawable/ic_action_scan_qr_code" />
 
     <ImageView
-        android:id="@+id/imageViewVerifyPaste"
+        android:id="@+id/imageViewValidatePaste"
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toBottomOf="@+id/textView17"
-        app:layout_constraintEnd_toStartOf="@+id/imageViewVerifyScanQR"
+        app:layout_constraintEnd_toStartOf="@+id/imageViewValidateScanQR"
         app:layout_constraintTop_toTopOf="@+id/textView17"
         app:srcCompat="@drawable/ic_content_paste_black_24dp" />
 
     <ImageView
-        android:id="@+id/imageViewVerifyGreen"
+        android:id="@+id/imageViewValidateGreen"
         android:layout_width="96dp"
         android:layout_height="96dp"
         android:layout_marginStart="8dp"
@@ -82,17 +82,17 @@
         app:layout_constraintBottom_toTopOf="@+id/buttonValidateMessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextMessageToBeVerified"
+        app:layout_constraintTop_toBottomOf="@+id/editTextMessageToBeValidated"
         app:srcCompat="@drawable/ic_check_circle_green_24dp" />
 
     <ImageView
-        android:id="@+id/imageViewVerifyFail"
+        android:id="@+id/imageViewValidateFail"
         android:layout_width="96dp"
         android:layout_height="96dp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageViewVerifyGreen"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewValidateGreen"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageViewVerifyGreen"
+        app:layout_constraintTop_toTopOf="@+id/imageViewValidateGreen"
         app:srcCompat="@drawable/ic_fail_24dp" />
 
     <TextView
@@ -105,6 +105,6 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewVerifyGreen" />
+        app:layout_constraintTop_toBottomOf="@+id/imageViewValidateGreen" />
 
 </android.support.constraint.ConstraintLayout>

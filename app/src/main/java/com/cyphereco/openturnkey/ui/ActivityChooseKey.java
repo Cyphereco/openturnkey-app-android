@@ -210,7 +210,7 @@ public class ActivityChooseKey extends AppCompatActivity {
     }
 
     private void showFmtErrorDialog(String contents) {
-        Dialog dialog = new AlertDialog.Builder(this)
+        Dialog dialog = new AlertDialog.Builder(this, R.style.AlertDialogNarrowWidth)
                 .setTitle(R.string.invalid_key_path)
                 .setMessage(contents)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {

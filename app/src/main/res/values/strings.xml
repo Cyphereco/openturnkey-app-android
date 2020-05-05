@@ -90,7 +90,7 @@
     <string name="please_wait">You can remove OpenTurnKey now. \n Please wait a moment.</string>
     <string name="use_all_funds">Use All Funds</string>
     <string name="operation_timeout">Operation Timeout</string>
-    <string name="do_not_remove_otk">Please approach to OpenTurnKey to complete singing transactionHelper.\nDo not remove OpenTurnKey until it\'s done.</string>
+    <string name="do_not_remove_otk">Please approach to OpenTurnKey to complete singing transaction.\nDo not remove OpenTurnKey until it\'s done.</string>
     <string name="confirm_payment">Confirm Payment</string>
     <string name="subject_text_estimated_time">"Est. Time to Complete: "</string>
     <string name="unknown_reason">Unknown Reason</string>
@@ -143,7 +143,7 @@
     <string name="_unit_jpy" translatable="false">JPY</string>
     <string name="_unit_cny" translatable="false">CNY</string>
     <string name="currency_btc">BTC (Bitcoin)</string>
-    <string name="write_note_hint">Note (Less than 64 characters)</string>
+    <string name="write_note_hint">Note (No more than 64 characters)</string>
     <string name="check_balance">Checking balance, please wait …</string>
     <string name="set_pin_success">Set PIN Code Successfully</string>
     <string name="set_pin_fail">Set PIN Code Failed</string>
@@ -164,8 +164,8 @@
     <string name="message_to_be_signed">Message to Be Signed</string>
     <string name="message_to_be_signed_hint">Message</string>
     <string name="signed_message">Signed Message</string>
-    <string name="message_to_be_verified">Message to Be Verified</string>
-    <string name="verify_signature">Verify Signature</string>
+    <string name="message_to_be_validated">Message to Be Validated</string>
+    <string name="validate_signature">Validate Signature</string>
     <string name="using_master_key">Using Master Key</string>
     <string name="advance">Advance</string>
     <string name="export_private_key">Export Key</string>
@@ -220,10 +220,10 @@
     <string name="update_addr_fail">Update address failed</string>
     <string name="add_new_addr_fail">Add new address failed</string>
     <string name="amount_received">Received Amount:</string>
-    <string name="amount_less_than_fees">Amount is less than transactionHelper fee</string>
+    <string name="amount_less_than_fees">Amount is less than transaction fee</string>
     <string name="sign">Sign</string>
-    <string name="verify">Verify</string>
-    <string name="error_cannot_create_tx">Error! Cannot create transactionHelper</string>
+    <string name="validate">Validate</string>
+    <string name="error_cannot_create_tx">Error! Cannot create transaction</string>
     <string name="public_key_information">Public Key Information</string>
     <string name="reapproach_openturnkey">Move OpenTurnKey away, then approach again.</string>
     <string name="incorrect_openturnkey">Incorrect OpenTurnKey</string>

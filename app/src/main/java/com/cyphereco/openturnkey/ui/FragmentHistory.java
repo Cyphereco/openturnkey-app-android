@@ -1,6 +1,11 @@
 package com.cyphereco.openturnkey.ui;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -15,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.db.RecordTransaction;
@@ -26,6 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class FragmentHistory extends FragmentExtendOtkViewPage {
 
@@ -164,16 +171,43 @@ public class FragmentHistory extends FragmentExtendOtkViewPage {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.menu_history_clear_history) {
-            DialogClearHistory dialog = new DialogClearHistory();
-            dialog.setDialogClearHistoryListener(new DialogClearHistory.DialogClearHistoryListener() {
-                @Override
-                public void onHistoryCleared() {
-                    updateTransactionDataset();
-                }
-            });
-            assert getFragmentManager() != null;
-            dialog.show(getFragmentManager(), "dialog");
+            processClearHistory();
+//            DialogClearHistory dialog = new DialogClearHistory();
+//            dialog.setDialogClearHistoryListener(new DialogClearHistory.DialogClearHistoryListener() {
+//                @Override
+//                public void onHistoryCleared() {
+//                    updateTransactionDataset();
+//                }
+//            });
+//            assert getFragmentManager() != null;
+//            dialog.show(getFragmentManager(), "dialog");
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void processClearHistory() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogNarrowWidth);
+
+        builder.setMessage(R.string.clear_all_payment_history)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Clear payment history
+                        if (OpenturnkeyDB.clearTransactionTable()) {
+                            Toast.makeText(getContext(), getString(R.string.all_history_cleared), Toast.LENGTH_LONG).show();
+                            updateTransactionDataset();
+                        }
+                        else {
+                            Toast.makeText(getContext(), getString(R.string.failed_to_clear_history), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+
+        Dialog dialog = builder.create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_read_otk_round);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.ShowReadOtkAnimation;
+        dialog.show();
     }
 }

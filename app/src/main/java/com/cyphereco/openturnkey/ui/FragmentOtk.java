@@ -178,7 +178,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
                             }
                         });
 
-                        Dialog dialog = new AlertDialog.Builder(getContext())
+                        Dialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogNarrowWidth)
                                 .setTitle(getString(R.string.export_private_key))
                                 .setView(v)
                                 .setPositiveButton(R.string.ok, null)
