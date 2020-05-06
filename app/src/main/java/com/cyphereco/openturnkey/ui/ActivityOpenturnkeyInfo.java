@@ -158,7 +158,7 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     // Show dialog
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivityOpenturnkeyInfo.this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivityOpenturnkeyInfo.this, R.style.AlertDialogNarrowWidth);
                     Dialog dialog = builder.setTitle(R.string.mint_information)
                             .setMessage(otkData.getMintInfo().toString())
                             .setPositiveButton(R.string.ok, null)
