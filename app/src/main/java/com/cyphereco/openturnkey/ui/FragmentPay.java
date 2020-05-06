@@ -167,7 +167,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
 
         ImageView iv;
         iv = view.findViewById(R.id.icon_scan_qrcode);
-        iv.setTooltipText(getString(R.string.scan_qr_code));
+        if (Build.VERSION.SDK_INT >= 26)    // setTooltipText requires Android SDK API level 26 above
+            iv.setTooltipText(getString(R.string.scan_qr_code));
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -176,7 +177,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         });
 
         iv = view.findViewById(R.id.icon_paste_clipboard);
-        iv.setTooltipText(getString(R.string.paste_clipboard));
+        if (Build.VERSION.SDK_INT >= 26)    // setTooltipText requires Android SDK API level 26 above
+            iv.setTooltipText(getString(R.string.paste_clipboard));
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -185,7 +187,8 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
         });
 
         iv = view.findViewById(R.id.icon_read_nfc);
-        iv.setTooltipText(getString(R.string.read_nfc));
+        if (Build.VERSION.SDK_INT >= 26)    // setTooltipText requires Android SDK API level 26 above
+            iv.setTooltipText(getString(R.string.read_nfc));
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

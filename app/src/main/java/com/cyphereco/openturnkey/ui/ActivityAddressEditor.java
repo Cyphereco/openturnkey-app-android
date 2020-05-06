@@ -69,13 +69,16 @@ public class ActivityAddressEditor extends ActivityExtendOtkNfcReader {
         mInputAlias = findViewById(R.id.input_contact_alias);
         mInputAddress = findViewById(R.id.input_contact_address);
         mPasteClipboardBtn = findViewById(R.id.icon_paste_clipboard_edit_addr);
-        mPasteClipboardBtn.setTooltipText(getString(R.string.paste_clipboard));
+        if (Build.VERSION.SDK_INT >= 26)    // setTooltipText requires Android SDK API level 26 above
+           mPasteClipboardBtn.setTooltipText(getString(R.string.paste_clipboard));
 
         mQRCodeScanBtn = findViewById(R.id.icon_scan_qrcode_edit_addr);
-        mQRCodeScanBtn.setTooltipText(getString(R.string.scan_qr_code));
+        if (Build.VERSION.SDK_INT >= 26)    // setTooltipText requires Android SDK API level 26 above
+            mQRCodeScanBtn.setTooltipText(getString(R.string.scan_qr_code));
 
         mReadNFCBtn = findViewById(R.id.icon_read_nfc_edit_addr);
-        mReadNFCBtn.setTooltipText(getString(R.string.read_nfc));
+        if (Build.VERSION.SDK_INT >= 26)    // setTooltipText requires Android SDK API level 26 above
+            mReadNFCBtn.setTooltipText(getString(R.string.read_nfc));
 
         mSaveBtn = findViewById(R.id.button_save_edit_addr);
 

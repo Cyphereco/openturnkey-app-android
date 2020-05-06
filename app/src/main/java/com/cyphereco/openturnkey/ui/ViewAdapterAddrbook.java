@@ -99,11 +99,14 @@ public class ViewAdapterAddrbook extends RecyclerView.Adapter<ViewAdapterAddrboo
             mTVAlias = itemView.findViewById(R.id.textView_addrbook_item_alias);
             mTVAddress = itemView.findViewById(R.id.textView_addrbook_item_address);
             ImageView ivDeleteBtn = itemView.findViewById(R.id.imageView_addrbook_item_delete);
-            ivDeleteBtn.setTooltipText(itemView.getContext().getString(R.string.delete));
+            if (Build.VERSION.SDK_INT >= 26)    // setTooltipText requires Android SDK API level 26 above
+                ivDeleteBtn.setTooltipText(itemView.getContext().getString(R.string.delete));
             ImageView ivQRCodeBtn = itemView.findViewById(R.id.imageView_addrbook_item_qrcode);
-            ivQRCodeBtn.setTooltipText(itemView.getContext().getString(R.string.show_qr_code));
+            if (Build.VERSION.SDK_INT >= 26)    // setTooltipText requires Android SDK API level 26 above
+                ivQRCodeBtn.setTooltipText(itemView.getContext().getString(R.string.show_qr_code));
             ImageView ivPayBtn = itemView.findViewById(R.id.imageView_addrbook_item_pay);
-            ivPayBtn.setTooltipText(itemView.getContext().getString(R.string.pay));
+            if (Build.VERSION.SDK_INT >= 26)    // setTooltipText requires Android SDK API level 26 above
+                ivPayBtn.setTooltipText(itemView.getContext().getString(R.string.pay));
 
             ivDeleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
