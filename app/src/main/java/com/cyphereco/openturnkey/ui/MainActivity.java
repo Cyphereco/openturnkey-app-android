@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
                         // call viewPager to scroll the page, otherwise (triggered by scroll page)
                         // do nothing
                         if (navItems[viewPager.getCurrentItem()] != menuItem.getItemId()) {
-                            viewPager.setCurrentItem(page, true);
+                            if (viewPager != null) viewPager.setCurrentItem(page, true);
                         }
 
                         // if soft-keyboard is opened, close it!

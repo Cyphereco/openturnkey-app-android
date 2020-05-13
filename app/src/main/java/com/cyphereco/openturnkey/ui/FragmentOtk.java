@@ -409,6 +409,7 @@ public class FragmentOtk extends FragmentExtendOtkViewPage {
     @Override
     protected void clearRequest() {
         super.clearRequest();
+        if (cbUsePin == null) return;
         cbUsePin.setVisibility(View.INVISIBLE);
         ivAuthType.setVisibility(View.INVISIBLE);
         cbUsePin.setChecked(false);
