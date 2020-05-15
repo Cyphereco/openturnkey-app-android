@@ -137,7 +137,8 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
                                 public void postProcess() {
                                     AlertPrompt.alert(getApplicationContext(), getString(R.string.request_fail) +
                                             "\n" + getString(R.string.reason) + ": " +
-                                            parseFailureReason(strDesc));
+                                            getString(R.string.auth_failed) +
+                                            " - " + getString(R.string.otk_is_unlocked));
                                 }
                             });
                             return;
