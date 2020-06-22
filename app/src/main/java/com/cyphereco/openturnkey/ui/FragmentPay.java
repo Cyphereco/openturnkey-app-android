@@ -585,8 +585,7 @@ public class FragmentPay extends FragmentExtendOtkViewPage {
                                 dialog.cancel();
                                 if (balance.longValue() < amountSent || amountReceived < 0) {
                                     // balance not enough
-                                    // calling AlertPrompt from thread need Looper.prepare
-                                    AlertPrompt.threadSafeAlert(getContext(), getString(R.string.balance_insufficient));
+                                    AlertPrompt.alert(getContext(), getString(R.string.balance_insufficient));
                                 } else {
                                     pubKeyPayer = otkData.getPublicKey();
                                     // proceed final confirmation

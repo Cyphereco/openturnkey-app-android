@@ -20,7 +20,10 @@ public class AlertPrompt {
     }
 
     public static void threadSafeInfo(Context context, String msg) {
-        Looper.prepare();
+        if (Looper.myLooper() == null)
+        {
+            Looper.prepare();
+        }
         info(context, msg);
         Looper.loop();
     }
@@ -30,7 +33,10 @@ public class AlertPrompt {
     }
 
     public static void threadSafeAlert(Context context, String msg) {
-        Looper.prepare();
+        if (Looper.myLooper() == null)
+        {
+            Looper.prepare();
+        }
         alert(context, msg);
         Looper.loop();
     }

@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import com.cyphereco.openturnkey.R;
 import com.cyphereco.openturnkey.core.NfcHandler;
 import com.cyphereco.openturnkey.core.OtkData;
+import com.cyphereco.openturnkey.core.protocol.Command;
 import com.cyphereco.openturnkey.core.protocol.OtkRequest;
 import com.cyphereco.openturnkey.core.protocol.OtkState;
 import com.cyphereco.openturnkey.utils.AlertPrompt;
@@ -126,7 +127,9 @@ public class FragmentExtendOtkViewPage extends Fragment {
                         // Pending request has not been delivered, prepare to send.
 
                         // Check if OpenTurnKey is locked to accept authentication.
-                        if (otkData.getOtkState().getLockState() == OtkState.LockState.UNLOCKED) {
+                        // RESET command does not need authentication, just let it pass.
+                        if (!request.getCommand().equals(Command.RESET.toString()) &&
+                                otkData.getOtkState().getLockState() == OtkState.LockState.UNLOCKED) {
                             // OpenTurnKey is not locked, request cannot be made
                             clearRequest();
                             dialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.REQUEST_FAIL);
