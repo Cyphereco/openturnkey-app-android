@@ -13,13 +13,13 @@
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
         android:background="@drawable/custom_toast_info_round"
-        android:backgroundTint="#90CAF9"
         android:drawableStart="@drawable/ic_validate_in_black_24dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:text="@string/validate_signature"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:theme="@style/PrimaryButton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -46,7 +46,6 @@
         android:gravity="start|top"
         android:inputType="textMultiLine|textNoSuggestions"
         android:maxLines="15"
-        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView17" />
@@ -56,6 +55,7 @@
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:layout_marginEnd="16dp"
+        android:tint="@color/colorForeground"
         app:layout_constraintBottom_toBottomOf="@+id/textView17"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/textView17"
@@ -66,6 +66,7 @@
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:layout_marginEnd="16dp"
+        android:tint="@color/colorForeground"
         app:layout_constraintBottom_toBottomOf="@+id/textView17"
         app:layout_constraintEnd_toStartOf="@+id/imageViewValidateScanQR"
         app:layout_constraintTop_toTopOf="@+id/textView17"

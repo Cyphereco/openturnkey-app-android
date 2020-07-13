@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Handler;
@@ -115,6 +116,7 @@ public class ActivityOpenturnkeyInfo extends AppCompatActivity {
             final String address = otkData.getSessionData().getAddress();
             final TextView tvAddress = findViewById(R.id.btc_address_context);
             tvAddress.setText(address);
+            tvAddress.setPaintFlags(tvAddress.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             tvAddress.setMovementMethod(LinkMovementMethod.getInstance());
             tvAddress.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {

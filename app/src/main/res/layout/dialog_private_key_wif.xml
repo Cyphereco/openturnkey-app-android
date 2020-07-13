@@ -47,6 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:contentDescription="@string/copy"
+        android:tint="@color/colorButtonForeground"
         app:layout_constraintBottom_toBottomOf="@+id/label_export_key_string"
         app:layout_constraintStart_toEndOf="@+id/label_export_key_string"
         app:layout_constraintTop_toTopOf="@+id/label_export_key_string"

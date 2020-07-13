@@ -159,12 +159,12 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/custom_toast_info_round"
-        android:backgroundTint="#90CAF9"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:text="@string/ok"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:theme="@style/PrimaryButton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -174,12 +174,12 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:background="@drawable/custom_toast_info_round"
-        android:backgroundTint="#90CAF9"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:text="@string/cancel"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:theme="@style/PrimaryButton"
         app:layout_constraintBottom_toBottomOf="@+id/buttonChooseKeyOk"
         app:layout_constraintEnd_toStartOf="@+id/buttonChooseKeyOk"
         app:layout_constraintTop_toTopOf="@+id/buttonChooseKeyOk" />
@@ -194,7 +194,7 @@
         android:contentDescription="@string/paste_clipboard"
         android:focusable="true"
         android:paddingTop="4dp"
-        android:tint="@color/colorPrimary"
+        android:tint="@color/colorForeground"
         app:layout_constraintEnd_toStartOf="@id/imageChooseKeyScanQRCode"
         app:layout_constraintTop_toBottomOf="@+id/textView14"
         app:srcCompat="@drawable/ic_content_paste_black_24dp" />
@@ -203,8 +203,9 @@
         android:id="@+id/imageChooseKeyScanQRCode"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:tint="@color/colorForeground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView14"
         app:srcCompat="@drawable/ic_action_scan_qr_code" />

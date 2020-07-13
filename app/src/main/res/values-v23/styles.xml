@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="PrimaryButton" parent="Theme.AppCompat">
+        <item name="android:textColor">@color/colorForeground</item>
+        <item name="android:drawableTint">@color/colorForeground</item>
+        <item name="android:foregroundTint">@color/colorForeground</item>
+        <item name="backgroundTint">@color/colorButtonForeground</item>
+    </style>
+</resources>

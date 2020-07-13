@@ -65,7 +65,7 @@
         android:contentDescription="@string/paste_clipboard"
         android:focusable="true"
         android:paddingTop="4dp"
-        android:tint="@color/colorPrimary"
+        android:tint="@color/colorForeground"
         app:layout_constraintEnd_toStartOf="@+id/icon_read_nfc_edit_addr"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
         app:srcCompat="@drawable/ic_content_paste_black_24dp" />
@@ -80,6 +80,7 @@
         android:contentDescription="@string/read_nfc"
         android:focusable="true"
         android:paddingTop="4dp"
+        android:tint="@color/colorForeground"
         app:layout_constraintEnd_toStartOf="@+id/icon_scan_qrcode_edit_addr"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
         app:srcCompat="@drawable/ic_read_nfc_foreground" />
@@ -94,6 +95,7 @@
         android:contentDescription="@string/scan_qr_code"
         android:focusable="true"
         android:padding="4dp"
+        android:tint="@color/colorForeground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
         app:srcCompat="@drawable/ic_action_scan_qr_code" />
@@ -105,13 +107,13 @@
         android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
         android:background="@drawable/custom_toast_info_round"
-        android:backgroundTint="#90CAF9"
         android:enabled="false"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:text="@string/save"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:theme="@style/PrimaryButton"
         app:layout_constraintEnd_toEndOf="@+id/icon_scan_qrcode_edit_addr"
         app:layout_constraintTop_toBottomOf="@+id/icon_read_nfc_edit_addr" />
 
