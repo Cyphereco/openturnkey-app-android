@@ -113,12 +113,16 @@ public class ActivityExtendOtkNfcReader extends AppCompatActivity {
                                 clearRequest();
                                 dialogReadOtk.endingDialogReadOtkWithReason(DialogReadOtk.REQUEST_FAIL);
                                 final String strDesc = otkData.getOtkState().getFailureReason().getValue();
+                                final String strPinRetry = otkData.getSessionData().getPinReryAfter() <= 0 ? "" :
+                                        "\n" + getString(R.string.pin_auth_suspended) + "\n" +
+                                        getString(R.string.retry_after) + " " + otkData.getSessionData().getPinReryAfter() +
+                                                " " + getString(R.string.reboot);
                                 delayProcessAfterReadOtkEnded(new PostReadOtkHandler() {
                                     @Override
                                     public void postProcess() {
                                         AlertPrompt.alert(getApplicationContext(), getString(R.string.request_fail) +
                                                 "\n" + getString(R.string.reason) + ": " +
-                                                parseFailureReason(strDesc));
+                                                parseFailureReason(strDesc) + strPinRetry);
                                     }
                                 });
                             }

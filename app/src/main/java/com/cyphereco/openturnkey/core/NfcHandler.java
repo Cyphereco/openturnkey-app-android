@@ -65,8 +65,9 @@ public class NfcHandler {
                     logger.debug("OTK request sent.");
                     return request.getSessionId();
                 } catch (IOException | FormatException | IllegalStateException e) {
-                    logger.error("Write command exception:" + e);
-                    return "0";
+                    return sendRequest(intent, request);
+//                    logger.error("Write command exception:" + e);
+//                    return "0";
                 }
             }
         }

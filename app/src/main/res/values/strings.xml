@@ -247,5 +247,8 @@
     <string name="included">Included</string>
     <string name="excluded">Excluded</string>
     <string name="show_qr_code">Show QR Code</string>
+    <string name="pin_auth_suspended">PIN code authentication suspended</string>
+    <string name="reboot">reboot</string>
+    <string name="retry_after">Please retry after</string>
 
 </resources>

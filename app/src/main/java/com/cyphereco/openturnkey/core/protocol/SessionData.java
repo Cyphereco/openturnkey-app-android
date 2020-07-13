@@ -24,6 +24,7 @@ public class SessionData implements Serializable {
     private static final String OTK_LABEL_DERIVATIVE_EXT_KEY_OLD = "<Derivative_Exteded_Key>\r\n"; // there was a typo which has been fixed, but to keep thing working with the old firmware
     private static final String OTK_LABEL_DERIVATIVE_PATH = "<Derivative_Path>\r\n";
     private static final String OTK_LABEL_WIF_KEY = "<WIF_Key>\r\n";
+    private static final String OTK_LABEL_PIN_AUTH_SUSPEND = "<PIN_Suspend>\r\n";
     private static final String OTK_REQUEST_SIGNATURE_DELIM = "\n";
 
 
@@ -35,6 +36,7 @@ public class SessionData implements Serializable {
     private String derivativePath = null;
     private String publicKey = null;
     private String wifKey = null;
+    private int pinReryAfter = 0;
     private List<String> sigList = new ArrayList<>();
 
     public SessionData(String sessData) {
@@ -139,6 +141,14 @@ public class SessionData implements Serializable {
             int crlf = sessData.indexOf(CRLF, wifKeyStart);
             wifKey = sessData.substring(wifKeyStart, crlf);
         }
+
+        // PIN_Auth_Suspend
+        int labelPINRetryStart = sessData.indexOf(OTK_LABEL_PIN_AUTH_SUSPEND);
+        if (labelPINRetryStart != -1) {
+            int pinRetryStart = labelPINRetryStart + OTK_LABEL_PIN_AUTH_SUSPEND.length();
+            int crlf = sessData.indexOf(CRLF, pinRetryStart);
+            pinReryAfter = Integer.valueOf(sessData.substring(pinRetryStart, crlf));
+        }
     }
 
     public String getAddress() {
@@ -173,6 +183,10 @@ public class SessionData implements Serializable {
         return wifKey;
     }
 
+    public int getPinReryAfter() {
+        return pinReryAfter;
+    }
+
     public List<String> getRequestSigList() {
         return sigList;
     }
@@ -189,6 +203,7 @@ public class SessionData implements Serializable {
                 ", derivativePath='" + derivativePath + '\'' +
                 ", publicKey='" + publicKey + '\'' +
                 ", wifKey='" + wifKey + '\'' +
+                ", pinRetryAfter='" + pinReryAfter + '\'' +
                 '}';
     }
 }

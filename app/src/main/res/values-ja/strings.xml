@@ -229,4 +229,7 @@
     <string name="excluded">抜き</string>
     <string name="included">込み</string>
     <string name="show_qr_code">QRコードを表示</string>
+    <string name="pin_auth_suspended">PINコード認証が一時停止されました</string>
+    <string name="reboot">次再起動後</string>
+    <string name="retry_after">再試行してください、</string>
 </resources>

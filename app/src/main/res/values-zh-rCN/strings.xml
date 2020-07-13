@@ -229,4 +229,7 @@
     <string name="excluded">外加</string>
     <string name="included">内含</string>
     <string name="show_qr_code">显示二維碼</string>
+    <string name="retry_after">请在</string>
+    <string name="reboot">次重启后</string>
+    <string name="pin_auth_suspended">已暂停PIN码验证</string>
 </resources>
